@@ -14,58 +14,66 @@
 
 int main(int argc, char **argv)
 {
-    const char *SourceDirectoryAbsolutePath = "W:\\thing\\build";
+    const char *SourceDirectoryAbsolutePath = "W:\\thing";
     bool32 Error = false;
 
     if (StringLength(SourceDirectoryAbsolutePath) > (MAX_PATH - 3))
     {
-        printf("Path that will be used to build is too long!");
+        printf("ERROR: Path that will be used to build is too long!");
         Error = true;
     }
 
     if (Error == false)
     {
-        const char *ExtensionsOfFilesToBeCleaned[4] = 
+        const char *ExtensionsToClean[4] = 
         {
             "obj", "pdb", "exe", "log"
         };
 
-        for (u32 Index = 0; Index < ArrayLength(ExtensionsOfFilesToBeCleaned); Index++)
+        for (u32 Index = 0; Index < ArrayLength(ExtensionsToClean); Index++)
         {
-            DeleteFilesWithExtention(ExtensionsOfFilesToBeCleaned[Index], SourceDirectoryAbsolutePath);
+            DeleteFilesWithExtention(ExtensionsToClean[Index], SourceDirectoryAbsolutePath);
         }
 
         STARTUPINFO CompilerProcessStartupInfo = {};
         CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
         PROCESS_INFORMATION CompilerProcessProcessInfo = {};
 
-        // TODO: craft command line arguments to the compiler
-        // TODO: determine the compiler path
-#if 0
+        char CompilerCommand[512];
+        ZeroMemory(CompilerCommand, 512);
+
+        AppendString(CompilerCommand, 512, "cl.exe");
+        AppendString(CompilerCommand, 512, " -nologo -Zi -FC -Od -Oi -GR- -EHa- -Gm- -MTd");
+        AppendString(CompilerCommand, 512, " -W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996");
+        AppendString(CompilerCommand, 512, " W:\\thing\\source\\main.cpp");
+        AppendString(CompilerCommand, 512, " /link /incremental:no /subsystem:windows /opt:ref");
+
         BOOL CreateSucceeded = CreateProcess
         (
-            NULL,   // No module name (use command line)
-            argv[1],        // Command line
+            NULL,           // No module name (use command line)
+            CompilerCommand,// Command line
             NULL,           // Process handle not inheritable
             NULL,           // Thread handle not inheritable
             FALSE,          // Set handle inheritance to FALSE
             0,              // No creation flags
             NULL,           // Use parent's environment block
             NULL,           // Use parent's starting directory 
-            &si,            // Pointer to STARTUPINFO structure
-            &pi
+            &CompilerProcessStartupInfo,            // Pointer to STARTUPINFO structure
+            &CompilerProcessProcessInfo
         );
 
-        if (!CreateSucceeded)
+        if (CreateSucceeded == false)
         {
-            return -1;
+            printf("ERROR: failed to create compiler process");
+            Error = true;
         }
 
-        WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
-
-        CloseHandle(CompilerProcessProcessInfo.hProcess);
-        CloseHandle(CompilerProcessProcessInfo.hThread);
-#endif
+        if (Error == false)
+        {
+            WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
+            CloseHandle(CompilerProcessProcessInfo.hProcess);
+            CloseHandle(CompilerProcessProcessInfo.hThread);
+        }
     }
 
     return 0;
