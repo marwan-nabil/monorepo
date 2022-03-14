@@ -1,4 +1,3 @@
-
 struct string_length_cache_entry
 {
     const char *String;
@@ -78,4 +77,15 @@ inline void
 AppendString(char *DestinationBuffer, size_t DestinationSize, const char *SourceString)
 {
     StringCchCatA(DestinationBuffer, DestinationSize, SourceString);
+}
+
+bool32 ValidateStringLength(char *Path, u32 MaxAllowedLength, const char *ErrorMessage)
+{
+    bool32 Result = false;
+    if (StringLength(Path) > MaxAllowedLength)
+    {
+        printf("ERROR ValidateStringLength(): %s\n", ErrorMessage);
+        Result = true;
+    }
+    return Result;
 }
