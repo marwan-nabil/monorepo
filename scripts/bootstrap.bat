@@ -1,5 +1,5 @@
 @echo off
 
 pushd binaries
-    cl ..\source\build.cpp
+    cl ..\sources\build.cpp
 popd

@@ -1,5 +1,0 @@
-#include "scalars.cpp"
-#include "v2.cpp"
-#include "v3.cpp"
-#include "v4.cpp"
-#include "rectangle2.cpp"
