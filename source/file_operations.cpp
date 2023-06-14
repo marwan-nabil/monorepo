@@ -1,22 +1,22 @@
-inline void DeleteFileSynchronous(char *FilePath)
-{
-    DWORD GetTempPathA
-    (
-        [in]  DWORD nBufferLength,
-        [out] LPSTR lpBuffer
-    );
+// inline void DeleteFileSynchronous(char *FilePath)
+// {
+//     DWORD GetTempPathA
+//     (
+//         [in]  DWORD nBufferLength,
+//         [out] LPSTR lpBuffer
+//     );
 
-    GetTempFileNameA
-    (
-        [in]  LPCSTR lpPathName,
-        [in]  LPCSTR lpPrefixString,
-        [in]  UINT   uUnique,
-        [out] LPSTR  lpTempFileName
-    );
+//     GetTempFileNameA
+//     (
+//         [in]  LPCSTR lpPathName,
+//         [in]  LPCSTR lpPrefixString,
+//         [in]  UINT   uUnique,
+//         [out] LPSTR  lpTempFileName
+//     );
 
-    DeleteFileA(FilePathBuffer);
-    // TODO: wait for all shell delete operation to finish
-}
+//     DeleteFileA(FilePathBuffer);
+//     // TODO: wait for all shell delete operation to finish
+// }
 
 inline void
 DeleteFilesWithExtentionFromDirectory(const char *Extension, const char *BaseDirectoryPath)
@@ -53,7 +53,7 @@ DeleteFilesWithExtentionFromDirectory(const char *Extension, const char *BaseDir
             if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
             {
                 AppendString(FilePathBuffer, MAX_PATH, FindOperationData.cFileName);
-                DeleteFileSynchronous(FilePathBuffer);
+                // DeleteFileSynchronous(FilePathBuffer);
                 printf("deleted file: %s\n", FilePathBuffer);
             }
         } while (FindNextFileA(FindHandle, &FindOperationData) != 0);

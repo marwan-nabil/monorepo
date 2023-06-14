@@ -9,7 +9,7 @@
 #include "utility_macros.h"
 #include "constants.h"
 
-#include "math/math.cpp"
+#include "math.cpp"
 #include "physics.cpp"
 #include "simulation.cpp"
 #include "renderer.cpp"

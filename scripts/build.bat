@@ -1,5 +1,5 @@
 @echo off
 
-pushd binaries
+pushd bin
     .\build.exe
 popd

@@ -16,13 +16,12 @@ int main(int argc, char **argv)
 {
     bool32 Error = false;
 
-    const char *RootDirectoryPath = "W:\\thing";
-    Error = ValidateStringLength
-    (
-        RootDirectoryPath, 
-        MAX_PATH, 
-        "ERROR: main(): RootDirectoryPath is over MAX_PATH!"
-    );
+    const char *RootDirectoryPath = "F:\\thing";
+    if (StringLength(RootDirectoryPath) > MAX_PATH)
+    {
+        printf("ERROR: main(): RootDirectoryPath is over MAX_PATH!");
+        Error = true;
+    }
 
     if (Error == false)
     {
@@ -56,7 +55,7 @@ int main(int argc, char **argv)
 
             for (u32 Index = 0; Index < ArrayLength(ExtensionsToClean); Index++)
             {
-                DeleteFilesWithExtentionFromDirectory(ExtensionsToClean[Index], BinariesDirectoryPath);
+                // DeleteFilesWithExtentionFromDirectory(ExtensionsToClean[Index], BinariesDirectoryPath);
             }
 
             STARTUPINFO CompilerProcessStartupInfo = {};
@@ -91,15 +90,15 @@ int main(int argc, char **argv)
 
                 BOOL CreateSucceeded = CreateProcess
                 (
-                    NULL,           // No module name (use command line)
-                    CompilerCommand,// Command line
-                    NULL,           // Process handle not inheritable
-                    NULL,           // Thread handle not inheritable
-                    FALSE,          // Set handle inheritance to FALSE
-                    0,              // No creation flags
-                    NULL,           // Use parent's environment block
-                    NULL,           // Use parent's starting directory 
-                    &CompilerProcessStartupInfo,            // Pointer to STARTUPINFO structure
+                    NULL,
+                    CompilerCommand,
+                    NULL,
+                    NULL,
+                    FALSE,
+                    0,
+                    NULL,
+                    NULL,
+                    &CompilerProcessStartupInfo,
                     &CompilerProcessProcessInfo
                 );
 
