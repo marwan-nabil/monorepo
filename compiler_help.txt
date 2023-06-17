@@ -67,6 +67,7 @@
 /QIntel-jcc-erratum enable mitigations for Intel JCC erratum
 /Qspectre-load Enable spectre mitigations for all instructions which load memory
 /Qspectre-load-cf Enable spectre mitigations for all control-flow instructions which load memory
+/Qspectre-jmp[-] Enable spectre mitigations for unconditional jump instructions
 /fpcvt:<IA|BC> FP to unsigned integer conversion compatibility
    IA - results compatible with VCVTTSD2USI instruction
    BC - results compatible with VS2017 and earlier compiler
@@ -133,6 +134,10 @@
   lambda[-]             better lambda support by using the newer lambda processor (off by default)
   tlsGuards[-]          generate runtime checks for TLS variable initialization (on by default)
   zeroSizeArrayNew[-]   call member new/delete for 0-size arrays of objects (on by default)
+  static_assert[-]      strict handling of 'static_assert' (implied by /permissive-)
+  gotoScope[-]          cannot jump past the initialization of a variable (implied by /permissive-)
+  __STDC__              define __STDC__ to 1 in C
+  enumTypes[-]          enable Standard C++ underlying enum types (off by default)
 /await enable resumable functions extension
 /await:strict enable standard C++20 coroutine support with earlier language versions
 /constexpr:depth<N>     recursion depth limit for constexpr evaluation (default: 512)
@@ -140,7 +145,7 @@
 /constexpr:steps<N>     terminate constexpr evaluation after N steps (default: 100000)
 /Zi enable debugging information        /Z7 enable old-style debug info
 /Zo[-] generate richer debugging information for optimized code (on by default)
-/ZH:[MD5|SHA1|SHA_256] hash algorithm for calculation of file checksum in debug info (default: MD5)
+/ZH:[MD5|SHA1|SHA_256] hash algorithm for calculation of file checksum in debug info (default: SHA_256)
 /Zp[n] pack structs on n-byte boundary  /Zl omit default library name in .OBJ
 /vd{0|1|2} disable/enable vtordisp      /vm<x> type of pointers to members
 /std:<c11|c17> C standard version
@@ -177,6 +182,7 @@
 /fastfail[-] enable fast-fail mode      /JMC[-] enable native just my code
 /presetPadding[-] zero initialize padding for stack based class types
 /volatileMetadata[-] generate metadata on volatile memory accesses
+/sourcelink [file] file containing source link information
 
                                 -LINKING-
 
