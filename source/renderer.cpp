@@ -1,20 +1,7 @@
-
-struct render_buffer
-{
-    void *Memory;
-    i32 Width;
-    i32 Height;
-    i32 BytesPerPixel;
-    i32 Pitch;
-};
-
-struct color
-{
-    f32 A, R, G, B;
-};
+#include "renderer.h"
 
 void
-DrawRectangle(render_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor)
+DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor)
 {
     i32 MinX = RoundF32ToI32(MinCorner.X);
     i32 MinY = RoundF32ToI32(MinCorner.Y);
@@ -29,21 +16,28 @@ DrawRectangle(render_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor
     {
         MinY = 0;
     }
-    if (MaxX > Buffer->Width)
+    if (MaxX > (i32)Buffer->Width)
     {
-        MaxX = Buffer->Width;
+        MaxX = (i32)Buffer->Width;
     }
-    if (MaxY > Buffer->Height)
+    if (MaxY > (i32)Buffer->Height)
     {
-        MaxY = Buffer->Height;
+        MaxY = (i32)Buffer->Height;
     }
 
-    u32 Color = (u32)(RoundF32ToU32(RectColor.A * 255.0f) << 24 |
-                      RoundF32ToU32(RectColor.R * 255.0f) << 16 |
-                      RoundF32ToU32(RectColor.G * 255.0f) << 8 |
-                      RoundF32ToU32(RectColor.B * 255.0f));
+    u32 Color =
+    (
+        (RoundF32ToU32(RectColor.A * 255.0f) << 24) |
+        (RoundF32ToU32(RectColor.R * 255.0f) << 16) |
+        (RoundF32ToU32(RectColor.G * 255.0f) << 8) |
+        RoundF32ToU32(RectColor.B * 255.0f)
+    );
 
-    u8 *Row = ((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
+    u8 *Row = 
+        (u8 *)Buffer->Memory + 
+        MinX * Buffer->BytesPerPixel + 
+        MinY * Buffer->Pitch;
+
     for (i32 Y = MinY; Y < MaxY; Y++)
     {
         u32 *Pixel = (u32 *)Row;
@@ -72,7 +66,7 @@ DrawRectangle(render_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor
 }
 
 void
-DrawLine(render_buffer *Buffer, v2 Start, v2 End, u32 LineColor)
+DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, u32 LineColor)
 {
     i32 MinX = RoundF32ToI32(Start.X);
     i32 MinY = RoundF32ToI32(Start.Y);
@@ -87,13 +81,13 @@ DrawLine(render_buffer *Buffer, v2 Start, v2 End, u32 LineColor)
     {
         MinY = 0;
     }
-    if (MaxX > Buffer->Width)
+    if (MaxX > (i32)Buffer->Width)
     {
-        MaxX = Buffer->Width;
+        MaxX = (i32)Buffer->Width;
     }
-    if (MaxY > Buffer->Height)
+    if (MaxY > (i32)Buffer->Height)
     {
-        MaxY = Buffer->Height;
+        MaxY = (i32)Buffer->Height;
     }
 
     f32 LineMCoefficient = (f32)(MaxY - MinY) / (f32)(MaxX - MinX);
@@ -117,7 +111,7 @@ DrawLine(render_buffer *Buffer, v2 Start, v2 End, u32 LineColor)
     }
 }
 
-void DrawFilledCircle(render_buffer *Buffer, v2 CenterPosition, f32 CircleRadius, u32 PointColor)
+void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRadius, u32 PointColor)
 {
     i32 MinX = RoundF32ToI32(CenterPosition.X - CircleRadius);
     i32 MinY = RoundF32ToI32(CenterPosition.Y - CircleRadius);
@@ -132,13 +126,13 @@ void DrawFilledCircle(render_buffer *Buffer, v2 CenterPosition, f32 CircleRadius
     {
         MinY = 0;
     }
-    if (MaxX > Buffer->Width)
+    if (MaxX > (i32)Buffer->Width)
     {
-        MaxX = Buffer->Width;
+        MaxX = (i32)Buffer->Width;
     }
-    if (MaxY > Buffer->Height)
+    if (MaxY > (i32)Buffer->Height)
     {
-        MaxY = Buffer->Height;
+        MaxY = (i32)Buffer->Height;
     }
 
     u8 *DestinationRow = ((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
@@ -164,7 +158,7 @@ void DrawFilledCircle(render_buffer *Buffer, v2 CenterPosition, f32 CircleRadius
     }
 }
 
-void DrawGraph(render_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YAxisRange, rectangle2 GraphRectangle)
+void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YAxisRange, rectangle2 GraphRectangle)
 {
     DrawRectangle(Buffer, GraphRectangle.MinPoint, GraphRectangle.MaxPoint, color{1.0f,1.0f,1.0f,1.0f});
     
@@ -189,14 +183,18 @@ void DrawGraph(render_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YAxis
 }
 
 void
-RenderSimulation(render_buffer *Buffer, simulation_state *SimulationState)
+RenderSimulation(rendering_buffer *Buffer)
 {
-    // Buffer is 960 X 540 pixels
+    // background
+    color RectColor = {1.0f, 1.0f, 1.0f, 1.0f};
+    DrawRectangle(Buffer, v2{0, 0}, v2 {1080, 720}, RectColor);
+    
 
-    //DrawRectangle(Buffer, v2{1, 1}, v2 {400, 400}, .8f, .8f, 0.1f, 1.0f);
-    //u32 LineColor = 0xff335577;
-    //DrawLine(Buffer, v2{4, 4}, v2{300, 300}, LineColor);
-    //DrawFilledCircle(Buffer, v2{40, 70}, 30, LineColor);
+#if 0
+    u32 LineColor = 0xFFFF0000;
+    DrawLine(Buffer, v2{4, 4}, v2{300, 300}, LineColor);
+    DrawFilledCircle(Buffer, v2{40, 70}, 20, LineColor);
+#endif
 
     u32 Data[20] = {};
     for (u32 Index = 0; Index < 20; Index++)

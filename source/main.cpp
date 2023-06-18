@@ -30,19 +30,15 @@ typedef double f64;
 #include "simulation.cpp"
 #include "renderer.cpp"
 
-struct window_data
+struct window_private_data
 {
-    BITMAPINFO *OffscreenBufferBitmapInfo;
-    render_buffer *OffscreenRenderBuffer;
+    BITMAPINFO *LocalBufferBitmapinfo;
+    rendering_buffer *LocalRenderingBuffer;
     i32 *RunningState;
 };
 
 void
-DisplayRenderBufferInWindow
-(
-    HWND Window, HDC DeviceContext, 
-    render_buffer *Buffer, BITMAPINFO *OffscreenBufferBitmapInfo
-)
+DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo)
 {
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
@@ -50,10 +46,7 @@ DisplayRenderBufferInWindow
     i32 WindowWidth = ClientRect.right - ClientRect.left;
     i32 WindowHeight = ClientRect.bottom - ClientRect.top;
 
-    if
-    (
-        (WindowWidth == 1280) && (WindowHeight == 800)
-    )
+    if((WindowWidth == 1280) && (WindowHeight == 800))
     {
         i32 DestinationWidth = (i32)(Buffer->Width * 1.3);
         i32 DestinationHeight = (i32)(Buffer->Height * 1.3);
@@ -62,7 +55,7 @@ DisplayRenderBufferInWindow
             DeviceContext,
             0, 0, DestinationWidth, DestinationHeight,
             0, 0, Buffer->Width, Buffer->Height,
-            Buffer->Memory, OffscreenBufferBitmapInfo, DIB_RGB_COLORS, SRCCOPY
+            Buffer->Memory, LocalBufferBitmapinfo, DIB_RGB_COLORS, SRCCOPY
         );
     }
     else
@@ -79,96 +72,68 @@ DisplayRenderBufferInWindow
             DeviceContext,
             OffsetX, OffsetY, Buffer->Width, Buffer->Height,
             0, 0, Buffer->Width, Buffer->Height,
-            Buffer->Memory, OffscreenBufferBitmapInfo, DIB_RGB_COLORS, SRCCOPY
+            Buffer->Memory, LocalBufferBitmapinfo, DIB_RGB_COLORS, SRCCOPY
         );
     }
 }
 
 LRESULT CALLBACK
-MainWindowCallback
-(
-    HWND Window, UINT Message,
-    WPARAM WParam, LPARAM LParam
-)
+MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 {
     LRESULT Result = 0;
 
     switch (Message)
     {
+        case WM_CREATE:
+        {
+            CREATESTRUCT *LocalCreateStruct = (CREATESTRUCT *)LParam;
+            SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)LocalCreateStruct->lpCreateParams);
+            SetWindowPos(Window, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+        } break;
 
-    case WM_CREATE:
-    {
-        CREATESTRUCT *LocalCreateStruct = (CREATESTRUCT *)LParam;
-        SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)LocalCreateStruct->lpCreateParams);
-        SetWindowPos(Window, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-    } break;
+        case WM_PAINT:
+        {
+            window_private_data *WindowPrivateData = (window_private_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
+            PAINTSTRUCT Paint;
+            HDC DeviceContext = BeginPaint(Window, &Paint);
+            DisplayRenderBufferInWindow
+            (
+                Window, DeviceContext,
+                WindowPrivateData->LocalRenderingBuffer,
+                WindowPrivateData->LocalBufferBitmapinfo
+            );
+            EndPaint(Window, &Paint);
+        } break;
 
-    case WM_PAINT:
-    {
-        window_data *WindowData = (window_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
-        PAINTSTRUCT Paint;
-        HDC DeviceContext = BeginPaint(Window, &Paint);
-        DisplayRenderBufferInWindow
-        (
-            Window, DeviceContext,
-            WindowData->OffscreenRenderBuffer,
-            WindowData->OffscreenBufferBitmapInfo
-        );
-        EndPaint(Window, &Paint);
-    } break;
+        case WM_SYSKEYDOWN:
+        case WM_SYSKEYUP:
+        case WM_KEYDOWN:
+        case WM_KEYUP:
+        {
+            Assert(false);
+        } break;
 
-    case WM_SYSKEYDOWN:
-    case WM_SYSKEYUP:
-    case WM_KEYDOWN:
-    case WM_KEYUP:
-    {
-        Assert(false);
-    } break;
+        case WM_DESTROY:
+        case WM_QUIT:
+        case WM_CLOSE:
+        {
+            window_private_data *WindowPrivateData = (window_private_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
+            *WindowPrivateData->RunningState = false;
+        } break;
 
-    case WM_DESTROY:
-    case WM_QUIT:
-    case WM_CLOSE:
-    {
-        window_data *WindowData = (window_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
-        *WindowData->RunningState = false;
-    } break;
-
-    default:
-    {
-        Result = DefWindowProcA(Window, Message, WParam, LParam);
-    } break;
+        default:
+        {
+            Result = DefWindowProcA(Window, Message, WParam, LParam);
+        } break;
     }
 
     return Result;
 }
 
 void
-ResizeRenderBuffer(render_buffer *Buffer, BITMAPINFO *OffscreenBufferBitmapInfo, i32 Width, i32 Height)
+ResizeRenderBuffer(rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo, u32 Width, u32 Height)
 {
-    Buffer->Width = Width;
-    Buffer->Height = Height;
-    Buffer->BytesPerPixel = 4;
-    Buffer->Pitch = Buffer->Width * Buffer->BytesPerPixel;
-
-    OffscreenBufferBitmapInfo->bmiHeader.biSize = sizeof(OffscreenBufferBitmapInfo->bmiHeader);
-    OffscreenBufferBitmapInfo->bmiHeader.biWidth = Buffer->Width;
-    OffscreenBufferBitmapInfo->bmiHeader.biHeight = -Buffer->Height;
-    OffscreenBufferBitmapInfo->bmiHeader.biPlanes = 1;
-    OffscreenBufferBitmapInfo->bmiHeader.biBitCount = 32;
-    OffscreenBufferBitmapInfo->bmiHeader.biCompression = BI_RGB;
-
-    if (Buffer->Memory)
-    {
-        VirtualFree(Buffer->Memory, 0, MEM_RELEASE);
-    }
-
-    i32 BitmapMemorySize = Buffer->Width * Buffer->Height * Buffer->BytesPerPixel;
-    Buffer->Memory = VirtualAlloc
-    (
-        0, BitmapMemorySize,
-        MEM_COMMIT | MEM_RESERVE,
-        PAGE_READWRITE
-    );
+    
 }
 
 void
@@ -177,23 +142,23 @@ ProcessPendingMessages()
     MSG Message;
     while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
     {
-        // NOTE: we could intercept messages here before they go to the WindowProc
-        //switch (Message.message)
-        //{
-        //default:
-        //{
-        TranslateMessage(&Message);
-        DispatchMessage(&Message);
-        //} break;
-        //}
-    }
-}
+        switch (Message.message)
+        {
+            case WM_SYSKEYDOWN:
+            case WM_SYSKEYUP:
+            case WM_KEYDOWN:
+            case WM_KEYUP:
+            {
+                // TODO: handle key press
+            } break;
 
-void
-UpdateSimulationStateAndRender(render_buffer *Buffer, f32 TimeDelta, simulation_state *SimulationState)
-{
-    UpdateSimulation(TimeDelta, SimulationState);
-    RenderSimulation(Buffer, SimulationState);
+            default:
+            {
+                TranslateMessage(&Message);
+                DispatchMessage(&Message);
+            } break;
+        }
+    }
 }
 
 inline LARGE_INTEGER
@@ -213,9 +178,9 @@ GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End, i64 ProfileCounterFreq
 }
 
 void
-SleepRestOfFrame(LARGE_INTEGER FrameStartTimerValue, i64 WindowsTimerFrequency, f32 TargetSecondsPerFrame)
+SleepRestOfFrame(LARGE_INTEGER FrameStartTime, i64 WindowsTimerFrequency, f32 TargetSecondsPerFrame)
 {
-    f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTimerValue, GetWindowsTimerValue(), WindowsTimerFrequency);
+    f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
     if (SecondsElapsedForFrame < TargetSecondsPerFrame)
     {
         DWORD SleepMilliSeconds = (DWORD)(1000.0f * (TargetSecondsPerFrame - SecondsElapsedForFrame));
@@ -226,7 +191,7 @@ SleepRestOfFrame(LARGE_INTEGER FrameStartTimerValue, i64 WindowsTimerFrequency, 
 
         do
         {
-            SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTimerValue, GetWindowsTimerValue(), WindowsTimerFrequency);
+            SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
         } while (SecondsElapsedForFrame < TargetSecondsPerFrame);
     }
     else
@@ -236,65 +201,90 @@ SleepRestOfFrame(LARGE_INTEGER FrameStartTimerValue, i64 WindowsTimerFrequency, 
 }
 
 i32
-WinMain(HINSTANCE Instance, HINSTANCE PrevInstance,
-        LPSTR CmdLine, i32 ShowCmd)
+WinMain
+(
+    HINSTANCE Instance, 
+    HINSTANCE PrevInstance,
+    LPSTR CmdLine, 
+    i32 ShowCmd
+)
 {
     i32 RunningState = false;
-    i64 WindowsTimerFrequency;
-    render_buffer OffscreenRenderBuffer = {};
-    BITMAPINFO OffscreenBufferBitmapInfo = {};
-    simulation_state SimulationState = {};
+    rendering_buffer LocalRenderingBuffer = {};
+    BITMAPINFO LocalBufferBitmapinfo = {};
 
-    WNDCLASSA WindowClass1 = {};
-    WindowClass1.style = CS_VREDRAW | CS_HREDRAW;
-    WindowClass1.lpfnWndProc = MainWindowCallback;
-    WindowClass1.hInstance = Instance;
-    WindowClass1.lpszClassName = "VoidWindowClass";
-    WindowClass1.hCursor = LoadCursor(0, IDC_ARROW);
+    WNDCLASSA MainWindowClass = {};
+    MainWindowClass.style = CS_VREDRAW | CS_HREDRAW;
+    MainWindowClass.lpfnWndProc = MainWindowCallback;
+    MainWindowClass.hInstance = Instance;
+    MainWindowClass.lpszClassName = "MainWindowClass";
+    MainWindowClass.hCursor = LoadCursor(0, IDC_ARROW);
 
     LARGE_INTEGER ProfileCounterFrequency;
     QueryPerformanceFrequency(&ProfileCounterFrequency);
-    WindowsTimerFrequency = ProfileCounterFrequency.QuadPart;
+    i64 WindowsTimerFrequency = ProfileCounterFrequency.QuadPart;
 
-    if (RegisterClassA(&WindowClass1))
+    if (RegisterClassA(&MainWindowClass))
     {
-        window_data WindowData = {};
-        WindowData.OffscreenRenderBuffer = &OffscreenRenderBuffer;
-        WindowData.OffscreenBufferBitmapInfo = &OffscreenBufferBitmapInfo;
-        WindowData.RunningState = &RunningState;
+        window_private_data WindowPrivateData = {};
+        WindowPrivateData.LocalRenderingBuffer = &LocalRenderingBuffer;
+        WindowPrivateData.LocalBufferBitmapinfo = &LocalBufferBitmapinfo;
+        WindowPrivateData.RunningState = &RunningState;
 
         HWND Window = CreateWindowExA
         (
-            0, WindowClass1.lpszClassName,
-            "Void",
+            0, 
+            MainWindowClass.lpszClassName,
+            "thing",
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-            CW_USEDEFAULT, CW_USEDEFAULT,
-            CW_USEDEFAULT, CW_USEDEFAULT,
-            0, 0, Instance, &WindowData
+            CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+            0, 
+            0, 
+            Instance, 
+            &WindowPrivateData
         );
 
         if (Window)
         {
-            i32 MonitorRefreshHz = 60;
-            f32 RendererRefreshHz = (f32)MonitorRefreshHz;
-            f32 TargetSecondsPerFrame = 1.0f / (f32)RendererRefreshHz;
+            f32 RendererRefreshHz = 60.0f;
+            f32 TargetSecondsPerFrame = 1.0f / RendererRefreshHz;
 
-            ResizeRenderBuffer(&OffscreenRenderBuffer, &OffscreenBufferBitmapInfo, 960, 540);
+            LocalRenderingBuffer.Width = 960;
+            LocalRenderingBuffer.Height = 540;
+            LocalRenderingBuffer.BytesPerPixel = 4;
+            LocalRenderingBuffer.Pitch = LocalRenderingBuffer.Width * LocalRenderingBuffer.BytesPerPixel;
+
+            LocalBufferBitmapinfo.bmiHeader.biSize = sizeof(LocalBufferBitmapinfo.bmiHeader);
+            LocalBufferBitmapinfo.bmiHeader.biWidth = LocalRenderingBuffer.Width;
+            LocalBufferBitmapinfo.bmiHeader.biHeight = -(i32)LocalRenderingBuffer.Height;
+            LocalBufferBitmapinfo.bmiHeader.biPlanes = 1;
+            LocalBufferBitmapinfo.bmiHeader.biBitCount = 32;
+            LocalBufferBitmapinfo.bmiHeader.biCompression = BI_RGB;
+
+            i32 BitmapMemorySize = LocalRenderingBuffer.Width * LocalRenderingBuffer.Height * LocalRenderingBuffer.BytesPerPixel;
+            LocalRenderingBuffer.Memory = VirtualAlloc
+            (
+                0,
+                BitmapMemorySize,
+                MEM_COMMIT | MEM_RESERVE,
+                PAGE_READWRITE
+            );
 
             RunningState = true;
             while (RunningState)
             {
-                LARGE_INTEGER FrameStartTimerValue = GetWindowsTimerValue();
+                LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
 
                 ProcessPendingMessages();
-
-                UpdateSimulationStateAndRender(&OffscreenRenderBuffer, TargetSecondsPerFrame, &SimulationState);
+                
+                UpdateSimulation(TargetSecondsPerFrame);
+                RenderSimulation(&LocalRenderingBuffer);
 
                 HDC DeviceContext = GetDC(Window);
-                DisplayRenderBufferInWindow(Window, DeviceContext, &OffscreenRenderBuffer, &OffscreenBufferBitmapInfo);
+                DisplayRenderBufferInWindow(Window, DeviceContext, &LocalRenderingBuffer, &LocalBufferBitmapinfo);
                 ReleaseDC(Window, DeviceContext);
 
-                SleepRestOfFrame(FrameStartTimerValue, WindowsTimerFrequency, TargetSecondsPerFrame);
+                SleepRestOfFrame(FrameStartTime, WindowsTimerFrequency, TargetSecondsPerFrame);
             }
         }
     }

@@ -21,7 +21,11 @@ typedef int64_t i64;
 int main(int argc, char **argv)
 {
     b32 CleanOnly = false;
-    if ((argc == 2) && (strcmp(argv[1], "clean") == 0))
+    if
+    (
+        (argc == 2) && 
+        (strcmp(argv[1], "clean") == 0)
+    )
     {
         CleanOnly = true;
     }
@@ -80,7 +84,8 @@ int main(int argc, char **argv)
                         DWORD LastError = GetLastError();
 
                         LPVOID ErrorMessageFromSystem;
-                        FormatMessage(
+                        FormatMessage
+                        (
                             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                             NULL,
                             LastError,
@@ -90,7 +95,8 @@ int main(int argc, char **argv)
                             NULL
                         );
 
-                        printf(
+                        printf
+                        (
                             "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %d == %s", 
                             FoundFilePath, LastError, (const char *)ErrorMessageFromSystem
                         );
@@ -110,8 +116,9 @@ int main(int argc, char **argv)
                 printf("ERROR: last error code is %d\n", LastErrorCode);
                 printf("ERROR: extension with error is %s\n", ExtensionsToClean[ExtensionIndex]);
             }
-            FindClose(FindHandle);
         }
+
+        FindClose(FindHandle);
     }
 
     if (!CleanOnly)
@@ -131,14 +138,15 @@ int main(int argc, char **argv)
         ZeroMemory(CompilerCommand, 1024);
         StringCchCatA(CompilerCommand, 1024, "cl.exe ");
         StringCchCatA(CompilerCommand, 1024, "-nologo -Zi -FC -Od -Oi -GR- -EHa- -Gm- -MTd ");
-        StringCchCatA(CompilerCommand, 1024, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 ");
+        StringCchCatA(CompilerCommand, 1024, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
         StringCchCatA(CompilerCommand, 1024, MainTranslationUnitPath);
         StringCchCatA(CompilerCommand, 1024, " /link /incremental:no /subsystem:windows /opt:ref /Fe:");
         StringCchCatA(CompilerCommand, 1024, BinDirectoryPath);
         StringCchCatA(CompilerCommand, 1024, "\\main.exe ");
         StringCchCatA(CompilerCommand, 1024, "user32.lib gdi32.lib");
 
-        BOOL CreateSucceeded = CreateProcess(
+        BOOL CreateSucceeded = CreateProcess
+        (
             NULL,
             CompilerCommand,
             NULL,
