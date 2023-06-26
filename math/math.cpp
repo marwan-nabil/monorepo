@@ -347,9 +347,9 @@ rectangle2 RectMinDiameter(v2 MinPoint, v2 Diameter)
     return Result;
 }
 
-bool32 IsPointInRectangle(rectangle2 Rectangle, v2 TestPoint)
+b32 IsPointInRectangle(rectangle2 Rectangle, v2 TestPoint)
 {
-    bool32 Result =
+    b32 Result =
     (
         TestPoint.X >= Rectangle.MinPoint.X &&
         TestPoint.Y >= Rectangle.MinPoint.Y &&

@@ -1,5 +1,3 @@
-#include "renderer.h"
-
 void
 DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor)
 {
@@ -183,18 +181,56 @@ void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YA
 }
 
 void
-RenderSimulation(rendering_buffer *Buffer)
+RenderSimulation(rendering_buffer *Buffer, simulation_state *SimulationState)
 {
     // background
-    color RectColor = {1.0f, 1.0f, 1.0f, 1.0f};
-    DrawRectangle(Buffer, v2{0, 0}, v2 {1080, 720}, RectColor);
+    color RectColor = {1.0f, .57f, 0.85f, 0};
+    DrawRectangle(Buffer, v2{0, 0}, v2 {1920, 1080}, RectColor);
+
+    // draw keypad
+    color InactiveColor = {1.0f, 0.98f, 0.678f, 0.678f};
+    color ActiveColor = {1.0f, 1.0f, 0, 0}; // red
     
+    if (SimulationState->Up)
+    {
+        DrawRectangle(Buffer, v2{100, 70}, v2 {130, 100}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{100, 70}, v2 {130, 100}, InactiveColor);
+    }
+
+    if (SimulationState->Down)
+    {
+        DrawRectangle(Buffer, v2{100, 30}, v2 {130, 60}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{100, 30}, v2 {130, 60}, InactiveColor);
+    }
+
+    if (SimulationState->Left)
+    {
+        DrawRectangle(Buffer, v2{60, 30}, v2 {90, 60}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{60, 30}, v2 {90, 60}, InactiveColor);
+    }
+    
+    if (SimulationState->Right)
+    {
+        DrawRectangle(Buffer, v2{140, 30}, v2 {170, 60}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{140, 30}, v2 {170, 60}, InactiveColor);
+    }
 
 #if 0
     u32 LineColor = 0xFFFF0000;
     DrawLine(Buffer, v2{4, 4}, v2{300, 300}, LineColor);
     DrawFilledCircle(Buffer, v2{40, 70}, 20, LineColor);
-#endif
 
     u32 Data[20] = {};
     for (u32 Index = 0; Index < 20; Index++)
@@ -206,4 +242,5 @@ RenderSimulation(rendering_buffer *Buffer)
     GraphRect.MinPoint = v2{0, 0};
     GraphRect.MaxPoint = v2{500, 500};
     DrawGraph(Buffer, Data, 20, 30, GraphRect);
+#endif
 }

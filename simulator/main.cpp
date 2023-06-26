@@ -2,58 +2,32 @@
 #include <stdint.h>
 #include <math.h>
 
-typedef uint8_t bool8;
-typedef uint32_t bool32;
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef int8_t i8;
-typedef int16_t i16;
-typedef int32_t i32;
-typedef int64_t i64;
-typedef float f32;
-typedef double f64;
+#include"platform.h"
 
-#define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
-#define AbsoluteValue(X) ((u32)(((X) < 0)?-(X):(X)))
-#define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
-#define AssertIsBit(Value) Assert(!((Value) & (~1ull)))
-#define AssertFits(Value, FittingMask) Assert(!((Value) & (~(FittingMask))))
-#define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
-
-#define PI32 3.1415926535f
-#define SQRT2 1.4142135623f
-
-#include "math.cpp"
+#include "..\math\math.cpp"
 #include "physics.cpp"
 #include "simulation.cpp"
 #include "renderer.cpp"
 
-struct window_private_data
-{
-    BITMAPINFO *LocalBufferBitmapinfo;
-    rendering_buffer *LocalRenderingBuffer;
-    i32 *RunningState;
-};
+struct user_input_sample GlobalLastUserInput;
+struct simulation_state GlobalSimulationState;
 
 void
 DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo)
 {
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
-
     i32 WindowWidth = ClientRect.right - ClientRect.left;
     i32 WindowHeight = ClientRect.bottom - ClientRect.top;
 
-    if((WindowWidth == 1280) && (WindowHeight == 800))
+    if ((WindowWidth == 1920) && (WindowHeight == 1027))
     {
         i32 DestinationWidth = (i32)(Buffer->Width * 1.3);
         i32 DestinationHeight = (i32)(Buffer->Height * 1.3);
         StretchDIBits
         (
             DeviceContext,
-            0, 0, DestinationWidth, DestinationHeight,
+            0, 0, WindowWidth, WindowHeight,
             0, 0, Buffer->Width, Buffer->Height,
             Buffer->Memory, LocalBufferBitmapinfo, DIB_RGB_COLORS, SRCCOPY
         );
@@ -62,15 +36,16 @@ DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffer *Bu
     {
         i32 OffsetX = 10;
         i32 OffsetY = 10;
-        PatBlt(DeviceContext, 0, 0, WindowWidth, OffsetY, BLACKNESS);
-        PatBlt(DeviceContext, 0, OffsetY + Buffer->Height, WindowWidth, WindowHeight, BLACKNESS);
-        PatBlt(DeviceContext, 0, 0, OffsetX, WindowHeight, BLACKNESS);
-        PatBlt(DeviceContext, OffsetX + Buffer->Width, 0, WindowWidth, WindowHeight, BLACKNESS);
+
+        PatBlt(DeviceContext, 0, 0, WindowWidth, OffsetY, WHITENESS); // top bar
+        PatBlt(DeviceContext, 0, 0, OffsetX, WindowHeight, WHITENESS); // left bar
+        PatBlt(DeviceContext, WindowWidth - OffsetX, 0, OffsetX, WindowHeight, WHITENESS); // right bar
+        PatBlt(DeviceContext, 0, WindowHeight - OffsetY, WindowWidth, OffsetY, WHITENESS); // bottom bar
 
         StretchDIBits
         (
             DeviceContext,
-            OffsetX, OffsetY, Buffer->Width, Buffer->Height,
+            OffsetX, OffsetY, WindowWidth - 2 * OffsetX, WindowHeight - 2 * OffsetX,
             0, 0, Buffer->Width, Buffer->Height,
             Buffer->Memory, LocalBufferBitmapinfo, DIB_RGB_COLORS, SRCCOPY
         );
@@ -131,13 +106,7 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 }
 
 void
-ResizeRenderBuffer(rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo, u32 Width, u32 Height)
-{
-    
-}
-
-void
-ProcessPendingMessages()
+ProcessPendingMessages(user_input_sample *LastUserInput, window_private_data *WindowData)
 {
     MSG Message;
     while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
@@ -149,7 +118,35 @@ ProcessPendingMessages()
             case WM_KEYDOWN:
             case WM_KEYUP:
             {
-                // TODO: handle key press
+                u32 VirtualKeyCode = (u32)Message.wParam;
+                b32 KeyWasDown = (Message.lParam & (1 << 30)) != 0;
+                b32 KeyIsDown = (Message.lParam & (1ll << 31)) == 0;
+                b32 AltKeyIsDown = (Message.lParam & (1 << 29)) != 0;
+
+                if (KeyIsDown != KeyWasDown)
+                {
+                    if (VirtualKeyCode == 'W')
+                    {
+                        LastUserInput->Up.IsDown = (b8)KeyIsDown;
+                    }
+                    else if (VirtualKeyCode == 'A')
+                    {
+                        LastUserInput->Left.IsDown = (b8)KeyIsDown;
+                    }
+                    else if (VirtualKeyCode == 'S')
+                    {
+                        LastUserInput->Down.IsDown = (b8)KeyIsDown;
+                    }
+                    else if (VirtualKeyCode == 'D')
+                    {
+                        LastUserInput->Right.IsDown = (b8)KeyIsDown;
+                    }
+
+                    if ((VirtualKeyCode == VK_F4) && KeyIsDown && AltKeyIsDown)
+                    {
+                        WindowData->RunningState = false;
+                    }
+                }
             } break;
 
             default:
@@ -249,14 +246,14 @@ WinMain
             f32 RendererRefreshHz = 60.0f;
             f32 TargetSecondsPerFrame = 1.0f / RendererRefreshHz;
 
-            LocalRenderingBuffer.Width = 960;
-            LocalRenderingBuffer.Height = 540;
+            LocalRenderingBuffer.Width = 1920;
+            LocalRenderingBuffer.Height = 1080;
             LocalRenderingBuffer.BytesPerPixel = 4;
             LocalRenderingBuffer.Pitch = LocalRenderingBuffer.Width * LocalRenderingBuffer.BytesPerPixel;
 
             LocalBufferBitmapinfo.bmiHeader.biSize = sizeof(LocalBufferBitmapinfo.bmiHeader);
             LocalBufferBitmapinfo.bmiHeader.biWidth = LocalRenderingBuffer.Width;
-            LocalBufferBitmapinfo.bmiHeader.biHeight = -(i32)LocalRenderingBuffer.Height;
+            LocalBufferBitmapinfo.bmiHeader.biHeight = (LONG)LocalRenderingBuffer.Height;
             LocalBufferBitmapinfo.bmiHeader.biPlanes = 1;
             LocalBufferBitmapinfo.bmiHeader.biBitCount = 32;
             LocalBufferBitmapinfo.bmiHeader.biCompression = BI_RGB;
@@ -275,10 +272,10 @@ WinMain
             {
                 LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
 
-                ProcessPendingMessages();
+                ProcessPendingMessages(&GlobalLastUserInput, &WindowPrivateData);
                 
-                UpdateSimulation(TargetSecondsPerFrame);
-                RenderSimulation(&LocalRenderingBuffer);
+                UpdateSimulation(TargetSecondsPerFrame, &GlobalLastUserInput, &GlobalSimulationState);
+                RenderSimulation(&LocalRenderingBuffer, &GlobalSimulationState);
 
                 HDC DeviceContext = GetDC(Window);
                 DisplayRenderBufferInWindow(Window, DeviceContext, &LocalRenderingBuffer, &LocalBufferBitmapinfo);
