@@ -51,12 +51,6 @@ f32 SquareRoot(f32 A)
 /***************************************************************/
 /*                      V2 math                                */
 /***************************************************************/
-struct v2
-{
-    f32 X;
-    f32 Y;
-};
-
 v2 V2(f32 X, f32 Y)
 {
     v2 Result;
@@ -170,13 +164,6 @@ v2 Normalize(v2 A)
 /***************************************************************/
 /*                      V3 math                                */
 /***************************************************************/
-struct v3
-{
-    f32 X;
-    f32 Y;
-    f32 Z;
-};
-
 v3 V3(f32 X, f32 Y, f32 Z)
 {
     v3 Result;
@@ -278,6 +265,25 @@ f32 InnerProduct(v3 A, v3 B)
     return Result;
 }
 
+inline v3
+HadamardProduct(v3 A, v3 B)
+{
+    v3 Result = V3(A.X * B.X, A.Y * B.Y, A.Z * B.Z);
+    return Result;
+}
+
+inline v3
+CrossProduct(v3 A, v3 B)
+{
+    v3 Result;
+
+    Result.X = A.Y * B.Z - A.Z * B.Y;
+    Result.Y = A.Z * B.X - A.X * B.Z;
+    Result.Z = A.X * B.Y - A.Y * B.X;
+
+    return Result;
+}
+
 f32 LengthSquared(v3 A)
 {
     f32 Result = InnerProduct(A, A);
@@ -300,13 +306,6 @@ v3 Normalize(v3 A)
 /***************************************************************/
 /*                      V4 math                                */
 /***************************************************************/
-struct v4
-{
-    f32 X;
-    f32 Y;
-    f32 Z;
-    f32 W;
-};
 
 /***************************************************************/
 /*                      rectangle2 math                        */

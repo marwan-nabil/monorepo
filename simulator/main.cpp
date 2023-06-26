@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include"platform.h"
+#include "..\math\math.h"
 
 #include "..\math\math.cpp"
 #include "physics.cpp"

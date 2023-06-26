@@ -14,30 +14,11 @@ typedef float f32;
 typedef double f64;
 
 #define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
-#define AbsoluteValue(X) ((u32)(((X) < 0)?-(X):(X)))
+#define AbsoluteValue(X) (((X) < 0)?-(X):(X))
 #define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
 #define AssertIsBit(Value) Assert(!((Value) & (~1ull)))
 #define AssertFits(Value, FittingMask) Assert(!((Value) & (~(FittingMask))))
 #define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
 
-#include "renderer.h"
-
-struct window_private_data
-{
-    BITMAPINFO *LocalBufferBitmapinfo;
-    rendering_buffer *LocalRenderingBuffer;
-    i32 *RunningState;
-};
-
-struct button_sample 
-{
-    b8 IsDown;
-};
-
-struct user_input_sample
-{
-    button_sample Up;
-    button_sample Down;
-    button_sample Left;
-    button_sample Right;
-};
+#define PI32 3.1415926535f
+#define SQRT2 1.4142135623f

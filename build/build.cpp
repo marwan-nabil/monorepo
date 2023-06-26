@@ -173,12 +173,12 @@ int main(int argc, char **argv)
 
             char CompilerFlags[512];
             ZeroMemory(CompilerFlags, 512);
-            StringCchCatA(CompilerFlags, 512, "-nologo -Zi -FC -Od -Oi -GR- -EHa- -Gm- -MTd ");
-            StringCchCatA(CompilerFlags, 512, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018");
+            StringCchCatA(CompilerFlags, 512, "-nologo -Zi -Zo -FC -Od -Oi -GR- -EHa- -Gm- -MTd -fp:fast -fp:except- ");
+            StringCchCatA(CompilerFlags, 512, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
 
             char LinkerFlags[512];
             ZeroMemory(LinkerFlags, 512);
-            StringCchCatA(LinkerFlags, 512, "/incremental:no /subsystem:windows /opt:ref user32.lib gdi32.lib");
+            StringCchCatA(LinkerFlags, 512, "/incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
 
             char SourceTranslationUnitPath[MAX_PATH];
             ZeroMemory(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath));
@@ -192,11 +192,14 @@ int main(int argc, char **argv)
             {
                 StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\simulator\\main.cpp");
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\simulator.exe");
+                StringCchCatA(LinkerFlags, 512, "/subsystem:windows ");
             }
             else if (strcmp(argv[1], "ray_tracer") == 0)
             {
                 StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\ray_tracer\\main.cpp");
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
+                StringCchCatA(CompilerFlags, 512, "-DINTERNAL -DSLOW -D_CRT_SECURE_NO_WARNINGS ");
+                StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
             }
             else
             {
