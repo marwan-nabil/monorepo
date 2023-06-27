@@ -31,7 +31,9 @@ struct image_u32
 
 struct material
 {
-    v3 Color;
+    f32 Specularity;
+    v3 ReflectionColor;
+    v3 EmmissionColor;
 };
 
 struct plane
