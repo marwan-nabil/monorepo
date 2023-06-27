@@ -84,9 +84,6 @@ struct world
 
 struct rendering_parameters
 {
-    u64 TotalRayBouncesComputed;
-    u32 TotalTilesDone;
-    
     u8 CoreCount;
 
     u32 TileWidthInPixels;
@@ -97,4 +94,26 @@ struct rendering_parameters
 
     f32 HitDistanceLowerLimit;
     f32 ToleranceToZero;
+};
+
+struct work_order
+{
+    world *World;
+    image_u32 *Image;
+    rendering_parameters *RenderingParameters;
+
+    u32 StartPixelX;
+    u32 StartPixelY;
+    u32 EndPixelX;
+    u32 EndPixelY;
+};
+
+struct work_queue
+{
+    u32 WorkOrderCount;
+    work_order *WorkOrders;
+
+    volatile u64 TotalRayBouncesComputed;
+    volatile u32 TotalTilesDone;
+    volatile u32 NextWorkOrderIndex;
 };
