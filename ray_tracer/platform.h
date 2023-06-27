@@ -19,6 +19,3 @@ typedef double f64;
 #define AssertIsBit(Value) Assert(!((Value) & (~1ull)))
 #define AssertFits(Value, FittingMask) Assert(!((Value) & (~(FittingMask))))
 #define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
-
-#define PI32 3.1415926535f
-#define SQRT2 1.4142135623f

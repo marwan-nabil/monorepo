@@ -5,25 +5,60 @@
 #define F32MAX FLT_MAX
 #define F32MIN -FLT_MAX
 
-struct v2
+union v2
 {
-    f32 X;
-    f32 Y;
+	struct
+	{
+		f32 X;
+		f32 Y;
+	};
+	f32 E[2];
 };
 
-struct v3
+union v3
 {
-    f32 X;
-    f32 Y;
-    f32 Z;
+	struct
+	{
+		f32 X;
+		f32 Y;
+		f32 Z;
+	};
+	struct
+	{
+		f32 Red;
+		f32 Green;
+		f32 Blue;
+	};
+	struct
+	{
+		v2 XY;
+		f32 Ignored0;
+	};
+	struct
+	{
+		f32 Ignored1;
+		v2 YZ;
+	};
+	f32 E[3];
 };
 
-struct v4
+union v4
 {
-    f32 X;
-    f32 Y;
-    f32 Z;
-    f32 W;
+	struct
+	{
+		f32 X;
+		f32 Y;
+		f32 Z;
+		f32 W;
+	};
+	struct
+	{
+		f32 Red;
+		f32 Green;
+		f32 Blue;
+		f32 Alpha;
+	};
+	f32 E[4];
 };
 
 struct coordinate_set
@@ -31,4 +66,16 @@ struct coordinate_set
     v3 X;
     v3 Y;
     v3 Z;
+};
+
+struct rectangle2
+{
+    v2 MinPoint;
+    v2 MaxPoint;
+};
+
+struct rectangle3
+{
+	v3 MinPoint;
+	v3 MaxPoint;
 };
