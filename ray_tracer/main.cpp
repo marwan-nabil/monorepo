@@ -15,8 +15,10 @@
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
 
+#include "..\multi_threading\multi_threading_utils.cpp"
+
 #define BOUNCES_PER_RAY 8
-#define RAYS_PER_PIXEL 8
+#define RAYS_PER_PIXEL 512
 
 inline void
 WriteImage(image_u32 OutputImage, const char *FileName)
@@ -123,23 +125,13 @@ GetPixelPointer(image_u32 *Image, u32 X, u32 Y)
     return Result;
 }
 
-inline u32
-LockedAddAndReturnOldValue(volatile u32 *Variable, u32 Addend)
-{
-}
-
-inline u64
-LockedAddAndReturnOldValue(volatile u64 *Variable, u64 Addend)
-{
-}
-
-inline void
+inline b32
 RenderTile(work_queue *WorkQueue)
 {
-    u32 WorkOrderIndex = LockedAddAndReturnOldValue(&WorkQueue->NextWorkOrderIndex, 1);
+    u64 WorkOrderIndex = LockedAddAndReturnOldValue(&WorkQueue->NextWorkOrderIndex, 1);
     if (WorkOrderIndex >= WorkQueue->WorkOrderCount)
     {
-        return;
+        return false;
     }
 
     work_order *WorkOrder = &WorkQueue->WorkOrders[WorkOrderIndex];
@@ -293,6 +285,15 @@ RenderTile(work_queue *WorkQueue)
 
     LockedAddAndReturnOldValue(&WorkQueue->TotalTilesDone, 1);
     LockedAddAndReturnOldValue(&WorkQueue->TotalRayBouncesComputed, BouncesComputedPerTile);
+    return true;
+}
+
+static DWORD WINAPI
+WorkerThread(void *Parameter)
+{
+    work_queue *WorkQueue = (work_queue *)Parameter;
+    while(RenderTile(WorkQueue)){}
+    return 0;
 }
 
 i32
@@ -373,11 +374,14 @@ main(i32 argc, u8 **argv)
     World.Film.PixelHeight = 1.0f / (f32)OutputImage.Height;
 
     rendering_parameters RenderingParameters = {};
-    RenderingParameters.CoreCount = 8;
+    SYSTEM_INFO SystemInfo;
+    GetSystemInfo(&SystemInfo);
+    RenderingParameters.CoreCount = (u8)SystemInfo.dwNumberOfProcessors;
     RenderingParameters.HitDistanceLowerLimit = 0.001f;
     RenderingParameters.ToleranceToZero = 0.0001f;
 
-    RenderingParameters.TileWidthInPixels = OutputImage.Width / RenderingParameters.CoreCount;
+    // RenderingParameters.TileWidthInPixels = OutputImage.Width / RenderingParameters.CoreCount;
+    RenderingParameters.TileWidthInPixels = 64; // TODO(marwan): optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX = 
@@ -425,18 +429,24 @@ main(i32 argc, u8 **argv)
 
     Assert(WorkQueue.WorkOrderCount == RenderingParameters.TotalTileCount);
 
+    // TODO(marwan): memory fence here
+
     for (u32 CoreIndex = 1; CoreIndex < RenderingParameters.CoreCount; CoreIndex++)
     {
-        CreateThread();
+        DWORD ThreadId;
+        HANDLE ThreadHandle = CreateThread(0, 0, WorkerThread, &WorkQueue, 0, &ThreadId);
+        CloseHandle(ThreadHandle);
     }
 
     clock_t StartTime = clock();
     
     while (WorkQueue.TotalTilesDone < RenderingParameters.TotalTileCount)
     {
-        RenderTile(&WorkQueue);
-        printf("\rRayCasting %d%%", 100 * WorkQueue.TotalTilesDone / RenderingParameters.TotalTileCount);
-        fflush(stdout);
+        if (RenderTile(&WorkQueue))
+        {
+            printf("\rRayCasting %d%%", 100 * (u32)WorkQueue.TotalTilesDone / RenderingParameters.TotalTileCount);
+            fflush(stdout);
+        }
     }
 
     clock_t TotalTimeElapsed = clock() - StartTime;

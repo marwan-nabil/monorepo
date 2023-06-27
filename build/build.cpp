@@ -24,7 +24,7 @@ void CleanupBinFolder(const char *BinDirectoryPath)
 
     const char *ExtensionsToClean[] = 
     {
-        "obj", "pdb", "exe", "log", "ilk", "sln"
+        "obj", "pdb", "exe", "log", "ilk", "sln", "bmp"
     };
 
     for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
