@@ -20,7 +20,7 @@ typedef int64_t i64;
 
 void CleanupBinFolder(const char *BinDirectoryPath)
 {
-    printf("\n====== Cleanup ======\n");
+    // printf("\n====== Cleanup ======\n");
 
     const char *ExtensionsToClean[] = 
     {
@@ -82,7 +82,7 @@ void CleanupBinFolder(const char *BinDirectoryPath)
                     }
                     else
                     {
-                        printf("INFO: Deleted file: %s\n", FoundFilePath);
+                        // printf("INFO: Deleted file: %s\n", FoundFilePath);
                     }
                 }
             } while (FindNextFileA(FindHandle, &FindOperationData) != 0);
@@ -108,7 +108,7 @@ void InvokeCompiler
     const char *OutputBinaryPath
 )
 {
-    printf("\n====== Compiler output ======\n");
+    // printf("\n====== Compiler output ======\n");
 
     STARTUPINFO CompilerProcessStartupInfo = {};
     CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);

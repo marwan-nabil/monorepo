@@ -50,8 +50,28 @@ struct sphere
     u32 MaterialIndex;
 };
 
+struct camera
+{
+    v3 Position;
+    coordinate_set CoordinateSet;
+};
+
+struct film
+{
+    v3 Center;
+    f32 DistanceFromCamera;
+    f32 Width;
+    f32 Height;
+    f32 PixelWidth;
+    f32 PixelHeight;
+};
+
 struct world
 {
+    coordinate_set CoordinateSet;
+    camera Camera;
+    film Film;
+
     material *Materials;
     u32 MaterialsCount;
 
@@ -60,4 +80,21 @@ struct world
 
     sphere *Spheres;
     u32 SpheresCount;
+};
+
+struct rendering_parameters
+{
+    u64 TotalRayBouncesComputed;
+    u32 TotalTilesDone;
+    
+    u8 CoreCount;
+
+    u32 TileWidthInPixels;
+    u32 TileHeightInPixels;
+    u32 TileCountX;
+    u32 TileCountY;
+    u32 TotalTileCount;
+
+    f32 HitDistanceLowerLimit;
+    f32 ToleranceToZero;
 };
