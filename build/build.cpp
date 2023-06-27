@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     StringCchCatA(BinDirectoryPath, ArrayLength(BinDirectoryPath), RootDirectoryPath);
     StringCchCatA(BinDirectoryPath, ArrayLength(BinDirectoryPath), "\\bin");
 
-    if (argc == 2)
+    if (argc >= 2)
     {
         if (strcmp(argv[1], "clean") == 0)
         {
@@ -173,7 +173,15 @@ int main(int argc, char **argv)
 
             char CompilerFlags[512];
             ZeroMemory(CompilerFlags, 512);
-            StringCchCatA(CompilerFlags, 512, "-nologo -Zi -Zo -FC -Od -Oi -GR- -EHa- -Gm- -MTd -fp:fast -fp:except- ");
+            StringCchCatA(CompilerFlags, 512, "-nologo -Zi -Zo -FC -Oi -GR- -EHa- -Gm- -MTd -fp:fast -fp:except- ");
+            if ((argc == 3) && (strcmp(argv[2], "optimized") == 0))
+            {
+                StringCchCatA(CompilerFlags, 512, "-O2 ");
+            }
+            else
+            {
+                StringCchCatA(CompilerFlags, 512, "-Od ");
+            }
             StringCchCatA(CompilerFlags, 512, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
 
             char LinkerFlags[512];
