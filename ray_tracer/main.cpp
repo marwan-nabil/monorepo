@@ -15,7 +15,7 @@
 #include "..\math\vector4.cpp"
 
 #define BOUNCES_PER_RAY 8
-#define RAYS_PER_PIXEL 8
+#define RAYS_PER_PIXEL 64
 
 inline static void
 WriteImage(image_u32 OutputImage, const char *FileName)
@@ -163,14 +163,11 @@ RayCast(world *World, v3 RayOrigin, v3 RayDirection)
             
             Result += HadamardProduct(RayColorAttenuation, HitMaterial->EmmissionColor);
 
-            f32 CosineAttenuationFactor = 1;
-#if 0
             f32 CosineAttenuationFactor = InnerProduct(-RayDirection, NextRayNormal);
             if (CosineAttenuationFactor < 0)
             {
                 CosineAttenuationFactor = 0;
             }
-#endif
             RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * HitMaterial->ReflectionColor);
             
             RayOrigin += MinimumHitDistanceFound * RayDirection;
@@ -200,31 +197,39 @@ main(i32 argc, u8 **argv)
     // image_u32 OutputImage = CreateImage(4096, 2048);
     image_u32 OutputImage = CreateImage(1280, 720);
 
-    material MaterialsArray[5] = {};
+    material MaterialsArray[7] = {};
     MaterialsArray[0].EmmissionColor = V3(0.3, 0.4, 0.5);
     MaterialsArray[1].ReflectionColor = V3(0.5, 0.5, 0.5);
     MaterialsArray[2].ReflectionColor = V3(0.7, 0.5, 0.3);
-    MaterialsArray[3].ReflectionColor = V3(0.9, 0, 0);
+    MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
     MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
     MaterialsArray[4].Specularity = 0.7;
+    MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
+    MaterialsArray[5].Specularity = 0.85;
+    MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
+    MaterialsArray[6].Specularity = 1;
 
     plane PlanesArray[1] = {};
     PlanesArray[0].MaterialIndex = 1;
     PlanesArray[0].Normal = V3(0, 0, 1);
     PlanesArray[0].Distance = 0;
 
-    sphere SpheresArray[3] = {};
+    sphere SpheresArray[5] = {};
     SpheresArray[0].MaterialIndex = 2;
     SpheresArray[0].Position = V3(0, 0, 0);
     SpheresArray[0].Radius = 1;
-
     SpheresArray[1].MaterialIndex = 3;
     SpheresArray[1].Position = V3(3, -2, 0);
     SpheresArray[1].Radius = 1;
-
     SpheresArray[2].MaterialIndex = 4;
     SpheresArray[2].Position = V3(-2, -1, 2);
     SpheresArray[2].Radius = 1;
+    SpheresArray[3].MaterialIndex = 5;
+    SpheresArray[3].Position = V3(1, -1, 3);
+    SpheresArray[3].Radius = 1;
+    SpheresArray[4].MaterialIndex = 6;
+    SpheresArray[4].Position = V3(-2, 3, 0);
+    SpheresArray[4].Radius = 2;
 
     world World = {};
     World.Materials = MaterialsArray;
@@ -242,7 +247,6 @@ main(i32 argc, u8 **argv)
     WorldCoordinateSet.Z = V3(0, 0, 1);
 
     v3 CameraPosition = {0, -10, 1};
-
     coordinate_set CameraCoordinateSet = {};
     CameraCoordinateSet.Z = Normalize(CameraPosition);
     CameraCoordinateSet.X = Normalize(CrossProduct(CameraCoordinateSet.Z, WorldCoordinateSet.Z));
@@ -261,10 +265,16 @@ main(i32 argc, u8 **argv)
     }
     f32 HalfFilmWidth = 0.5f * FilmWidth;
     f32 HalfFilmHeight = 0.5f * FilmHeight;
+    f32 HalfPixelWidth = 0.5f / (f32)OutputImage.Width;
+    f32 HalfPixelHeight = 0.5f / (f32)OutputImage.Height;
 
     v3 FilmCenter = CameraPosition - FilmDistanceFromCamera * CameraCoordinateSet.Z;
 
+    f32 SingleRayContributionRatio = 1.0 / (f32)RAYS_PER_PIXEL;
+    v3 RayOrigin = CameraPosition;
+
     u32 *PixelWritePointer = OutputImage.Pixels;
+
     for (u32 Y = 0; Y < OutputImage.Height; Y++)
     {
         f32 FilmRatioY = 2.0f * ((f32)Y / (f32)OutputImage.Height) - 1.0f; // [-1, 1]
@@ -272,19 +282,20 @@ main(i32 argc, u8 **argv)
         {
             f32 FilmRatioX = 2.0f * ((f32)X / (f32)OutputImage.Width) - 1.0f; // [-1, 1]
 
-            v3 PositionOnFilm = 
-                FilmCenter +
-                FilmRatioX * HalfFilmWidth * CameraCoordinateSet.X + 
-                FilmRatioY * HalfFilmHeight * CameraCoordinateSet.Y; 
-
-            v3 RayOrigin = CameraPosition;
-            v3 RayDirection = Normalize(PositionOnFilm - CameraPosition);
-            
-            f32 SingleRayContributionRatio = 1.0 / (f32)RAYS_PER_PIXEL;
             v3 PixelColor = {};
 
             for (u32 RayIndex = 0; RayIndex < RAYS_PER_PIXEL; RayIndex++)
             {
+                f32 FilmX = FilmRatioX * HalfFilmWidth + HalfPixelWidth * RandomBilateral();
+                f32 FilmY = FilmRatioY * HalfFilmHeight + HalfPixelHeight * RandomBilateral();
+
+                v3 PositionOnFilm = 
+                    FilmCenter +
+                    FilmX * CameraCoordinateSet.X + 
+                    FilmY * CameraCoordinateSet.Y; 
+
+                v3 RayDirection = Normalize(PositionOnFilm - CameraPosition);
+
                 PixelColor +=  SingleRayContributionRatio * RayCast(&World, RayOrigin, RayDirection);
             }
 
