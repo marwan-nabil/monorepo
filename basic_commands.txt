@@ -1,5 +1,0 @@
-cl ..\build\build.cpp
-
-build ray_tracer && ray_tracer.exe && test.bmp
-
-devenv ray_tracer.exe
