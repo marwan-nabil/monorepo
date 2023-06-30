@@ -8,17 +8,20 @@
 
 #include"platform.h"
 #include "..\math\math.h"
+#include "..\math\random.h"
 #include"ray_tracer.h"
 
 #include "..\math\scalars.cpp"
 #include "..\math\vector2.cpp"
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
+#include "..\math\random.cpp"
 
 #include "..\multi_threading\multi_threading_utils.cpp"
 
 #define BOUNCES_PER_RAY 8
-#define RAYS_PER_PIXEL 512
+#define RAYS_PER_PIXEL 256
+#define SIMD_LANE_WIDTH 4
 
 inline void
 WriteImage(image_u32 OutputImage, const char *FileName)
@@ -125,6 +128,114 @@ GetPixelPointer(image_u32 *Image, u32 X, u32 Y)
     return Result;
 }
 
+inline v3
+RenderPixel
+(
+    work_order *WorkOrder, v3 PixelCenterOnFilm, u64 *BouncesComputedPerTile
+)
+{
+    v3 PixelColor = {};
+    world *World = WorkOrder->World;
+    v3 CameraX = World->Camera.CoordinateSet.X;
+    v3 CameraY = World->Camera.CoordinateSet.Y;
+    f32 HalfPixelWidth = World->Film.HalfPixelWidth;
+    f32 HalfPixelHeight = World->Film.HalfPixelHeight;
+    random_series *RandomSeries = &WorkOrder->Entropy;
+    v3 CameraPosition = World->Camera.Position;
+    f32 ToleranceToZero = WorkOrder->RenderingParameters->ToleranceToZero;
+    f32 HitDistanceLowerLimit = WorkOrder->RenderingParameters->HitDistanceLowerLimit;
+
+    for (u32 RayIndex = 0; RayIndex < RAYS_PER_PIXEL; RayIndex++)
+    {
+        v3 RayColor = {};
+        v3 RayColorAttenuation = {1, 1, 1};
+
+        v3 RayPositionOnFilm = 
+            PixelCenterOnFilm +
+            HalfPixelWidth * RandomBilateral(RandomSeries) * CameraX +
+            HalfPixelHeight * RandomBilateral(RandomSeries) * CameraY;
+
+        v3 BounceOrigin = CameraPosition;
+        v3 BounceDirection = Normalize(RayPositionOnFilm - BounceOrigin);
+
+        for (u32 BounceIndex = 0; BounceIndex < BOUNCES_PER_RAY; BounceIndex++)
+        {
+            v3 NextBounceNormal = {};
+
+            (*BouncesComputedPerTile)++;
+
+            f32 MinimumHitDistanceFound = F32MAX;
+            u32 HitMaterialIndex = 0;
+
+            for (u32 PlaneIndex = 0; PlaneIndex < World->PlanesCount; PlaneIndex++)
+            {
+                plane *CurrentPlane = &World->Planes[PlaneIndex];
+                f32 CurrentHitDistance = RayIntersectsPlane(BounceOrigin, BounceDirection, CurrentPlane, ToleranceToZero);
+                if 
+                (
+                    (CurrentHitDistance < MinimumHitDistanceFound) && 
+                    (CurrentHitDistance > HitDistanceLowerLimit)
+                )
+                {
+                    MinimumHitDistanceFound = CurrentHitDistance;
+                    HitMaterialIndex = CurrentPlane->MaterialIndex;
+                    NextBounceNormal = CurrentPlane->Normal;
+                }
+            }
+
+            for (u32 SphereIndex = 0; SphereIndex < World->SpheresCount; SphereIndex++)
+            {
+                sphere *CurrentSphere = &World->Spheres[SphereIndex];
+                f32 CurrentHitDistance = RayIntersectsSphere(BounceOrigin, BounceDirection, CurrentSphere, ToleranceToZero, HitDistanceLowerLimit);
+                if 
+                (
+                    (CurrentHitDistance < MinimumHitDistanceFound) && 
+                    (CurrentHitDistance > HitDistanceLowerLimit)
+                )
+                {
+                    MinimumHitDistanceFound = CurrentHitDistance;
+                    HitMaterialIndex = CurrentSphere->MaterialIndex;
+                    NextBounceNormal = Normalize(BounceOrigin + CurrentHitDistance * BounceDirection - CurrentSphere->Position);
+                }
+            }
+
+            if (HitMaterialIndex)
+            {
+                material *HitMaterial = &World->Materials[HitMaterialIndex];
+                
+                RayColor += HadamardProduct(RayColorAttenuation, HitMaterial->EmmissionColor);
+
+                f32 CosineAttenuationFactor = InnerProduct(-BounceDirection, NextBounceNormal);
+                if (CosineAttenuationFactor < 0)
+                {
+                    CosineAttenuationFactor = 0;
+                }
+                RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * HitMaterial->ReflectionColor);
+                
+                BounceOrigin += MinimumHitDistanceFound * BounceDirection;
+
+                v3 PureBounceDirection = 
+                    Normalize(BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal);
+
+                v3 RandomBounceDirection = 
+                    Normalize(NextBounceNormal + V3(RandomBilateral(RandomSeries), RandomBilateral(RandomSeries), RandomBilateral(RandomSeries)));
+
+                BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterial->Specularity));
+            }
+            else
+            {
+                material *HitMaterial = &World->Materials[HitMaterialIndex];
+                RayColor += HadamardProduct(RayColorAttenuation, HitMaterial->EmmissionColor);
+                break;
+            }
+        }
+
+        PixelColor += RayColor / (f32)RAYS_PER_PIXEL;
+    }
+
+    return PixelColor;
+}
+
 inline b32
 RenderTile(work_queue *WorkQueue)
 {
@@ -141,16 +252,8 @@ RenderTile(work_queue *WorkQueue)
     film *Film = &WorkOrder->World->Film;
     rendering_parameters *RenderingParameters = WorkOrder->RenderingParameters;
 
-    f32 HalfFilmWidth = 0.5f * Film->Width;
-    f32 HalfFilmHeight = 0.5f * Film->Height;
-    f32 HalfPixelWidth = 0.5f * Film->PixelWidth;
-    f32 HalfPixelHeight = 0.5f * Film->PixelHeight;
     v3 CameraX = World->Camera.CoordinateSet.X;
     v3 CameraY = World->Camera.CoordinateSet.Y;
-    v3 CameraPosition = World->Camera.Position;
-
-    f32 ToleranceToZero = RenderingParameters->ToleranceToZero;
-    f32 HitDistanceLowerLimit = RenderingParameters->HitDistanceLowerLimit;
 
     u64 BouncesComputedPerTile = 0;
 
@@ -164,106 +267,15 @@ RenderTile(work_queue *WorkQueue)
         {
             f32 FilmRatioX = 2.0f * ((f32)PixelX / (f32)Image->Width) - 1.0f;
 
-            v3 PixelColor = {};
+            v3 PixelCenterOnFilm = 
+                Film->Center +
+                FilmRatioX * Film->HalfWidth * CameraX +
+                FilmRatioY * Film->HalfHeight * CameraY;
 
-            for (u32 RayIndex = 0; RayIndex < RAYS_PER_PIXEL; RayIndex++)
-            {
-                v3 RayColor = {};
-                v3 RayColorAttenuation = {1, 1, 1};
-
-                f32 FilmX = 
-                    FilmRatioX * HalfFilmWidth + 
-                    HalfPixelWidth * RandomBilateral();
-
-                f32 FilmY = 
-                    FilmRatioY * HalfFilmHeight + 
-                    HalfPixelHeight * RandomBilateral();
-
-                v3 RayPositionOnFilm = 
-                    Film->Center +
-                    FilmX * CameraX +
-                    FilmY * CameraY;
-
-                v3 BounceOrigin = CameraPosition;
-                v3 BounceDirection = Normalize(RayPositionOnFilm - BounceOrigin);
-
-                for (u32 BounceIndex = 0; BounceIndex < BOUNCES_PER_RAY; BounceIndex++)
-                {
-                    v3 NextBounceNormal = {};
-
-                    BouncesComputedPerTile++;
-
-                    f32 MinimumHitDistanceFound = F32MAX;
-                    b32 HitSomething = false;
-                    u32 HitMaterialIndex = 0;
-
-                    for (u32 PlaneIndex = 0; PlaneIndex < World->PlanesCount; PlaneIndex++)
-                    {
-                        plane *CurrentPlane = &World->Planes[PlaneIndex];
-                        f32 CurrentHitDistance = RayIntersectsPlane(BounceOrigin, BounceDirection, CurrentPlane, ToleranceToZero);
-                        if 
-                        (
-                            (CurrentHitDistance < MinimumHitDistanceFound) && 
-                            (CurrentHitDistance > HitDistanceLowerLimit)
-                        )
-                        {
-                            HitSomething = true;
-                            MinimumHitDistanceFound = CurrentHitDistance;
-                            HitMaterialIndex = CurrentPlane->MaterialIndex;
-                            NextBounceNormal = CurrentPlane->Normal;
-                        }
-                    }
-
-                    for (u32 SphereIndex = 0; SphereIndex < World->SpheresCount; SphereIndex++)
-                    {
-                        sphere *CurrentSphere = &World->Spheres[SphereIndex];
-                        f32 CurrentHitDistance = RayIntersectsSphere(BounceOrigin, BounceDirection, CurrentSphere, ToleranceToZero, HitDistanceLowerLimit);
-                        if 
-                        (
-                            (CurrentHitDistance < MinimumHitDistanceFound) && 
-                            (CurrentHitDistance > HitDistanceLowerLimit)
-                        )
-                        {
-                            HitSomething = true;
-                            MinimumHitDistanceFound = CurrentHitDistance;
-                            HitMaterialIndex = CurrentSphere->MaterialIndex;
-                            NextBounceNormal = Normalize(BounceOrigin + CurrentHitDistance * BounceDirection - CurrentSphere->Position);
-                        }
-                    }
-
-                    if (HitSomething)
-                    {
-                        material *HitMaterial = &World->Materials[HitMaterialIndex];
-                        
-                        RayColor += HadamardProduct(RayColorAttenuation, HitMaterial->EmmissionColor);
-
-                        f32 CosineAttenuationFactor = InnerProduct(-BounceDirection, NextBounceNormal);
-                        if (CosineAttenuationFactor < 0)
-                        {
-                            CosineAttenuationFactor = 0;
-                        }
-                        RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * HitMaterial->ReflectionColor);
-                        
-                        BounceOrigin += MinimumHitDistanceFound * BounceDirection;
-
-                        v3 PureBounceDirection = 
-                            Normalize(BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal);
-
-                        v3 RandomBounceDirection = 
-                            Normalize(NextBounceNormal + V3(RandomBilateral(), RandomBilateral(), RandomBilateral()));
-
-                        BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterial->Specularity));
-                    }
-                    else
-                    {
-                        material *HitMaterial = &World->Materials[HitMaterialIndex];
-                        RayColor += HadamardProduct(RayColorAttenuation, HitMaterial->EmmissionColor);
-                        break;
-                    }
-                }
-
-                PixelColor += RayColor / (f32)RAYS_PER_PIXEL;
-            }
+            v3 PixelColor = RenderPixel
+            (
+                WorkOrder, PixelCenterOnFilm, &BouncesComputedPerTile
+            );
 
             v4 BitmapColorRGBA = 
             {
@@ -361,22 +373,24 @@ main(i32 argc, u8 **argv)
 
     if (OutputImage.Width >= OutputImage.Height)
     {
-        World.Film.Width = 1.0f;
-        World.Film.Height = (f32)OutputImage.Height / (f32)OutputImage.Width;
+        World.Film.HalfWidth = 0.5f;
+        World.Film.HalfHeight = 0.5f * (f32)OutputImage.Height / (f32)OutputImage.Width;
     }
     else
     {
-        World.Film.Height = 1.0f;
-        World.Film.Width = (f32)OutputImage.Width / (f32)OutputImage.Height;
+        World.Film.HalfHeight = 1.0f;
+        World.Film.HalfWidth = (f32)OutputImage.Width / (f32)OutputImage.Height;
     }
 
-    World.Film.PixelWidth = 1.0f / (f32)OutputImage.Width;    
-    World.Film.PixelHeight = 1.0f / (f32)OutputImage.Height;
+    World.Film.HalfPixelWidth = 0.5f / (f32)OutputImage.Width;
+    World.Film.HalfPixelHeight = 0.5f / (f32)OutputImage.Height;
 
     rendering_parameters RenderingParameters = {};
+
     SYSTEM_INFO SystemInfo;
     GetSystemInfo(&SystemInfo);
     RenderingParameters.CoreCount = (u8)SystemInfo.dwNumberOfProcessors;
+
     RenderingParameters.HitDistanceLowerLimit = 0.001f;
     RenderingParameters.ToleranceToZero = 0.0001f;
 
@@ -395,28 +409,19 @@ main(i32 argc, u8 **argv)
     work_queue WorkQueue = {};
     WorkQueue.WorkOrders = (work_order *)malloc(RenderingParameters.TotalTileCount * sizeof(work_order));
 
-
     for (u32 TileY = 0; TileY < RenderingParameters.TileCountY; TileY++)
     {
         u32 StartPixelY = TileY * RenderingParameters.TileHeightInPixels;
         u32 EndPixelY = StartPixelY + RenderingParameters.TileHeightInPixels;
-        if (EndPixelY > OutputImage.Height)
-        {
-            EndPixelY = OutputImage.Height;
-        }
+        EndPixelY = Clamp(EndPixelY, 0, OutputImage.Height);
         
         for (u32 TileX = 0; TileX < RenderingParameters.TileCountX; TileX++)
         {
             u32 StartPixelX = TileX * RenderingParameters.TileWidthInPixels;
             u32 EndPixelX = StartPixelX + RenderingParameters.TileWidthInPixels;
-            if (EndPixelX > OutputImage.Width)
-            {
-                EndPixelX = OutputImage.Width;
-            }
+            EndPixelX = Clamp(EndPixelX, 0, OutputImage.Width);
 
             work_order *WorkOrder = WorkQueue.WorkOrders + WorkQueue.WorkOrderCount++;
-            Assert(WorkQueue.WorkOrderCount <= RenderingParameters.TotalTileCount);
-
             WorkOrder->World = &World;
             WorkOrder->Image = &OutputImage;
             WorkOrder->RenderingParameters = &RenderingParameters;
@@ -424,12 +429,14 @@ main(i32 argc, u8 **argv)
             WorkOrder->StartPixelY = StartPixelY;
             WorkOrder->EndPixelX = EndPixelX;
             WorkOrder->EndPixelY = EndPixelY;
+            WorkOrder->Entropy.State = TileX * 32542345 + TileY * 897124;
         }
     }
 
     Assert(WorkQueue.WorkOrderCount == RenderingParameters.TotalTileCount);
 
     // TODO(marwan): memory fence here
+    clock_t StartTime = clock();
 
     for (u32 CoreIndex = 1; CoreIndex < RenderingParameters.CoreCount; CoreIndex++)
     {
@@ -437,8 +444,6 @@ main(i32 argc, u8 **argv)
         HANDLE ThreadHandle = CreateThread(0, 0, WorkerThread, &WorkQueue, 0, &ThreadId);
         CloseHandle(ThreadHandle);
     }
-
-    clock_t StartTime = clock();
     
     while (WorkQueue.TotalTilesDone < RenderingParameters.TotalTileCount)
     {
@@ -455,6 +460,8 @@ main(i32 argc, u8 **argv)
 
     printf("\nRayCasting time: %d ms\n", TotalTimeElapsed);
     printf("Core Count: %d\n", RenderingParameters.CoreCount);
+    printf("Rays Per Pixel: %d\n", RAYS_PER_PIXEL);
+    printf("Bounces Per Ray: %d\n", BOUNCES_PER_RAY);
 
     f32 KBytesPerTile = (f32)
     (

@@ -60,10 +60,10 @@ struct film
 {
     v3 Center;
     f32 DistanceFromCamera;
-    f32 Width;
-    f32 Height;
-    f32 PixelWidth;
-    f32 PixelHeight;
+    f32 HalfWidth;
+    f32 HalfHeight;
+    f32 HalfPixelWidth;
+    f32 HalfPixelHeight;
 };
 
 struct world
@@ -101,6 +101,7 @@ struct work_order
     world *World;
     image_u32 *Image;
     rendering_parameters *RenderingParameters;
+    random_series Entropy;
 
     u32 StartPixelX;
     u32 StartPixelY;

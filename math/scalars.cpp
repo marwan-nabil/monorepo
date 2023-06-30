@@ -1,4 +1,8 @@
-inline i32 
+/////////////////////////////////////////
+//			Integers
+/////////////////////////////////////////
+
+inline i32
 RoundF32ToI32(f32 Real)
 {
     i32 Result = (i32)roundf(Real);
@@ -40,6 +44,25 @@ TruncateF32ToU32(f32 Real)
     return Result;
 }
 
+inline u32
+Clamp(u32 Value, u32 Min, u32 Max)
+{
+	u32 Result = Value;
+	if (Result < Min)
+	{
+		Result = Min;
+	}
+	else if (Result > Max)
+	{
+		Result = Max;
+	}
+	return Result;
+}
+
+/////////////////////////////////////////
+//			Floating point
+/////////////////////////////////////////
+
 inline f32 
 Square(f32 A)
 {
@@ -58,20 +81,6 @@ Power(f32 Base, f32 Exponent)
 {
 	f32 Result = (f32)pow(Base, Exponent);
 	return Result;
-}
-
-inline f32
-RandomUnilateral()
-{
-    f32 Result = (f32)rand() / RAND_MAX;
-    return Result;
-}
-
-inline f32
-RandomBilateral()
-{
-    f32 Result = -1.0f + 2.0f * RandomUnilateral();
-    return Result;
 }
 
 inline f32
