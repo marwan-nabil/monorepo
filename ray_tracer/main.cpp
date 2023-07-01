@@ -1,4 +1,6 @@
 #include <Windows.h>
+#include <intrin.h>
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,9 +17,10 @@
 #include "..\math\vector4.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\simd_math\math.h"
-#else
-#   error "still not defined yet."
+#   include "..\simd_math\1_wide\math.h"
+#elif (SIMD_NUMBEROF_LANES == 4)
+#   include "..\simd_math\4_wide\math.h"
+#   include "..\simd_math\4_wide\random.h"
 #endif
 
 #include"ray_tracer.h"
@@ -30,14 +33,16 @@
 #include "..\math\vector4.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\simd_math\scalars.cpp"
-#   include "..\simd_math\v3.cpp"
-#else
+#   include "..\simd_math\1_wide\scalars.cpp"
+#   include "..\simd_math\1_wide\v3.cpp"
+#elif (SIMD_NUMBEROF_LANES == 4)
+#   include "..\simd_math\4_wide\scalars.cpp"
+#   include "..\simd_math\4_wide\v3.cpp"
+#   include "..\simd_math\4_wide\random.cpp"
 #   error "still not defined yet."
 #endif
 
 #include "..\multi_threading\utils.cpp"
-
 
 inline void
 WriteImage(image_u32 OutputImage, const char *FileName)
@@ -83,54 +88,54 @@ CreateImage(u32 Width, u32 Height)
     return OutputImage;
 }
 
-inline lane_f32
-RayIntersectsPlane(lane_v3 RayOrigin, lane_v3 RayDirection, plane *Plane, lane_f32 ToleranceToZero)
+inline f32_lane
+RayIntersectsPlane(v3_lane RayOrigin, v3_lane RayDirection, plane *Plane, f32_lane ToleranceToZero)
 {
-    lane_f32 IntersectionDistance = F32MAX;
+    f32_lane IntersectionDistance = F32MAX;
 
-    lane_v3 PlaneNormal = Plane->Normal;
-    lane_f32 PlaneDistance = Plane->Distance;
+    v3_lane PlaneNormal = Plane->Normal;
+    f32_lane PlaneDistance = Plane->Distance;
 
-    lane_f32 Denominator = InnerProduct(PlaneNormal, RayDirection);
-    lane_u32 DenominatorMask = AbsoluteValue(Denominator) > ToleranceToZero;
+    f32_lane Denominator = InnerProduct(PlaneNormal, RayDirection);
+    u32_lane DenominatorMask = AbsoluteValue(Denominator) > ToleranceToZero;
     
-    lane_f32 Numerator;
+    f32_lane Numerator;
     ConditionalAssign(&Numerator, -PlaneDistance - InnerProduct(PlaneNormal, RayOrigin), DenominatorMask);
     ConditionalAssign(&IntersectionDistance, Numerator / Denominator, DenominatorMask);
 
     return IntersectionDistance;
 }
 
-inline lane_f32
-RayIntersectsSphere(lane_v3 RayOrigin, lane_v3 RayDirection, sphere *Sphere, lane_f32 ToleranceToZero, lane_f32 HitDistanceLowerLimit)
+inline f32_lane
+RayIntersectsSphere(v3_lane RayOrigin, v3_lane RayDirection, sphere *Sphere, f32_lane ToleranceToZero, f32_lane HitDistanceLowerLimit)
 {
-    lane_f32 IntersectionDistance = F32MAX;
+    f32_lane IntersectionDistance = F32MAX;
 
-    lane_v3 SpherePosition = Sphere->Position;
-    lane_f32 SphereRadius = Sphere->Radius;
+    v3_lane SpherePosition = Sphere->Position;
+    f32_lane SphereRadius = Sphere->Radius;
 
-    lane_v3 SphereRelativeRayOrigin = RayOrigin - SpherePosition;
+    v3_lane SphereRelativeRayOrigin = RayOrigin - SpherePosition;
 
-    lane_f32 A = InnerProduct(RayDirection, RayDirection);
-    lane_f32 B = 2.0f * InnerProduct(RayDirection, SphereRelativeRayOrigin);
-    lane_f32 C = InnerProduct(SphereRelativeRayOrigin, SphereRelativeRayOrigin) - Square(SphereRadius);
+    f32_lane A = InnerProduct(RayDirection, RayDirection);
+    f32_lane B = 2.0f * InnerProduct(RayDirection, SphereRelativeRayOrigin);
+    f32_lane C = InnerProduct(SphereRelativeRayOrigin, SphereRelativeRayOrigin) - Square(SphereRadius);
     
-    lane_f32 RootTerm = SquareRoot(B * B - 4 * A * C);
-    lane_u32 RootTermMask = RootTerm > ToleranceToZero;
+    f32_lane RootTerm = SquareRoot(B * B - 4 * A * C);
+    u32_lane RootTermMask = RootTerm > ToleranceToZero;
 
-    lane_f32 QuadraticDenominator;
+    f32_lane QuadraticDenominator;
     ConditionalAssign(&QuadraticDenominator, 2 * A, RootTermMask);
     
-    lane_f32 TPositive;
+    f32_lane TPositive;
     ConditionalAssign(&TPositive, (-B + RootTerm) / QuadraticDenominator, RootTermMask);
 
-    lane_f32 TNegative;
+    f32_lane TNegative;
     ConditionalAssign(&TNegative, (-B - RootTerm) / QuadraticDenominator, RootTermMask);
 
-    lane_u32 TNegativeMask;
+    u32_lane TNegativeMask;
     ConditionalAssign(&TNegativeMask, (TNegative > HitDistanceLowerLimit) && (TNegative < TPositive), RootTermMask);
 
-    lane_u32 RootTermAndTNegativeMask = RootTermMask && TNegativeMask;
+    u32_lane RootTermAndTNegativeMask = RootTermMask && TNegativeMask;
 
     ConditionalAssign(&IntersectionDistance, TPositive, RootTermMask);
     ConditionalAssign(&IntersectionDistance, TNegative, RootTermAndTNegativeMask);
@@ -156,52 +161,52 @@ RenderPixel
 
     world *World = WorkOrder->World;
 
-    lane_v3 CameraX = World->Camera.CoordinateSet.X;
-    lane_v3 CameraY = World->Camera.CoordinateSet.Y;
-    lane_f32 HalfPixelWidth = World->Film.HalfPixelWidth;
-    lane_f32 HalfPixelHeight = World->Film.HalfPixelHeight;
+    v3_lane CameraX = World->Camera.CoordinateSet.X;
+    v3_lane CameraY = World->Camera.CoordinateSet.Y;
+    f32_lane HalfPixelWidth = World->Film.HalfPixelWidth;
+    f32_lane HalfPixelHeight = World->Film.HalfPixelHeight;
 
     random_series *RandomSeries = &WorkOrder->Entropy;
 
-    lane_v3 CameraPosition = World->Camera.Position;
-    lane_f32 ToleranceToZero = WorkOrder->RenderingParameters->ToleranceToZero;
-    lane_f32 HitDistanceLowerLimit = WorkOrder->RenderingParameters->HitDistanceLowerLimit;
+    v3_lane CameraPosition = World->Camera.Position;
+    f32_lane ToleranceToZero = WorkOrder->RenderingParameters->ToleranceToZero;
+    f32_lane HitDistanceLowerLimit = WorkOrder->RenderingParameters->HitDistanceLowerLimit;
 
     for (u32 RayBatchIndex = 0; RayBatchIndex < RAY_BATCHES_PER_PIXEL; RayBatchIndex++)
     {
-        lane_v3 RayColor = {};
-        lane_v3 RayColorAttenuation = {1, 1, 1};
+        v3_lane RayColor = {};
+        v3_lane RayColorAttenuation = {1, 1, 1};
 
-        lane_v3 RayPositionOnFilm = 
+        v3_lane RayPositionOnFilm = 
             PixelCenterOnFilm +
             HalfPixelWidth * RandomBilateral(RandomSeries) * CameraX +
             HalfPixelHeight * RandomBilateral(RandomSeries) * CameraY;
 
-        lane_v3 BounceOrigin = CameraPosition;
-        lane_v3 BounceDirection = Normalize(RayPositionOnFilm - BounceOrigin);
+        v3_lane BounceOrigin = CameraPosition;
+        v3_lane BounceDirection = Normalize(RayPositionOnFilm - BounceOrigin);
 
-        lane_u32 BouncesComputedPerRayBatch = 0;
-        lane_u32 LaneMask = 0xFFFFFFFF;
+        u32_lane BouncesComputedPerRayBatch = 0;
+        u32_lane LaneMask = 0xFFFFFFFF;
 
         for (u32 BounceIndex = 0; BounceIndex < BOUNCES_PER_RAY; BounceIndex++)
         {
-            lane_v3 NextBounceNormal = {};
+            v3_lane NextBounceNormal = {};
 
-            lane_u32 LaneIncrement = 1;
+            u32_lane LaneIncrement = 1;
             BouncesComputedPerRayBatch += LaneIncrement & LaneMask;
 
-            lane_f32 MinimumHitDistanceFound = F32MAX;
-            lane_u32 HitMaterialIndex = 0;
+            f32_lane MinimumHitDistanceFound = F32MAX;
+            u32_lane HitMaterialIndex = 0;
 
             for (u32 PlaneIndex = 0; PlaneIndex < World->PlanesCount; PlaneIndex++)
             {
                 plane *CurrentPlane = &World->Planes[PlaneIndex];
-                lane_f32 CurrentHitDistance = RayIntersectsPlane(BounceOrigin, BounceDirection, CurrentPlane, ToleranceToZero);
+                f32_lane CurrentHitDistance = RayIntersectsPlane(BounceOrigin, BounceDirection, CurrentPlane, ToleranceToZero);
 
-                lane_v3 PlaneNormal = CurrentPlane->Normal;
-                lane_u32 PlaneMaterialIndex = CurrentPlane->MaterialIndex;
+                v3_lane PlaneNormal = CurrentPlane->Normal;
+                u32_lane PlaneMaterialIndex = CurrentPlane->MaterialIndex;
 
-                lane_u32 HitDistanceMask = 
+                u32_lane HitDistanceMask = 
                     (CurrentHitDistance < MinimumHitDistanceFound) && 
                     (CurrentHitDistance > HitDistanceLowerLimit);
 
@@ -214,12 +219,12 @@ RenderPixel
             {
                 sphere *CurrentSphere = &World->Spheres[SphereIndex];
 
-                lane_v3 SpherePosition = CurrentSphere->Position;
-                lane_u32 SphereMaterialIndex = CurrentSphere->MaterialIndex;
+                v3_lane SpherePosition = CurrentSphere->Position;
+                u32_lane SphereMaterialIndex = CurrentSphere->MaterialIndex;
 
-                lane_f32 CurrentHitDistance = RayIntersectsSphere(BounceOrigin, BounceDirection, CurrentSphere, ToleranceToZero, HitDistanceLowerLimit);
+                f32_lane CurrentHitDistance = RayIntersectsSphere(BounceOrigin, BounceDirection, CurrentSphere, ToleranceToZero, HitDistanceLowerLimit);
 
-                lane_u32 HitDistanceMask = 
+                u32_lane HitDistanceMask = 
                     (CurrentHitDistance < MinimumHitDistanceFound) && 
                     (CurrentHitDistance > HitDistanceLowerLimit);
 
@@ -231,25 +236,25 @@ RenderPixel
 
             material *HitMaterial = &World->Materials[HitMaterialIndex];
 
-            lane_v3 MaterialEmmissionColor = LaneMask & HitMaterial->EmmissionColor; // must be masked for each lane
-            lane_v3 MaterialReflectionColor = HitMaterial->ReflectionColor;
-            lane_f32 MaterialSpecularity = HitMaterial->Specularity;
+            v3_lane MaterialEmmissionColor = LaneMask & HitMaterial->EmmissionColor; // must be masked for each lane
+            v3_lane MaterialReflectionColor = HitMaterial->ReflectionColor;
+            f32_lane MaterialSpecularity = HitMaterial->Specularity;
 
             RayColor += HadamardProduct(RayColorAttenuation, MaterialEmmissionColor);
 
             LaneMask = LaneMask & ((HitMaterialIndex != 0)? 0xFFFFFFFF : 0x00000000);
 
-            lane_f32 CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), 0);
+            f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), 0);
 
             RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * MaterialReflectionColor);
             
             BounceOrigin += MinimumHitDistanceFound * BounceDirection;
 
-            lane_v3 PureBounceDirection = 
+            v3_lane PureBounceDirection = 
                 Normalize(BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal);
 
-            lane_v3 RandomBounceDirection = 
-                Normalize(NextBounceNormal + V3(RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries)));
+            v3_lane RandomBounceDirection = 
+                Normalize(NextBounceNormal + V3(RandomBilateral(RandomSeries), RandomBilateral(RandomSeries), RandomBilateral(RandomSeries)));
 
             BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, MaterialSpecularity));
 

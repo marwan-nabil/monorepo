@@ -70,6 +70,19 @@ Clamp01(f32 Value)
 }
 
 inline f32
+Max(f32 A, f32 B)
+{
+    if (A > B)
+    {
+        return A;
+    }
+    else
+    {
+        return B;
+    }
+}
+
+inline f32
 TranslateLinearTosRGB(f32 Linear)
 {
 	if (Linear < 0)

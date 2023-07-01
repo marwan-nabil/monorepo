@@ -1,5 +1,5 @@
-inline lane_v3
-operator&(lane_u32 A, lane_v3 B)
+inline v3_lane
+operator&(u32_lane A, v3_lane B)
 {
     if (A == 0xFFFFFFFF)
     {
@@ -12,7 +12,7 @@ operator&(lane_u32 A, lane_v3 B)
 }
 
 inline v3
-HorizontalAdd(lane_v3 WideValue)
+HorizontalAdd(v3_lane WideValue)
 {
     v3 NarrowValue = 
     {
@@ -24,7 +24,7 @@ HorizontalAdd(lane_v3 WideValue)
 }
 
 inline void
-ConditionalAssign(lane_v3 *Destination, lane_v3 Source, lane_u32 Mask)
+ConditionalAssign(v3_lane *Destination, v3_lane Source, u32_lane Mask)
 {
     ConditionalAssign(&Destination->X, Source.X, Mask);
     ConditionalAssign(&Destination->Y, Source.Y, Mask);
