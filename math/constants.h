@@ -1,0 +1,9 @@
+#pragma once
+
+#define PI32 3.1415926535f
+#define SQRT2 1.4142135623f
+#define F32MAX FLT_MAX
+#define F32MIN -FLT_MAX
+#define U32MAX UINT32_MAX
+#define I32MAX INT32_MAX
+#define I32MIN INT32_MIN

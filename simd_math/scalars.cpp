@@ -1,5 +1,3 @@
-#if 1
-
 inline void
 ConditionalAssign(lane_u32 *Destination, lane_u32 Source, lane_u32 Mask)
 {
@@ -7,31 +5,10 @@ ConditionalAssign(lane_u32 *Destination, lane_u32 Source, lane_u32 Mask)
     *Destination = (~Mask & *Destination) | (Mask & Source);
 }
 
-#else
-
-inline void
-ConditionalAssign(lane_u32 *Destination, lane_u32 Source, lane_u32 Mask)
-{
-    if (Mask)
-    {
-        *Destination = Source;
-    }
-}
-
-#endif
-
 inline void
 ConditionalAssign(lane_f32 *Destination, lane_f32 Source, lane_u32 Mask)
 {
     ConditionalAssign((u32 *)Destination, *(u32 *)&Source, Mask);
-}
-
-inline void
-ConditionalAssign(lane_v3 *Destination, lane_v3 Source, lane_u32 Mask)
-{
-    ConditionalAssign(&Destination->X, Source.X, Mask);
-    ConditionalAssign(&Destination->Y, Source.Y, Mask);
-    ConditionalAssign(&Destination->Z, Source.Z, Mask);
 }
 
 inline u32

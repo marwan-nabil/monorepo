@@ -22,3 +22,11 @@ HorizontalAdd(lane_v3 WideValue)
     };
     return NarrowValue;
 }
+
+inline void
+ConditionalAssign(lane_v3 *Destination, lane_v3 Source, lane_u32 Mask)
+{
+    ConditionalAssign(&Destination->X, Source.X, Mask);
+    ConditionalAssign(&Destination->Y, Source.Y, Mask);
+    ConditionalAssign(&Destination->Z, Source.Z, Mask);
+}

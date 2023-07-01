@@ -8,26 +8,36 @@
 
 #include"platform.h"
 
-#include "..\math\math.h"
-#include "..\simd_math\simd_math.h"
+#include "..\math\constants.h"
 #include "..\math\random.h"
+#include "..\math\vector2.h"
+#include "..\math\vector3.h"
+#include "..\math\vector4.h"
+
+#if (SIMD_NUMBEROF_LANES == 1)
+#   include "..\simd_math\math.h"
+#else
+#   error "still not defined yet."
+#endif
 
 #include"ray_tracer.h"
 
-#include "..\math\scalars.cpp"
+#include "..\math\random.cpp"
+#include "..\math\integers.cpp"
+#include "..\math\floats.cpp"
 #include "..\math\vector2.cpp"
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
-#include "..\math\random.cpp"
-#include "..\simd_math\simd_math.cpp"
-#include "..\simd_math\simd_v3.cpp"
 
-#include "..\multi_threading\multi_threading_utils.cpp"
+#if (SIMD_NUMBEROF_LANES == 1)
+#   include "..\simd_math\scalars.cpp"
+#   include "..\simd_math\v3.cpp"
+#else
+#   error "still not defined yet."
+#endif
 
-#define BOUNCES_PER_RAY 8
-#define RAYS_PER_PIXEL 256
-#define SIMD_NUMBEROF_LANES 1
-#define RAY_BATCHES_PER_PIXEL (RAYS_PER_PIXEL / SIMD_NUMBEROF_LANES)
+#include "..\multi_threading\utils.cpp"
+
 
 inline void
 WriteImage(image_u32 OutputImage, const char *FileName)

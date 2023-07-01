@@ -1,5 +1,9 @@
 #pragma once
 
+#define BOUNCES_PER_RAY 8
+#define RAYS_PER_PIXEL 256
+#define RAY_BATCHES_PER_PIXEL (RAYS_PER_PIXEL / SIMD_NUMBEROF_LANES)
+
 #pragma pack(push, 1)
 struct bitmap_header
 {
