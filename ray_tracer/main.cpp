@@ -254,7 +254,7 @@ RenderPixel
     }
 
     *BouncesComputedPerTile += BouncesComputedPerPixel;
-
+    WorkOrder->Entropy = *RandomSeries;
     return PixelColor;
 }
 
@@ -291,8 +291,8 @@ RenderTile(work_queue *WorkQueue)
 
             v3 PixelCenterOnFilm = 
                 Film->Center +
-                FilmRatioX * Film->HalfWidth * CameraX +
-                FilmRatioY * Film->HalfHeight * CameraY;
+                (FilmRatioX * Film->HalfWidth + Film->HalfPixelWidth) * CameraX +
+                (FilmRatioY * Film->HalfHeight + Film->HalfPixelHeight) * CameraY;
 
             v3 PixelColor = RenderPixel
             (
@@ -451,7 +451,7 @@ main(i32 argc, u8 **argv)
             WorkOrder->StartPixelY = StartPixelY;
             WorkOrder->EndPixelX = EndPixelX;
             WorkOrder->EndPixelY = EndPixelY;
-            WorkOrder->Entropy.State = TileX * 32542345 + TileY * 897124;
+            WorkOrder->Entropy.State = TileX * 32542345 + TileY * 897124 + 23523623;
         }
     }
 

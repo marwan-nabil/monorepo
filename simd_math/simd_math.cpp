@@ -1,44 +1,50 @@
+#if 1
 
 inline void
-ConditionalAssign(lane_u32 *LeftHandSide, lane_u32 RightHandSide, lane_u32 Mask)
+ConditionalAssign(lane_u32 *Destination, lane_u32 Source, lane_u32 Mask)
+{
+    Mask = Mask? 0xFFFFFFFF : 0;
+    *Destination = (~Mask & *Destination) | (Mask & Source);
+}
+
+#else
+
+inline void
+ConditionalAssign(lane_u32 *Destination, lane_u32 Source, lane_u32 Mask)
 {
     if (Mask)
     {
-        *LeftHandSide = RightHandSide;
+        *Destination = Source;
     }
 }
 
+#endif
+
 inline void
-ConditionalAssign(lane_f32 *LeftHandSide, lane_f32 RightHandSide, lane_u32 Mask)
+ConditionalAssign(lane_f32 *Destination, lane_f32 Source, lane_u32 Mask)
 {
-    if (Mask)
-    {
-        *LeftHandSide = RightHandSide;
-    }
+    ConditionalAssign((u32 *)Destination, *(u32 *)&Source, Mask);
 }
 
 inline void
-ConditionalAssign(lane_v3 *LeftHandSide, lane_v3 RightHandSide, lane_u32 Mask)
+ConditionalAssign(lane_v3 *Destination, lane_v3 Source, lane_u32 Mask)
 {
-    if (Mask)
-    {
-        *LeftHandSide = RightHandSide;
-    }
-}
-
-inline void
-ConditionalAssign(lane_v2 *LeftHandSide, lane_v2 RightHandSide, lane_u32 Mask)
-{
-    if (Mask)
-    {
-        *LeftHandSide = RightHandSide;
-    }
+    ConditionalAssign(&Destination->X, Source.X, Mask);
+    ConditionalAssign(&Destination->Y, Source.Y, Mask);
+    ConditionalAssign(&Destination->Z, Source.Z, Mask);
 }
 
 inline u32
 HorizontalAdd(lane_u32 WideValue)
 {
     u32 NarrowValue = WideValue;
+    return NarrowValue;
+}
+
+inline f32
+HorizontalAdd(lane_f32 WideValue)
+{
+    f32 NarrowValue = WideValue;
     return NarrowValue;
 }
 
