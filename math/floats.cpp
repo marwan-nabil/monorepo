@@ -83,6 +83,19 @@ Max(f32 A, f32 B)
 }
 
 inline f32
+AbsoluteValue(f32 A)
+{
+	if (A < 0)
+	{
+		return -A;
+	}
+	else
+	{
+		return A;
+	}
+}
+
+inline f32
 TranslateLinearTosRGB(f32 Linear)
 {
 	if (Linear < 0)

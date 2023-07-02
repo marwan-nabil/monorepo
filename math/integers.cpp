@@ -54,3 +54,16 @@ Clamp(u32 Value, u32 Min, u32 Max)
 	}
 	return Result;
 }
+
+inline u32
+AbsoluteValue(i32 A)
+{
+	if (A < 0)
+	{
+		return -A;
+	}
+	else
+	{
+		return A;
+	}
+}
