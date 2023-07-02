@@ -1,6 +1,6 @@
 #pragma once
 
-struct lane_random_series
+struct random_series_lane
 {
     u32_lane State;
 };

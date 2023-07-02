@@ -20,4 +20,4 @@ typedef double f64;
 #define AssertFits(Value, FittingMask) Assert(!((Value) & (~(FittingMask))))
 #define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
 
-#define SIMD_NUMBEROF_LANES 1
+#define SIMD_NUMBEROF_LANES 4

@@ -21,6 +21,8 @@
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\simd_math\4_wide\math.h"
 #   include "..\simd_math\4_wide\random.h"
+#else
+#   error "still not defined yet."
 #endif
 
 #include"ray_tracer.h"
@@ -36,9 +38,12 @@
 #   include "..\simd_math\1_wide\scalars.cpp"
 #   include "..\simd_math\1_wide\v3.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\simd_math\4_wide\scalars.cpp"
+#   include "..\simd_math\4_wide\conversions.cpp"
+#   include "..\simd_math\4_wide\integers.cpp"
+#   include "..\simd_math\4_wide\floats.cpp"
 #   include "..\simd_math\4_wide\v3.cpp"
 #   include "..\simd_math\4_wide\random.cpp"
+#else
 #   error "still not defined yet."
 #endif
 

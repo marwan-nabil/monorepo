@@ -1,5 +1,5 @@
 inline u32_lane
-XORShift32(lane_random_series *Series)
+XORShift32(random_series_lane *Series)
 {
     u32_lane Result = Series->State;
     Result ^= Result << 13;
@@ -10,14 +10,14 @@ XORShift32(lane_random_series *Series)
 }
 
 inline f32_lane
-RandomUnilateral(lane_random_series *Series)
+RandomUnilateral(random_series_lane *Series)
 {
-    f32_lane Result = (f32_lane)XORShift32(Series) / LaneF32FromU32(U32MAX);
+    f32_lane Result = (f32_lane)XORShift32(Series) / F32LaneFromU32(U32MAX);
     return Result;
 }
 
 inline f32_lane
-RandomBilateral(lane_random_series *Series)
+RandomBilateral(random_series_lane *Series)
 {
     f32_lane Result = -1.0f + 2.0f * RandomUnilateral(Series);
     return Result;
