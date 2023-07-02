@@ -7,35 +7,35 @@ union v2_lane
 {
 	struct
 	{
-		__m256 X;
-		__m256 Y;
+		f32_lane X;
+		f32_lane Y;
 	};
-	__m256 E[2];
+	f32_lane E[2];
 };
 
 union v3_lane
 {
 	struct
 	{
-		__m256 X;
-		__m256 Y;
-		__m256 Z;
+		f32_lane X;
+		f32_lane Y;
+		f32_lane Z;
 	};
 	struct
 	{
-		__m256 Red;
-		__m256 Green;
-		__m256 Blue;
+		f32_lane Red;
+		f32_lane Green;
+		f32_lane Blue;
 	};
 	struct
 	{
 		v2_lane XY;
-		__m256 Ignored0;
+		f32_lane Ignored0;
 	};
 	struct
 	{
-		__m256 Ignored1;
+		f32_lane Ignored1;
 		v2_lane YZ;
 	};
-	__m256 E[3];
+	f32_lane E[3];
 };

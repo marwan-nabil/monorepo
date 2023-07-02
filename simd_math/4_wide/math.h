@@ -7,35 +7,55 @@ union v2_lane
 {
 	struct
 	{
-		__m128 X;
-		__m128 Y;
+		f32_lane X;
+		f32_lane Y;
 	};
-	__m128 E[2];
+	f32_lane E[2];
 };
 
 union v3_lane
 {
 	struct
 	{
-		__m128 X;
-		__m128 Y;
-		__m128 Z;
+		f32_lane X;
+		f32_lane Y;
+		f32_lane Z;
 	};
 	struct
 	{
-		__m128 Red;
-		__m128 Green;
-		__m128 Blue;
+		f32_lane Red;
+		f32_lane Green;
+		f32_lane Blue;
 	};
 	struct
 	{
 		v2_lane XY;
-		__m128 Ignored0;
+		f32_lane Ignored0;
 	};
 	struct
 	{
-		__m128 Ignored1;
+		f32_lane Ignored1;
 		v2_lane YZ;
 	};
-	__m128 E[3];
+	f32_lane E[3];
+};
+
+
+union v4_lane
+{
+	struct
+	{
+		f32_lane X;
+		f32_lane Y;
+		f32_lane Z;
+		f32_lane W;
+	};
+	struct
+	{
+		f32_lane Red;
+		f32_lane Green;
+		f32_lane Blue;
+		f32_lane Alpha;
+	};
+	f32_lane E[4];
 };
