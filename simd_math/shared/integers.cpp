@@ -216,6 +216,16 @@ operator^=(u32_lane &A, u32 B)
 }
 
 /******************************************/
+/*           comparison operations        */
+/******************************************/
+inline u32_lane
+operator!=(u32_lane A, u32_lane B)
+{
+    u32_lane Result = ~(A == B);
+    return Result;
+}
+
+/******************************************/
 /*             logical operations         */
 /******************************************/
 inline u32_lane
@@ -248,13 +258,22 @@ ConditionalAssign(u32_lane *Destination, u32_lane Source, u32_lane Mask)
     *Destination = (~Mask & *Destination) | (Mask & Source);
 }
 
+inline u32
+HorizontalAdd(u32_lane WideValue)
+{
+    u32 NarrowValue = 
+        U32FromU32Lane(WideValue, 0) + 
+        U32FromU32Lane(WideValue, 1) + 
+        U32FromU32Lane(WideValue, 2) + 
+        U32FromU32Lane(WideValue, 3);
+    return NarrowValue;
+}
 
 // -----------------------------------------------------------
 
 
 // TODO: implement these for u32_lane usig intrinsics
 #if 0
-
 inline u32_lane
 Clamp(u32_lane Value, u32_lane Min, u32_lane Max)
 {

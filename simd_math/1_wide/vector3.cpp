@@ -1,3 +1,13 @@
+inline v3_lane 
+V3Lane(f32_lane X, f32_lane Y, f32_lane Z)
+{
+    v3_lane Result;
+    Result.X = X;
+    Result.Y = Y;
+    Result.Z = Z;
+    return Result;
+}
+
 inline v3_lane
 operator&(u32_lane A, v3_lane B)
 {

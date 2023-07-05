@@ -130,6 +130,24 @@ operator/=(f32_lane &A, f32 B)
 }
 
 /******************************************/
+/*                masking                 */
+/******************************************/
+inline f32_lane 
+operator&(u32_lane Mask, f32_lane Value)
+{
+    u32_lane ResultU32Lane = Mask & *(u32_lane *)&Value;
+    f32_lane Result = *(f32_lane *)&ResultU32Lane;
+    return Result;
+}
+
+inline f32_lane 
+operator&(f32_lane Value, u32_lane Mask)
+{
+    f32_lane Result = Mask & Value;
+    return Result;
+}
+
+/******************************************/
 /*             other operations           */
 /******************************************/
 inline f32_lane 
@@ -144,17 +162,38 @@ ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
     ConditionalAssign((u32_lane *)Destination, *(u32_lane *)&Source, Mask);
 }
 
+inline f32_lane
+Max(f32_lane A, f32_lane B)
+{
+    f32_lane Result;
+    ConditionalAssign(&Result, A, (A >= B));
+    ConditionalAssign(&Result, B, (A < B));
+    return Result;
+}
 
-// -----------------------------------------------------------
-// TODO: implement these for f32_lane usig intrinsics
-#if 0
+inline f32_lane
+Min(f32_lane A, f32_lane B)
+{
+    f32_lane Result;
+    ConditionalAssign(&Result, A, (A <= B));
+    ConditionalAssign(&Result, B, (A > B));
+    return Result;
+}
 
 inline f32
 HorizontalAdd(f32_lane WideValue)
 {
-    f32 NarrowValue = WideValue;
+    f32 NarrowValue = 
+        F32FromF32Lane(WideValue, 0) + 
+        F32FromF32Lane(WideValue, 1) + 
+        F32FromF32Lane(WideValue, 2) + 
+        F32FromF32Lane(WideValue, 3);
     return NarrowValue;
 }
+
+// -----------------------------------------------------------
+// TODO: implement these for f32_lane usig intrinsics
+#if 0
 
 inline f32
 SafeRatioN(f32 Dividend, f32 Divisor, f32 AltValue)
@@ -205,19 +244,6 @@ inline f32
 Clamp01(f32 Value)
 {
 	return Clamp(Value, 0.0f, 1.0f);
-}
-
-inline f32
-Max(f32 A, f32 B)
-{
-    if (A > B)
-    {
-        return A;
-    }
-    else
-    {
-        return B;
-    }
 }
 
 inline f32

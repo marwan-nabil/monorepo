@@ -75,7 +75,7 @@ operator>>(u32_lane Value, u32 Shift)
 }
 
 /******************************************/
-/*             logical operations         */
+/*           comparison operations        */
 /******************************************/
 inline u32_lane
 operator<(u32_lane A, u32_lane B)
@@ -91,6 +91,13 @@ operator>(u32_lane A, u32_lane B)
     return Result;
 }
 
+inline u32_lane
+operator==(u32_lane A, u32_lane B)
+{
+    u32_lane Result = _mm_cmpeq_epi32(A, B);
+    return Result;
+}
+
 /******************************************/
 /*             other operations           */
 /******************************************/
@@ -100,3 +107,4 @@ MaskIsAllZeroes(u32_lane Mask)
     b32 Result = _mm_test_all_zeros(_mm_set1_epi32(0xFFFFFFFF), Mask);
     return Result;
 }
+ 
