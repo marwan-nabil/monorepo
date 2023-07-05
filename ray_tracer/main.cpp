@@ -1,6 +1,11 @@
+/******************************************/
+/*                  headers               */
+/******************************************/
+// windows
 #include <Windows.h>
 #include <intrin.h>
 
+// c stdlib
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,25 +13,39 @@
 #include <float.h>
 #include <time.h>
 
+// platform definitions
 #include"platform.h"
 
+// math
 #include "..\math\constants.h"
 #include "..\math\random.h"
 #include "..\math\vector2.h"
 #include "..\math\vector3.h"
 #include "..\math\vector4.h"
 
+// simd_math
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\simd_math\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\simd_math\4_wide\math.h"
-#   include "..\simd_math\4_wide\random.h"
 #else
 #   error "still not defined yet."
 #endif
 
-#include"ray_tracer.h"
+#if (SIMD_NUMBEROF_LANES != 1)
+#   include "..\simd_math\shared\random.h"
+#endif
 
+// application
+#include "ray_tracer.h"
+
+/******************************************/
+/*                  sources               */
+/******************************************/
+// multi_threading library
+#include "..\multi_threading\utils.cpp"
+
+// math library
 #include "..\math\random.cpp"
 #include "..\math\integers.cpp"
 #include "..\math\floats.cpp"
@@ -34,21 +53,35 @@
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
 
+// simd_math library
 #if (SIMD_NUMBEROF_LANES == 1)
+#   include "..\simd_math\1_wide\conversions.cpp"
 #   include "..\simd_math\1_wide\scalars.cpp"
-#   include "..\simd_math\1_wide\v3.cpp"
+#   include "..\simd_math\1_wide\vector3.cpp"
+#   include "..\simd_math\1_wide\random.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\simd_math\4_wide\conversions.cpp"
 #   include "..\simd_math\4_wide\integers.cpp"
 #   include "..\simd_math\4_wide\floats.cpp"
-#   include "..\simd_math\4_wide\v3.cpp"
-#   include "..\simd_math\4_wide\random.cpp"
 #else
 #   error "still not defined yet."
 #endif
 
-#include "..\multi_threading\utils.cpp"
+#if (SIMD_NUMBEROF_LANES != 1)
+#   include "..\simd_math\shared\conversions.cpp"
+#   include "..\simd_math\shared\integers.cpp"
+#   include "..\simd_math\shared\floats.cpp"
+#   include "..\simd_math\shared\vector3.cpp"
+#   include "..\simd_math\shared\random.cpp"
+#endif
 
+/******************************************/
+/*           Global Variables             */
+/******************************************/
+
+/******************************************/
+/*           Global functions             */
+/******************************************/
 inline void
 WriteImage(image_u32 OutputImage, const char *FileName)
 {
@@ -96,13 +129,13 @@ CreateImage(u32 Width, u32 Height)
 inline f32_lane
 RayIntersectsPlane(v3_lane RayOrigin, v3_lane RayDirection, plane *Plane, f32_lane ToleranceToZero)
 {
-    f32_lane IntersectionDistance = F32MAX;
+    f32_lane IntersectionDistance = F32LaneFromF32(F32MAX);
 
-    v3_lane PlaneNormal = Plane->Normal;
-    f32_lane PlaneDistance = Plane->Distance;
+    v3_lane PlaneNormal = V3LaneFromV3(Plane->Normal);
+    f32_lane PlaneDistance = F32LaneFromF32(Plane->Distance);
 
     f32_lane Denominator = InnerProduct(PlaneNormal, RayDirection);
-    u32_lane DenominatorMask = AbsoluteValue(Denominator) > ToleranceToZero;
+    u32_lane DenominatorMask = (Denominator > ToleranceToZero) || (Denominator < -ToleranceToZero);
     
     f32_lane Numerator;
     ConditionalAssign(&Numerator, -PlaneDistance - InnerProduct(PlaneNormal, RayOrigin), DenominatorMask);
@@ -114,10 +147,10 @@ RayIntersectsPlane(v3_lane RayOrigin, v3_lane RayDirection, plane *Plane, f32_la
 inline f32_lane
 RayIntersectsSphere(v3_lane RayOrigin, v3_lane RayDirection, sphere *Sphere, f32_lane ToleranceToZero, f32_lane HitDistanceLowerLimit)
 {
-    f32_lane IntersectionDistance = F32MAX;
+    f32_lane IntersectionDistance = F32LaneFromF32(F32MAX);
 
-    v3_lane SpherePosition = Sphere->Position;
-    f32_lane SphereRadius = Sphere->Radius;
+    v3_lane SpherePosition = V3LaneFromV3(Sphere->Position);
+    f32_lane SphereRadius = F32LaneFromF32(Sphere->Radius);
 
     v3_lane SphereRelativeRayOrigin = RayOrigin - SpherePosition;
 
@@ -166,50 +199,50 @@ RenderPixel
 
     world *World = WorkOrder->World;
 
-    v3_lane CameraX = World->Camera.CoordinateSet.X;
-    v3_lane CameraY = World->Camera.CoordinateSet.Y;
-    f32_lane HalfPixelWidth = World->Film.HalfPixelWidth;
-    f32_lane HalfPixelHeight = World->Film.HalfPixelHeight;
+    v3_lane CameraX = V3LaneFromV3(World->Camera.CoordinateSet.X);
+    v3_lane CameraY = V3LaneFromV3(World->Camera.CoordinateSet.Y);
+    f32_lane HalfPixelWidth = F32LaneFromF32(World->Film.HalfPixelWidth);
+    f32_lane HalfPixelHeight = F32LaneFromF32(World->Film.HalfPixelHeight);
 
-    random_series *RandomSeries = &WorkOrder->Entropy;
+    random_series_lane *RandomSeries = &WorkOrder->Entropy;
 
-    v3_lane CameraPosition = World->Camera.Position;
-    f32_lane ToleranceToZero = WorkOrder->RenderingParameters->ToleranceToZero;
-    f32_lane HitDistanceLowerLimit = WorkOrder->RenderingParameters->HitDistanceLowerLimit;
+    v3_lane CameraPosition = V3LaneFromV3(World->Camera.Position);
+    f32_lane ToleranceToZero = F32LaneFromF32(WorkOrder->RenderingParameters->ToleranceToZero);
+    f32_lane HitDistanceLowerLimit = F32LaneFromF32(WorkOrder->RenderingParameters->HitDistanceLowerLimit);
 
     for (u32 RayBatchIndex = 0; RayBatchIndex < RAY_BATCHES_PER_PIXEL; RayBatchIndex++)
     {
-        v3_lane RayColor = {};
-        v3_lane RayColorAttenuation = {1, 1, 1};
+        v3_lane RayColor = V3Lane(0, 0, 0);
+        v3_lane RayColorAttenuation = V3Lane(1, 1, 1);
 
         v3_lane RayPositionOnFilm = 
-            PixelCenterOnFilm +
-            HalfPixelWidth * RandomBilateral(RandomSeries) * CameraX +
-            HalfPixelHeight * RandomBilateral(RandomSeries) * CameraY;
+            V3LaneFromV3(PixelCenterOnFilm) +
+            HalfPixelWidth * RandomBilateralLane(RandomSeries) * CameraX +
+            HalfPixelHeight * RandomBilateralLane(RandomSeries) * CameraY;
 
         v3_lane BounceOrigin = CameraPosition;
         v3_lane BounceDirection = Normalize(RayPositionOnFilm - BounceOrigin);
 
-        u32_lane BouncesComputedPerRayBatch = 0;
-        u32_lane LaneMask = 0xFFFFFFFF;
+        u32_lane BouncesComputedPerRayBatch = U32LaneFromU32(0);
+        u32_lane LaneMask = U32LaneFromU32(0xFFFFFFFF);
 
         for (u32 BounceIndex = 0; BounceIndex < BOUNCES_PER_RAY; BounceIndex++)
         {
             v3_lane NextBounceNormal = {};
 
-            u32_lane LaneIncrement = 1;
+            u32_lane LaneIncrement = U32LaneFromU32(1);
             BouncesComputedPerRayBatch += LaneIncrement & LaneMask;
 
-            f32_lane MinimumHitDistanceFound = F32MAX;
-            u32_lane HitMaterialIndex = 0;
+            f32_lane MinimumHitDistanceFound = F32LaneFromF32(F32MAX);
+            u32_lane HitMaterialIndex = U32LaneFromU32(0);
 
             for (u32 PlaneIndex = 0; PlaneIndex < World->PlanesCount; PlaneIndex++)
             {
                 plane *CurrentPlane = &World->Planes[PlaneIndex];
                 f32_lane CurrentHitDistance = RayIntersectsPlane(BounceOrigin, BounceDirection, CurrentPlane, ToleranceToZero);
 
-                v3_lane PlaneNormal = CurrentPlane->Normal;
-                u32_lane PlaneMaterialIndex = CurrentPlane->MaterialIndex;
+                v3_lane PlaneNormal = V3LaneFromV3(CurrentPlane->Normal);
+                u32_lane PlaneMaterialIndex = U32LaneFromU32(CurrentPlane->MaterialIndex);
 
                 u32_lane HitDistanceMask = 
                     (CurrentHitDistance < MinimumHitDistanceFound) && 
@@ -224,8 +257,8 @@ RenderPixel
             {
                 sphere *CurrentSphere = &World->Spheres[SphereIndex];
 
-                v3_lane SpherePosition = CurrentSphere->Position;
-                u32_lane SphereMaterialIndex = CurrentSphere->MaterialIndex;
+                v3_lane SpherePosition = V3LaneFromV3(CurrentSphere->Position);
+                u32_lane SphereMaterialIndex = U32LaneFromU32(CurrentSphere->MaterialIndex);
 
                 f32_lane CurrentHitDistance = RayIntersectsSphere(BounceOrigin, BounceDirection, CurrentSphere, ToleranceToZero, HitDistanceLowerLimit);
 
@@ -239,19 +272,45 @@ RenderPixel
             }
 
 
+#if (SIMD_NUMBEROF_LANES != 1)
+            f32_lane HitMaterialSpecularity = F32LaneFromF32
+            (
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].Specularity,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].Specularity,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].Specularity,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].Specularity
+            );
+
+            v3_lane HitMaterialReflectionColor = V3LaneFromV3
+            (
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].ReflectionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].ReflectionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].ReflectionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].ReflectionColor
+            );
+
+            v3_lane HitMaterialEmmissionColor = V3LaneFromV3
+            (
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].EmmissionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].EmmissionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].EmmissionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].EmmissionColor
+            );
+#else
             material *HitMaterial = &World->Materials[HitMaterialIndex];
+            f32_lane HitMaterialSpecularity = HitMaterial->Specularity;
+            v3_lane HitMaterialReflectionColor = HitMaterial->ReflectionColor;
+            v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
+#endif
 
-            v3_lane MaterialEmmissionColor = LaneMask & HitMaterial->EmmissionColor; // must be masked for each lane
-            v3_lane MaterialReflectionColor = HitMaterial->ReflectionColor;
-            f32_lane MaterialSpecularity = HitMaterial->Specularity;
+            RayColor += HadamardProduct(RayColorAttenuation, LaneMask & HitMaterialEmmissionColor);
 
-            RayColor += HadamardProduct(RayColorAttenuation, MaterialEmmissionColor);
+            // LaneMask = LaneMask & ((HitMaterialIndex != 0)? 0xFFFFFFFF : 0x00000000);
+            ConditionalAssign(&LaneMask, U32LaneFromU32(0xFFFFFFFF), (HitMaterialIndex != U32LaneFromU32(0)));
 
-            LaneMask = LaneMask & ((HitMaterialIndex != 0)? 0xFFFFFFFF : 0x00000000);
+            f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
 
-            f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), 0);
-
-            RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * MaterialReflectionColor);
+            RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
             
             BounceOrigin += MinimumHitDistanceFound * BounceDirection;
 
@@ -259,9 +318,9 @@ RenderPixel
                 Normalize(BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal);
 
             v3_lane RandomBounceDirection = 
-                Normalize(NextBounceNormal + V3(RandomBilateral(RandomSeries), RandomBilateral(RandomSeries), RandomBilateral(RandomSeries)));
+                Normalize(NextBounceNormal + V3Lane(RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries)));
 
-            BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, MaterialSpecularity));
+            BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
 
             if (MaskIsAllZeroes(LaneMask))
             {
@@ -471,7 +530,18 @@ main(i32 argc, u8 **argv)
             WorkOrder->StartPixelY = StartPixelY;
             WorkOrder->EndPixelX = EndPixelX;
             WorkOrder->EndPixelY = EndPixelY;
-            WorkOrder->Entropy.State = TileX * 32542345 + TileY * 897124 + 23523623;
+
+#if (SIMD_NUMBEROF_LANES != 1)
+            WorkOrder->Entropy.State = U32LaneFromU32
+            (
+                TileX * 32542345 + TileY * 881712265 + 93073411,
+                TileX * 98698641 + TileY * 640200962 + 24681141,
+                TileX * 52350329 + TileY * 793083851 + 63274279,
+                TileX * 39846279 + TileY * 505147656 + 12932640
+            );
+#else
+            WorkOrder->Entropy.State = TileX * 52350329 + TileY * 793083851 + 63274279;
+#endif
         }
     }
 

@@ -105,7 +105,7 @@ struct work_order
     world *World;
     image_u32 *Image;
     rendering_parameters *RenderingParameters;
-    random_series Entropy;
+    random_series_lane Entropy;
 
     u32 StartPixelX;
     u32 StartPixelY;
