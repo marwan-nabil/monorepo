@@ -59,17 +59,9 @@ V4LaneFromV4(v4 Value)
 /*                  u32                   */
 /******************************************/
 
-
 // ----------------------------------------
 // TODO: implement these for u32_lane & f32_lane usig intrinsics
 #if 0
-
-inline u32
-HorizontalAdd(u32_lane WideValue)
-{
-    u32 NarrowValue = WideValue;
-    return NarrowValue;
-}
 
 inline i32
 RoundF32ToI32(f32 Real)

@@ -28,10 +28,10 @@ U32LaneFromU32(u32 Value)
     return Value;
 }
 
-inline u32_lane
-U32LaneFromF32Lane(f32_lane Value)
+inline u32
+U32FromU32Lane(u32_lane Value, u32 Index)
 {
-    return (u32_lane)Value;
+    return Value;
 }
 
 inline u32_lane

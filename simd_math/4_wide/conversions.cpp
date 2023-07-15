@@ -22,6 +22,7 @@ F32LaneFromU32(u32 Value)
     return Result;
 }
 
+// TODO(marwan): investigate this
 inline f32_lane
 F32LaneFromU32Lane(u32_lane Value)
 {
@@ -79,13 +80,6 @@ inline u32_lane
 U32LaneFromU32(u32 A, u32 B, u32 C, u32 D)
 {
     u32_lane Result = _mm_set_epi32(A, B, C, D);
-    return Result;
-}
-
-inline u32_lane
-U32LaneFromF32Lane(f32_lane Value)
-{
-    u32_lane Result = _mm_cvtps_epi32(Value);
     return Result;
 }
 

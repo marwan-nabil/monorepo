@@ -21,16 +21,6 @@ V3Lane(f32 X, f32 Y, f32 Z)
     return Result;
 }
 
-inline v3_lane
-V3Lane(v2_lane XY, f32_lane Z)
-{
-	v3_lane Result;
-	Result.X = XY.X;
-	Result.Y = XY.Y;
-	Result.Z = Z;
-	return Result;
-}
-
 /******************************************/
 /*              Addition                  */
 /******************************************/
@@ -124,6 +114,16 @@ operator/(v3_lane A, f32_lane B)
     return Result;
 }
 
+inline v3_lane 
+operator/(v3_lane A, f32 B)
+{
+    v3_lane Result;
+    Result.X = A.X / F32LaneFromF32(B);
+    Result.Y = A.Y / F32LaneFromF32(B);
+    Result.Z = A.Z / F32LaneFromF32(B);
+    return Result;
+}
+
 inline v3_lane &
 operator/=(v3_lane &A, f32_lane B)
 {
@@ -206,7 +206,7 @@ CrossProduct(v3_lane A, v3_lane B)
 inline v3_lane
 Lerp(v3_lane A, v3_lane B, f32_lane t)
 {
-    v3_lane Result = (1.0f - t) * A + t * B;
+    v3_lane Result = ((1.0f - t) * A) + (t * B);
     return Result;
 }
 
@@ -230,20 +230,3 @@ HorizontalAdd(v3_lane WideValue)
 
     return Result;
 }
-
-// -----------------------------------------------------------
-// TODO: implement these for v3_lane usig intrinsics
-
-#if 0
-
-inline v3_lane
-Clamp01(v3_lane A)
-{
-	v3_lane Result;
-	Result.X = Clamp01(A.X);
-	Result.Y = Clamp01(A.Y);
-	Result.Z = Clamp01(A.Z);
-	return Result;
-}
-
-#endif

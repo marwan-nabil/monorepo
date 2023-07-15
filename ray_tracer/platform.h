@@ -13,10 +13,5 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 
-#define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
-#define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
-#define AssertIsBit(Value) Assert(!((Value) & (~1ull)))
-#define AssertFits(Value, FittingMask) Assert(!((Value) & (~(FittingMask))))
-#define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
-
 #define SIMD_NUMBEROF_LANES 4
+#define ENABLE_ASSERTIONS 0

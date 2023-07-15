@@ -130,6 +130,41 @@ operator/=(f32_lane &A, f32 B)
 }
 
 /******************************************/
+/*             logical comparison         */
+/******************************************/
+inline u32_lane
+operator<(f32_lane A, f32 B)
+{
+    u32_lane Result = A < F32LaneFromF32(B);
+    AssertGoodMask(Result, __LINE__);
+    return Result;
+}
+
+inline u32_lane
+operator<=(f32_lane A, f32 B)
+{
+    u32_lane Result = A <= F32LaneFromF32(B);
+    AssertGoodMask(Result, __LINE__);
+    return Result;
+}
+
+inline u32_lane
+operator>(f32_lane A, f32 B)
+{
+    u32_lane Result = A > F32LaneFromF32(B);
+    AssertGoodMask(Result, __LINE__);
+    return Result;
+}
+
+inline u32_lane
+operator>=(f32_lane A, f32 B)
+{
+    u32_lane Result = A >= F32LaneFromF32(B);
+    AssertGoodMask(Result, __LINE__);
+    return Result;
+}
+
+/******************************************/
 /*                masking                 */
 /******************************************/
 inline f32_lane 
@@ -156,6 +191,45 @@ Square(f32_lane A)
     return A * A;
 }
 
+inline f32_lane 
+Power(f32_lane A, f32 Exponent)
+{
+    f32_lane Result = F32LaneFromF32
+    (
+        Power(F32FromF32Lane(A, 3), Exponent),
+        Power(F32FromF32Lane(A, 2), Exponent),
+        Power(F32FromF32Lane(A, 1), Exponent),
+        Power(F32FromF32Lane(A, 0), Exponent)
+    );
+    return Result;
+}
+
+inline f32_lane 
+Power(f32 A, f32_lane Exponent)
+{
+    f32_lane Result = F32LaneFromF32
+    (
+        Power(A, F32FromF32Lane(Exponent, 3)),
+        Power(A, F32FromF32Lane(Exponent, 2)),
+        Power(A, F32FromF32Lane(Exponent, 1)),
+        Power(A, F32FromF32Lane(Exponent, 0))
+    );
+    return Result;
+}
+
+inline f32_lane 
+Power(f32_lane A, f32_lane Exponent)
+{
+    f32_lane Result = F32LaneFromF32
+    (
+        Power(F32FromF32Lane(A, 3), F32FromF32Lane(Exponent, 3)),
+        Power(F32FromF32Lane(A, 2), F32FromF32Lane(Exponent, 2)),
+        Power(F32FromF32Lane(A, 1), F32FromF32Lane(Exponent, 1)),
+        Power(F32FromF32Lane(A, 0), F32FromF32Lane(Exponent, 0))
+    );
+    return Result;
+}
+
 inline void
 ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
 {
@@ -166,8 +240,9 @@ inline f32_lane
 Max(f32_lane A, f32_lane B)
 {
     f32_lane Result;
-    ConditionalAssign(&Result, A, (A >= B));
-    ConditionalAssign(&Result, B, (A < B));
+    u32_lane ComparisonMask = (A >= B);
+    ConditionalAssign(&Result, A, ComparisonMask);
+    ConditionalAssign(&Result, B, ~ComparisonMask);
     return Result;
 }
 
@@ -175,20 +250,47 @@ inline f32_lane
 Min(f32_lane A, f32_lane B)
 {
     f32_lane Result;
-    ConditionalAssign(&Result, A, (A <= B));
-    ConditionalAssign(&Result, B, (A > B));
+    u32_lane ComparisonMask = (A <= B);
+    ConditionalAssign(&Result, A, ComparisonMask);
+    ConditionalAssign(&Result, B, ~ComparisonMask);
     return Result;
 }
 
-inline f32
-HorizontalAdd(f32_lane WideValue)
+inline f32_lane
+Clamp(f32_lane Value, f32_lane Minimum, f32_lane Maximum)
 {
-    f32 NarrowValue = 
-        F32FromF32Lane(WideValue, 0) + 
-        F32FromF32Lane(WideValue, 1) + 
-        F32FromF32Lane(WideValue, 2) + 
-        F32FromF32Lane(WideValue, 3);
-    return NarrowValue;
+	f32_lane Result = Value;
+    Result = Max(Value, Minimum);
+    Result = Min(Value, Maximum);
+	return Result;
+}
+
+inline f32_lane
+Clamp(f32_lane Value, f32 Min, f32 Max)
+{
+	f32_lane Result = Clamp(Value, F32LaneFromF32(Min), F32LaneFromF32(Max));
+	return Result;
+}
+
+inline f32_lane
+Clamp01(f32_lane Value)
+{
+	f32_lane Result = Clamp(Value, 0.0f, 1.0f);
+    return Result;
+}
+
+inline f32_lane
+TranslateLinearTosRGB(f32_lane Linear)
+{
+    Linear = Clamp(Linear, 0.0f, 1.0f);
+
+	f32_lane sRGB = Linear * 12.92f;
+
+    f32_lane Expression = 1.055f * Power(Linear, 1.0f/2.4f) - 0.055f;
+
+    ConditionalAssign(&sRGB, Expression, Linear > 0.0031308f);
+
+	return sRGB;
 }
 
 // -----------------------------------------------------------
@@ -223,48 +325,6 @@ Lerp(f32 A, f32 B, f32 T)
 {
 	f32 Result = (1.0f - T) * A + T * B;
 	return Result;
-}
-
-inline f32
-Clamp(f32 Value, f32 Min, f32 Max)
-{
-	f32 Result = Value;
-	if (Result < Min)
-	{
-		Result = Min;
-	}
-	else if (Result > Max)
-	{
-		Result = Max;
-	}
-	return Result;
-}
-
-inline f32
-Clamp01(f32 Value)
-{
-	return Clamp(Value, 0.0f, 1.0f);
-}
-
-inline f32
-TranslateLinearTosRGB(f32 Linear)
-{
-	if (Linear < 0)
-	{
-		Linear = 0;
-	}
-	if (Linear > 1)
-	{
-		Linear = 1;
-	}
-
-	f32 sRGB = Linear * 12.92f;
-	if (Linear > 0.0031308f)
-	{
-		sRGB = 1.055f * Power(Linear, 1.0f/2.4f) - 0.055f;
-	}
-
-	return sRGB;
 }
 
 #endif

@@ -28,8 +28,8 @@ struct bitmap_header
 
 struct image_u32
 {
-    u32 Width;
-    u32 Height;
+    u32 WidthInPixels;
+    u32 HeightInPixels;
     u32 *Pixels;
 };
 

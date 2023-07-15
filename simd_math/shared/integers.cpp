@@ -11,7 +11,7 @@ operator+(u32_lane A, u32 B)
 inline u32_lane
 operator+(u32 A, u32_lane B)
 {
-    u32_lane Result = U32LaneFromU32(A) + B;
+    u32_lane Result = B + A;
     return Result;
 }
 
@@ -25,7 +25,7 @@ operator+=(u32_lane &A, u32_lane B)
 inline u32_lane &
 operator+=(u32_lane &A, u32 B)
 {
-    A = A + U32LaneFromU32(B);
+    A = A + B;
     return A;
 }
 
@@ -46,6 +46,13 @@ operator-(u32 A, u32_lane B)
     return Result;
 }
 
+inline u32_lane
+operator-(u32_lane A)
+{
+    u32_lane Result = U32LaneFromU32(0) - A;
+    return Result;
+}
+
 inline u32_lane &
 operator-=(u32_lane &A, u32_lane B)
 {
@@ -57,68 +64,6 @@ inline u32_lane &
 operator-=(u32_lane &A, u32 B)
 {
     A = A - U32LaneFromU32(B);
-    return A;
-}
-
-/******************************************/
-/*               Multiplication           */
-/******************************************/
-inline u32_lane
-operator*(u32_lane A, u32 B)
-{
-    u32_lane Result = A * U32LaneFromU32(B);
-    return Result;
-}
-
-inline u32_lane
-operator*(u32 A, u32_lane B)
-{
-    u32_lane Result = U32LaneFromU32(A) * B;
-    return Result;
-}
-
-inline u32_lane &
-operator*=(u32_lane &A, u32_lane B)
-{
-    A = A * B;
-    return A;
-}
-
-inline u32_lane &
-operator*=(u32_lane &A, u32 B)
-{
-    A = A * U32LaneFromU32(B);
-    return A;
-}
-
-/******************************************/
-/*                  Division              */
-/******************************************/
-inline u32_lane
-operator/(u32_lane A, u32 B)
-{
-    u32_lane Result = A / U32LaneFromU32(B);
-    return Result;
-}
-
-inline u32_lane
-operator/(u32 A, u32_lane B)
-{
-    u32_lane Result = U32LaneFromU32(A) / B;
-    return Result;
-}
-
-inline u32_lane &
-operator/=(u32_lane &A, u32_lane B)
-{
-    A = A / B;
-    return A;
-}
-
-inline u32_lane &
-operator/=(u32_lane &A, u32 B)
-{
-    A = A / U32LaneFromU32(B);
     return A;
 }
 
@@ -231,6 +176,8 @@ operator!=(u32_lane A, u32_lane B)
 inline u32_lane
 operator||(u32_lane A, u32_lane B)
 {
+    AssertGoodMask(A, __LINE__);
+    AssertGoodMask(B, __LINE__);
     u32_lane Result = A | B;
     return Result;
 }
@@ -238,6 +185,8 @@ operator||(u32_lane A, u32_lane B)
 inline u32_lane
 operator&&(u32_lane A, u32_lane B)
 {
+    AssertGoodMask(A, __LINE__);
+    AssertGoodMask(B, __LINE__);
     u32_lane Result = A & B;
     return Result;
 }
@@ -245,6 +194,7 @@ operator&&(u32_lane A, u32_lane B)
 inline u32_lane
 operator!(u32_lane A)
 {
+    AssertGoodMask(A, __LINE__);
     u32_lane Result = ~A;
     return Result;
 }
@@ -258,34 +208,31 @@ ConditionalAssign(u32_lane *Destination, u32_lane Source, u32_lane Mask)
     *Destination = (~Mask & *Destination) | (Mask & Source);
 }
 
-inline u32
-HorizontalAdd(u32_lane WideValue)
+inline u32_lane
+Max(u32_lane A, u32_lane B)
 {
-    u32 NarrowValue = 
-        U32FromU32Lane(WideValue, 0) + 
-        U32FromU32Lane(WideValue, 1) + 
-        U32FromU32Lane(WideValue, 2) + 
-        U32FromU32Lane(WideValue, 3);
-    return NarrowValue;
+    u32_lane Result;
+    u32_lane ComparisonMask = (A > B);
+    ConditionalAssign(&Result, A, ComparisonMask);
+    ConditionalAssign(&Result, B, ~ComparisonMask);
+    return Result;
 }
 
-// -----------------------------------------------------------
-
-
-// TODO: implement these for u32_lane usig intrinsics
-#if 0
 inline u32_lane
-Clamp(u32_lane Value, u32_lane Min, u32_lane Max)
+Min(u32_lane A, u32_lane B)
+{
+    u32_lane Result;
+    u32_lane ComparisonMask = (A < B);
+    ConditionalAssign(&Result, A, ComparisonMask);
+    ConditionalAssign(&Result, B, ~ComparisonMask);
+    return Result;
+}
+
+inline u32_lane
+Clamp(u32_lane Value, u32_lane Minimum, u32_lane Maximum)
 {
 	u32_lane Result = Value;
-	if (Result < Min)
-	{
-		Result = Min;
-	}
-	else if (Result > Max)
-	{
-		Result = Max;
-	}
+    Result = Max(Value, Minimum);
+    Result = Min(Value, Maximum);
 	return Result;
 }
-#endif

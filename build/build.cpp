@@ -20,11 +20,9 @@ typedef int64_t i64;
 
 void CleanupBinFolder(const char *BinDirectoryPath)
 {
-    // printf("\n====== Cleanup ======\n");
-
     const char *ExtensionsToClean[] = 
     {
-        "obj", "pdb", "exe", "log", "ilk", "sln", "bmp"
+        "obj", "pdb", "exe", "log", "ilk", "sln"
     };
 
     for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
@@ -38,7 +36,7 @@ void CleanupBinFolder(const char *BinDirectoryPath)
         WIN32_FIND_DATAA FindOperationData;
         HANDLE FindHandle = FindFirstFileA(FilesWildcard, &FindOperationData);
 
-        if(FindHandle == INVALID_HANDLE_VALUE)
+        if (FindHandle == INVALID_HANDLE_VALUE)
         {
             if(GetLastError() != ERROR_FILE_NOT_FOUND)
             {
@@ -108,8 +106,6 @@ void InvokeCompiler
     const char *OutputBinaryPath
 )
 {
-    // printf("\n====== Compiler output ======\n");
-
     STARTUPINFO CompilerProcessStartupInfo = {};
     CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
     PROCESS_INFORMATION CompilerProcessProcessInfo = {};
@@ -154,7 +150,7 @@ void InvokeCompiler
 
 int main(int argc, char **argv)
 {
-    const char *RootDirectoryPath = "F:\\thing";
+    const char *RootDirectoryPath = "F:\\monorepo";
 
     char BinDirectoryPath[MAX_PATH];
     ZeroMemory(BinDirectoryPath, ArrayLength(BinDirectoryPath));

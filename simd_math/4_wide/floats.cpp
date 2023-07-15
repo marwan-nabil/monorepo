@@ -30,7 +30,7 @@ operator/(f32_lane A, f32_lane B)
 }
 
 /******************************************/
-/*             logical comparison         */
+/*         comparison operations          */
 /******************************************/
 inline u32_lane
 operator<(f32_lane A, f32_lane B)
@@ -60,8 +60,22 @@ operator>=(f32_lane A, f32_lane B)
     return Result;
 }
 
+inline u32_lane
+operator==(f32_lane A, f32_lane B)
+{
+    u32_lane Result = _mm_castps_si128(_mm_cmpeq_ps(A, B));
+    return Result;
+}
+
+inline u32_lane
+operator!=(f32_lane A, f32_lane B)
+{
+    u32_lane Result = _mm_castps_si128(_mm_cmpneq_ps(A, B));
+    return Result;
+}
+
 /******************************************/
-/*             other operations           */
+/*             Common Functions           */
 /******************************************/
 inline f32_lane 
 SquareRoot(f32_lane A)
@@ -70,14 +84,15 @@ SquareRoot(f32_lane A)
     return Result;
 }
 
-// TODO: implement later with intrinsics
-#if 0
-
 inline f32
-Power(f32 Base, f32 Exponent)
+HorizontalAdd(f32_lane WideValue)
 {
-	f32 Result = ;
-	return Result;
-}
+    f32 NarrowValue;
 
-#endif
+    f32_lane Result0 = _mm_hadd_ps(WideValue, F32LaneFromF32(0));
+    f32_lane Result1 = _mm_hadd_ps(Result0, F32LaneFromF32(0));
+
+    *(u32 *)&NarrowValue = _mm_extract_ps(Result1, 0);
+
+    return NarrowValue;
+}

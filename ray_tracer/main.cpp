@@ -1,11 +1,6 @@
-/******************************************/
-/*                  headers               */
-/******************************************/
-// windows
 #include <Windows.h>
 #include <intrin.h>
 
-// c stdlib
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,58 +8,53 @@
 #include <float.h>
 #include <time.h>
 
-// platform definitions
 #include"platform.h"
 
-// math
 #include "..\math\constants.h"
+#include "..\math\macros.h"
 #include "..\math\random.h"
 #include "..\math\vector2.h"
 #include "..\math\vector3.h"
 #include "..\math\vector4.h"
 
-// simd_math
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\simd_math\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\simd_math\4_wide\math.h"
 #else
-#   error "still not defined yet."
+#   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
 #   include "..\simd_math\shared\random.h"
 #endif
 
-// application
 #include "ray_tracer.h"
 
-/******************************************/
-/*                  sources               */
-/******************************************/
-// multi_threading library
 #include "..\multi_threading\utils.cpp"
 
-// math library
 #include "..\math\random.cpp"
+#include "..\math\conversions.cpp"
 #include "..\math\integers.cpp"
 #include "..\math\floats.cpp"
 #include "..\math\vector2.cpp"
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
+#include "..\math\assertions.cpp"
 
-// simd_math library
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\simd_math\1_wide\conversions.cpp"
 #   include "..\simd_math\1_wide\scalars.cpp"
 #   include "..\simd_math\1_wide\vector3.cpp"
 #   include "..\simd_math\1_wide\random.cpp"
+#   include "..\simd_math\1_wide\assertions.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\simd_math\4_wide\conversions.cpp"
+#   include "..\simd_math\4_wide\assertions.cpp"
 #   include "..\simd_math\4_wide\integers.cpp"
 #   include "..\simd_math\4_wide\floats.cpp"
 #else
-#   error "still not defined yet."
+#   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
@@ -75,25 +65,18 @@
 #   include "..\simd_math\shared\random.cpp"
 #endif
 
-/******************************************/
-/*           Global Variables             */
-/******************************************/
-
-/******************************************/
-/*           Global functions             */
-/******************************************/
 inline void
 WriteImage(image_u32 OutputImage, const char *FileName)
 {
-    u32 OutputPixelSize = OutputImage.Width * OutputImage.Height * sizeof(u32);
+    u32 OutputPixelSize = OutputImage.WidthInPixels * OutputImage.HeightInPixels * sizeof(u32);
 
     bitmap_header BitmapHeader = {};
     BitmapHeader.FileType = 0x4D42;
     BitmapHeader.FileSize = sizeof(BitmapHeader) + OutputPixelSize;
     BitmapHeader.BitmapOffset = sizeof(BitmapHeader);
     BitmapHeader.Size = sizeof(BitmapHeader) - 14;
-    BitmapHeader.Width = OutputImage.Width;
-    BitmapHeader.Height = -(i32)OutputImage.Height;
+    BitmapHeader.Width = OutputImage.WidthInPixels;
+    BitmapHeader.Height = -(i32)OutputImage.HeightInPixels;
     BitmapHeader.Planes = 1;
     BitmapHeader.BitsPerPixel = 32;
     BitmapHeader.Compression = 0;
@@ -120,9 +103,9 @@ inline image_u32
 CreateImage(u32 Width, u32 Height)
 {
     image_u32 OutputImage = {};
-    OutputImage.Width = Width;
-    OutputImage.Height = Height;
-    OutputImage.Pixels = (u32 *)malloc(OutputImage.Width * OutputImage.Height * sizeof(u32));
+    OutputImage.WidthInPixels = Width;
+    OutputImage.HeightInPixels = Height;
+    OutputImage.Pixels = (u32 *)malloc(OutputImage.WidthInPixels * OutputImage.HeightInPixels * sizeof(u32));
     return OutputImage;
 }
 
@@ -136,8 +119,10 @@ RayIntersectsPlane(v3_lane RayOrigin, v3_lane RayDirection, plane *Plane, f32_la
 
     f32_lane Denominator = InnerProduct(PlaneNormal, RayDirection);
     u32_lane DenominatorMask = (Denominator > ToleranceToZero) || (Denominator < -ToleranceToZero);
+
+    AssertGoodMask(DenominatorMask, __LINE__);
     
-    f32_lane Numerator;
+    f32_lane Numerator = F32LaneFromF32(0);
     ConditionalAssign(&Numerator, -PlaneDistance - InnerProduct(PlaneNormal, RayOrigin), DenominatorMask);
     ConditionalAssign(&IntersectionDistance, Numerator / Denominator, DenominatorMask);
 
@@ -151,32 +136,26 @@ RayIntersectsSphere(v3_lane RayOrigin, v3_lane RayDirection, sphere *Sphere, f32
 
     v3_lane SpherePosition = V3LaneFromV3(Sphere->Position);
     f32_lane SphereRadius = F32LaneFromF32(Sphere->Radius);
-
     v3_lane SphereRelativeRayOrigin = RayOrigin - SpherePosition;
 
     f32_lane A = InnerProduct(RayDirection, RayDirection);
     f32_lane B = 2.0f * InnerProduct(RayDirection, SphereRelativeRayOrigin);
     f32_lane C = InnerProduct(SphereRelativeRayOrigin, SphereRelativeRayOrigin) - Square(SphereRadius);
-    
+
     f32_lane RootTerm = SquareRoot(B * B - 4 * A * C);
     u32_lane RootTermMask = RootTerm > ToleranceToZero;
 
-    f32_lane QuadraticDenominator;
-    ConditionalAssign(&QuadraticDenominator, 2 * A, RootTermMask);
-    
-    f32_lane TPositive;
-    ConditionalAssign(&TPositive, (-B + RootTerm) / QuadraticDenominator, RootTermMask);
+    // if (RootTermMask)
+    // {
+        f32_lane QuadraticDenominator = 2 * A;
+        f32_lane PositiveSolution = (-B + RootTerm) / QuadraticDenominator;
+        f32_lane NegativeSolution = (-B - RootTerm) / QuadraticDenominator;
 
-    f32_lane TNegative;
-    ConditionalAssign(&TNegative, (-B - RootTerm) / QuadraticDenominator, RootTermMask);
+        u32_lane NegativeSolutionMask = (NegativeSolution > HitDistanceLowerLimit) && (NegativeSolution < PositiveSolution);
 
-    u32_lane TNegativeMask;
-    ConditionalAssign(&TNegativeMask, (TNegative > HitDistanceLowerLimit) && (TNegative < TPositive), RootTermMask);
-
-    u32_lane RootTermAndTNegativeMask = RootTermMask && TNegativeMask;
-
-    ConditionalAssign(&IntersectionDistance, TPositive, RootTermMask);
-    ConditionalAssign(&IntersectionDistance, TNegative, RootTermAndTNegativeMask);
+        ConditionalAssign(&IntersectionDistance, PositiveSolution, RootTermMask);
+        ConditionalAssign(&IntersectionDistance, NegativeSolution, NegativeSolutionMask && RootTermMask);
+    // }
 
     return IntersectionDistance;
 }
@@ -184,7 +163,7 @@ RayIntersectsSphere(v3_lane RayOrigin, v3_lane RayDirection, sphere *Sphere, f32
 inline u32 *
 GetPixelPointer(image_u32 *Image, u32 X, u32 Y)
 {
-    u32 *Result = Image->Pixels + Y * Image->Width + X;
+    u32 *Result = Image->Pixels + Y * Image->WidthInPixels + X;
     return Result;
 }
 
@@ -198,30 +177,27 @@ RenderPixel
     u64 BouncesComputedPerPixel = 0;
 
     world *World = WorkOrder->World;
-
     v3_lane CameraX = V3LaneFromV3(World->Camera.CoordinateSet.X);
     v3_lane CameraY = V3LaneFromV3(World->Camera.CoordinateSet.Y);
     f32_lane HalfPixelWidth = F32LaneFromF32(World->Film.HalfPixelWidth);
     f32_lane HalfPixelHeight = F32LaneFromF32(World->Film.HalfPixelHeight);
-
     random_series_lane *RandomSeries = &WorkOrder->Entropy;
-
     v3_lane CameraPosition = V3LaneFromV3(World->Camera.Position);
     f32_lane ToleranceToZero = F32LaneFromF32(WorkOrder->RenderingParameters->ToleranceToZero);
     f32_lane HitDistanceLowerLimit = F32LaneFromF32(WorkOrder->RenderingParameters->HitDistanceLowerLimit);
 
     for (u32 RayBatchIndex = 0; RayBatchIndex < RAY_BATCHES_PER_PIXEL; RayBatchIndex++)
     {
-        v3_lane RayColor = V3Lane(0, 0, 0);
-        v3_lane RayColorAttenuation = V3Lane(1, 1, 1);
+        v3_lane RayBatchColor = V3Lane(0, 0, 0);
+        v3_lane RayBatchColorAttenuation = V3Lane(1, 1, 1);
 
-        v3_lane RayPositionOnFilm = 
+        v3_lane RayBatchPositionOnFilm = 
             V3LaneFromV3(PixelCenterOnFilm) +
             HalfPixelWidth * RandomBilateralLane(RandomSeries) * CameraX +
             HalfPixelHeight * RandomBilateralLane(RandomSeries) * CameraY;
 
         v3_lane BounceOrigin = CameraPosition;
-        v3_lane BounceDirection = Normalize(RayPositionOnFilm - BounceOrigin);
+        v3_lane BounceDirection = Normalize(RayBatchPositionOnFilm - BounceOrigin);
 
         u32_lane BouncesComputedPerRayBatch = U32LaneFromU32(0);
         u32_lane LaneMask = U32LaneFromU32(0xFFFFFFFF);
@@ -230,8 +206,7 @@ RenderPixel
         {
             v3_lane NextBounceNormal = {};
 
-            u32_lane LaneIncrement = U32LaneFromU32(1);
-            BouncesComputedPerRayBatch += LaneIncrement & LaneMask;
+            BouncesComputedPerRayBatch += U32LaneFromU32(1) & LaneMask;
 
             f32_lane MinimumHitDistanceFound = F32LaneFromF32(F32MAX);
             u32_lane HitMaterialIndex = U32LaneFromU32(0);
@@ -247,6 +222,8 @@ RenderPixel
                 u32_lane HitDistanceMask = 
                     (CurrentHitDistance < MinimumHitDistanceFound) && 
                     (CurrentHitDistance > HitDistanceLowerLimit);
+
+                AssertGoodMask(HitDistanceMask, __LINE__);
 
                 ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitDistanceMask);
                 ConditionalAssign(&HitMaterialIndex, PlaneMaterialIndex, HitDistanceMask);
@@ -266,35 +243,36 @@ RenderPixel
                     (CurrentHitDistance < MinimumHitDistanceFound) && 
                     (CurrentHitDistance > HitDistanceLowerLimit);
 
+                AssertGoodMask(HitDistanceMask, __LINE__);
+
                 ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitDistanceMask);
                 ConditionalAssign(&HitMaterialIndex, SphereMaterialIndex, HitDistanceMask);
                 ConditionalAssign(&NextBounceNormal, Normalize(BounceOrigin + CurrentHitDistance * BounceDirection - SpherePosition), HitDistanceMask);
             }
 
-
-#if (SIMD_NUMBEROF_LANES != 1)
+#if (SIMD_NUMBEROF_LANES == 4)
             f32_lane HitMaterialSpecularity = F32LaneFromF32
             (
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].Specularity,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].Specularity,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].Specularity,
                 World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].Specularity,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].Specularity
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].Specularity,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].Specularity
             );
 
             v3_lane HitMaterialReflectionColor = V3LaneFromV3
             (
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].ReflectionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].ReflectionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].ReflectionColor,
                 World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].ReflectionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].ReflectionColor
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].ReflectionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].ReflectionColor
             );
 
             v3_lane HitMaterialEmmissionColor = V3LaneFromV3
             (
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].EmmissionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].EmmissionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].EmmissionColor,
                 World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].EmmissionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].EmmissionColor
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].EmmissionColor,
+                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].EmmissionColor
             );
 #else
             material *HitMaterial = &World->Materials[HitMaterialIndex];
@@ -303,14 +281,15 @@ RenderPixel
             v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
 #endif
 
-            RayColor += HadamardProduct(RayColorAttenuation, LaneMask & HitMaterialEmmissionColor);
+            RayBatchColor += HadamardProduct(RayBatchColorAttenuation, LaneMask & HitMaterialEmmissionColor);
 
-            // LaneMask = LaneMask & ((HitMaterialIndex != 0)? 0xFFFFFFFF : 0x00000000);
             ConditionalAssign(&LaneMask, U32LaneFromU32(0xFFFFFFFF), (HitMaterialIndex != U32LaneFromU32(0)));
+
+            AssertGoodMask(LaneMask, __LINE__);
 
             f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
 
-            RayColorAttenuation = HadamardProduct(RayColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
+            RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
             
             BounceOrigin += MinimumHitDistanceFound * BounceDirection;
 
@@ -328,7 +307,7 @@ RenderPixel
             }
         }
 
-        PixelColor += HorizontalAdd(RayColor) / (f32)RAY_BATCHES_PER_PIXEL;
+        PixelColor += HorizontalAdd(RayBatchColor) / (f32)RAYS_PER_PIXEL;
         BouncesComputedPerPixel += (u64)HorizontalAdd(BouncesComputedPerRayBatch);
     }
 
@@ -352,7 +331,6 @@ RenderTile(work_queue *WorkQueue)
     world *World = WorkOrder->World;
     film *Film = &WorkOrder->World->Film;
     rendering_parameters *RenderingParameters = WorkOrder->RenderingParameters;
-
     v3 CameraX = World->Camera.CoordinateSet.X;
     v3 CameraY = World->Camera.CoordinateSet.Y;
 
@@ -360,18 +338,18 @@ RenderTile(work_queue *WorkQueue)
 
     for (u32 PixelY = WorkOrder->StartPixelY; PixelY < WorkOrder->EndPixelY; PixelY++)
     {
-        f32 FilmRatioY = 2.0f * ((f32)PixelY / (f32)Image->Height) - 1.0f;
+        f32 PixelBeginY = 2.0f * ((f32)PixelY / (f32)Image->HeightInPixels) - 1.0f;
 
         u32 *PixelWritePointer = GetPixelPointer(Image, WorkOrder->StartPixelX, PixelY);
 
         for (u32 PixelX = WorkOrder->StartPixelX; PixelX < WorkOrder->EndPixelX; PixelX++)
         {
-            f32 FilmRatioX = 2.0f * ((f32)PixelX / (f32)Image->Width) - 1.0f;
+            f32 PixelBeginX = 2.0f * ((f32)PixelX / (f32)Image->WidthInPixels) - 1.0f;
 
             v3 PixelCenterOnFilm = 
                 Film->Center +
-                (FilmRatioX * Film->HalfWidth + Film->HalfPixelWidth) * CameraX +
-                (FilmRatioY * Film->HalfHeight + Film->HalfPixelHeight) * CameraY;
+                (PixelBeginX * Film->HalfWidth + Film->HalfPixelWidth) * CameraX +
+                (PixelBeginY * Film->HalfHeight + Film->HalfPixelHeight) * CameraY;
 
             v3 PixelColor = RenderPixel
             (
@@ -402,7 +380,7 @@ RenderTile(work_queue *WorkQueue)
 }
 
 static DWORD WINAPI
-WorkerThread(void *Parameter)
+WorkerThreadEntry(void *Parameter)
 {
     work_queue *WorkQueue = (work_queue *)Parameter;
     while(RenderTile(WorkQueue)){}
@@ -412,6 +390,15 @@ WorkerThread(void *Parameter)
 i32
 main(i32 argc, u8 **argv)
 {
+#if 0
+    printf("Testing...");
+
+    u32_lane Number0 = U32LaneFromU32(1, 2, 3, 4);
+    u32 Result = HorizontalAdd(Number0);
+
+    printf("Result = %d\n", Result);
+
+#else
     printf("RayCasting...");
 
     image_u32 OutputImage = CreateImage(1280, 720);
@@ -458,7 +445,7 @@ main(i32 argc, u8 **argv)
     World.PlanesCount = ArrayLength(PlanesArray);
 
     World.Spheres = SpheresArray;
-    World.SpheresCount = ArrayLength(SpheresArray);
+    World.SpheresCount = 1; // ArrayLength(SpheresArray);
 
     World.CoordinateSet.X = V3(1, 0, 0);
     World.CoordinateSet.Y = V3(0, 1, 0);
@@ -472,38 +459,39 @@ main(i32 argc, u8 **argv)
     World.Film.DistanceFromCamera = 1.0f;
     World.Film.Center = World.Camera.Position + World.Film.DistanceFromCamera * (-World.Camera.CoordinateSet.Z);
 
-    if (OutputImage.Width >= OutputImage.Height)
+    if (OutputImage.WidthInPixels >= OutputImage.HeightInPixels)
     {
         World.Film.HalfWidth = 0.5f;
-        World.Film.HalfHeight = 0.5f * (f32)OutputImage.Height / (f32)OutputImage.Width;
+        World.Film.HalfHeight = 0.5f * (f32)OutputImage.HeightInPixels / (f32)OutputImage.WidthInPixels;
     }
     else
     {
         World.Film.HalfHeight = 1.0f;
-        World.Film.HalfWidth = (f32)OutputImage.Width / (f32)OutputImage.Height;
+        World.Film.HalfWidth = (f32)OutputImage.WidthInPixels / (f32)OutputImage.HeightInPixels;
     }
 
-    World.Film.HalfPixelWidth = 0.5f / (f32)OutputImage.Width;
-    World.Film.HalfPixelHeight = 0.5f / (f32)OutputImage.Height;
+    World.Film.HalfPixelWidth = 0.5f / (f32)OutputImage.WidthInPixels;
+    World.Film.HalfPixelHeight = 0.5f / (f32)OutputImage.HeightInPixels;
 
     rendering_parameters RenderingParameters = {};
 
     SYSTEM_INFO SystemInfo;
     GetSystemInfo(&SystemInfo);
     RenderingParameters.CoreCount = (u8)SystemInfo.dwNumberOfProcessors;
+    // RenderingParameters.CoreCount = 1;
 
     RenderingParameters.HitDistanceLowerLimit = 0.001f;
     RenderingParameters.ToleranceToZero = 0.0001f;
 
-    // RenderingParameters.TileWidthInPixels = OutputImage.Width / RenderingParameters.CoreCount;
+    // RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
     RenderingParameters.TileWidthInPixels = 64; // TODO(marwan): optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX = 
-        (OutputImage.Width + RenderingParameters.TileWidthInPixels - 1) / RenderingParameters.TileWidthInPixels;
+        (OutputImage.WidthInPixels + RenderingParameters.TileWidthInPixels - 1) / RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountY = 
-        (OutputImage.Height + RenderingParameters.TileHeightInPixels - 1) / RenderingParameters.TileHeightInPixels;
+        (OutputImage.HeightInPixels + RenderingParameters.TileHeightInPixels - 1) / RenderingParameters.TileHeightInPixels;
 
     RenderingParameters.TotalTileCount = RenderingParameters.TileCountX * RenderingParameters.TileCountY;
 
@@ -514,13 +502,13 @@ main(i32 argc, u8 **argv)
     {
         u32 StartPixelY = TileY * RenderingParameters.TileHeightInPixels;
         u32 EndPixelY = StartPixelY + RenderingParameters.TileHeightInPixels;
-        EndPixelY = Clamp(EndPixelY, 0, OutputImage.Height);
+        EndPixelY = Clamp(EndPixelY, 0, OutputImage.HeightInPixels);
         
         for (u32 TileX = 0; TileX < RenderingParameters.TileCountX; TileX++)
         {
             u32 StartPixelX = TileX * RenderingParameters.TileWidthInPixels;
             u32 EndPixelX = StartPixelX + RenderingParameters.TileWidthInPixels;
-            EndPixelX = Clamp(EndPixelX, 0, OutputImage.Width);
+            EndPixelX = Clamp(EndPixelX, 0, OutputImage.WidthInPixels);
 
             work_order *WorkOrder = WorkQueue.WorkOrders + WorkQueue.WorkOrderCount++;
             WorkOrder->World = &World;
@@ -545,15 +533,14 @@ main(i32 argc, u8 **argv)
         }
     }
 
-    Assert(WorkQueue.WorkOrderCount == RenderingParameters.TotalTileCount);
-
     // TODO(marwan): memory fence here
+
     clock_t StartTime = clock();
 
     for (u32 CoreIndex = 1; CoreIndex < RenderingParameters.CoreCount; CoreIndex++)
     {
         DWORD ThreadId;
-        HANDLE ThreadHandle = CreateThread(0, 0, WorkerThread, &WorkQueue, 0, &ThreadId);
+        HANDLE ThreadHandle = CreateThread(0, 0, WorkerThreadEntry, &WorkQueue, 0, &ThreadId);
         CloseHandle(ThreadHandle);
     }
     
@@ -590,7 +577,6 @@ main(i32 argc, u8 **argv)
         RenderingParameters.TileWidthInPixels, RenderingParameters.TileHeightInPixels, 
         KBytesPerTile
     );
-
     printf("Bounces Computed: %lld\n", WorkQueue.TotalRayBouncesComputed);
     printf
     (
@@ -598,5 +584,6 @@ main(i32 argc, u8 **argv)
         (f64)TotalTimeElapsed / (f64)WorkQueue.TotalRayBouncesComputed * 1000000.0f
     );
 
+#endif
     return 0;
 }
