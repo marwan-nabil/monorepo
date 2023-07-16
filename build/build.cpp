@@ -18,7 +18,7 @@ typedef int64_t i64;
 #define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
 #define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
 
-void CleanupBinFolder(const char *BinDirectoryPath)
+void CleanupBinFolder(const char *OutputDirectoryPath)
 {
     const char *ExtensionsToClean[] = 
     {
@@ -29,7 +29,7 @@ void CleanupBinFolder(const char *BinDirectoryPath)
     {
         char FilesWildcard[MAX_PATH];
         ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
-        StringCchCopyA(FilesWildcard, MAX_PATH, BinDirectoryPath);
+        StringCchCopyA(FilesWildcard, MAX_PATH, OutputDirectoryPath);
         StringCchCatA(FilesWildcard, MAX_PATH, "\\*.");
         StringCchCatA(FilesWildcard, MAX_PATH, ExtensionsToClean[ExtensionIndex]);
 
@@ -51,7 +51,7 @@ void CleanupBinFolder(const char *BinDirectoryPath)
                 {
                     char FoundFilePath[512];
                     ZeroMemory(FoundFilePath, 512);
-                    StringCchCopyA(FoundFilePath, MAX_PATH, BinDirectoryPath);
+                    StringCchCopyA(FoundFilePath, MAX_PATH, OutputDirectoryPath);
                     StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                     StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
 
@@ -73,7 +73,7 @@ void CleanupBinFolder(const char *BinDirectoryPath)
 
                         printf
                         (
-                            "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %d == %s", 
+                            "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %lu == %s", 
                             FoundFilePath, LastError, (const char *)ErrorMessageFromSystem
                         );
                         LocalFree(ErrorMessageFromSystem);
@@ -152,25 +152,25 @@ int main(int argc, char **argv)
 {
     const char *RootDirectoryPath = "F:\\monorepo";
 
-    char BinDirectoryPath[MAX_PATH];
-    ZeroMemory(BinDirectoryPath, ArrayLength(BinDirectoryPath));
-    StringCchCatA(BinDirectoryPath, ArrayLength(BinDirectoryPath), RootDirectoryPath);
-    StringCchCatA(BinDirectoryPath, ArrayLength(BinDirectoryPath), "\\bin");
+    char OutputDirectoryPath[MAX_PATH];
+    ZeroMemory(OutputDirectoryPath, ArrayLength(OutputDirectoryPath));
+    StringCchCatA(OutputDirectoryPath, ArrayLength(OutputDirectoryPath), RootDirectoryPath);
+    StringCchCatA(OutputDirectoryPath, ArrayLength(OutputDirectoryPath), "\\output");
 
     if (argc >= 2)
     {
         if (strcmp(argv[1], "clean") == 0)
         {
-            CleanupBinFolder(BinDirectoryPath);
+            CleanupBinFolder(OutputDirectoryPath);
         }
         else 
         {
-            CleanupBinFolder(BinDirectoryPath);
+            CleanupBinFolder(OutputDirectoryPath);
 
             char CompilerFlags[512];
             ZeroMemory(CompilerFlags, 512);
             StringCchCatA(CompilerFlags, 512, "-nologo -Zi -Zo -FC -Oi -GR- -EHa- -Gm- -MTd -fp:fast -fp:except- ");
-            if ((argc == 3) && (strcmp(argv[2], "optimized") == 0))
+            if ((argc >= 3) && (strcmp(argv[2], "optimized") == 0))
             {
                 StringCchCatA(CompilerFlags, 512, "-O2 ");
             }
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 
             char OutputBinaryPath[MAX_PATH];
             ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), BinDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
 
             if (strcmp(argv[1], "simulator") == 0)
             {
@@ -204,6 +204,17 @@ int main(int argc, char **argv)
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
                 StringCchCatA(CompilerFlags, 512, "-DINTERNAL -DSLOW -D_CRT_SECURE_NO_WARNINGS ");
                 StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
+                if (argc >= 4)
+                {
+                    if ((argc >= 4) && (strcmp(argv[3], "1") == 0))
+                    {
+                        StringCchCatA(CompilerFlags, 512, "-DSIMD_NUMBEROF_LANES=1 ");
+                    }
+                    else if ((argc >= 4) && (strcmp(argv[3], "4") == 0))
+                    {
+                        StringCchCatA(CompilerFlags, 512, "-DSIMD_NUMBEROF_LANES=4 ");
+                    }
+                }
             }
             else
             {

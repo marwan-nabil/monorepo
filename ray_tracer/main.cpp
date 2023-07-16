@@ -105,59 +105,13 @@ CreateImage(u32 Width, u32 Height)
     image_u32 OutputImage = {};
     OutputImage.WidthInPixels = Width;
     OutputImage.HeightInPixels = Height;
-    OutputImage.Pixels = (u32 *)malloc(OutputImage.WidthInPixels * OutputImage.HeightInPixels * sizeof(u32));
+    OutputImage.Pixels = (u32 *)malloc
+    (
+        OutputImage.WidthInPixels * 
+        OutputImage.HeightInPixels * 
+        sizeof(u32)
+    );
     return OutputImage;
-}
-
-inline f32_lane
-RayIntersectsPlane(v3_lane RayOrigin, v3_lane RayDirection, plane *Plane, f32_lane ToleranceToZero)
-{
-    f32_lane IntersectionDistance = F32LaneFromF32(F32MAX);
-
-    v3_lane PlaneNormal = V3LaneFromV3(Plane->Normal);
-    f32_lane PlaneDistance = F32LaneFromF32(Plane->Distance);
-
-    f32_lane Denominator = InnerProduct(PlaneNormal, RayDirection);
-    u32_lane DenominatorMask = (Denominator > ToleranceToZero) || (Denominator < -ToleranceToZero);
-
-    AssertGoodMask(DenominatorMask, __LINE__);
-    
-    f32_lane Numerator = F32LaneFromF32(0);
-    ConditionalAssign(&Numerator, -PlaneDistance - InnerProduct(PlaneNormal, RayOrigin), DenominatorMask);
-    ConditionalAssign(&IntersectionDistance, Numerator / Denominator, DenominatorMask);
-
-    return IntersectionDistance;
-}
-
-inline f32_lane
-RayIntersectsSphere(v3_lane RayOrigin, v3_lane RayDirection, sphere *Sphere, f32_lane ToleranceToZero, f32_lane HitDistanceLowerLimit)
-{
-    f32_lane IntersectionDistance = F32LaneFromF32(F32MAX);
-
-    v3_lane SpherePosition = V3LaneFromV3(Sphere->Position);
-    f32_lane SphereRadius = F32LaneFromF32(Sphere->Radius);
-    v3_lane SphereRelativeRayOrigin = RayOrigin - SpherePosition;
-
-    f32_lane A = InnerProduct(RayDirection, RayDirection);
-    f32_lane B = 2.0f * InnerProduct(RayDirection, SphereRelativeRayOrigin);
-    f32_lane C = InnerProduct(SphereRelativeRayOrigin, SphereRelativeRayOrigin) - Square(SphereRadius);
-
-    f32_lane RootTerm = SquareRoot(B * B - 4 * A * C);
-    u32_lane RootTermMask = RootTerm > ToleranceToZero;
-
-    // if (RootTermMask)
-    // {
-        f32_lane QuadraticDenominator = 2 * A;
-        f32_lane PositiveSolution = (-B + RootTerm) / QuadraticDenominator;
-        f32_lane NegativeSolution = (-B - RootTerm) / QuadraticDenominator;
-
-        u32_lane NegativeSolutionMask = (NegativeSolution > HitDistanceLowerLimit) && (NegativeSolution < PositiveSolution);
-
-        ConditionalAssign(&IntersectionDistance, PositiveSolution, RootTermMask);
-        ConditionalAssign(&IntersectionDistance, NegativeSolution, NegativeSolutionMask && RootTermMask);
-    // }
-
-    return IntersectionDistance;
 }
 
 inline u32 *
@@ -214,43 +168,77 @@ RenderPixel
             for (u32 PlaneIndex = 0; PlaneIndex < World->PlanesCount; PlaneIndex++)
             {
                 plane *CurrentPlane = &World->Planes[PlaneIndex];
-                f32_lane CurrentHitDistance = RayIntersectsPlane(BounceOrigin, BounceDirection, CurrentPlane, ToleranceToZero);
-
                 v3_lane PlaneNormal = V3LaneFromV3(CurrentPlane->Normal);
-                u32_lane PlaneMaterialIndex = U32LaneFromU32(CurrentPlane->MaterialIndex);
+                f32_lane PlaneDistance = F32LaneFromF32(CurrentPlane->Distance);
 
-                u32_lane HitDistanceMask = 
-                    (CurrentHitDistance < MinimumHitDistanceFound) && 
-                    (CurrentHitDistance > HitDistanceLowerLimit);
+                f32_lane Denominator = InnerProduct(PlaneNormal, BounceDirection);
+                u32_lane DenominatorMask = (Denominator > ToleranceToZero) || (Denominator < -ToleranceToZero);
 
-                AssertGoodMask(HitDistanceMask, __LINE__);
+                if (!MaskIsAllZeroes(DenominatorMask))
+                {
+                    f32_lane CurrentHitDistance = (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) / Denominator;
+                    u32_lane CurrentHitDistanceMask = 
+                        (CurrentHitDistance < MinimumHitDistanceFound) && 
+                        (CurrentHitDistance > HitDistanceLowerLimit);
 
-                ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitDistanceMask);
-                ConditionalAssign(&HitMaterialIndex, PlaneMaterialIndex, HitDistanceMask);
-                ConditionalAssign(&NextBounceNormal, PlaneNormal, HitDistanceMask);
+                    u32_lane HitMask = CurrentHitDistanceMask & DenominatorMask;
+                    if (!MaskIsAllZeroes(HitMask))
+                    {
+                        ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitMask);
+                        ConditionalAssign(&HitMaterialIndex, U32LaneFromU32(CurrentPlane->MaterialIndex), HitMask);
+                        ConditionalAssign(&NextBounceNormal, PlaneNormal, HitMask);
+                    }
+                }
             }
 
             for (u32 SphereIndex = 0; SphereIndex < World->SpheresCount; SphereIndex++)
             {
                 sphere *CurrentSphere = &World->Spheres[SphereIndex];
-
                 v3_lane SpherePosition = V3LaneFromV3(CurrentSphere->Position);
+                f32_lane SphereRadius = F32LaneFromF32(CurrentSphere->Radius);
                 u32_lane SphereMaterialIndex = U32LaneFromU32(CurrentSphere->MaterialIndex);
+                v3_lane SphereRelativeRayOrigin = BounceOrigin - SpherePosition;
 
-                f32_lane CurrentHitDistance = RayIntersectsSphere(BounceOrigin, BounceDirection, CurrentSphere, ToleranceToZero, HitDistanceLowerLimit);
+                f32_lane A = InnerProduct(BounceDirection, BounceDirection);
+                f32_lane B = 2.0f * InnerProduct(BounceDirection, SphereRelativeRayOrigin);
+                f32_lane C = InnerProduct(SphereRelativeRayOrigin, SphereRelativeRayOrigin) - Square(SphereRadius);
 
-                u32_lane HitDistanceMask = 
-                    (CurrentHitDistance < MinimumHitDistanceFound) && 
-                    (CurrentHitDistance > HitDistanceLowerLimit);
+                f32_lane RootTerm = SquareRoot(B * B - 4 * A * C);
+                u32_lane RootTermMask = RootTerm > ToleranceToZero;
 
-                AssertGoodMask(HitDistanceMask, __LINE__);
+                f32_lane QuadraticDenominator = 2 * A;
 
-                ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitDistanceMask);
-                ConditionalAssign(&HitMaterialIndex, SphereMaterialIndex, HitDistanceMask);
-                ConditionalAssign(&NextBounceNormal, Normalize(BounceOrigin + CurrentHitDistance * BounceDirection - SpherePosition), HitDistanceMask);
+                if (!MaskIsAllZeroes(RootTermMask))
+                {
+                    f32_lane PositiveSolution = (-B + RootTerm) / QuadraticDenominator;
+                    f32_lane NegativeSolution = (-B - RootTerm) / QuadraticDenominator;
+
+                    u32_lane NegativeSolutionMask = (NegativeSolution > HitDistanceLowerLimit) && (NegativeSolution < PositiveSolution);
+
+                    f32_lane CurrentHitDistance = PositiveSolution;
+                    ConditionalAssign(&CurrentHitDistance, NegativeSolution, NegativeSolutionMask);
+
+                    u32_lane HitDistanceMask = 
+                        (CurrentHitDistance < MinimumHitDistanceFound) && 
+                        (CurrentHitDistance > HitDistanceLowerLimit);
+
+                    if (!MaskIsAllZeroes(HitDistanceMask))
+                    {
+                        u32_lane HitMask = RootTermMask & HitDistanceMask;
+
+                        ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitMask);
+                        ConditionalAssign(&HitMaterialIndex, SphereMaterialIndex, HitMask);
+                        ConditionalAssign(&NextBounceNormal, Normalize(BounceOrigin + MinimumHitDistanceFound * BounceDirection - SpherePosition), HitDistanceMask);
+                    }
+                }
             }
 
-#if (SIMD_NUMBEROF_LANES == 4)
+#if (SIMD_NUMBEROF_LANES == 1)
+            material *HitMaterial = &World->Materials[HitMaterialIndex];
+            f32_lane HitMaterialSpecularity = HitMaterial->Specularity;
+            v3_lane HitMaterialReflectionColor = HitMaterial->ReflectionColor;
+            v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
+#elif (SIMD_NUMBEROF_LANES == 4)
             f32_lane HitMaterialSpecularity = F32LaneFromF32
             (
                 World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].Specularity,
@@ -274,18 +262,12 @@ RenderPixel
                 World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].EmmissionColor,
                 World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].EmmissionColor
             );
-#else
-            material *HitMaterial = &World->Materials[HitMaterialIndex];
-            f32_lane HitMaterialSpecularity = HitMaterial->Specularity;
-            v3_lane HitMaterialReflectionColor = HitMaterial->ReflectionColor;
-            v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
 #endif
 
             RayBatchColor += HadamardProduct(RayBatchColorAttenuation, LaneMask & HitMaterialEmmissionColor);
 
             ConditionalAssign(&LaneMask, U32LaneFromU32(0xFFFFFFFF), (HitMaterialIndex != U32LaneFromU32(0)));
-
-            AssertGoodMask(LaneMask, __LINE__);
+            ConditionalAssign(&LaneMask, U32LaneFromU32(0), (HitMaterialIndex == U32LaneFromU32(0)));
 
             f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
 
@@ -391,12 +373,34 @@ i32
 main(i32 argc, u8 **argv)
 {
 #if 0
-    printf("Testing...");
+    printf("Testing...\n");
 
-    u32_lane Number0 = U32LaneFromU32(1, 2, 3, 4);
-    u32 Result = HorizontalAdd(Number0);
+    v3_lane Vector0 = V3LaneFromV3
+    (
+        V3(5000, 5000, 5000),
+        V3(5000, 5000, 5000),
+        V3(5000, 5000, 5000),
+        V3(5000, 5000, 5000)
+    );
 
-    printf("Result = %d\n", Result);
+    u32_lane Mask = U32LaneFromU32(0xFFFFFFFF, 0xFFFFFFFF, 0, 0);
+
+    v3_lane Vector1 = Mask & Vector0;
+
+    printf("Vecor1.X[0] = %f\n", F32FromF32Lane(Vector1.X, 0));
+    printf("Vecor1.X[1] = %f\n", F32FromF32Lane(Vector1.X, 1));
+    printf("Vecor1.X[2] = %f\n", F32FromF32Lane(Vector1.X, 2));
+    printf("Vecor1.X[3] = %f\n", F32FromF32Lane(Vector1.X, 3));
+
+    printf("Vecor1.Y[0] = %f\n", F32FromF32Lane(Vector1.Y, 0));
+    printf("Vecor1.Y[1] = %f\n", F32FromF32Lane(Vector1.Y, 1));
+    printf("Vecor1.Y[2] = %f\n", F32FromF32Lane(Vector1.Y, 2));
+    printf("Vecor1.Y[3] = %f\n", F32FromF32Lane(Vector1.Y, 3));
+
+    printf("Vecor1.Z[0] = %f\n", F32FromF32Lane(Vector1.Z, 0));
+    printf("Vecor1.Z[1] = %f\n", F32FromF32Lane(Vector1.Z, 1));
+    printf("Vecor1.Z[2] = %f\n", F32FromF32Lane(Vector1.Z, 2));
+    printf("Vecor1.Z[3] = %f\n", F32FromF32Lane(Vector1.Z, 3));
 
 #else
     printf("RayCasting...");
@@ -445,7 +449,7 @@ main(i32 argc, u8 **argv)
     World.PlanesCount = ArrayLength(PlanesArray);
 
     World.Spheres = SpheresArray;
-    World.SpheresCount = 1; // ArrayLength(SpheresArray);
+    World.SpheresCount = ArrayLength(SpheresArray);
 
     World.CoordinateSet.X = V3(1, 0, 0);
     World.CoordinateSet.Y = V3(0, 1, 0);
@@ -555,9 +559,9 @@ main(i32 argc, u8 **argv)
 
     clock_t TotalTimeElapsed = clock() - StartTime;
 
-    WriteImage(OutputImage, "test.bmp");
+    WriteImage(OutputImage, (const char *)argv[1]);
 
-    printf("\nRayCasting time: %d ms\n", TotalTimeElapsed);
+    printf("\nRayCasting time: %ld ms\n", TotalTimeElapsed);
     printf("Core Count: %d\n", RenderingParameters.CoreCount);
     printf("Rays Per Pixel: %d\n", RAYS_PER_PIXEL);
     printf("Bounces Per Ray: %d\n", BOUNCES_PER_RAY);
