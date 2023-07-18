@@ -26,6 +26,14 @@ operator&(u32_lane A, u32_lane B)
 }
 
 inline u32_lane
+AndNot(u32_lane A, u32_lane B)
+{
+    // (~A) & B
+    u32_lane Result = _mm_andnot_si128(A, B);
+    return Result;
+}
+
+inline u32_lane
 operator|(u32_lane A, u32_lane B)
 {
     u32_lane Result = _mm_or_si128(A, B);

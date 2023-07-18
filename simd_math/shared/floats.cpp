@@ -229,33 +229,16 @@ Power(f32_lane A, f32_lane Exponent)
 inline void
 ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
 {
-    ConditionalAssign((u32_lane *)Destination, *(u32_lane *)&Source, Mask);
-}
-
-inline f32_lane
-Max(f32_lane A, f32_lane B)
-{
-    f32_lane Result = A;
-    ConditionalAssign(&Result, B, B > A);
-    return Result;
-}
-
-inline f32_lane
-Min(f32_lane A, f32_lane B)
-{
-    f32_lane Result;
-    u32_lane ComparisonMask = (A <= B);
-    ConditionalAssign(&Result, A, ComparisonMask);
-    ConditionalAssign(&Result, B, ~ComparisonMask);
-    return Result;
+    // ConditionalAssign((u32_lane *)Destination, *(u32_lane *)&Source, Mask);
+    *Destination = 
+        (AndNot(StaticCastU32LaneToF32Lane(Mask), *Destination)) | 
+        (StaticCastU32LaneToF32Lane(Mask) & Source);
 }
 
 inline f32_lane
 Clamp(f32_lane Value, f32_lane Minimum, f32_lane Maximum)
 {
-	f32_lane Result = Value;
-    Result = Max(Value, Minimum);
-    Result = Min(Value, Maximum);
+	f32_lane Result = Min(Max(Value, Minimum), Maximum);
 	return Result;
 }
 

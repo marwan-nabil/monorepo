@@ -1,5 +1,5 @@
 /******************************************/
-/*             basic operations           */
+/*         arithmetic operations          */
 /******************************************/
 inline f32_lane 
 operator+(f32_lane A, f32_lane B)
@@ -26,6 +26,38 @@ inline f32_lane
 operator/(f32_lane A, f32_lane B)
 {
     f32_lane Result = _mm_div_ps(A, B);
+    return Result;
+}
+
+/******************************************/
+/*          bitwise operations            */
+/******************************************/
+inline f32_lane
+operator&(f32_lane A, f32_lane B)
+{
+    f32_lane Result = _mm_and_ps(A, B);
+    return Result;
+}
+
+inline f32_lane
+AndNot(f32_lane A, f32_lane B)
+{
+    // (~A) & B
+    f32_lane Result = _mm_andnot_ps(A, B);
+    return Result;
+}
+
+inline f32_lane
+operator|(f32_lane A, f32_lane B)
+{
+    f32_lane Result = _mm_or_ps(A, B);
+    return Result;
+}
+
+inline f32_lane
+operator^(f32_lane A, f32_lane B)
+{
+    f32_lane Result = _mm_xor_ps(A, B);
     return Result;
 }
 
@@ -95,4 +127,18 @@ HorizontalAdd(f32_lane WideValue)
     *(u32 *)&NarrowValue = _mm_extract_ps(Result1, 0);
 
     return NarrowValue;
+}
+
+inline f32_lane
+Max(f32_lane A, f32_lane B)
+{
+    f32_lane Result = _mm_max_ps(A, B);
+    return Result;
+}
+
+inline f32_lane
+Min(f32_lane A, f32_lane B)
+{
+    f32_lane Result = _mm_min_ps(A, B);
+    return Result;
 }

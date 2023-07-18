@@ -1,0 +1,2 @@
+>> build and run, optimized, using lane width of 4
+build ray_tracer optimized 4 && ray_tracer.exe test.bmp && test.bmp

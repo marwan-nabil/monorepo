@@ -31,7 +31,7 @@ F32LaneFromU32Lane(u32_lane Value)
 }
 
 inline f32_lane
-StaticCastF32LaneFromU32Lane(u32_lane Value)
+StaticCastU32LaneToF32Lane(u32_lane Value)
 {
     f32_lane Result = _mm_castsi128_ps(Value);
     return Result;

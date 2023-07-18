@@ -99,6 +99,23 @@ operator&=(u32_lane &A, u32 B)
 }
 
 /******************************************/
+/*                  bitwise andnot        */
+/******************************************/
+inline u32_lane
+AndNot(u32_lane A, u32 B)
+{
+    u32_lane Result = AndNot(A, U32LaneFromU32(B));
+    return Result;
+}
+
+inline u32_lane
+AndNot(u32 A, u32_lane B)
+{
+    u32_lane Result = AndNot(U32LaneFromU32(A), B);
+    return Result;
+}
+
+/******************************************/
 /*                  bitwise or            */
 /******************************************/
 inline u32_lane
@@ -200,7 +217,7 @@ operator!(u32_lane A)
 inline void
 ConditionalAssign(u32_lane *Destination, u32_lane Source, u32_lane Mask)
 {
-    *Destination = (~Mask & *Destination) | (Mask & Source);
+    *Destination = AndNot(Mask, *Destination) | (Mask & Source);
 }
 
 inline u32_lane
