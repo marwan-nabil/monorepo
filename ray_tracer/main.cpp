@@ -27,6 +27,7 @@
 
 #if (SIMD_NUMBEROF_LANES != 1)
 #   include "..\simd_math\shared\random.h"
+#   include "..\simd_math\shared\math.h"
 #endif
 
 #include "ray_tracer.h"
@@ -272,7 +273,7 @@ RenderPixel
             f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
 
             RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
-            
+
             BounceOrigin += MinimumHitDistanceFound * BounceDirection;
 
             v3_lane PureBounceDirection = 
@@ -488,7 +489,7 @@ main(i32 argc, u8 **argv)
     RenderingParameters.ToleranceToZero = 0.0001f;
 
     // RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
-    RenderingParameters.TileWidthInPixels = 64; // TODO(marwan): optimize tile size
+    RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX = 
@@ -537,7 +538,7 @@ main(i32 argc, u8 **argv)
         }
     }
 
-    // TODO(marwan): memory fence here
+    // TODO: memory fence here
 
     clock_t StartTime = clock();
 

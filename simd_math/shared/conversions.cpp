@@ -60,9 +60,8 @@ V4LaneFromV4(v4 Value)
 /******************************************/
 
 // ----------------------------------------
-// TODO: implement these for u32_lane & f32_lane usig intrinsics
+// NOTE: implement these for u32_lane & f32_lane usig intrinsics
 #if 0
-
 inline i32
 RoundF32ToI32(f32 Real)
 {

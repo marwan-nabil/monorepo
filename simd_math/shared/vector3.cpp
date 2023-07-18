@@ -156,14 +156,22 @@ operator&(v3_lane Value, u32_lane Mask)
 /******************************************/
 /*           vector operations            */
 /******************************************/
-inline f32_lane 
+inline void
+ConditionalAssign(v3_lane *Destination, v3_lane Source, u32_lane Mask)
+{
+    ConditionalAssign(&Destination->X, Source.X, Mask);
+    ConditionalAssign(&Destination->Y, Source.Y, Mask);
+    ConditionalAssign(&Destination->Z, Source.Z, Mask);
+}
+
+inline f32_lane
 InnerProduct(v3_lane A, v3_lane B)
 {
     f32_lane Result = A.X * B.X + A.Y * B.Y + A.Z * B.Z;
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 LengthSquared(v3_lane A)
 {
     f32_lane Result = InnerProduct(A, A);
@@ -180,7 +188,13 @@ Length(v3_lane A)
 inline v3_lane 
 Normalize(v3_lane A)
 {
-    v3_lane Result = A / Length(A);
+    v3_lane Result = {};
+
+    f32_lane LengthSq = LengthSquared(A);
+    u32_lane DivisionMask = LengthSq > Square(0.0001f);
+
+    ConditionalAssign(&Result, A / SquareRoot(LengthSq), DivisionMask);
+
     return Result;
 }
 
@@ -208,14 +222,6 @@ Lerp(v3_lane A, v3_lane B, f32_lane t)
 {
     v3_lane Result = ((1.0f - t) * A) + (t * B);
     return Result;
-}
-
-inline void
-ConditionalAssign(v3_lane *Destination, v3_lane Source, u32_lane Mask)
-{
-    ConditionalAssign(&Destination->X, Source.X, Mask);
-    ConditionalAssign(&Destination->Y, Source.Y, Mask);
-    ConditionalAssign(&Destination->Z, Source.Z, Mask);
 }
 
 inline v3

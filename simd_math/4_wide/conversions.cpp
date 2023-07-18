@@ -22,7 +22,7 @@ F32LaneFromU32(u32 Value)
     return Result;
 }
 
-// TODO(marwan): investigate this
+// NOTE: unsigned or signed?
 inline f32_lane
 F32LaneFromU32Lane(u32_lane Value)
 {

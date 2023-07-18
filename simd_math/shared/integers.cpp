@@ -176,8 +176,6 @@ operator!=(u32_lane A, u32_lane B)
 inline u32_lane
 operator||(u32_lane A, u32_lane B)
 {
-    AssertGoodMask(A, __LINE__);
-    AssertGoodMask(B, __LINE__);
     u32_lane Result = A | B;
     return Result;
 }
@@ -185,8 +183,6 @@ operator||(u32_lane A, u32_lane B)
 inline u32_lane
 operator&&(u32_lane A, u32_lane B)
 {
-    AssertGoodMask(A, __LINE__);
-    AssertGoodMask(B, __LINE__);
     u32_lane Result = A & B;
     return Result;
 }
@@ -194,7 +190,6 @@ operator&&(u32_lane A, u32_lane B)
 inline u32_lane
 operator!(u32_lane A)
 {
-    AssertGoodMask(A, __LINE__);
     u32_lane Result = ~A;
     return Result;
 }

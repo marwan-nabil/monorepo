@@ -136,7 +136,6 @@ inline u32_lane
 operator<(f32_lane A, f32 B)
 {
     u32_lane Result = A < F32LaneFromF32(B);
-    AssertGoodMask(Result, __LINE__);
     return Result;
 }
 
@@ -144,7 +143,6 @@ inline u32_lane
 operator<=(f32_lane A, f32 B)
 {
     u32_lane Result = A <= F32LaneFromF32(B);
-    AssertGoodMask(Result, __LINE__);
     return Result;
 }
 
@@ -152,7 +150,6 @@ inline u32_lane
 operator>(f32_lane A, f32 B)
 {
     u32_lane Result = A > F32LaneFromF32(B);
-    AssertGoodMask(Result, __LINE__);
     return Result;
 }
 
@@ -160,7 +157,6 @@ inline u32_lane
 operator>=(f32_lane A, f32 B)
 {
     u32_lane Result = A >= F32LaneFromF32(B);
-    AssertGoodMask(Result, __LINE__);
     return Result;
 }
 
@@ -239,10 +235,8 @@ ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
 inline f32_lane
 Max(f32_lane A, f32_lane B)
 {
-    f32_lane Result;
-    u32_lane ComparisonMask = (A >= B);
-    ConditionalAssign(&Result, A, ComparisonMask);
-    ConditionalAssign(&Result, B, ~ComparisonMask);
+    f32_lane Result = A;
+    ConditionalAssign(&Result, B, B > A);
     return Result;
 }
 
@@ -293,38 +287,31 @@ TranslateLinearTosRGB(f32_lane Linear)
 	return sRGB;
 }
 
-// -----------------------------------------------------------
-// TODO: implement these for f32_lane usig intrinsics
-#if 0
-
-inline f32
-SafeRatioN(f32 Dividend, f32 Divisor, f32 AltValue)
+inline f32_lane
+Lerp(f32_lane A, f32_lane B, f32_lane T)
 {
-	f32 Result = AltValue;
-	if (Divisor != 0)
-	{
-		Result = Dividend / Divisor;
-	}
+	f32_lane Result = ((1.0f - T) * A) + (T * B);
 	return Result;
 }
 
-inline f32
-SafeRatio0(f32 Dividend, f32 Divisor)
+inline f32_lane
+SafeRatioN(f32_lane Dividend, f32_lane Divisor, f32_lane AltValue)
 {
-	return SafeRatioN(Dividend, Divisor, 0);
-}
+	f32_lane Result = AltValue;
 
-inline f32
-SafeRatio1(f32 Dividend, f32 Divisor)
-{
-	return SafeRatioN(Dividend, Divisor, 1.0f);
-}
+    ConditionalAssign(&Result, Dividend / Divisor, (Divisor != F32LaneFromF32(0)));
 
-inline f32
-Lerp(f32 A, f32 B, f32 T)
-{
-	f32 Result = (1.0f - T) * A + T * B;
 	return Result;
 }
 
-#endif
+inline f32_lane
+SafeRatio0(f32_lane Dividend, f32_lane Divisor)
+{
+	return SafeRatioN(Dividend, Divisor, F32LaneFromF32(0));
+}
+
+inline f32_lane
+SafeRatio1(f32_lane Dividend, f32_lane Divisor)
+{
+	return SafeRatioN(Dividend, Divisor, F32LaneFromF32(1.0f));
+}

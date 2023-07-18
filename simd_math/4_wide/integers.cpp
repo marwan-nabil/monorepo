@@ -94,17 +94,6 @@ MaskIsAllZeroes(u32_lane Mask)
     return Result;
 }
 
-// inline u32
-// HorizontalAdd(u32_lane WideValue)
-// {
-//     u32 NarrowValue = 
-//         U32FromU32Lane(WideValue, 0) + 
-//         U32FromU32Lane(WideValue, 1) + 
-//         U32FromU32Lane(WideValue, 2) + 
-//         U32FromU32Lane(WideValue, 3);
-//     return NarrowValue;
-// }
-
 inline u32
 HorizontalAdd(u32_lane WideValue)
 {
