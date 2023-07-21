@@ -87,18 +87,22 @@ operator*(f32_lane A, v3_lane B)
 inline v3_lane 
 operator*(v3_lane A, f32_lane B)
 {
-    v3_lane Result;
-    Result.X = A.X * B;
-    Result.Y = A.Y * B;
-    Result.Z = A.Z * B;
+    v3_lane Result = B * A;
     return Result;
 }
 
-inline v3_lane &
-operator*=(v3_lane &A, f32_lane B)
+inline v3_lane 
+operator*(v3_lane A, f32 B)
 {
-    A = A * B;
-    return A;
+    v3_lane Result = A * F32LaneFromF32(B);
+    return Result;
+}
+
+inline v3_lane 
+operator*(f32 A, v3_lane B)
+{
+    v3_lane Result = F32LaneFromF32(A) * B;
+    return Result;
 }
 
 /******************************************/
@@ -150,6 +154,24 @@ inline v3_lane
 operator&(v3_lane Value, u32_lane Mask)
 {
     v3_lane Result = Mask & Value;
+    return Result;
+}
+
+/******************************************/
+/*                gathers                 */
+/******************************************/
+#define GatherV3(BasePointer, Member, Indices) \
+    GatherV3Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
+
+inline v3_lane
+GatherV3Implementation(v3 *Base, u32 Stride, u32_lane Indices)
+{
+    v3_lane Result = 
+    {
+        GatherF32Implementation(&Base->X, Stride, Indices),
+        GatherF32Implementation(&Base->Y, Stride, Indices),
+        GatherF32Implementation(&Base->Z, Stride, Indices)
+    };
     return Result;
 }
 

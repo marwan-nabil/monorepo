@@ -107,6 +107,23 @@ operator!=(f32_lane A, f32_lane B)
 }
 
 /******************************************/
+/*                gathers                 */
+/******************************************/
+inline f32_lane
+GatherF32Implementation(void *Base, u32 Stride, u32_lane Indices)
+{
+    u32 *IndexPointer = (u32 *)&Indices;
+    f32_lane Result = F32LaneFromF32
+    (
+        *(f32 *)((u8 *)Base + IndexPointer[3] * Stride),
+        *(f32 *)((u8 *)Base + IndexPointer[2] * Stride),
+        *(f32 *)((u8 *)Base + IndexPointer[1] * Stride),
+        *(f32 *)((u8 *)Base + IndexPointer[0] * Stride)
+    );
+    return Result;
+}
+
+/******************************************/
 /*             Common Functions           */
 /******************************************/
 inline f32_lane 
@@ -119,13 +136,12 @@ SquareRoot(f32_lane A)
 inline f32
 HorizontalAdd(f32_lane WideValue)
 {
-    f32 NarrowValue;
-
-    f32_lane Result0 = _mm_hadd_ps(WideValue, F32LaneFromF32(0));
-    f32_lane Result1 = _mm_hadd_ps(Result0, F32LaneFromF32(0));
-
-    *(u32 *)&NarrowValue = _mm_extract_ps(Result1, 0);
-
+    f32 *ElementPointer = (f32 *)&WideValue;
+    f32 NarrowValue = 
+        ElementPointer[0] +
+        ElementPointer[1] +
+        ElementPointer[2] +
+        ElementPointer[3];
     return NarrowValue;
 }
 
@@ -140,5 +156,44 @@ inline f32_lane
 Min(f32_lane A, f32_lane B)
 {
     f32_lane Result = _mm_min_ps(A, B);
+    return Result;
+}
+
+inline f32_lane 
+Power(f32_lane A, f32 Exponent)
+{
+    f32_lane Result = F32LaneFromF32
+    (
+        Power(F32FromF32Lane(A, 3), Exponent),
+        Power(F32FromF32Lane(A, 2), Exponent),
+        Power(F32FromF32Lane(A, 1), Exponent),
+        Power(F32FromF32Lane(A, 0), Exponent)
+    );
+    return Result;
+}
+
+inline f32_lane 
+Power(f32 A, f32_lane Exponent)
+{
+    f32_lane Result = F32LaneFromF32
+    (
+        Power(A, F32FromF32Lane(Exponent, 3)),
+        Power(A, F32FromF32Lane(Exponent, 2)),
+        Power(A, F32FromF32Lane(Exponent, 1)),
+        Power(A, F32FromF32Lane(Exponent, 0))
+    );
+    return Result;
+}
+
+inline f32_lane 
+Power(f32_lane A, f32_lane Exponent)
+{
+    f32_lane Result = F32LaneFromF32
+    (
+        Power(F32FromF32Lane(A, 3), F32FromF32Lane(Exponent, 3)),
+        Power(F32FromF32Lane(A, 2), F32FromF32Lane(Exponent, 2)),
+        Power(F32FromF32Lane(A, 1), F32FromF32Lane(Exponent, 1)),
+        Power(F32FromF32Lane(A, 0), F32FromF32Lane(Exponent, 0))
+    );
     return Result;
 }

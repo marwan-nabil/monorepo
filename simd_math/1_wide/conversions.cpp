@@ -35,7 +35,7 @@ U32FromU32Lane(u32_lane Value, u32 Index)
 }
 
 inline u32_lane
-StaticCastU32LaneFromF32Lane(f32_lane Value)
+StaticCastF32LaneToU32Lane(f32_lane Value)
 {
     return *(u32_lane *)&Value;
 }

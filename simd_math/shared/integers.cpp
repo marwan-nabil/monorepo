@@ -188,30 +188,6 @@ operator!=(u32_lane A, u32_lane B)
 }
 
 /******************************************/
-/*             logical operations         */
-/******************************************/
-inline u32_lane
-operator||(u32_lane A, u32_lane B)
-{
-    u32_lane Result = A | B;
-    return Result;
-}
-
-inline u32_lane
-operator&&(u32_lane A, u32_lane B)
-{
-    u32_lane Result = A & B;
-    return Result;
-}
-
-inline u32_lane
-operator!(u32_lane A)
-{
-    u32_lane Result = ~A;
-    return Result;
-}
-
-/******************************************/
 /*             other operations           */
 /******************************************/
 inline void

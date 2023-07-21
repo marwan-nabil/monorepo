@@ -173,13 +173,13 @@ RenderPixel
                 f32_lane PlaneDistance = F32LaneFromF32(CurrentPlane->Distance);
 
                 f32_lane Denominator = InnerProduct(PlaneNormal, BounceDirection);
-                u32_lane DenominatorMask = (Denominator > ToleranceToZero) || (Denominator < -ToleranceToZero);
+                u32_lane DenominatorMask = (Denominator > ToleranceToZero) | (Denominator < -ToleranceToZero);
 
                 if (!MaskIsAllZeroes(DenominatorMask))
                 {
                     f32_lane CurrentHitDistance = (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) / Denominator;
                     u32_lane CurrentHitDistanceMask = 
-                        (CurrentHitDistance < MinimumHitDistanceFound) && 
+                        (CurrentHitDistance < MinimumHitDistanceFound) &
                         (CurrentHitDistance > HitDistanceLowerLimit);
 
                     u32_lane HitMask = CurrentHitDistanceMask & DenominatorMask;
@@ -214,13 +214,13 @@ RenderPixel
                     f32_lane PositiveSolution = (-B + RootTerm) / QuadraticDenominator;
                     f32_lane NegativeSolution = (-B - RootTerm) / QuadraticDenominator;
 
-                    u32_lane NegativeSolutionMask = (NegativeSolution > HitDistanceLowerLimit) && (NegativeSolution < PositiveSolution);
+                    u32_lane NegativeSolutionMask = (NegativeSolution > HitDistanceLowerLimit) & (NegativeSolution < PositiveSolution);
 
                     f32_lane CurrentHitDistance = PositiveSolution;
                     ConditionalAssign(&CurrentHitDistance, NegativeSolution, NegativeSolutionMask);
 
                     u32_lane HitDistanceMask = 
-                        (CurrentHitDistance < MinimumHitDistanceFound) && 
+                        (CurrentHitDistance < MinimumHitDistanceFound) &
                         (CurrentHitDistance > HitDistanceLowerLimit);
 
                     if (!MaskIsAllZeroes(HitDistanceMask))
@@ -240,35 +240,19 @@ RenderPixel
             v3_lane HitMaterialReflectionColor = HitMaterial->ReflectionColor;
             v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
 #elif (SIMD_NUMBEROF_LANES == 4)
-            f32_lane HitMaterialSpecularity = F32LaneFromF32
-            (
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].Specularity,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].Specularity,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].Specularity,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].Specularity
-            );
+            f32_lane HitMaterialSpecularity = 
+                LaneMask & GatherF32(World->Materials, Specularity, HitMaterialIndex);
 
-            v3_lane HitMaterialReflectionColor = V3LaneFromV3
-            (
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].ReflectionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].ReflectionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].ReflectionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].ReflectionColor
-            );
+            v3_lane HitMaterialReflectionColor = 
+                LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
 
-            v3_lane HitMaterialEmmissionColor = V3LaneFromV3
-            (
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 3)].EmmissionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 2)].EmmissionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 1)].EmmissionColor,
-                World->Materials[U32FromU32Lane(HitMaterialIndex, 0)].EmmissionColor
-            );
+            v3_lane HitMaterialEmmissionColor = 
+                LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
 #endif
 
-            RayBatchColor += HadamardProduct(RayBatchColorAttenuation, LaneMask & HitMaterialEmmissionColor);
+            RayBatchColor += HadamardProduct(RayBatchColorAttenuation, HitMaterialEmmissionColor);
 
-            ConditionalAssign(&LaneMask, U32LaneFromU32(0xFFFFFFFF), (HitMaterialIndex != U32LaneFromU32(0)));
-            ConditionalAssign(&LaneMask, U32LaneFromU32(0), (HitMaterialIndex == U32LaneFromU32(0)));
+            LaneMask = LaneMask & (HitMaterialIndex != U32LaneFromU32(0));
 
             f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
 
@@ -291,7 +275,7 @@ RenderPixel
         }
 
         PixelColor += HorizontalAdd(RayBatchColor) / (f32)RAYS_PER_PIXEL;
-        BouncesComputedPerPixel += (u64)HorizontalAdd(BouncesComputedPerRayBatch);
+        BouncesComputedPerPixel += HorizontalAdd(BouncesComputedPerRayBatch);
     }
 
     *BouncesComputedPerTile += BouncesComputedPerPixel;
@@ -488,8 +472,8 @@ main(i32 argc, u8 **argv)
     RenderingParameters.HitDistanceLowerLimit = 0.001f;
     RenderingParameters.ToleranceToZero = 0.0001f;
 
-    // RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
-    RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
+    RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
+    // RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX = 

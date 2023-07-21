@@ -98,19 +98,18 @@ operator==(u32_lane A, u32_lane B)
 inline b32
 MaskIsAllZeroes(u32_lane Mask)
 {
-    b32 Result = _mm_test_all_zeros(_mm_set1_epi32(0xFFFFFFFF), Mask);
+    b32 Result = (_mm_movemask_epi8(Mask) == 0);
     return Result;
 }
 
-inline u32
+inline u64
 HorizontalAdd(u32_lane WideValue)
 {
-    u32 NarrowValue;
-
-    u32_lane Result0 = _mm_hadd_epi32(WideValue, U32LaneFromU32(0));
-    u32_lane Result1 = _mm_hadd_epi32(Result0, U32LaneFromU32(0));
-
-    *(u32 *)&NarrowValue = _mm_extract_epi32(Result1, 0);
-
+    u32 *ElementPointer = (u32 *)&WideValue;
+    u32 NarrowValue = 
+        (u64)ElementPointer[0] +
+        (u64)ElementPointer[1] +
+        (u64)ElementPointer[2] +
+        (u64)ElementPointer[3];
     return NarrowValue;
 }

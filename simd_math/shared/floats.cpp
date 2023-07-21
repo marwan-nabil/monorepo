@@ -130,7 +130,7 @@ operator/=(f32_lane &A, f32 B)
 }
 
 /******************************************/
-/*             logical comparison         */
+/*             comparison                 */
 /******************************************/
 inline u32_lane
 operator<(f32_lane A, f32 B)
@@ -166,8 +166,7 @@ operator>=(f32_lane A, f32 B)
 inline f32_lane 
 operator&(u32_lane Mask, f32_lane Value)
 {
-    u32_lane ResultU32Lane = Mask & *(u32_lane *)&Value;
-    f32_lane Result = *(f32_lane *)&ResultU32Lane;
+    f32_lane Result = StaticCastU32LaneToF32Lane(Mask) & Value;
     return Result;
 }
 
@@ -179,51 +178,18 @@ operator&(f32_lane Value, u32_lane Mask)
 }
 
 /******************************************/
+/*                gathers                 */
+/******************************************/
+#define GatherF32(BasePointer, Member, Indices) \
+    GatherF32Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
+
+/******************************************/
 /*             other operations           */
 /******************************************/
 inline f32_lane 
 Square(f32_lane A)
 {
     return A * A;
-}
-
-inline f32_lane 
-Power(f32_lane A, f32 Exponent)
-{
-    f32_lane Result = F32LaneFromF32
-    (
-        Power(F32FromF32Lane(A, 3), Exponent),
-        Power(F32FromF32Lane(A, 2), Exponent),
-        Power(F32FromF32Lane(A, 1), Exponent),
-        Power(F32FromF32Lane(A, 0), Exponent)
-    );
-    return Result;
-}
-
-inline f32_lane 
-Power(f32 A, f32_lane Exponent)
-{
-    f32_lane Result = F32LaneFromF32
-    (
-        Power(A, F32FromF32Lane(Exponent, 3)),
-        Power(A, F32FromF32Lane(Exponent, 2)),
-        Power(A, F32FromF32Lane(Exponent, 1)),
-        Power(A, F32FromF32Lane(Exponent, 0))
-    );
-    return Result;
-}
-
-inline f32_lane 
-Power(f32_lane A, f32_lane Exponent)
-{
-    f32_lane Result = F32LaneFromF32
-    (
-        Power(F32FromF32Lane(A, 3), F32FromF32Lane(Exponent, 3)),
-        Power(F32FromF32Lane(A, 2), F32FromF32Lane(Exponent, 2)),
-        Power(F32FromF32Lane(A, 1), F32FromF32Lane(Exponent, 1)),
-        Power(F32FromF32Lane(A, 0), F32FromF32Lane(Exponent, 0))
-    );
-    return Result;
 }
 
 inline void
