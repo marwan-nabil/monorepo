@@ -350,7 +350,7 @@ static DWORD WINAPI
 WorkerThreadEntry(void *Parameter)
 {
     work_queue *WorkQueue = (work_queue *)Parameter;
-    while(RenderTile(WorkQueue)){}
+    while (RenderTile(WorkQueue)){}
     return 0;
 }
 
