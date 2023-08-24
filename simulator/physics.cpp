@@ -1,19 +1,3 @@
-
-typedef f32 potential;
-
-struct electric_point
-{
-    potential CurrentPotential;
-    potential NextPotential;
-};
-
-struct electric_wire
-{
-    electric_point *A;
-    electric_point *B;
-    u32 InverseEquillibriumRate;
-};
-
 void ElectricPointUpdate(electric_point *Point)
 {
     Assert(Point);

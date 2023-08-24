@@ -8,10 +8,17 @@
 #include <float.h>
 #include <time.h>
 
-#include"platform.h"
+#ifndef SIMD_NUMBEROF_LANES
+#define SIMD_NUMBEROF_LANES 4
+#endif
+
+#define ENABLE_ASSERTIONS 0
+
+#include "..\miscellaneous\assertions.h"
+#include "..\miscellaneous\base_types.h"
+#include "..\miscellaneous\basic_defines.h"
 
 #include "..\math\constants.h"
-#include "..\math\macros.h"
 #include "..\math\random.h"
 #include "..\math\vector2.h"
 #include "..\math\vector3.h"
@@ -32,8 +39,6 @@
 
 #include "ray_tracer.h"
 
-#include "..\multi_threading\utils.cpp"
-
 #include "..\math\random.cpp"
 #include "..\math\conversions.cpp"
 #include "..\math\integers.cpp"
@@ -41,7 +46,8 @@
 #include "..\math\vector2.cpp"
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
-#include "..\math\assertions.cpp"
+
+#include "..\miscellaneous\multithreading_utils.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\simd_math\1_wide\conversions.cpp"

@@ -12,9 +12,3 @@ typedef int32_t i32;
 typedef int64_t i64;
 typedef float f32;
 typedef double f64;
-
-#ifndef SIMD_NUMBEROF_LANES
-#define SIMD_NUMBEROF_LANES 4
-#endif
-
-#define ENABLE_ASSERTIONS 0

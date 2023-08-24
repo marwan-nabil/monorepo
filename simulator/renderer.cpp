@@ -1,5 +1,4 @@
-void
-DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor)
+void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, color RectColor)
 {
     i32 MinX = RoundF32ToI32(MinCorner.X);
     i32 MinY = RoundF32ToI32(MinCorner.Y);

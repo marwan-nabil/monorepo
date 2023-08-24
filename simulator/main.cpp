@@ -2,10 +2,20 @@
 #include <stdint.h>
 #include <math.h>
 
-#include"platform.h"
-#include "..\math\math.h"
+#include "..\miscellaneous\base_types.h"
+#include "..\miscellaneous\assertions.h"
+#include "..\miscellaneous\basic_defines.h"
 
-#include "..\math\math.cpp"
+#include "..\math\vector2.h"
+#include "..\math\rectangle2.h"
+
+#include "simulator.h"
+
+#include "..\math\conversions.cpp"
+#include "..\math\floats.cpp"
+#include "..\math\integers.cpp"
+#include "..\math\vector2.cpp"
+
 #include "physics.cpp"
 #include "simulation.cpp"
 #include "renderer.cpp"
@@ -13,8 +23,7 @@
 struct user_input_sample GlobalLastUserInput;
 struct simulation_state GlobalSimulationState;
 
-void
-DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo)
+void DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo)
 {
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);

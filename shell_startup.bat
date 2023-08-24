@@ -3,4 +3,5 @@ call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 if not exist output; mkdir output
 cd output
 cl ..\build\build.cpp
+del build.obj
 cls
