@@ -1,17 +1,7 @@
 #pragma once
 
-struct rendering_buffer
-{
-    void *Memory;
-    u32 Width;
-    u32 Height;
-    u32 BytesPerPixel;
-    u32 Pitch;
-};
-
 struct window_private_data
 {
-    BITMAPINFO *LocalBufferBitmapinfo;
     rendering_buffer *LocalRenderingBuffer;
     i32 *RunningState;
 };
@@ -42,12 +32,10 @@ struct simulation_state
     b8 Right;
 };
 
-typedef f32 potential;
-
 struct electric_point
 {
-    potential CurrentPotential;
-    potential NextPotential;
+    f32 CurrentPotential;
+    f32 NextPotential;
 };
 
 struct electric_wire

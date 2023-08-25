@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     {
         const char *ExtensionsToClean[] = 
         {
-            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp"
+            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp", "txt"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)

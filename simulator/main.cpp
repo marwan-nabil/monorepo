@@ -2,12 +2,16 @@
 #include <stdint.h>
 #include <math.h>
 
+#define ENABLE_ASSERTIONS
+
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\assertions.h"
 #include "..\miscellaneous\basic_defines.h"
 
 #include "..\math\vector2.h"
 #include "..\math\rectangle2.h"
+
+#include "..\software_rendering\software_rendering.h"
 
 #include "simulator.h"
 
@@ -16,50 +20,52 @@
 #include "..\math\integers.cpp"
 #include "..\math\vector2.cpp"
 
-#include "physics.cpp"
-#include "simulation.cpp"
-#include "renderer.cpp"
+#include "..\miscellaneous\timing_utils.cpp"
+#include "..\software_rendering\software_rendering.cpp"
 
 struct user_input_sample GlobalLastUserInput;
 struct simulation_state GlobalSimulationState;
 
-void DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffer *Buffer, BITMAPINFO *LocalBufferBitmapinfo)
+void ElectricPointUpdate(electric_point *Point)
 {
-    RECT ClientRect;
-    GetClientRect(Window, &ClientRect);
-    i32 WindowWidth = ClientRect.right - ClientRect.left;
-    i32 WindowHeight = ClientRect.bottom - ClientRect.top;
+    Assert(Point);
+    Point->CurrentPotential = Point->NextPotential;
+}
 
-    if ((WindowWidth == 1920) && (WindowHeight == 1027))
+void WireUpdate(electric_wire *Wire)
+{
+    Assert(Wire);
+    Assert(Wire->InverseEquillibriumRate);
+
+    ElectricPointUpdate(Wire->A);
+    ElectricPointUpdate(Wire->B);
+
+    electric_point *LowerPotentialPoint;
+    electric_point *HigherPotentialPoint;
+
+    if (Wire->A->CurrentPotential > Wire->B->CurrentPotential)
     {
-        i32 DestinationWidth = (i32)(Buffer->Width * 1.3);
-        i32 DestinationHeight = (i32)(Buffer->Height * 1.3);
-        StretchDIBits
-        (
-            DeviceContext,
-            0, 0, WindowWidth, WindowHeight,
-            0, 0, Buffer->Width, Buffer->Height,
-            Buffer->Memory, LocalBufferBitmapinfo, DIB_RGB_COLORS, SRCCOPY
-        );
+        LowerPotentialPoint = Wire->B;
+        HigherPotentialPoint = Wire->A;
     }
     else
     {
-        i32 OffsetX = 10;
-        i32 OffsetY = 10;
-
-        PatBlt(DeviceContext, 0, 0, WindowWidth, OffsetY, WHITENESS); // top bar
-        PatBlt(DeviceContext, 0, 0, OffsetX, WindowHeight, WHITENESS); // left bar
-        PatBlt(DeviceContext, WindowWidth - OffsetX, 0, OffsetX, WindowHeight, WHITENESS); // right bar
-        PatBlt(DeviceContext, 0, WindowHeight - OffsetY, WindowWidth, OffsetY, WHITENESS); // bottom bar
-
-        StretchDIBits
-        (
-            DeviceContext,
-            OffsetX, OffsetY, WindowWidth - 2 * OffsetX, WindowHeight - 2 * OffsetX,
-            0, 0, Buffer->Width, Buffer->Height,
-            Buffer->Memory, LocalBufferBitmapinfo, DIB_RGB_COLORS, SRCCOPY
-        );
+        LowerPotentialPoint = Wire->A;
+        HigherPotentialPoint = Wire->B;
     }
+
+    f32 PotentialDifference = HigherPotentialPoint->CurrentPotential - LowerPotentialPoint->CurrentPotential;
+    f32 StepSize = PotentialDifference / Wire->InverseEquillibriumRate;
+    HigherPotentialPoint->NextPotential -= StepSize;
+    LowerPotentialPoint->NextPotential += StepSize;
+}
+
+void UpdateSimulation(f32 TimeDelta, user_input_sample *CurrentUserInput, simulation_state *SimulationState)
+{
+    SimulationState->Up = CurrentUserInput->Up.IsDown;
+    SimulationState->Down = CurrentUserInput->Down.IsDown;
+    SimulationState->Left = CurrentUserInput->Left.IsDown;
+    SimulationState->Right = CurrentUserInput->Right.IsDown;
 }
 
 LRESULT CALLBACK
@@ -79,13 +85,14 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
         case WM_PAINT:
         {
             window_private_data *WindowPrivateData = (window_private_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
+
             PAINTSTRUCT Paint;
             HDC DeviceContext = BeginPaint(Window, &Paint);
             DisplayRenderBufferInWindow
             (
-                Window, DeviceContext,
-                WindowPrivateData->LocalRenderingBuffer,
-                WindowPrivateData->LocalBufferBitmapinfo
+                Window, 
+                DeviceContext,
+                WindowPrivateData->LocalRenderingBuffer
             );
             EndPaint(Window, &Paint);
         } break;
@@ -152,10 +159,11 @@ ProcessPendingMessages(user_input_sample *LastUserInput, window_private_data *Wi
                         LastUserInput->Right.IsDown = (b8)KeyIsDown;
                     }
 
-                    if ((VirtualKeyCode == VK_F4) && KeyIsDown && AltKeyIsDown)
-                    {
-                        WindowData->RunningState = false;
-                    }
+                }
+
+                if ((VirtualKeyCode == VK_F4) && KeyIsDown && AltKeyIsDown)
+                {
+                    WindowData->RunningState = false;
                 }
             } break;
 
@@ -168,57 +176,44 @@ ProcessPendingMessages(user_input_sample *LastUserInput, window_private_data *Wi
     }
 }
 
-inline LARGE_INTEGER
-GetWindowsTimerValue()
-{
-    LARGE_INTEGER Result;
-    QueryPerformanceCounter(&Result);
-    return Result;
-}
-
-inline f32
-GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End, i64 ProfileCounterFrequency)
-{
-    f32 SecondsElapsed = (f32)(End.QuadPart - Start.QuadPart)
-        / (f32)ProfileCounterFrequency;
-    return SecondsElapsed;
-}
-
-void
-SleepRestOfFrame(LARGE_INTEGER FrameStartTime, i64 WindowsTimerFrequency, f32 TargetSecondsPerFrame)
-{
-    f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
-    if (SecondsElapsedForFrame < TargetSecondsPerFrame)
-    {
-        DWORD SleepMilliSeconds = (DWORD)(1000.0f * (TargetSecondsPerFrame - SecondsElapsedForFrame));
-        if (SleepMilliSeconds > 0)
-        {
-            Sleep(SleepMilliSeconds);
-        }
-
-        do
-        {
-            SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
-        } while (SecondsElapsedForFrame < TargetSecondsPerFrame);
-    }
-    else
-    {
-        // NOTE: frame missed
-    }
-}
-
 i32
 WinMain
 (
-    HINSTANCE Instance, 
+    HINSTANCE Instance,
     HINSTANCE PrevInstance,
-    LPSTR CmdLine, 
+    LPSTR CmdLine,
     i32 ShowCmd
 )
 {
     i32 RunningState = false;
+
     rendering_buffer LocalRenderingBuffer = {};
-    BITMAPINFO LocalBufferBitmapinfo = {};
+    LocalRenderingBuffer.Width = 1920;
+    LocalRenderingBuffer.Height = 1080;
+    LocalRenderingBuffer.BytesPerPixel = 4;
+    LocalRenderingBuffer.Pitch = LocalRenderingBuffer.Width * LocalRenderingBuffer.BytesPerPixel;
+
+    LocalRenderingBuffer.Bitmapinfo.bmiHeader.biSize = sizeof(LocalRenderingBuffer.Bitmapinfo.bmiHeader);
+    LocalRenderingBuffer.Bitmapinfo.bmiHeader.biWidth = LocalRenderingBuffer.Width;
+    LocalRenderingBuffer.Bitmapinfo.bmiHeader.biHeight = (LONG)LocalRenderingBuffer.Height;
+    LocalRenderingBuffer.Bitmapinfo.bmiHeader.biPlanes = 1;
+    LocalRenderingBuffer.Bitmapinfo.bmiHeader.biBitCount = 32;
+    LocalRenderingBuffer.Bitmapinfo.bmiHeader.biCompression = BI_RGB;
+
+    LocalRenderingBuffer.Memory = VirtualAlloc
+    (
+        0,
+        LocalRenderingBuffer.Width * LocalRenderingBuffer.Height * LocalRenderingBuffer.BytesPerPixel,
+        MEM_COMMIT | MEM_RESERVE,
+        PAGE_READWRITE
+    );
+
+    f32 RendererRefreshHz = 60.0f;
+    f32 TargetSecondsPerFrame = 1.0f / RendererRefreshHz;
+
+    LARGE_INTEGER ProfileCounterFrequency;
+    QueryPerformanceFrequency(&ProfileCounterFrequency);
+    i64 WindowsTimerFrequency = ProfileCounterFrequency.QuadPart;
 
     WNDCLASSA MainWindowClass = {};
     MainWindowClass.style = CS_VREDRAW | CS_HREDRAW;
@@ -227,22 +222,17 @@ WinMain
     MainWindowClass.lpszClassName = "MainWindowClass";
     MainWindowClass.hCursor = LoadCursor(0, IDC_ARROW);
 
-    LARGE_INTEGER ProfileCounterFrequency;
-    QueryPerformanceFrequency(&ProfileCounterFrequency);
-    i64 WindowsTimerFrequency = ProfileCounterFrequency.QuadPart;
-
     if (RegisterClassA(&MainWindowClass))
     {
         window_private_data WindowPrivateData = {};
         WindowPrivateData.LocalRenderingBuffer = &LocalRenderingBuffer;
-        WindowPrivateData.LocalBufferBitmapinfo = &LocalBufferBitmapinfo;
         WindowPrivateData.RunningState = &RunningState;
 
         HWND Window = CreateWindowExA
         (
             0, 
             MainWindowClass.lpszClassName,
-            "thing",
+            "simulator",
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
             CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
             0, 
@@ -253,45 +243,39 @@ WinMain
 
         if (Window)
         {
-            f32 RendererRefreshHz = 60.0f;
-            f32 TargetSecondsPerFrame = 1.0f / RendererRefreshHz;
-
-            LocalRenderingBuffer.Width = 1920;
-            LocalRenderingBuffer.Height = 1080;
-            LocalRenderingBuffer.BytesPerPixel = 4;
-            LocalRenderingBuffer.Pitch = LocalRenderingBuffer.Width * LocalRenderingBuffer.BytesPerPixel;
-
-            LocalBufferBitmapinfo.bmiHeader.biSize = sizeof(LocalBufferBitmapinfo.bmiHeader);
-            LocalBufferBitmapinfo.bmiHeader.biWidth = LocalRenderingBuffer.Width;
-            LocalBufferBitmapinfo.bmiHeader.biHeight = (LONG)LocalRenderingBuffer.Height;
-            LocalBufferBitmapinfo.bmiHeader.biPlanes = 1;
-            LocalBufferBitmapinfo.bmiHeader.biBitCount = 32;
-            LocalBufferBitmapinfo.bmiHeader.biCompression = BI_RGB;
-
-            i32 BitmapMemorySize = LocalRenderingBuffer.Width * LocalRenderingBuffer.Height * LocalRenderingBuffer.BytesPerPixel;
-            LocalRenderingBuffer.Memory = VirtualAlloc
-            (
-                0,
-                BitmapMemorySize,
-                MEM_COMMIT | MEM_RESERVE,
-                PAGE_READWRITE
-            );
-
             RunningState = true;
             while (RunningState)
             {
                 LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
 
                 ProcessPendingMessages(&GlobalLastUserInput, &WindowPrivateData);
-                
+
                 UpdateSimulation(TargetSecondsPerFrame, &GlobalLastUserInput, &GlobalSimulationState);
                 RenderSimulation(&LocalRenderingBuffer, &GlobalSimulationState);
 
                 HDC DeviceContext = GetDC(Window);
-                DisplayRenderBufferInWindow(Window, DeviceContext, &LocalRenderingBuffer, &LocalBufferBitmapinfo);
+                DisplayRenderBufferInWindow(Window, DeviceContext, &LocalRenderingBuffer);
                 ReleaseDC(Window, DeviceContext);
 
-                SleepRestOfFrame(FrameStartTime, WindowsTimerFrequency, TargetSecondsPerFrame);
+                f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
+                if (SecondsElapsedForFrame < TargetSecondsPerFrame)
+                {
+                    DWORD TimeToSleepInMilliSeconds = (DWORD)(1000.0f * (TargetSecondsPerFrame - SecondsElapsedForFrame));
+                    if (TimeToSleepInMilliSeconds > 0)
+                    {
+                        Sleep(TimeToSleepInMilliSeconds);
+                    }
+
+                    do
+                    {
+                        SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
+                    } while (SecondsElapsedForFrame < TargetSecondsPerFrame);
+                }
+                else
+                {
+                    // NOTE: frame missed
+                    // TODO: log frame miss on screen
+                }
             }
         }
     }
