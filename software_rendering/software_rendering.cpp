@@ -37,7 +37,20 @@ void DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffe
     }
 }
 
-void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 RectColor)
+inline u32 
+ExtractColor(v4 Color)
+{
+    u32 Result =
+    (
+        (RoundF32ToU32(Color.Alpha * 255.0f) << 24) |
+        (RoundF32ToU32(Color.Red * 255.0f) << 16) |
+        (RoundF32ToU32(Color.Green * 255.0f) << 8) |
+        RoundF32ToU32(Color.Blue * 255.0f)
+    );
+    return Result;
+}
+
+void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Color)
 {
     i32 MinX = RoundF32ToI32(MinCorner.X);
     i32 MinY = RoundF32ToI32(MinCorner.Y);
@@ -61,13 +74,7 @@ void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Rect
         MaxY = (i32)Buffer->Height;
     }
 
-    u32 Color =
-    (
-        (RoundF32ToU32(RectColor.Alpha * 255.0f) << 24) |
-        (RoundF32ToU32(RectColor.Red * 255.0f) << 16) |
-        (RoundF32ToU32(RectColor.Green * 255.0f) << 8) |
-        RoundF32ToU32(RectColor.Blue * 255.0f)
-    );
+    u32 ColorU32 = ExtractColor(Color);
 
     u8 *Row = 
         (u8 *)Buffer->Memory + 
@@ -79,10 +86,10 @@ void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Rect
         u32 *Pixel = (u32 *)Row;
         for (i32 X = MinX; X < MaxX; X++)
         {
-            f32 SourceAlpha = (f32)((Color >> 24) & 0xff) / 255.0f;
-            f32 SourceRed = (f32)((Color >> 16) & 0xff);
-            f32 SourceGreen = (f32)((Color >> 8) & 0xff);
-            f32 SourceBlue = (f32)((Color >> 0) & 0xff);
+            f32 SourceAlpha = (f32)((ColorU32 >> 24) & 0xff) / 255.0f;
+            f32 SourceRed = (f32)((ColorU32 >> 16) & 0xff);
+            f32 SourceGreen = (f32)((ColorU32 >> 8) & 0xff);
+            f32 SourceBlue = (f32)((ColorU32 >> 0) & 0xff);
 
             f32 DestinationRed = (f32)((*Pixel >> 16) & 0xff);
             f32 DestinationGreen = (f32)((*Pixel >> 8) & 0xff);
@@ -102,52 +109,58 @@ void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Rect
 }
 
 void
-DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, u32 LineColor)
+DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
 {
-    i32 MinX = RoundF32ToI32(Start.X);
-    i32 MinY = RoundF32ToI32(Start.Y);
-    i32 MaxX = RoundF32ToI32(End.X);
-    i32 MaxY = RoundF32ToI32(End.Y);
+    rectangle2 BufferRectangle = RectangleFromMinMax(V2(0, 0), V2((f32)Buffer->Width, (f32)Buffer->Height));
 
-    if (MinX < 0)
+    Start = ClampPointToRectangle(Start, BufferRectangle);
+    End = ClampPointToRectangle(End, BufferRectangle);
+
+    u32 ColorU32 = ExtractColor(Color);
+
+    i32 StartX = RoundF32ToI32(Start.X);
+    i32 StartY = RoundF32ToI32(Start.Y);
+    i32 EndX = RoundF32ToI32(End.X);
+    i32 EndY = RoundF32ToI32(End.Y);
+
+    i32 MinX = Min(StartX, EndX);
+    i32 MinY = Min(StartY, EndY);
+    i32 MaxX = Max(StartX, EndX);
+    i32 MaxY = Max(StartY, EndY);
+
+    i32 XDiff = EndX - StartX;
+    i32 YDiff = EndY - StartY;
+
+    // TODO: review this algorithm carefully
+
+    if ((XDiff == 0) && (YDiff == 0))
     {
-        MinX = 0;
+        u32 *Pixel = (u32 *)((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
+        *Pixel = ColorU32;
     }
-    if (MinY < 0)
+    else if (AbsoluteValue(XDiff) > AbsoluteValue(YDiff))
     {
-        MinY = 0;
-    }
-    if (MaxX > (i32)Buffer->Width)
-    {
-        MaxX = (i32)Buffer->Width;
-    }
-    if (MaxY > (i32)Buffer->Height)
-    {
-        MaxY = (i32)Buffer->Height;
-    }
-
-    f32 LineMCoefficient = (f32)(MaxY - MinY) / (f32)(MaxX - MinX);
-
-    u8 *DestinationRow = ((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
-
-    for (i32 Y = MinY; Y < MaxY; Y++)
-    {
-        u32 *Pixel = (u32 *)DestinationRow;
-
-        for (i32 X = MinX; X < MaxX; X++)
+        f32 Slope = (f32)YDiff / (f32)XDiff;
+        for (i32 X = MinX; X <= MaxX; X++)
         {
-            if (RoundF32ToI32(LineMCoefficient * X) == Y)
-            {
-                *Pixel = LineColor;
-            }
-            Pixel++;
+            i32 Y = RoundF32ToI32((f32)StartY + Slope * (X - StartX));
+            u32 *Pixel = (u32 *)((u8 *)Buffer->Memory + X * Buffer->BytesPerPixel + Y * Buffer->Pitch);
+            *Pixel = ColorU32;
         }
-
-        DestinationRow += Buffer->Pitch;
+    }
+    else
+    {
+        f32 Slope = (f32)XDiff / (f32)YDiff;
+        for (i32 Y = MinY; Y <= MaxY; Y++)
+        {
+            i32 X = RoundF32ToI32((f32)StartX + Slope * (Y - StartY));
+            u32 *Pixel = (u32 *)((u8 *)Buffer->Memory + X * Buffer->BytesPerPixel + Y * Buffer->Pitch);
+            *Pixel = ColorU32;
+        }
     }
 }
 
-void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRadius, u32 PointColor)
+void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRadius, v4 Color)
 {
     i32 MinX = RoundF32ToI32(CenterPosition.X - CircleRadius);
     i32 MinY = RoundF32ToI32(CenterPosition.Y - CircleRadius);
@@ -171,6 +184,8 @@ void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRad
         MaxY = (i32)Buffer->Height;
     }
 
+    u32 ColorU32 = ExtractColor(Color);
+
     u8 *DestinationRow = ((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
 
     for (i32 Y = MinY; Y < MaxY; Y++)
@@ -184,7 +199,7 @@ void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRad
 
             if (Length(v2{PointCenterRelativeX, PointCenterRelativeY}) <= CircleRadius)
             {
-                *Pixel = PointColor;
+                *Pixel = ColorU32;
             }
 
             Pixel++;
@@ -196,24 +211,25 @@ void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRad
 
 void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YAxisRange, rectangle2 GraphRectangle)
 {
+    // background
     DrawRectangle(Buffer, GraphRectangle.MinPoint, GraphRectangle.MaxPoint, V4(1.0f, 1.0f, 1.0f, 1.0f));
 
-    f32 XPadding = 40;
-    f32 YPadding = 40;
+    f32 XPadding = 10;
+    f32 YPadding = 10;
 
     f32 XStepSize = (GraphRectangle.MaxPoint.X - GraphRectangle.MinPoint.X - 2 * XPadding) / XAxisCount;
     f32 XAxisLength = XStepSize * XAxisCount;
 
-    v2 XAxisStartPoint = v2{GraphRectangle.MinPoint.X + XPadding, GraphRectangle.MinPoint.Y + YPadding};
-    v2 XAxisEndPoint = v2{XAxisStartPoint.X + XAxisLength, XAxisStartPoint.Y};
+    v2 XAxisStartPoint = V2(GraphRectangle.MinPoint.X + XPadding, GraphRectangle.MinPoint.Y + YPadding);
+    v2 XAxisEndPoint = V2(XAxisStartPoint.X + XAxisLength, XAxisStartPoint.Y);
 
-    DrawLine(Buffer, XAxisStartPoint, XAxisEndPoint, 0xff335577);
+    DrawLine(Buffer, XAxisStartPoint, XAxisEndPoint, V4(0, 0, 0, 1.0f));
 
     f32 YStepSize = (GraphRectangle.MaxPoint.Y - GraphRectangle.MinPoint.Y - 2 * YPadding) / YAxisRange;
     f32 YAxisLength = YStepSize * YAxisRange;
 
     v2 YAxisStartPoint = XAxisStartPoint;
-    v2 YAxisEndPoint = v2{YAxisStartPoint.X, YAxisStartPoint.Y + YAxisLength};
+    v2 YAxisEndPoint = V2(YAxisStartPoint.X, YAxisStartPoint.Y + YAxisLength);
 
-    DrawLine(Buffer, YAxisStartPoint, YAxisEndPoint, 0xff335577);
+    DrawLine(Buffer, YAxisStartPoint, YAxisEndPoint, V4(0, 0, 0, 1.0f));
 }

@@ -1,5 +1,5 @@
 inline rectangle2 
-RectMinMax(v2 Min, v2 Max)
+RectangleFromMinMax(v2 Min, v2 Max)
 {
     rectangle2 Result = {Min, Max};
     return Result;
@@ -96,4 +96,13 @@ GetbarycentricPoint(rectangle2 Volume, v2 Point)
 	Result.X = SafeRatio0((Point.X - Volume.MinPoint.X), (Volume.MaxPoint.X - Volume.MinPoint.X));
 	Result.Y = SafeRatio0((Point.Y - Volume.MinPoint.Y), (Volume.MaxPoint.Y - Volume.MinPoint.Y));
 	return Result;
+}
+
+inline v2
+ClampPointToRectangle(v2 Point, rectangle2 Rectangle)
+{
+    v2 Result;
+    Result.X = Clamp(Point.X, Rectangle.MinPoint.X, Rectangle.MaxPoint.X);
+    Result.Y = Clamp(Point.Y, Rectangle.MinPoint.Y, Rectangle.MaxPoint.Y);
+    return Result;
 }

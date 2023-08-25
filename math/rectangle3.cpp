@@ -1,5 +1,5 @@
 inline rectangle3
-RectMinMax(v3 Min, v3 Max)
+RectangleFromMinMax(v3 Min, v3 Max)
 {
 	rectangle3 Result = {Min, Max};
 	return Result;
