@@ -13,7 +13,8 @@ void DisplayHelp()
     printf("INFO: Available build targets:\n");
     printf("          build help\n");
     printf("          build clean\n");
-    printf("          build build [optimized, non_optimized]\n");
+    printf("          build build\n");
+    printf("          build tests\n");
     printf("          build simulator [optimized, non_optimized]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
@@ -147,6 +148,12 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\build.temp.exe");
             StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
         }
+        else if (strcmp(argv[1], "tests") == 0)
+        {
+            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\tests\\test.cpp");
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
+            StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
+        }
         else if (strcmp(argv[1], "simulator") == 0)
         {
             StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\simulator\\main.cpp");
@@ -167,28 +174,35 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        if (argc >= 3)
+        if 
+        (
+            (strcmp(argv[1], "simulator") == 0) ||
+            (strcmp(argv[1], "ray_tracer") == 0)
+        )
         {
-            if (strcmp(argv[2], "optimized") == 0)
+            if (argc >= 3)
             {
-                StringCchCatA(CompilerFlags, 512, "-O2 ");
-            }
-            else if (strcmp(argv[2], "non_optimized") == 0)
-            {
-                StringCchCatA(CompilerFlags, 512, "-Od ");
+                if (strcmp(argv[2], "optimized") == 0)
+                {
+                    StringCchCatA(CompilerFlags, 512, "-O2 ");
+                }
+                else if (strcmp(argv[2], "non_optimized") == 0)
+                {
+                    StringCchCatA(CompilerFlags, 512, "-Od ");
+                }
+                else
+                {
+                    printf("ERROR: invalid argument \"%s\" for build ...\n", argv[2]);
+                    DisplayHelp();
+                    return 1;
+                }
             }
             else
             {
-                printf("ERROR: invalid argument \"%s\" for build ...\n", argv[2]);
+                printf("ERROR: invalid number of arguments for build ...\n");
                 DisplayHelp();
                 return 1;
             }
-        }
-        else
-        {
-            printf("ERROR: invalid number of arguments for build ...\n");
-            DisplayHelp();
-            return 1;
         }
 
         if (strcmp(argv[1], "ray_tracer") == 0)

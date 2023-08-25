@@ -559,9 +559,9 @@ main(i32 argc, u8 **argv)
 
     f32 KBytesPerTile = (f32)
     (
-        RenderingParameters.TileWidthInPixels * 
-        RenderingParameters.TileHeightInPixels * 
-        sizeof(u32) / 
+        RenderingParameters.TileWidthInPixels *
+        RenderingParameters.TileHeightInPixels *
+        sizeof(u32) /
         1024.0f
     );
 
