@@ -3,25 +3,7 @@
 struct window_private_data
 {
     rendering_buffer *LocalRenderingBuffer;
-    i32 *RunningState;
-};
-
-struct button_sample 
-{
-    b8 IsDown;
-};
-
-struct user_input_sample
-{
-    button_sample Up;
-    button_sample Down;
-    button_sample Left;
-    button_sample Right;
-};
-
-struct color
-{
-    f32 A, R, G, B;
+    b32 *RunningState;
 };
 
 struct simulation_state

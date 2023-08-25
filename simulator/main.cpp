@@ -2,13 +2,16 @@
 #include <stdint.h>
 #include <math.h>
 
-#define ENABLE_ASSERTIONS
+#define ENABLE_ASSERTIONS 1
 
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\assertions.h"
 #include "..\miscellaneous\basic_defines.h"
+#include "..\miscellaneous\input_utils.h"
 
 #include "..\math\vector2.h"
+#include "..\math\vector3.h"
+#include "..\math\vector4.h"
 #include "..\math\rectangle2.h"
 
 #include "..\software_rendering\software_rendering.h"
@@ -19,12 +22,80 @@
 #include "..\math\floats.cpp"
 #include "..\math\integers.cpp"
 #include "..\math\vector2.cpp"
+#include "..\math\vector4.cpp"
 
 #include "..\miscellaneous\timing_utils.cpp"
+#include "..\miscellaneous\input_utils.cpp"
+
 #include "..\software_rendering\software_rendering.cpp"
 
-struct user_input_sample GlobalLastUserInput;
-struct simulation_state GlobalSimulationState;
+user_input GlobalUserInput;
+simulation_state GlobalSimulationState;
+
+void
+RenderSimulation(rendering_buffer *Buffer, simulation_state *SimulationState)
+{
+    // background
+    v4 RectColor = V4(1.0f, 0.992f, 0.608f, 1.0f);
+    DrawRectangle(Buffer, V2(0, 0), V2(1920, 1080), RectColor);
+
+    // draw keypad
+    v4 InactiveColor = V4(0.98f, 0.678f, 0.678f, 1.0f);
+    v4 ActiveColor = V4(1.0f, 0, 0, 1.0f); // red
+    
+    if (SimulationState->Up)
+    {
+        DrawRectangle(Buffer, v2{100, 70}, v2 {130, 100}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{100, 70}, v2 {130, 100}, InactiveColor);
+    }
+
+    if (SimulationState->Down)
+    {
+        DrawRectangle(Buffer, v2{100, 30}, v2 {130, 60}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{100, 30}, v2 {130, 60}, InactiveColor);
+    }
+
+    if (SimulationState->Left)
+    {
+        DrawRectangle(Buffer, v2{60, 30}, v2 {90, 60}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{60, 30}, v2 {90, 60}, InactiveColor);
+    }
+    
+    if (SimulationState->Right)
+    {
+        DrawRectangle(Buffer, v2{140, 30}, v2 {170, 60}, ActiveColor);
+    }
+    else
+    {
+        DrawRectangle(Buffer, v2{140, 30}, v2 {170, 60}, InactiveColor);
+    }
+
+#if 0
+    u32 LineColor = 0xFFFF0000;
+    DrawLine(Buffer, v2{4, 4}, v2{300, 300}, LineColor);
+    DrawFilledCircle(Buffer, v2{40, 70}, 20, LineColor);
+
+    u32 Data[20] = {};
+    for (u32 Index = 0; Index < 20; Index++)
+    {
+        Data[Index] = Index;
+    }
+
+    rectangle2 GraphRect;
+    GraphRect.MinPoint = v2{0, 0};
+    GraphRect.MaxPoint = v2{500, 500};
+    DrawGraph(Buffer, Data, 20, 30, GraphRect);
+#endif
+}
 
 void ElectricPointUpdate(electric_point *Point)
 {
@@ -60,12 +131,12 @@ void WireUpdate(electric_wire *Wire)
     LowerPotentialPoint->NextPotential += StepSize;
 }
 
-void UpdateSimulation(f32 TimeDelta, user_input_sample *CurrentUserInput, simulation_state *SimulationState)
+void UpdateSimulation(f32 TimeDelta, user_input *UserInput, simulation_state *SimulationState)
 {
-    SimulationState->Up = CurrentUserInput->Up.IsDown;
-    SimulationState->Down = CurrentUserInput->Down.IsDown;
-    SimulationState->Left = CurrentUserInput->Left.IsDown;
-    SimulationState->Right = CurrentUserInput->Right.IsDown;
+    SimulationState->Up = UserInput->Up;
+    SimulationState->Down = UserInput->Down;
+    SimulationState->Left = UserInput->Left;
+    SimulationState->Right = UserInput->Right;
 }
 
 LRESULT CALLBACK
@@ -122,60 +193,6 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
     return Result;
 }
 
-void
-ProcessPendingMessages(user_input_sample *LastUserInput, window_private_data *WindowData)
-{
-    MSG Message;
-    while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
-    {
-        switch (Message.message)
-        {
-            case WM_SYSKEYDOWN:
-            case WM_SYSKEYUP:
-            case WM_KEYDOWN:
-            case WM_KEYUP:
-            {
-                u32 VirtualKeyCode = (u32)Message.wParam;
-                b32 KeyWasDown = (Message.lParam & (1 << 30)) != 0;
-                b32 KeyIsDown = (Message.lParam & (1ll << 31)) == 0;
-                b32 AltKeyIsDown = (Message.lParam & (1 << 29)) != 0;
-
-                if (KeyIsDown != KeyWasDown)
-                {
-                    if (VirtualKeyCode == 'W')
-                    {
-                        LastUserInput->Up.IsDown = (b8)KeyIsDown;
-                    }
-                    else if (VirtualKeyCode == 'A')
-                    {
-                        LastUserInput->Left.IsDown = (b8)KeyIsDown;
-                    }
-                    else if (VirtualKeyCode == 'S')
-                    {
-                        LastUserInput->Down.IsDown = (b8)KeyIsDown;
-                    }
-                    else if (VirtualKeyCode == 'D')
-                    {
-                        LastUserInput->Right.IsDown = (b8)KeyIsDown;
-                    }
-
-                }
-
-                if ((VirtualKeyCode == VK_F4) && KeyIsDown && AltKeyIsDown)
-                {
-                    WindowData->RunningState = false;
-                }
-            } break;
-
-            default:
-            {
-                TranslateMessage(&Message);
-                DispatchMessage(&Message);
-            } break;
-        }
-    }
-}
-
 i32
 WinMain
 (
@@ -185,7 +202,7 @@ WinMain
     i32 ShowCmd
 )
 {
-    i32 RunningState = false;
+    b32 RunningState = false;
 
     rendering_buffer LocalRenderingBuffer = {};
     LocalRenderingBuffer.Width = 1920;
@@ -230,14 +247,14 @@ WinMain
 
         HWND Window = CreateWindowExA
         (
-            0, 
+            0,
             MainWindowClass.lpszClassName,
             "simulator",
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
             CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-            0, 
-            0, 
-            Instance, 
+            0,
+            0,
+            Instance,
             &WindowPrivateData
         );
 
@@ -248,9 +265,32 @@ WinMain
             {
                 LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
 
-                ProcessPendingMessages(&GlobalLastUserInput, &WindowPrivateData);
+                MSG Message;
+                while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
+                {
+                    switch (Message.message)
+                    {
+                        case WM_SYSKEYDOWN:
+                        case WM_SYSKEYUP:
+                        case WM_KEYDOWN:
+                        case WM_KEYUP:
+                        {
+                            ProcessWindowsMessage(Message, &GlobalUserInput);
+                            if (GlobalUserInput.ExitSignal)
+                            {
+                                *WindowPrivateData.RunningState = false;
+                            }
+                        } break;
 
-                UpdateSimulation(TargetSecondsPerFrame, &GlobalLastUserInput, &GlobalSimulationState);
+                        default:
+                        {
+                            TranslateMessage(&Message);
+                            DispatchMessage(&Message);
+                        } break;
+                    }
+                }
+
+                UpdateSimulation(TargetSecondsPerFrame, &GlobalUserInput, &GlobalSimulationState);
                 RenderSimulation(&LocalRenderingBuffer, &GlobalSimulationState);
 
                 HDC DeviceContext = GetDC(Window);

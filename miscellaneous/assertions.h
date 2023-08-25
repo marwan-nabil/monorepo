@@ -1,4 +1,4 @@
-#ifdef ENABLE_ASSERTIONS
+#if ENABLE_ASSERTIONS
 
 #define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
 #define AssertIsBit(Value) Assert(!((Value) & (~1ull)))
