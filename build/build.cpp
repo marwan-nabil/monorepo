@@ -14,7 +14,7 @@ void DisplayHelp()
     printf("          build help\n");
     printf("          build clean\n");
     printf("          build build\n");
-    printf("          build tests\n");
+    printf("          build test\n");
     printf("          build simulator [optimized, non_optimized]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
@@ -59,6 +59,7 @@ int main(int argc, char **argv)
                 if (LastError != ERROR_FILE_NOT_FOUND)
                 {
                     printf("ERROR: FindFirstFileA() failed.\n");
+                    return 1;
                 }
             }
             else
@@ -111,6 +112,7 @@ int main(int argc, char **argv)
                     printf("ERROR: cleanup process did not finish properly, please debug.\n");
                     printf("ERROR: last error code is %d\n", LastErrorCode);
                     printf("ERROR: extension with error is %s\n", ExtensionsToClean[ExtensionIndex]);
+                    return 1;
                 }
             }
 
@@ -148,7 +150,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\build.temp.exe");
             StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
         }
-        else if (strcmp(argv[1], "tests") == 0)
+        else if (strcmp(argv[1], "test") == 0)
         {
             StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\tests\\test.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
@@ -269,12 +271,23 @@ int main(int argc, char **argv)
         if (CreateSucceeded == false)
         {
             printf("ERROR: failed to create the compiler process, please debug the build system.\n");
+            fflush(stdout);
+            return 1;
         }
         else
         {
             WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
+
+            DWORD ProcessExitCode;
+            GetExitCodeProcess(CompilerProcessProcessInfo.hProcess, &ProcessExitCode);
+
             CloseHandle(CompilerProcessProcessInfo.hProcess);
             CloseHandle(CompilerProcessProcessInfo.hThread);
+
+            if (ProcessExitCode != 0)
+            {
+                return 1;
+            }
         }
     }
 
