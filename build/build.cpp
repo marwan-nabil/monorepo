@@ -159,7 +159,7 @@ int main(int argc, char **argv)
         else if (strcmp(argv[1], "simulator") == 0)
         {
             StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\simulator\\main.cpp");
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\simulator.exe");
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\sss.exe");
             StringCchCatA(LinkerFlags, 512, "/subsystem:windows ");
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)

@@ -58,7 +58,7 @@ RenderSimulation(rendering_buffer *Buffer, simulation_state *SimulationState)
     }
 
     rectangle2 GraphRect;
-    GraphRect.MinPoint = v2{300, 300};
-    GraphRect.MaxPoint = v2{1000, 1000};
+    GraphRect.MinPoint = V2(300, 300);
+    GraphRect.MaxPoint = V2(1000, 1000);
     DrawGraph(Buffer, Data, 20, 30, GraphRect);
 }

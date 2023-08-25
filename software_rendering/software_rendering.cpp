@@ -37,19 +37,6 @@ void DisplayRenderBufferInWindow(HWND Window, HDC DeviceContext, rendering_buffe
     }
 }
 
-inline u32 
-ExtractColor(v4 Color)
-{
-    u32 Result =
-    (
-        (RoundF32ToU32(Color.Alpha * 255.0f) << 24) |
-        (RoundF32ToU32(Color.Red * 255.0f) << 16) |
-        (RoundF32ToU32(Color.Green * 255.0f) << 8) |
-        RoundF32ToU32(Color.Blue * 255.0f)
-    );
-    return Result;
-}
-
 void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Color)
 {
     i32 MinX = RoundF32ToI32(MinCorner.X);
@@ -74,7 +61,7 @@ void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Colo
         MaxY = (i32)Buffer->Height;
     }
 
-    u32 ColorU32 = ExtractColor(Color);
+    u32 ColorU32 = PackColor(Color);
 
     u8 *Row = 
         (u8 *)Buffer->Memory + 
@@ -116,7 +103,7 @@ DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
     Start = ClampPointToRectangle(Start, BufferRectangle);
     End = ClampPointToRectangle(End, BufferRectangle);
 
-    u32 ColorU32 = ExtractColor(Color);
+    u32 ColorU32 = PackColor(Color);
 
     i32 StartX = RoundF32ToI32(Start.X);
     i32 StartY = RoundF32ToI32(Start.Y);
@@ -131,8 +118,6 @@ DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
     i32 XDiff = EndX - StartX;
     i32 YDiff = EndY - StartY;
 
-    // TODO: review this algorithm carefully
-
     if ((XDiff == 0) && (YDiff == 0))
     {
         u32 *Pixel = (u32 *)((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
@@ -140,6 +125,7 @@ DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
     }
     else if (AbsoluteValue(XDiff) > AbsoluteValue(YDiff))
     {
+        // TODO: SIMD here
         f32 Slope = (f32)YDiff / (f32)XDiff;
         for (i32 X = MinX; X <= MaxX; X++)
         {
@@ -184,7 +170,7 @@ void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRad
         MaxY = (i32)Buffer->Height;
     }
 
-    u32 ColorU32 = ExtractColor(Color);
+    u32 ColorU32 = PackColor(Color);
 
     u8 *DestinationRow = ((u8 *)Buffer->Memory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
 
@@ -231,5 +217,7 @@ void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YA
     v2 YAxisStartPoint = XAxisStartPoint;
     v2 YAxisEndPoint = V2(YAxisStartPoint.X, YAxisStartPoint.Y + YAxisLength);
 
-    DrawLine(Buffer, YAxisStartPoint, YAxisEndPoint, V4(0, 0, 0, 1.0f));
+    DrawLine(Buffer, V2(800, 50), V2(40, 700), V4(0, 0, 0, 1.0f));
+    DrawLine(Buffer, V2(40, 50), V2(400, 700), V4(0, 0, 0, 1.0f));
+    DrawLine(Buffer, V2(700, 100), V2(35, 70), V4(0, 0, 0, 1.0f));
 }
