@@ -60,8 +60,7 @@ void CompilationTests()
 
     CompilationTest("build build");
 
-    CompilationTest("build simulator optimized");
-    CompilationTest("build simulator non_optimized");
+    CompilationTest("build basic_windows_application");
 
     CompilationTest("build ray_tracer optimized 1_lane");
     CompilationTest("build ray_tracer optimized 4_lanes");

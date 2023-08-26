@@ -15,7 +15,7 @@ void DisplayHelp()
     printf("          build clean\n");
     printf("          build build\n");
     printf("          build test\n");
-    printf("          build simulator [optimized, non_optimized]\n");
+    printf("          build basic_windows_application\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
 
@@ -156,10 +156,11 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
             StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
         }
-        else if (strcmp(argv[1], "simulator") == 0)
+        else if (strcmp(argv[1], "basic_windows_application") == 0)
         {
-            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\simulator\\main.cpp");
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\sss.exe");
+            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\basic_windows_application\\main.cpp");
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_windows_application.exe");
+            StringCchCatA(CompilerFlags, 512, "-Od ");
             StringCchCatA(LinkerFlags, 512, "/subsystem:windows ");
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)
@@ -178,7 +179,6 @@ int main(int argc, char **argv)
 
         if 
         (
-            (strcmp(argv[1], "simulator") == 0) ||
             (strcmp(argv[1], "ray_tracer") == 0)
         )
         {

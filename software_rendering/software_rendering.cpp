@@ -197,7 +197,6 @@ void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRad
 
 void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YAxisRange, rectangle2 GraphRectangle)
 {
-    // background
     DrawRectangle(Buffer, GraphRectangle.MinPoint, GraphRectangle.MaxPoint, V4(1.0f, 1.0f, 1.0f, 1.0f));
 
     f32 XPadding = 10;
@@ -208,7 +207,6 @@ void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YA
 
     v2 XAxisStartPoint = V2(GraphRectangle.MinPoint.X + XPadding, GraphRectangle.MinPoint.Y + YPadding);
     v2 XAxisEndPoint = V2(XAxisStartPoint.X + XAxisLength, XAxisStartPoint.Y);
-
     DrawLine(Buffer, XAxisStartPoint, XAxisEndPoint, V4(0, 0, 0, 1.0f));
 
     f32 YStepSize = (GraphRectangle.MaxPoint.Y - GraphRectangle.MinPoint.Y - 2 * YPadding) / YAxisRange;
@@ -216,8 +214,12 @@ void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YA
 
     v2 YAxisStartPoint = XAxisStartPoint;
     v2 YAxisEndPoint = V2(YAxisStartPoint.X, YAxisStartPoint.Y + YAxisLength);
+    DrawLine(Buffer, YAxisStartPoint, YAxisEndPoint, V4(0, 0, 0, 1.0f));
 
-    DrawLine(Buffer, V2(800, 50), V2(40, 700), V4(0, 0, 0, 1.0f));
-    DrawLine(Buffer, V2(40, 50), V2(400, 700), V4(0, 0, 0, 1.0f));
-    DrawLine(Buffer, V2(700, 100), V2(35, 70), V4(0, 0, 0, 1.0f));
+    for (u32 DataPointIndex = 0; DataPointIndex < XAxisCount; DataPointIndex++)
+    {
+        f32 PointX = GraphRectangle.MinPoint.X + XPadding + DataPointIndex * XStepSize;
+        f32 PointY = GraphRectangle.MinPoint.Y + YPadding + DataPoints[DataPointIndex] * YStepSize;
+        DrawFilledCircle(Buffer, V2(PointX, PointY), 4.0f, V4(1.0f, 0, 0, 1.0f));
+    }
 }

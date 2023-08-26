@@ -17,6 +17,7 @@
 #include "..\miscellaneous\assertions.h"
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\basic_defines.h"
+#include "..\miscellaneous\bitmap_utils.h"
 
 #include "..\math\constants.h"
 #include "..\math\random.h"
@@ -48,6 +49,7 @@
 #include "..\math\vector4.cpp"
 
 #include "..\miscellaneous\multithreading_utils.cpp"
+#include "..\miscellaneous\bitmap_utils.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\simd_math\1_wide\conversions.cpp"
@@ -72,40 +74,6 @@
 #   include "..\simd_math\shared\random.cpp"
 #endif
 
-inline void
-WriteImage(image_u32 OutputImage, const char *FileName)
-{
-    u32 OutputPixelSize = OutputImage.WidthInPixels * OutputImage.HeightInPixels * sizeof(u32);
-
-    bitmap_header BitmapHeader = {};
-    BitmapHeader.FileType = 0x4D42;
-    BitmapHeader.FileSize = sizeof(BitmapHeader) + OutputPixelSize;
-    BitmapHeader.BitmapOffset = sizeof(BitmapHeader);
-    BitmapHeader.Size = sizeof(BitmapHeader) - 14;
-    BitmapHeader.Width = OutputImage.WidthInPixels;
-    BitmapHeader.Height = -(i32)OutputImage.HeightInPixels;
-    BitmapHeader.Planes = 1;
-    BitmapHeader.BitsPerPixel = 32;
-    BitmapHeader.Compression = 0;
-    BitmapHeader.SizeOfBitmap = OutputPixelSize;
-    BitmapHeader.HorizontalResolution = 0;
-    BitmapHeader.VerticalResolution = 0;
-    BitmapHeader.ColorsUsed = 0;
-    BitmapHeader.ColorsImportant = 0;
-
-    FILE *OutputFile = fopen(FileName, "wb");
-    if (OutputFile)
-    {
-        fwrite(&BitmapHeader, sizeof(BitmapHeader), 1, OutputFile);
-        fwrite((void *)OutputImage.Pixels, OutputPixelSize, 1, OutputFile);
-        fclose(OutputFile);
-    }
-    else
-    {
-        printf("ERROR: unable to create the output bitmap file.\n");
-    }
-}
-
 inline image_u32
 CreateImage(u32 Width, u32 Height)
 {
@@ -114,8 +82,8 @@ CreateImage(u32 Width, u32 Height)
     OutputImage.HeightInPixels = Height;
     OutputImage.Pixels = (u32 *)malloc
     (
-        OutputImage.WidthInPixels * 
-        OutputImage.HeightInPixels * 
+        OutputImage.WidthInPixels *
+        OutputImage.HeightInPixels *
         sizeof(u32)
     );
     return OutputImage;
@@ -392,7 +360,6 @@ main(i32 argc, u8 **argv)
     printf("Vecor1.Z[1] = %f\n", F32FromF32Lane(Vector1.Z, 1));
     printf("Vecor1.Z[2] = %f\n", F32FromF32Lane(Vector1.Z, 2));
     printf("Vecor1.Z[3] = %f\n", F32FromF32Lane(Vector1.Z, 3));
-
 #else
     printf("RayCasting...");
 
@@ -498,7 +465,7 @@ main(i32 argc, u8 **argv)
         u32 StartPixelY = TileY * RenderingParameters.TileHeightInPixels;
         u32 EndPixelY = StartPixelY + RenderingParameters.TileHeightInPixels;
         EndPixelY = Clamp(EndPixelY, 0, OutputImage.HeightInPixels);
-        
+
         for (u32 TileX = 0; TileX < RenderingParameters.TileCountX; TileX++)
         {
             u32 StartPixelX = TileX * RenderingParameters.TileWidthInPixels;
@@ -550,7 +517,7 @@ main(i32 argc, u8 **argv)
 
     clock_t TotalTimeElapsed = clock() - StartTime;
 
-    WriteImage(OutputImage, (const char *)argv[1]);
+    WriteBitmapImage(OutputImage.Pixels, OutputImage.WidthInPixels, OutputImage.HeightInPixels, (const char *)argv[1]);
 
     printf("\nRayCasting time: %ld ms\n", TotalTimeElapsed);
     printf("Core Count: %d\n", RenderingParameters.CoreCount);
