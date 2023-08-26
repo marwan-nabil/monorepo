@@ -62,6 +62,8 @@ void CompilationTests()
 
     CompilationTest("build basic_windows_application");
 
+    CompilationTest("build imgui_opengl3_example");
+
     CompilationTest("build ray_tracer optimized 1_lane");
     CompilationTest("build ray_tracer optimized 4_lanes");
     CompilationTest("build ray_tracer non_optimized 1_lane");

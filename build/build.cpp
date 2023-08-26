@@ -3,6 +3,7 @@
 #include <math.h>
 #include <strsafe.h>
 #include <stdio.h>
+#include <direct.h>
 
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\assertions.h"
@@ -15,18 +16,21 @@ void DisplayHelp()
     printf("          build clean\n");
     printf("          build build\n");
     printf("          build test\n");
+    printf("          build imgui_opengl3_example\n");
     printf("          build basic_windows_application\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
 
 int main(int argc, char **argv)
 {
-    const char *RootDirectoryPath = "F:\\Archive\\monorepo";
-
-    char OutputDirectoryPath[MAX_PATH];
+    char OutputDirectoryPath[1024];
     ZeroMemory(OutputDirectoryPath, ArrayLength(OutputDirectoryPath));
-    StringCchCatA(OutputDirectoryPath, ArrayLength(OutputDirectoryPath), RootDirectoryPath);
-    StringCchCatA(OutputDirectoryPath, ArrayLength(OutputDirectoryPath), "\\output");
+    _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
+
+    char RootDirectoryPath[1024];
+    ZeroMemory(RootDirectoryPath, ArrayLength(RootDirectoryPath));
+    StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), OutputDirectoryPath);
+    StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), "\\..");
 
     if (argc < 2)
     {
@@ -39,14 +43,14 @@ int main(int argc, char **argv)
     {
         const char *ExtensionsToClean[] = 
         {
-            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp", "txt"
+            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp", "txt", "ini"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
         {
             char FilesWildcard[MAX_PATH];
             ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
-            StringCchCopyA(FilesWildcard, MAX_PATH, OutputDirectoryPath);
+            StringCchCatA(FilesWildcard, MAX_PATH, OutputDirectoryPath);
             StringCchCatA(FilesWildcard, MAX_PATH, "\\*.");
             StringCchCatA(FilesWildcard, MAX_PATH, ExtensionsToClean[ExtensionIndex]);
 
@@ -70,7 +74,7 @@ int main(int argc, char **argv)
                     {
                         char FoundFilePath[512];
                         ZeroMemory(FoundFilePath, 512);
-                        StringCchCopyA(FoundFilePath, MAX_PATH, OutputDirectoryPath);
+                        StringCchCatA(FoundFilePath, MAX_PATH, OutputDirectoryPath);
                         StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                         StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
 
@@ -125,50 +129,77 @@ int main(int argc, char **argv)
     }
     else
     {
-        char CompilerFlags[512];
-        ZeroMemory(CompilerFlags, 512);
+        char CompilerFlags[1024];
+        ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
 
-        StringCchCatA(CompilerFlags, 512, "-nologo -Z7 -FC -Oi -GR- -EHa- -MTd -fp:fast -fp:except- ");
-        StringCchCatA(CompilerFlags, 512, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
+        char LinkerFlags[1024];
+        ZeroMemory(LinkerFlags, ArrayLength(LinkerFlags));
 
-        char LinkerFlags[512];
-        ZeroMemory(LinkerFlags, 512);
+        char SourcesPath[1024];
+        ZeroMemory(SourcesPath, ArrayLength(SourcesPath));
 
-        StringCchCatA(LinkerFlags, 512, "/incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
-
-        char SourceTranslationUnitPath[MAX_PATH];
-        ZeroMemory(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath));
-        StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), RootDirectoryPath);
-
-        char OutputBinaryPath[MAX_PATH];
+        char OutputBinaryPath[1024];
         ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
-        StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+
+        if
+        (
+            (strcmp(argv[1], "build") == 0) ||
+            (strcmp(argv[1], "test") == 0) ||
+            (strcmp(argv[1], "basic_windows_application") == 0) ||
+            (strcmp(argv[1], "ray_tracer") == 0)
+        )
+        {
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-nologo -Z7 -FC -Oi -GR- -EHa- -MTd -fp:fast -fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+        }
 
         if (strcmp(argv[1], "build") == 0)
         {
-            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\build\\build.cpp");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), RootDirectoryPath);
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "\\build\\build.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\build.temp.exe");
-            StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
         }
         else if (strcmp(argv[1], "test") == 0)
         {
-            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\tests\\test.cpp");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), RootDirectoryPath);
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "\\tests\\test.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
-            StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
+        }
+        else if (strcmp(argv[1], "imgui_opengl3_example") == 0)
+        {
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\example\\main.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\backends\\imgui_impl_opengl3.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\backends\\imgui_impl_win32.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\imgui*.cpp ");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_opengl3_example.exe");
+
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I..\\dearimgui ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I..\\dearimgui\\backends ");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
         }
         else if (strcmp(argv[1], "basic_windows_application") == 0)
         {
-            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\basic_windows_application\\main.cpp");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), RootDirectoryPath);
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "\\basic_windows_application\\main.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_windows_application.exe");
-            StringCchCatA(CompilerFlags, 512, "-Od ");
-            StringCchCatA(LinkerFlags, 512, "/subsystem:windows ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows ");
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)
         {
-            StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\ray_tracer\\main.cpp");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), RootDirectoryPath);
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "\\ray_tracer\\main.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
-            StringCchCatA(CompilerFlags, 512, "-D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
         }
         else
         {
@@ -186,11 +217,11 @@ int main(int argc, char **argv)
             {
                 if (strcmp(argv[2], "optimized") == 0)
                 {
-                    StringCchCatA(CompilerFlags, 512, "-O2 ");
+                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-O2 ");
                 }
                 else if (strcmp(argv[2], "non_optimized") == 0)
                 {
-                    StringCchCatA(CompilerFlags, 512, "-Od ");
+                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
                 }
                 else
                 {
@@ -213,15 +244,15 @@ int main(int argc, char **argv)
             {
                 if (strcmp(argv[3], "1_lane") == 0)
                 {
-                    StringCchCatA(CompilerFlags, 512, "-DSIMD_NUMBEROF_LANES=1 ");
+                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-DSIMD_NUMBEROF_LANES=1 ");
                 }
                 else if (strcmp(argv[3], "4_lanes") == 0)
                 {
-                    StringCchCatA(CompilerFlags, 512, "-DSIMD_NUMBEROF_LANES=4 ");
+                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-DSIMD_NUMBEROF_LANES=4 ");
                 }
                 else if (strcmp(argv[3], "8_lanes") == 0)
                 {
-                    StringCchCatA(CompilerFlags, 512, "-DSIMD_NUMBEROF_LANES=8 ");
+                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-DSIMD_NUMBEROF_LANES=8 ");
                 }
                 else
                 {
@@ -243,16 +274,16 @@ int main(int argc, char **argv)
         PROCESS_INFORMATION CompilerProcessProcessInfo = {};
 
         char CompilerCommand[1024];
-        ZeroMemory(CompilerCommand, 1024);
-        StringCchCatA(CompilerCommand, 1024, "cl.exe ");
-        StringCchCatA(CompilerCommand, 1024, CompilerFlags);
-        StringCchCatA(CompilerCommand, 1024, " ");
-        StringCchCatA(CompilerCommand, 1024, SourceTranslationUnitPath);
-        StringCchCatA(CompilerCommand, 1024, " /Fe:\"");
-        StringCchCatA(CompilerCommand, 1024, OutputBinaryPath);
-        StringCchCatA(CompilerCommand, 1024, "\"");
-        StringCchCatA(CompilerCommand, 1024, " /link ");
-        StringCchCatA(CompilerCommand, 1024, LinkerFlags);
+        ZeroMemory(CompilerCommand, ArrayLength(CompilerCommand));
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "cl.exe ");
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), CompilerFlags);
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " ");
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), SourcesPath);
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /Fe:\"");
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), OutputBinaryPath);
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "\"");
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /link ");
+        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), LinkerFlags);
 
         BOOL CreateSucceeded = CreateProcess
         (
