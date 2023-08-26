@@ -51,14 +51,13 @@ RenderSimulation(rendering_buffer *Buffer, simulation_state *SimulationState)
     // keypad
     RenderKeypad(Buffer, SimulationState);
 
-    u32 Data[20] = {};
-    for (u32 Index = 0; Index < 20; Index++)
-    {
-        Data[Index] = Index;
-    }
-
     rectangle2 GraphRect;
     GraphRect.MinPoint = V2(300, 300);
     GraphRect.MaxPoint = V2(1000, 1000);
-    DrawGraph(Buffer, Data, 20, 30, GraphRect);
+
+    DrawGraph
+    (
+        Buffer, SimulationState->DataValues, SimulationState->DataColors, 
+        SimulationState->DataPointCount, 1000, GraphRect
+    );
 }

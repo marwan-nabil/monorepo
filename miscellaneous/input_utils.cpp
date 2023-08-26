@@ -8,21 +8,29 @@ ProcessWindowsMessage(MSG Message, user_input *UserInput)
 
     if (KeyIsDown != KeyWasDown)
     {
-        if (VirtualKeyCode == 'W')
+        if (VirtualKeyCode == VK_UP)
         {
             UserInput->Up = KeyIsDown;
         }
-        else if (VirtualKeyCode == 'A')
+        else if (VirtualKeyCode == VK_LEFT)
         {
             UserInput->Left = KeyIsDown;
         }
-        else if (VirtualKeyCode == 'S')
+        else if (VirtualKeyCode == VK_DOWN)
         {
             UserInput->Down = KeyIsDown;
         }
-        else if (VirtualKeyCode == 'D')
+        else if (VirtualKeyCode == VK_RIGHT)
         {
             UserInput->Right = KeyIsDown;
+        }
+        else if ((VirtualKeyCode >= '0') && (VirtualKeyCode <= '9'))
+        {
+            UserInput->Number = VirtualKeyCode;
+        }
+        else if (VirtualKeyCode == VK_SHIFT)
+        {
+            UserInput->Shift = KeyIsDown;
         }
     }
 

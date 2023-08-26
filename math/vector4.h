@@ -11,6 +11,11 @@ union v4
 	};
 	struct
 	{
+		v3 XYZ;
+		f32 Ignored0;
+	};
+	struct
+	{
 		f32 Red;
 		f32 Green;
 		f32 Blue;

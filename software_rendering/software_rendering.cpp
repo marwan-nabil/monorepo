@@ -195,7 +195,7 @@ void DrawFilledCircle(rendering_buffer *Buffer, v2 CenterPosition, f32 CircleRad
     }
 }
 
-void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YAxisRange, rectangle2 GraphRectangle)
+void DrawGraph(rendering_buffer *Buffer, f32 *DataPoints, v4 *DataColors, u32 XAxisCount, u32 YAxisRange, rectangle2 GraphRectangle)
 {
     DrawRectangle(Buffer, GraphRectangle.MinPoint, GraphRectangle.MaxPoint, V4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -220,6 +220,6 @@ void DrawGraph(rendering_buffer *Buffer, u32 *DataPoints, u32 XAxisCount, u32 YA
     {
         f32 PointX = GraphRectangle.MinPoint.X + XPadding + DataPointIndex * XStepSize;
         f32 PointY = GraphRectangle.MinPoint.Y + YPadding + DataPoints[DataPointIndex] * YStepSize;
-        DrawFilledCircle(Buffer, V2(PointX, PointY), 4.0f, V4(1.0f, 0, 0, 1.0f));
+        DrawFilledCircle(Buffer, V2(PointX, PointY), 15.0f, DataColors[DataPointIndex]);
     }
 }

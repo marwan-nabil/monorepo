@@ -16,12 +16,13 @@
 
 #include "..\software_rendering\software_rendering.h"
 
-#include "platform.h"
+#include "internal_types.h"
 
 #include "..\math\conversions.cpp"
 #include "..\math\floats.cpp"
 #include "..\math\integers.cpp"
 #include "..\math\vector2.cpp"
+#include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
 #include "..\math\rectangle2.cpp"
 
@@ -29,18 +30,12 @@
 #include "..\miscellaneous\input_utils.cpp"
 
 #include "..\software_rendering\software_rendering.cpp"
+
+#include "state_update.cpp"
 #include "rendering.cpp"
 
 user_input GlobalUserInput;
 simulation_state GlobalSimulationState;
-
-void UpdateSimulation(f32 TimeDelta, user_input *UserInput, simulation_state *SimulationState)
-{
-    SimulationState->Up = UserInput->Up;
-    SimulationState->Down = UserInput->Down;
-    SimulationState->Left = UserInput->Left;
-    SimulationState->Right = UserInput->Right;
-}
 
 LRESULT CALLBACK
 MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
@@ -163,6 +158,8 @@ WinMain
 
         if (Window)
         {
+            InitializeSimulationState(&GlobalSimulationState);
+
             RunningState = true;
             while (RunningState)
             {

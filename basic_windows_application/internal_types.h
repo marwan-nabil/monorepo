@@ -12,4 +12,11 @@ struct simulation_state
     b8 Down;
     b8 Left;
     b8 Right;
+    b8 DoubleSpeed;
+
+    u32 SelectedDataPointIndex;
+
+    u32 DataPointCount;
+    f32 *DataValues;
+    v4 *DataColors;
 };

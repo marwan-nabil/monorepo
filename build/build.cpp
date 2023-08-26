@@ -128,7 +128,7 @@ int main(int argc, char **argv)
         char CompilerFlags[512];
         ZeroMemory(CompilerFlags, 512);
 
-        StringCchCatA(CompilerFlags, 512, "-nologo -Zi -Zo -FC -Oi -GR- -EHa- -Gm- -MTd -fp:fast -fp:except- ");
+        StringCchCatA(CompilerFlags, 512, "-nologo -Z7 -FC -Oi -GR- -EHa- -MTd -fp:fast -fp:except- ");
         StringCchCatA(CompilerFlags, 512, "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
 
         char LinkerFlags[512];
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
         {
             StringCchCatA(SourceTranslationUnitPath, ArrayLength(SourceTranslationUnitPath), "\\ray_tracer\\main.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
-            StringCchCatA(CompilerFlags, 512, "-DINTERNAL -DSLOW -D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, 512, "-D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(LinkerFlags, 512, "/subsystem:console ");
         }
         else
