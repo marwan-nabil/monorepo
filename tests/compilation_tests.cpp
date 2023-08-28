@@ -60,7 +60,7 @@ void CompilationTests()
 
     CompilationTest("build build");
 
-    CompilationTest("build basic_windows_application");
+    CompilationTest("build basic_app");
 
     CompilationTest("build imgui_opengl3_example");
 

@@ -4,38 +4,93 @@
 
 #define ENABLE_ASSERTIONS 1
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\assertions.h"
-#include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\input_utils.h"
+#include "..\..\miscellaneous\base_types.h"
+#include "..\..\miscellaneous\assertions.h"
+#include "..\..\miscellaneous\basic_defines.h"
 
-#include "..\math\vector2.h"
-#include "..\math\vector3.h"
-#include "..\math\vector4.h"
-#include "..\math\rectangle2.h"
+#include "..\..\math\vector2.h"
+#include "..\..\math\vector3.h"
+#include "..\..\math\vector4.h"
+#include "..\..\math\rectangle2.h"
 
-#include "..\software_rendering\software_rendering.h"
+#include "..\..\software_rendering\software_rendering.h"
 
 #include "internal_types.h"
 
-#include "..\math\conversions.cpp"
-#include "..\math\floats.cpp"
-#include "..\math\integers.cpp"
-#include "..\math\vector2.cpp"
-#include "..\math\vector3.cpp"
-#include "..\math\vector4.cpp"
-#include "..\math\rectangle2.cpp"
+#include "..\..\math\conversions.cpp"
+#include "..\..\math\floats.cpp"
+#include "..\..\math\integers.cpp"
+#include "..\..\math\vector2.cpp"
+#include "..\..\math\vector3.cpp"
+#include "..\..\math\vector4.cpp"
+#include "..\..\math\rectangle2.cpp"
 
-#include "..\miscellaneous\timing_utils.cpp"
-#include "..\miscellaneous\input_utils.cpp"
-
-#include "..\software_rendering\software_rendering.cpp"
+#include "..\..\software_rendering\software_rendering.cpp"
 
 #include "state_update.cpp"
 #include "rendering.cpp"
 
 user_input GlobalUserInput;
 simulation_state GlobalSimulationState;
+
+inline LARGE_INTEGER
+GetWindowsTimerValue()
+{
+    LARGE_INTEGER Result;
+    QueryPerformanceCounter(&Result);
+    return Result;
+}
+
+inline f32
+GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End, i64 ProfileCounterFrequency)
+{
+    f32 SecondsElapsed = 
+        (f32)(End.QuadPart - Start.QuadPart) / 
+        (f32)ProfileCounterFrequency;
+    return SecondsElapsed;
+}
+
+inline void
+ProcessWindowsMessage(MSG Message, user_input *UserInput)
+{
+    u32 VirtualKeyCode = (u32)Message.wParam;
+    b8 KeyWasDown = (Message.lParam & (1 << 30)) != 0;
+    b8 KeyIsDown = (Message.lParam & (1ll << 31)) == 0;
+    b8 AltKeyIsDown = (Message.lParam & (1 << 29)) != 0;
+
+    if (KeyIsDown != KeyWasDown)
+    {
+        if (VirtualKeyCode == VK_UP)
+        {
+            UserInput->Up = KeyIsDown;
+        }
+        else if (VirtualKeyCode == VK_LEFT)
+        {
+            UserInput->Left = KeyIsDown;
+        }
+        else if (VirtualKeyCode == VK_DOWN)
+        {
+            UserInput->Down = KeyIsDown;
+        }
+        else if (VirtualKeyCode == VK_RIGHT)
+        {
+            UserInput->Right = KeyIsDown;
+        }
+        else if ((VirtualKeyCode >= '0') && (VirtualKeyCode <= '9'))
+        {
+            UserInput->Number = VirtualKeyCode;
+        }
+        else if (VirtualKeyCode == VK_SHIFT)
+        {
+            UserInput->Shift = KeyIsDown;
+        }
+    }
+
+    if ((VirtualKeyCode == VK_F4) && KeyIsDown && AltKeyIsDown)
+    {
+        UserInput->ExitSignal = true;
+    }
+}
 
 LRESULT CALLBACK
 MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)

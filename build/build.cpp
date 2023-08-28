@@ -17,7 +17,7 @@ void DisplayHelp()
     printf("          build build\n");
     printf("          build test\n");
     printf("          build imgui_opengl3_example\n");
-    printf("          build basic_windows_application\n");
+    printf("          build basic_app\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
 
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
         (
             (strcmp(argv[1], "build") == 0) ||
             (strcmp(argv[1], "test") == 0) ||
-            (strcmp(argv[1], "basic_windows_application") == 0) ||
+            (strcmp(argv[1], "basic_app") == 0) ||
             (strcmp(argv[1], "ray_tracer") == 0)
         )
         {
@@ -171,25 +171,25 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[1], "imgui_opengl3_example") == 0)
         {
-            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\example\\main.cpp ");
-            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\backends\\imgui_impl_opengl3.cpp ");
-            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\backends\\imgui_impl_win32.cpp ");
-            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\dearimgui\\imgui*.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\imgui\\example\\main.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\imgui\\backends\\imgui_impl_opengl3.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\imgui\\backends\\imgui_impl_win32.cpp ");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "..\\imgui\\imgui*.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_opengl3_example.exe");
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I..\\dearimgui ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I..\\dearimgui\\backends ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I..\\imgui ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I..\\imgui\\backends ");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
         }
-        else if (strcmp(argv[1], "basic_windows_application") == 0)
+        else if (strcmp(argv[1], "basic_app") == 0)
         {
             StringCchCatA(SourcesPath, ArrayLength(SourcesPath), RootDirectoryPath);
-            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "\\basic_windows_application\\main.cpp");
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_windows_application.exe");
+            StringCchCatA(SourcesPath, ArrayLength(SourcesPath), "\\windows_apps\\basic_app\\main.cpp");
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_app.exe");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows ");
         }

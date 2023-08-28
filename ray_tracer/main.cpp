@@ -26,16 +26,16 @@
 #include "..\math\vector4.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\simd_math\1_wide\math.h"
+#   include "..\math\simd_math\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\simd_math\4_wide\math.h"
+#   include "..\math\simd_math\4_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\simd_math\shared\random.h"
-#   include "..\simd_math\shared\math.h"
+#   include "..\math\simd_math\shared\random.h"
+#   include "..\math\simd_math\shared\math.h"
 #endif
 
 #include "ray_tracer.h"
@@ -48,31 +48,36 @@
 #include "..\math\vector3.cpp"
 #include "..\math\vector4.cpp"
 
-#include "..\miscellaneous\multithreading_utils.cpp"
 #include "..\miscellaneous\bitmap_utils.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\simd_math\1_wide\conversions.cpp"
-#   include "..\simd_math\1_wide\scalars.cpp"
-#   include "..\simd_math\1_wide\vector3.cpp"
-#   include "..\simd_math\1_wide\random.cpp"
-#   include "..\simd_math\1_wide\assertions.cpp"
+#   include "..\math\simd_math\1_wide\conversions.cpp"
+#   include "..\math\simd_math\1_wide\scalars.cpp"
+#   include "..\math\simd_math\1_wide\vector3.cpp"
+#   include "..\math\simd_math\1_wide\random.cpp"
+#   include "..\math\simd_math\1_wide\assertions.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\simd_math\4_wide\conversions.cpp"
-#   include "..\simd_math\4_wide\assertions.cpp"
-#   include "..\simd_math\4_wide\integers.cpp"
-#   include "..\simd_math\4_wide\floats.cpp"
+#   include "..\math\simd_math\4_wide\conversions.cpp"
+#   include "..\math\simd_math\4_wide\assertions.cpp"
+#   include "..\math\simd_math\4_wide\integers.cpp"
+#   include "..\math\simd_math\4_wide\floats.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\simd_math\shared\conversions.cpp"
-#   include "..\simd_math\shared\integers.cpp"
-#   include "..\simd_math\shared\floats.cpp"
-#   include "..\simd_math\shared\vector3.cpp"
-#   include "..\simd_math\shared\random.cpp"
+#   include "..\math\simd_math\shared\conversions.cpp"
+#   include "..\math\simd_math\shared\integers.cpp"
+#   include "..\math\simd_math\shared\floats.cpp"
+#   include "..\math\simd_math\shared\vector3.cpp"
+#   include "..\math\simd_math\shared\random.cpp"
 #endif
+
+inline u64
+LockedAddAndReturnOldValue(volatile u64 *Addend, u64 Value)
+{
+    return InterlockedExchangeAdd64((volatile LONG64 *)Addend, Value);
+}
 
 inline image_u32
 CreateImage(u32 Width, u32 Height)
