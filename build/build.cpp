@@ -211,10 +211,10 @@ int main(int argc, char **argv)
         {
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\my_imgui_demo\\main.cpp ");
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_opengl3.cpp ");
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_win32.cpp ");
+            // StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            // StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_opengl3.cpp ");
+            // StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            // StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_win32.cpp ");
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
 
@@ -227,9 +227,9 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui\\backends ");
+            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
+            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
+            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui\\backends ");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
         }
