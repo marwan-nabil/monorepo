@@ -26,16 +26,16 @@
 #include "..\math\vector4.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\math\simd_math\1_wide\math.h"
+#   include "..\math\simd\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\math\simd_math\4_wide\math.h"
+#   include "..\math\simd\4_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\math\simd_math\shared\random.h"
-#   include "..\math\simd_math\shared\math.h"
+#   include "..\math\simd\shared\random.h"
+#   include "..\math\simd\shared\math.h"
 #endif
 
 #include "ray_tracer.h"
@@ -51,33 +51,27 @@
 #include "..\miscellaneous\bitmap_utils.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\math\simd_math\1_wide\conversions.cpp"
-#   include "..\math\simd_math\1_wide\scalars.cpp"
-#   include "..\math\simd_math\1_wide\vector3.cpp"
-#   include "..\math\simd_math\1_wide\random.cpp"
-#   include "..\math\simd_math\1_wide\assertions.cpp"
+#   include "..\math\simd\1_wide\conversions.cpp"
+#   include "..\math\simd\1_wide\scalars.cpp"
+#   include "..\math\simd\1_wide\vector3.cpp"
+#   include "..\math\simd\1_wide\random.cpp"
+#   include "..\math\simd\1_wide\assertions.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\math\simd_math\4_wide\conversions.cpp"
-#   include "..\math\simd_math\4_wide\assertions.cpp"
-#   include "..\math\simd_math\4_wide\integers.cpp"
-#   include "..\math\simd_math\4_wide\floats.cpp"
+#   include "..\math\simd\4_wide\conversions.cpp"
+#   include "..\math\simd\4_wide\assertions.cpp"
+#   include "..\math\simd\4_wide\integers.cpp"
+#   include "..\math\simd\4_wide\floats.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\math\simd_math\shared\conversions.cpp"
-#   include "..\math\simd_math\shared\integers.cpp"
-#   include "..\math\simd_math\shared\floats.cpp"
-#   include "..\math\simd_math\shared\vector3.cpp"
-#   include "..\math\simd_math\shared\random.cpp"
+#   include "..\math\simd\shared\conversions.cpp"
+#   include "..\math\simd\shared\integers.cpp"
+#   include "..\math\simd\shared\floats.cpp"
+#   include "..\math\simd\shared\vector3.cpp"
+#   include "..\math\simd\shared\random.cpp"
 #endif
-
-inline u64
-LockedAddAndReturnOldValue(volatile u64 *Addend, u64 Value)
-{
-    return InterlockedExchangeAdd64((volatile LONG64 *)Addend, Value);
-}
 
 inline image_u32
 CreateImage(u32 Width, u32 Height)
@@ -265,7 +259,7 @@ RenderPixel
 inline b32
 RenderTile(work_queue *WorkQueue)
 {
-    u64 WorkOrderIndex = LockedAddAndReturnOldValue(&WorkQueue->NextWorkOrderIndex, 1);
+    u64 WorkOrderIndex = InterlockedExchangeAdd64(&WorkQueue->NextWorkOrderIndex, 1);
     if (WorkOrderIndex >= WorkQueue->WorkOrderCount)
     {
         return false;
@@ -320,8 +314,8 @@ RenderTile(work_queue *WorkQueue)
         }
     }
 
-    LockedAddAndReturnOldValue(&WorkQueue->TotalTilesDone, 1);
-    LockedAddAndReturnOldValue(&WorkQueue->TotalRayBouncesComputed, BouncesComputedPerTile);
+    InterlockedExchangeAdd64(&WorkQueue->TotalTilesDone, 1);
+    InterlockedExchangeAdd64(&WorkQueue->TotalRayBouncesComputed, BouncesComputedPerTile);
     return true;
 }
 

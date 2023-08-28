@@ -96,7 +96,7 @@ struct work_queue
     u32 WorkOrderCount;
     work_order *WorkOrders;
 
-    volatile u64 TotalRayBouncesComputed;
-    volatile u64 TotalTilesDone;
-    volatile u64 NextWorkOrderIndex;
+    volatile i64 TotalRayBouncesComputed;
+    volatile i64 TotalTilesDone;
+    volatile i64 NextWorkOrderIndex;
 };
