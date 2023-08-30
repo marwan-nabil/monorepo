@@ -5,7 +5,7 @@
 // This is provided for completeness, however it is strogly recommended you use OpenGL with SDL or GLFW.
 
 #include "imgui.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui_impl_opengl2.h"
 #include "imgui_impl_win32.h"
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -31,7 +31,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Support function for multi-viewports
 // Unlike most other backend combination, we need specific hooks to combine Win32+OpenGL.
-// We could in theory decide to support Win32-specific code in OpenGL backend via e.g. an hypothetical ImGui_ImplOpenGL3_InitForRawWin32().
+// We could in theory decide to support Win32-specific code in OpenGL backend via e.g. an hypothetical ImGui_ImplOpenGL2_InitForRawWin32().
 static void Hook_Renderer_CreateWindow(ImGuiViewport* viewport)
 {
     assert(viewport->RendererUserData == NULL);
@@ -72,7 +72,7 @@ int main(int, char**)
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui Win32+OpenGL3 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui Win32+OpenGL2 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
@@ -111,7 +111,7 @@ int main(int, char**)
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_InitForOpenGL(hwnd);
-    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL2_Init();
 
     // Win32+GL needs specific hooks for viewport, as there are specific things needed to tie Win32 and GL api.
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -166,7 +166,7 @@ int main(int, char**)
             break;
 
         // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
@@ -212,7 +212,7 @@ int main(int, char**)
         glViewport(0, 0, g_Width, g_Height);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -228,7 +228,7 @@ int main(int, char**)
         ::SwapBuffers(g_MainWindow.hDC);
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
