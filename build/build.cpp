@@ -22,6 +22,14 @@ void DisplayHelp()
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
 
+void ConcatenateStringArray(char *OutputBuffer, u32 OutputBufferLength, char **StringsArray, u32 StringsArrayLength)
+{
+    for (u32 StringIndex = 0; StringIndex < StringsArrayLength; StringIndex++)
+    {
+        StringCchCatA(OutputBuffer, OutputBufferLength, StringsArray[StringIndex]);
+    }
+}
+
 u32 CleanPerExtension(const char *ExtensionToClean, const char *OutputDirectoryPath)
 {
     char FilesWildcard[MAX_PATH];
@@ -183,37 +191,48 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[1], "imgui_demo") == 0)
         {
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main.cpp ");
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_opengl2.cpp ");
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_win32.cpp ");
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
+            char *SourcesArray[] = 
+            {
+                (char *)&RootDirectoryPath,
+                "\\windows_apps\\imgui_demo\\main.cpp ",
+                (char *)&RootDirectoryPath,
+                "\\imgui\\backends\\imgui_impl_opengl2.cpp ",
+                (char *)&RootDirectoryPath,
+                "\\imgui\\backends\\imgui_impl_win32.cpp ",
+                (char *)&RootDirectoryPath,
+                "\\imgui\\imgui*.cpp "
+            };
+
+            ConcatenateStringArray(SourcesString, ArrayLength(SourcesString), SourcesArray, ArrayLength(SourcesArray));
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo.exe");
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
-
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui\\backends ");
+            char *IncludesArray[] = 
+            {
+                "/I",
+                (char *)&RootDirectoryPath,
+                "\\imgui ",
+                "/I",
+                (char *)&RootDirectoryPath,
+                "\\imgui\\backends ",
+            };
+            ConcatenateStringArray(CompilerFlags, ArrayLength(CompilerFlags), IncludesArray, ArrayLength(IncludesArray));
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
         }
         else if (strcmp(argv[1], "my_imgui_demo") == 0)
         {
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\my_imgui_demo\\main.cpp ");
-
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
+            char *SourcesArray[] = 
+            {
+                (char *)&RootDirectoryPath,
+                "\\windows_apps\\my_imgui_demo\\*.cpp ",
+                (char *)&RootDirectoryPath,
+                "\\imgui\\imgui*.cpp "
+            };
+            ConcatenateStringArray(SourcesString, ArrayLength(SourcesString), SourcesArray, ArrayLength(SourcesArray));
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\my_imgui_demo.exe");
@@ -249,7 +268,7 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        if 
+        if
         (
             (strcmp(argv[1], "ray_tracer") == 0)
         )
