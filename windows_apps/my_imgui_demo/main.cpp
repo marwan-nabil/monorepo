@@ -1,33 +1,101 @@
-// Dear ImGui: standalone example application for Win32 + OpenGL 3
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
-
-// This is provided for completeness, however it is strogly recommended you use OpenGL with SDL or GLFW.
-
-#include "imgui.h"
-#include "imgui_impl_opengl2.h"
-#include "imgui_impl_win32.h"
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 #include <windows.h>
+#include <stdint.h>
 #include <GL/GL.h>
 #include <tchar.h>
 
-// Data stored per platform window
-struct WGL_WindowData { HDC hDC; };
+#include "..\..\miscellaneous\base_types.h"
+#include "..\..\miscellaneous\basic_defines.h"
 
-// Data
-static HGLRC            g_hRC;
-static WGL_WindowData   g_MainWindow;
-static int              g_Width;
-static int              g_Height;
+#include "..\..\imgui\imgui.h"
+#include "internal_types.h"
 
-// Forward declarations of helper functions
-bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
-void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
-void ResetDeviceWGL();
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include "imgui_impl_opengl2.cpp"
+#include "imgui_impl_win32.cpp"
+
+HGLRC GlobalOpenGLRenderingContext;
+window_data GlobalMainWindowData;
+int GlobalWidth;
+int GlobalHeight;
+
+bool CreateDeviceWGL(HWND Window, window_data *WindowData)
+{
+    HDC DeviceContext = GetDC(Window);
+    PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {};
+    PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
+    PixelFormatDescriptor.nVersion = 1;
+    PixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    PixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
+    PixelFormatDescriptor.cColorBits = 32;
+
+    i32 PixelFormat = ChoosePixelFormat(DeviceContext, &PixelFormatDescriptor);
+    if (PixelFormat == 0)
+    {
+        return false;
+    }
+    if (SetPixelFormat(DeviceContext, PixelFormat, &PixelFormatDescriptor) == FALSE)
+    {
+        return false;
+    }
+    ReleaseDC(Window, DeviceContext);
+
+    WindowData->DeviceContext = GetDC(Window);
+    if (!GlobalOpenGLRenderingContext)
+    {
+        GlobalOpenGLRenderingContext = wglCreateContext(WindowData->DeviceContext);
+    }
+
+    return true;
+}
+
+void CleanupDeviceWGL(HWND Window, window_data *WindowData)
+{
+    wglMakeCurrent(NULL, NULL);
+    ReleaseDC(Window, WindowData->DeviceContext);
+}
+
+LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
+{
+    // Win32 message handler
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+
+    if (Win32_CustomCallbackHandler(Window, Message, WParam, LParam))
+    {
+        return true;
+    }
+
+    switch (Message)
+    {
+        case WM_SIZE:
+        {
+
+            if (WParam != SIZE_MINIMIZED)
+            {
+                GlobalWidth = LOWORD(LParam);
+                GlobalHeight = HIWORD(LParam);
+            }
+            return 0;
+        } break;
+
+        case WM_SYSCOMMAND:
+        {
+            if ((WParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+            {
+                return 0;
+            }
+        } break;
+
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+            return 0;
+        } break;
+    }
+
+    return DefWindowProcW(Window, Message, WParam, LParam);
+}
 
 // Support function for multi-viewports
 // Unlike most other backend combination, we need specific hooks to combine Win32+OpenGL.
@@ -36,7 +104,7 @@ static void Hook_Renderer_CreateWindow(ImGuiViewport* viewport)
 {
     assert(viewport->RendererUserData == NULL);
 
-    WGL_WindowData* data = IM_NEW(WGL_WindowData);
+    window_data* data = IM_NEW(window_data);
     CreateDeviceWGL((HWND)viewport->PlatformHandle, data);
     viewport->RendererUserData = data;
 }
@@ -45,7 +113,7 @@ static void Hook_Renderer_DestroyWindow(ImGuiViewport* viewport)
 {
     if (viewport->RendererUserData != NULL)
     {
-        WGL_WindowData* data = (WGL_WindowData*)viewport->RendererUserData;
+        window_data* data = (window_data*)viewport->RendererUserData;
         CleanupDeviceWGL((HWND)viewport->PlatformHandle, data);
         IM_DELETE(data);
         viewport->RendererUserData = NULL;
@@ -55,14 +123,14 @@ static void Hook_Renderer_DestroyWindow(ImGuiViewport* viewport)
 static void Hook_Platform_RenderWindow(ImGuiViewport* viewport, void*)
 {
     // Activate the platform window DC in the OpenGL rendering context
-    if (WGL_WindowData* data = (WGL_WindowData*)viewport->RendererUserData)
-        wglMakeCurrent(data->hDC, g_hRC);
+    if (window_data* data = (window_data*)viewport->RendererUserData)
+        wglMakeCurrent(data->DeviceContext, GlobalOpenGLRenderingContext);
 }
 
 static void Hook_Renderer_SwapBuffers(ImGuiViewport* viewport, void*)
 {
-    if (WGL_WindowData* data = (WGL_WindowData*)viewport->RendererUserData)
-        ::SwapBuffers(data->hDC);
+    if (window_data* data = (window_data*)viewport->RendererUserData)
+        SwapBuffers(data->DeviceContext);
 }
 
 // Main code
@@ -70,23 +138,23 @@ int main(int, char**)
 {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
-    ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui Win32+OpenGL2 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, MainWindowCallbackHandler, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+    RegisterClassExW(&wc);
+    HWND hwnd = CreateWindowW(wc.lpszClassName, L"Dear ImGui Win32+OpenGL2 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize OpenGL
-    if (!CreateDeviceWGL(hwnd, &g_MainWindow))
+    if (!CreateDeviceWGL(hwnd, &GlobalMainWindowData))
     {
-        CleanupDeviceWGL(hwnd, &g_MainWindow);
-        ::DestroyWindow(hwnd);
-        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+        CleanupDeviceWGL(hwnd, &GlobalMainWindowData);
+        DestroyWindow(hwnd);
+        UnregisterClassW(wc.lpszClassName, wc.hInstance);
         return 1;
     }
-    wglMakeCurrent(g_MainWindow.hDC, g_hRC);
+    wglMakeCurrent(GlobalMainWindowData.DeviceContext, GlobalOpenGLRenderingContext);
 
     // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(hwnd);
+    ShowWindow(hwnd, SW_SHOWDEFAULT);
+    UpdateWindow(hwnd);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -153,13 +221,13 @@ int main(int, char**)
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
-        // See the WndProc() function below for our to dispatch events to the Win32 backend.
-        MSG msg;
-        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+        // See the MainWindowCallbackHandler() function below for our to dispatch events to the Win32 backend.
+        MSG Message;
+        while (PeekMessage(&Message, NULL, 0U, 0U, PM_REMOVE))
         {
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-            if (msg.message == WM_QUIT)
+            TranslateMessage(&Message);
+            DispatchMessage(&Message);
+            if (Message.message == WM_QUIT)
                 done = true;
         }
         if (done)
@@ -209,7 +277,7 @@ int main(int, char**)
 
         // Rendering
         ImGui::Render();
-        glViewport(0, 0, g_Width, g_Height);
+        glViewport(0, 0, GlobalWidth, GlobalHeight);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
@@ -221,84 +289,21 @@ int main(int, char**)
             ImGui::RenderPlatformWindowsDefault();
 
             // Restore the OpenGL rendering context to the main window DC, since platform windows might have changed it.
-            wglMakeCurrent(g_MainWindow.hDC, g_hRC);
+            wglMakeCurrent(GlobalMainWindowData.DeviceContext, GlobalOpenGLRenderingContext);
         }
 
         // Present
-        ::SwapBuffers(g_MainWindow.hDC);
+        SwapBuffers(GlobalMainWindowData.DeviceContext);
     }
 
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    CleanupDeviceWGL(hwnd, &g_MainWindow);
-    wglDeleteContext(g_hRC);
-    ::DestroyWindow(hwnd);
-    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    CleanupDeviceWGL(hwnd, &GlobalMainWindowData);
+    wglDeleteContext(GlobalOpenGLRenderingContext);
+    DestroyWindow(hwnd);
+    UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
     return 0;
-}
-
-// Helper functions
-bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data)
-{
-    HDC hDc = ::GetDC(hWnd);
-    PIXELFORMATDESCRIPTOR pfd = { 0 };
-    pfd.nSize = sizeof(pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-
-    const int pf = ::ChoosePixelFormat(hDc, &pfd);
-    if (pf == 0)
-        return false;
-    if (::SetPixelFormat(hDc, pf, &pfd) == FALSE)
-        return false;
-    ::ReleaseDC(hWnd, hDc);
-
-    data->hDC = ::GetDC(hWnd);
-    if (!g_hRC)
-        g_hRC = wglCreateContext(data->hDC);
-    return true;
-}
-
-void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data)
-{
-    wglMakeCurrent(NULL, NULL);
-    ::ReleaseDC(hWnd, data->hDC);
-}
-
-// Forward declare message handler from imgui_impl_win32.cpp
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-// Win32 message handler
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-        return true;
-
-    switch (msg)
-    {
-    case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
-        {
-            g_Width = LOWORD(lParam);
-            g_Height = HIWORD(lParam);
-        }
-        return 0;
-    case WM_SYSCOMMAND:
-        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-            return 0;
-        break;
-    case WM_DESTROY:
-        ::PostQuitMessage(0);
-        return 0;
-    }
-    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }

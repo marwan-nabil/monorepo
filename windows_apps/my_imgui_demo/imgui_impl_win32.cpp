@@ -14,12 +14,7 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "imgui.h"
-#ifndef IMGUI_DISABLE
-#include "imgui_impl_win32.h"
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
+#include "..\..\imgui\imgui.h"
 #include <windows.h>
 #include <windowsx.h> // GET_X_LPARAM(), GET_Y_LPARAM()
 #include <tchar.h>
@@ -91,6 +86,7 @@ typedef DWORD (WINAPI *PFN_XInputGetState)(DWORD, XINPUT_STATE*);
 static void ImGui_ImplWin32_InitPlatformInterface(bool platformHasOwnDC);
 static void ImGui_ImplWin32_ShutdownPlatformInterface();
 static void ImGui_ImplWin32_UpdateMonitors();
+float ImGui_ImplWin32_GetDpiScaleForMonitor(void* monitor);
 
 struct ImGui_ImplWin32_Data
 {
@@ -593,7 +589,7 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
 // PS: We treat DBLCLK messages as regular mouse down messages, so this code will work on windows classes that have the CS_DBLCLKS flag set. Our own example app code doesn't set this flag.
 #if 0
 // Copy this line into your .cpp file to forward declare the function.
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT Win32_CustomCallbackHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
 // See https://learn.microsoft.com/en-us/windows/win32/tablet/system-events-and-mouse-messages
@@ -608,7 +604,7 @@ static ImGuiMouseSource GetMouseSourceFromMessageExtraInfo()
     return ImGuiMouseSource_Mouse;
 }
 
-IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+IMGUI_IMPL_API LRESULT Win32_CustomCallbackHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui::GetCurrentContext() == nullptr)
         return 0;
@@ -1195,7 +1191,7 @@ static void ImGui_ImplWin32_OnChangedViewport(ImGuiViewport* viewport)
 
 static LRESULT CALLBACK ImGui_ImplWin32_WndProcHandler_PlatformWindow(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+    if (Win32_CustomCallbackHandler(hWnd, msg, wParam, lParam))
         return true;
 
     if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle((void*)hWnd))
@@ -1282,7 +1278,3 @@ static void ImGui_ImplWin32_ShutdownPlatformInterface()
     ::UnregisterClass(_T("ImGui Platform"), ::GetModuleHandle(nullptr));
     ImGui::DestroyPlatformWindows();
 }
-
-//---------------------------------------------------------------------------------------------------------
-
-#endif // #ifndef IMGUI_DISABLE

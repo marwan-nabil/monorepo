@@ -36,17 +36,8 @@
 //  2016-09-10: OpenGL: Uploading font texture as RGBA32 to increase compatibility with users shaders (not ideal).
 //  2016-09-05: OpenGL: Fixed save and restore of current scissor rectangle.
 
-#include "imgui.h"
-#ifndef IMGUI_DISABLE
-#include "imgui_impl_opengl2.h"
+#include "..\..\imgui\imgui.h"
 #include <stdint.h>     // intptr_t
-
-// Clang/GCC warnings with -Weverything
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-macros"                      // warning: macro is not used
-#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
-#endif
 
 // Include OpenGL header (without an OpenGL loader) requires a bit of fiddling
 #if defined(_WIN32) && !defined(APIENTRY)
@@ -62,6 +53,9 @@
 #include <GL/gl.h>
 #endif
 
+void    ImGui_ImplOpenGL2_DestroyDeviceObjects();
+bool    ImGui_ImplOpenGL2_CreateDeviceObjects();
+
 struct ImGui_ImplOpenGL2_Data
 {
     GLuint       FontTexture;
@@ -71,7 +65,7 @@ struct ImGui_ImplOpenGL2_Data
 
 // Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
-static ImGui_ImplOpenGL2_Data* ImGui_ImplOpenGL2_GetBackendData()
+static ImGui_ImplOpenGL2_Data *ImGui_ImplOpenGL2_GetBackendData()
 {
     return ImGui::GetCurrentContext() ? (ImGui_ImplOpenGL2_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
 }
@@ -295,5 +289,3 @@ void    ImGui_ImplOpenGL2_DestroyDeviceObjects()
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
-
-#endif // #ifndef IMGUI_DISABLE

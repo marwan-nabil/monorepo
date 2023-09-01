@@ -228,7 +228,7 @@ int main(int argc, char **argv)
             char *SourcesArray[] = 
             {
                 (char *)&RootDirectoryPath,
-                "\\windows_apps\\my_imgui_demo\\*.cpp ",
+                "\\windows_apps\\my_imgui_demo\\main.cpp ",
                 (char *)&RootDirectoryPath,
                 "\\imgui\\imgui*.cpp "
             };
@@ -239,9 +239,9 @@ int main(int argc, char **argv)
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
+            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
+            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
+            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib user32.lib Gdi32.lib ");
         }
