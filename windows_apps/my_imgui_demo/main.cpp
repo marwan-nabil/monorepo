@@ -223,15 +223,15 @@ i32 main(i32 argc, char **argv)
     // Win32+GL needs specific hooks for ViewPort, as there are specific things needed to tie Win32 and GL api.
     if (ImGuiIOInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
-        ImGuiPlatformIO *ImGuiPlatformIOInterface = &ImGui::GetPlatformIO();
-        IM_ASSERT(ImGuiPlatformIOInterface->Renderer_CreateWindow == NULL);
-        IM_ASSERT(ImGuiPlatformIOInterface->Renderer_DestroyWindow == NULL);
-        IM_ASSERT(ImGuiPlatformIOInterface->Renderer_SwapBuffers == NULL);
-        IM_ASSERT(ImGuiPlatformIOInterface->Platform_RenderWindow == NULL);
-        ImGuiPlatformIOInterface->Renderer_CreateWindow = CreateWindowHook;
-        ImGuiPlatformIOInterface->Renderer_DestroyWindow = DestroyWindowHook;
-        ImGuiPlatformIOInterface->Renderer_SwapBuffers = SwapBuffersHook;
-        ImGuiPlatformIOInterface->Platform_RenderWindow = RenderWindowHook;
+        ImGuiPlatformIO *ImGuiPlatformIoInterface = &ImGui::GetPlatformIO();
+        IM_ASSERT(ImGuiPlatformIoInterface->Renderer_CreateWindow == NULL);
+        IM_ASSERT(ImGuiPlatformIoInterface->Renderer_DestroyWindow == NULL);
+        IM_ASSERT(ImGuiPlatformIoInterface->Renderer_SwapBuffers == NULL);
+        IM_ASSERT(ImGuiPlatformIoInterface->Platform_RenderWindow == NULL);
+        ImGuiPlatformIoInterface->Renderer_CreateWindow = CreateWindowHook;
+        ImGuiPlatformIoInterface->Renderer_DestroyWindow = DestroyWindowHook;
+        ImGuiPlatformIoInterface->Renderer_SwapBuffers = SwapBuffersHook;
+        ImGuiPlatformIoInterface->Platform_RenderWindow = RenderWindowHook;
     }
 
     // Load Fonts
