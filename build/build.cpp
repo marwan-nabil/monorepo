@@ -239,11 +239,7 @@ int main(int argc, char **argv)
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
 
-            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-            // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
-
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib user32.lib Gdi32.lib ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib user32.lib Gdi32.lib dwmapi.lib ");
         }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
