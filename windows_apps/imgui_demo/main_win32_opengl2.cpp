@@ -16,7 +16,7 @@
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"
-#include "internal_types.h"
+#include "main_win32_opengl2.h"
 
 #include "opengl2_backend.cpp"
 #include "win32_backend.cpp"
@@ -28,9 +28,9 @@ static i32 GlobalHeight;
 static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 {
     // Win32 message handler
-    // You can read the ImGuiIOInterface.WantCaptureMouse, ImGuiIOInterface.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    // - When ImGuiIOInterface.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-    // - When ImGuiIOInterface.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+    // You can read the ImGuiIoInterface.WantCaptureMouse, ImGuiIoInterface.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When ImGuiIoInterface.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+    // - When ImGuiIoInterface.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 
     if (Win32_CustomCallbackHandler(Window, Message, WParam, LParam))
@@ -157,11 +157,11 @@ i32 main(i32 argc, char **argv)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO *ImGuiIOInterface = &ImGui::GetIO();
-    ImGuiIOInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    ImGuiIOInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-    ImGuiIOInterface->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-    ImGuiIOInterface->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -169,7 +169,7 @@ i32 main(i32 argc, char **argv)
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle *ImGuiStyleInterface = &ImGui::GetStyle();
-    if (ImGuiIOInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         ImGuiStyleInterface->WindowRounding = 0.0f;
         ImGuiStyleInterface->Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -180,7 +180,7 @@ i32 main(i32 argc, char **argv)
     OpenGl2_Initialize();
 
     // Win32+GL needs specific hooks for ViewPort, as there are specific things needed to tie Win32 and GL api.
-    if (ImGuiIOInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         ImGuiPlatformIO *ImGuiPlatformIoInterface = &ImGui::GetPlatformIO();
         IM_ASSERT(ImGuiPlatformIoInterface->Renderer_CreateWindow == NULL);
@@ -201,12 +201,12 @@ i32 main(i32 argc, char **argv)
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //ImGuiIOInterface->Fonts->AddFontDefault();
-    //ImGuiIOInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //ImGuiIOInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //ImGuiIOInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //ImGuiIOInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = ImGuiIOInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIOInterface->Fonts->GetGlyphRangesJapanese());
+    //ImGuiIoInterface->Fonts->AddFontDefault();
+    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+    //ImFont* font = ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIoInterface->Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
     // Our state
@@ -270,8 +270,8 @@ i32 main(i32 argc, char **argv)
             ImGui::Text
             (
                 "Application average %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGuiIOInterface->Framerate,
-                ImGuiIOInterface->Framerate
+                1000.0f / ImGuiIoInterface->Framerate,
+                ImGuiIoInterface->Framerate
             );
             ImGui::End();
         }
@@ -296,7 +296,7 @@ i32 main(i32 argc, char **argv)
         OpenGl2_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
-        if (ImGuiIOInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();

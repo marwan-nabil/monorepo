@@ -24,7 +24,7 @@ struct win32_viewport_data
 enum win32_renderer_backend
 {
     W32RB_OPENGL2,
-    W32RB_D3D11
+    W32RB_DX11
 };
 
 typedef HRESULT(WINAPI *SetProcessDpiAwarenessFunctionType)(PROCESS_DPI_AWARENESS);
