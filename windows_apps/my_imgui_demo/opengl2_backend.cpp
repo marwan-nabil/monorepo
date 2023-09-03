@@ -1,6 +1,44 @@
+static HGLRC GlobalOpenGLRenderingContext;
+
+static b32 OpenGl2_CreateDevice(HWND Window, window_data *WindowData)
+{
+    HDC DeviceContext = GetDC(Window);
+    PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {};
+    PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
+    PixelFormatDescriptor.nVersion = 1;
+    PixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    PixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
+    PixelFormatDescriptor.cColorBits = 32;
+
+    i32 PixelFormat = ChoosePixelFormat(DeviceContext, &PixelFormatDescriptor);
+    if (PixelFormat == 0)
+    {
+        return false;
+    }
+    if (SetPixelFormat(DeviceContext, PixelFormat, &PixelFormatDescriptor) == FALSE)
+    {
+        return false;
+    }
+    ReleaseDC(Window, DeviceContext);
+
+    WindowData->DeviceContext = GetDC(Window);
+    if (!GlobalOpenGLRenderingContext)
+    {
+        GlobalOpenGLRenderingContext = wglCreateContext(WindowData->DeviceContext);
+    }
+
+    return true;
+}
+
+static void OpenGl2_CleanupDeviceWGL(HWND Window, window_data *WindowData)
+{
+    wglMakeCurrent(NULL, NULL);
+    ReleaseDC(Window, WindowData->DeviceContext);
+}
+
 // Backend data stored in ImGuiIoInterface.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
-static opengl2_backend_data *OpenGL2_GetBackendData()
+static opengl2_backend_data *OpenGl2_GetBackendData()
 {
     if (ImGui::GetCurrentContext())
     {
@@ -12,11 +50,11 @@ static opengl2_backend_data *OpenGL2_GetBackendData()
     }
 }
 
-static bool OpenGL2_CreateFontsTexture()
+static bool OpenGl2_CreateFontsTexture()
 {
     // Build texture atlas
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    opengl2_backend_data *BackendData = OpenGL2_GetBackendData();
+    opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
 
     u8 *Pixels;
     i32 Width, Height;
@@ -42,10 +80,10 @@ static bool OpenGL2_CreateFontsTexture()
     return true;
 }
 
-static void OpenGL2_DestroyFontsTexture()
+static void OpenGl2_DestroyFontsTexture()
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    opengl2_backend_data *BackendData = OpenGL2_GetBackendData();
+    opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
     if (BackendData->FontTexture)
     {
         glDeleteTextures(1, &BackendData->FontTexture);
@@ -54,7 +92,7 @@ static void OpenGL2_DestroyFontsTexture()
     }
 }
 
-static bool OpenGL2_Initialize()
+static bool OpenGl2_Initialize()
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     IM_ASSERT(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
@@ -68,14 +106,14 @@ static bool OpenGL2_Initialize()
     return true;
 }
 
-static void OpenGL2_Shutdown()
+static void OpenGl2_Shutdown()
 {
-    opengl2_backend_data *BackendData = OpenGL2_GetBackendData();
+    opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
     IM_ASSERT(BackendData != NULL && "No renderer backend to shutdown, or already shutdown?");
 
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
 
-    OpenGL2_DestroyFontsTexture();
+    OpenGl2_DestroyFontsTexture();
 
     ImGuiIoInterface->BackendRendererName = NULL;
     ImGuiIoInterface->BackendRendererUserData = NULL;
@@ -83,18 +121,18 @@ static void OpenGL2_Shutdown()
     ImGui::MemFree(BackendData);
 }
 
-static void OpenGL2_NewFrame()
+static void OpenGl2_NewFrame()
 {
-    opengl2_backend_data *BackendData = OpenGL2_GetBackendData();
-    IM_ASSERT(BackendData != NULL && "Did you call OpenGL2_Initialize()?");
+    opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
+    IM_ASSERT(BackendData != NULL && "Did you call OpenGl2_Initialize()?");
 
     if (!BackendData->FontTexture)
     {
-        OpenGL2_CreateFontsTexture();
+        OpenGl2_CreateFontsTexture();
     }
 }
 
-static void OpenGL2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth, i32 FrameBufferHeight)
+static void OpenGl2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth, i32 FrameBufferHeight)
 {
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, vertex/texcoord/color pointers, polygon fill.
     glEnable(GL_BLEND);
@@ -121,7 +159,7 @@ static void OpenGL2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth,
     //   GLint last_program;
     //   glGetIntegerv(GL_CURRENT_PROGRAM, &last_program);
     //   glUseProgram(0);
-    //   OpenGL2_RenderDrawData(...);
+    //   OpenGl2_RenderDrawData(...);
     //   glUseProgram(last_program)
     // There are potentially many more states you could need to clear/setup that we can't access from default headers.
     // e.g. glBindBuffer(GL_ARRAY_BUFFER, 0), glDisable(GL_TEXTURE_CUBE_MAP).
@@ -141,7 +179,7 @@ static void OpenGL2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth,
 // OpenGL2 Render function.
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly.
 // This is in order to be able to run within an OpenGL engine that doesn't do so.
-static void OpenGL2_RenderDrawData(ImDrawData *DrawData)
+static void OpenGl2_RenderDrawData(ImDrawData *DrawData)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     i32 FrameBufferWidth = (i32)(DrawData->DisplaySize.x * DrawData->FramebufferScale.x);
@@ -167,7 +205,7 @@ static void OpenGL2_RenderDrawData(ImDrawData *DrawData)
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT);
 
     // Setup desired GL state
-    OpenGL2_SetupRenderState(DrawData, FrameBufferWidth, FrameBufferHeight);
+    OpenGl2_SetupRenderState(DrawData, FrameBufferWidth, FrameBufferHeight);
 
     // Will project scissor/clipping rectangles into framebuffer space
     ImVec2 ClipOffset = DrawData->DisplayPos; // (0,0) unless using multi-viewports
@@ -192,7 +230,7 @@ static void OpenGL2_RenderDrawData(ImDrawData *DrawData)
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
                 if (Command->UserCallback == ImDrawCallback_ResetRenderState)
                 {
-                    OpenGL2_SetupRenderState(DrawData, FrameBufferWidth, FrameBufferHeight);
+                    OpenGl2_SetupRenderState(DrawData, FrameBufferWidth, FrameBufferHeight);
                 }
                 else
                 {

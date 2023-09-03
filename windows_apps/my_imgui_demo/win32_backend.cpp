@@ -1,36 +1,38 @@
-static HINSTANCE ShcoreDllModule;
-static GetDpiForMonitorFunctionType GetDpiForMonitorFunction;
-static HINSTANCE User32DllModule;
-static HINSTANCE ShcoreDllModule2;
+static HMODULE ShcoreDllModule;
+static HMODULE User32DllModule;
+static HMODULE NtDllModule;
 
-static i32 Win32_IsWindowsVersionOrGreater(u16 MajorVersion, u16 MinorVersion, u16 PatchVersion)
+static b32 Win32_IsWindowsVersionOrGreater(u16 MajorVersion, u16 MinorVersion, u16 PatchVersion)
 {
-    RtlVerifyVersionInfoFunctionType RtlVerifyVersionInfoFn = NULL;
+    RtlVerifyVersionInfoFunctionType RtlVerifyVersionInfoFunction = NULL;
 
-    HMODULE NtDllModule = GetModuleHandleA("ntdll.dll");
-    if (NtDllModule)
+    if (!NtDllModule)
     {
-        RtlVerifyVersionInfoFn =
-            (RtlVerifyVersionInfoFunctionType)
-            GetProcAddress(NtDllModule, "RtlVerifyVersionInfo");
+        NtDllModule = GetModuleHandleA("ntdll.dll");
     }
 
-    if (RtlVerifyVersionInfoFn == NULL)
+    if (NtDllModule)
+    {
+        RtlVerifyVersionInfoFunction =
+            (RtlVerifyVersionInfoFunctionType)GetProcAddress(NtDllModule, "RtlVerifyVersionInfo");
+    }
+
+    if (RtlVerifyVersionInfoFunction == NULL)
     {
         return FALSE;
     }
 
     RTL_OSVERSIONINFOEXW VersionInfo = {};
-    u64 ConditionMask = 0;
-
     VersionInfo.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOEXW);
     VersionInfo.dwMajorVersion = MajorVersion;
     VersionInfo.dwMinorVersion = MinorVersion;
 
+    u64 ConditionMask = 0;
+
     VER_SET_CONDITION(ConditionMask, VER_MAJORVERSION, VER_GREATER_EQUAL);
     VER_SET_CONDITION(ConditionMask, VER_MINORVERSION, VER_GREATER_EQUAL);
 
-    u32 Result = RtlVerifyVersionInfoFn(&VersionInfo, VER_MAJORVERSION | VER_MINORVERSION, ConditionMask);
+    u32 Result = RtlVerifyVersionInfoFunction(&VersionInfo, VER_MAJORVERSION | VER_MINORVERSION, ConditionMask);
     if (Result == 0)
     {
         return TRUE;
@@ -48,8 +50,12 @@ static f32 Win32_GetDpiScaleForMonitor(void *Monitor)
 
     if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0603), LOBYTE(0x0603), 0)) // _WIN32_WINNT_WINBLUE
     {
-        ShcoreDllModule = LoadLibraryA("shcore.dll"); // Reference counted per-process
-        GetDpiForMonitorFunction = NULL;
+        if (!ShcoreDllModule)
+        {
+            ShcoreDllModule = LoadLibraryA("shcore.dll"); // Reference counted per-process
+        }
+
+        GetDpiForMonitorFunctionType GetDpiForMonitorFunction = NULL;
 
         if (ShcoreDllModule)
         {
@@ -793,57 +799,36 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
     return 0;
 }
 
-//--------------------------------------------------------------------------------------------------------
-// DPI-related helpers (optional)
-//--------------------------------------------------------------------------------------------------------
-// - Use to enable DPI awareness without having to create an application manifest.
-// - Your own app may already do this via a manifest or explicit calls. This is mostly useful for our examples/ apps.
-// - In theory we could call simple functions from Windows SDK such as SetProcessDPIAware(), SetProcessDpiAwareness(), etc.
-//   but most of the functions provided by Microsoft require Windows 8.1/10+ SDK at compile time and Windows 8/10+ at runtime,
-//   neither we want to require the user to have. So we dynamically select and load those functions to avoid dependencies.
-//---------------------------------------------------------------------------------------------------------
-// This is the scheme successfully used by GLFW (from which we borrowed some of the code) and other apps aiming to be highly portable.
-// Win32_EnableDpiAwareness() is just a helper called by main.cpp, we don't call it automatically.
-// If you are trying to implement your own backend for your own engine, you may ignore that noise.
-//---------------------------------------------------------------------------------------------------------
-
-// Helper function to enable DPI awareness without setting up a manifest
-void Win32_EnableDpiAwareness()
+b32 Win32_EnableDpiAwareness()
 {
-    // Make sure monitors will be updated with latest correct scaling
     win32_backend_data *BackendData = Win32_GetBackendData();
     if (BackendData)
     {
         BackendData->WantUpdateMonitors = true;
     }
 
-    if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WINTHRESHOLD / _WIN32_WINNT_WIN10
+    if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10
     {
-        User32DllModule = LoadLibraryA("user32.dll"); // Reference counted per-process
+        User32DllModule = LoadLibraryA("user32.dll");
 
         SetThreadDpiAwarenessContextFunctionType SetThreadDpiAwarenessContextFunction =
             (SetThreadDpiAwarenessContextFunctionType)GetProcAddress(User32DllModule, "SetThreadDpiAwarenessContext");
+
         if (SetThreadDpiAwarenessContextFunction)
         {
             SetThreadDpiAwarenessContextFunction(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-            return;
+            return TRUE;
         }
     }
 
-    if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0603), LOBYTE(0x0603), 0)) // _WIN32_WINNT_WINBLUE
+    if (SetProcessDPIAware())
     {
-        ShcoreDllModule2 = LoadLibraryA("shcore.dll"); // Reference counted per-process
-        SetProcessDpiAwarenessFunctionType SetProcessDpiAwarenessFunction = 
-            (SetProcessDpiAwarenessFunctionType)GetProcAddress(ShcoreDllModule2, "SetProcessDpiAwareness");
-
-        if (SetProcessDpiAwarenessFunction)
-        {
-            SetProcessDpiAwarenessFunction(PROCESS_PER_MONITOR_DPI_AWARE);
-            return;
-        }
+        return TRUE;
     }
-
-    SetProcessDPIAware();
+    else
+    {
+        return FALSE;
+    }
 }
 
 f32 Win32_GetDpiScaleForHwnd(void *Window)

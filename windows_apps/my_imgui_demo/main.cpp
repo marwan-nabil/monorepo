@@ -4,9 +4,12 @@
 #include <stdint.h>
 #include <GL/GL.h>
 #include <tchar.h>
+#include <shellscalingapi.h>
 
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\basic_defines.h"
+
+#define ENABLE_ASSERTIONS 1
 #include "..\..\miscellaneous\assertions.h"
 
 #include "..\..\imgui\imgui.h"
@@ -18,46 +21,9 @@
 #include "opengl2_backend.cpp"
 #include "win32_backend.cpp"
 
-HGLRC GlobalOpenGLRenderingContext;
-window_data GlobalMainWindowData;
-i32 GlobalWidth;
-i32 GlobalHeight;
-
-static b32 CreateDeviceWGL(HWND Window, window_data *WindowData)
-{
-    HDC DeviceContext = GetDC(Window);
-    PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {};
-    PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
-    PixelFormatDescriptor.nVersion = 1;
-    PixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    PixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
-    PixelFormatDescriptor.cColorBits = 32;
-
-    i32 PixelFormat = ChoosePixelFormat(DeviceContext, &PixelFormatDescriptor);
-    if (PixelFormat == 0)
-    {
-        return false;
-    }
-    if (SetPixelFormat(DeviceContext, PixelFormat, &PixelFormatDescriptor) == FALSE)
-    {
-        return false;
-    }
-    ReleaseDC(Window, DeviceContext);
-
-    WindowData->DeviceContext = GetDC(Window);
-    if (!GlobalOpenGLRenderingContext)
-    {
-        GlobalOpenGLRenderingContext = wglCreateContext(WindowData->DeviceContext);
-    }
-
-    return true;
-}
-
-static void CleanupDeviceWGL(HWND Window, window_data *WindowData)
-{
-    wglMakeCurrent(NULL, NULL);
-    ReleaseDC(Window, WindowData->DeviceContext);
-}
+static window_data GlobalMainWindowData;
+static i32 GlobalWidth;
+static i32 GlobalHeight;
 
 static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 {
@@ -104,14 +70,14 @@ static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARA
 
 // Support function for multi-viewports
 // Unlike most other backend combination, we need specific hooks to combine Win32+OpenGL.
-// We could in theory decide to support Win32-specific code in OpenGL backend via e.g. an hypothetical ImGui_ImplOpenGL2_InitForRawWin32().
+// We could in theory decide to support Win32-specific code in OpenGL backend via e.g. an hypothetical ImGui_ImplOpenGl2_InitForRawWin32().
 static void CreateWindowHook(ImGuiViewport *ViewPort)
 {
     assert(ViewPort->RendererUserData == NULL);
 
     window_data *WindowData = (window_data *)ImGui::MemAlloc(sizeof(window_data));
     *WindowData = {};
-    CreateDeviceWGL((HWND)ViewPort->PlatformHandle, WindowData);
+    OpenGl2_CreateDevice((HWND)ViewPort->PlatformHandle, WindowData);
     ViewPort->RendererUserData = WindowData;
 }
 
@@ -120,7 +86,7 @@ static void DestroyWindowHook(ImGuiViewport *ViewPort)
     if (ViewPort->RendererUserData != NULL)
     {
         window_data *WindowData = (window_data *)ViewPort->RendererUserData;
-        CleanupDeviceWGL((HWND)ViewPort->PlatformHandle, WindowData);
+        OpenGl2_CleanupDeviceWGL((HWND)ViewPort->PlatformHandle, WindowData);
         if (WindowData)
         {
             ImGui::MemFree(WindowData);
@@ -146,12 +112,11 @@ static void SwapBuffersHook(ImGuiViewport *ViewPort, void *RenderArgument)
     }
 }
 
-// Main code
 i32 main(i32 argc, char **argv)
 {
-    // Win32_EnableDpiAwareness();
+    Win32_EnableDpiAwareness();
 
-    WNDCLASSEXW MainWindowClass = {}; 
+    WNDCLASSEXW MainWindowClass = {};
     MainWindowClass.cbSize = sizeof(MainWindowClass);
     MainWindowClass.style = CS_OWNDC;
     MainWindowClass.lpfnWndProc = MainWindowCallbackHandler;
@@ -166,25 +131,19 @@ i32 main(i32 argc, char **argv)
     MainWindowClass.hIconSm = NULL;
 
     RegisterClassExW(&MainWindowClass);
+
     HWND Window = CreateWindowW
     (
         MainWindowClass.lpszClassName,
         L"my imgui demo",
         WS_OVERLAPPEDWINDOW,
-        100,
-        100,
-        1280,
-        800,
-        NULL,
-        NULL,
-        MainWindowClass.hInstance,
-        NULL
+        100, 100, 1280, 800,
+        NULL, NULL, MainWindowClass.hInstance, NULL
     );
 
-    // Initialize OpenGL
-    if (!CreateDeviceWGL(Window, &GlobalMainWindowData))
+    if (!OpenGl2_CreateDevice(Window, &GlobalMainWindowData))
     {
-        CleanupDeviceWGL(Window, &GlobalMainWindowData);
+        OpenGl2_CleanupDeviceWGL(Window, &GlobalMainWindowData);
         DestroyWindow(Window);
         UnregisterClassW(MainWindowClass.lpszClassName, MainWindowClass.hInstance);
         return 1;
@@ -218,7 +177,7 @@ i32 main(i32 argc, char **argv)
 
     // Setup Platform/Renderer backends
     Win32_InitializeForOpenGL(Window);
-    OpenGL2_Initialize();
+    OpenGl2_Initialize();
 
     // Win32+GL needs specific hooks for ViewPort, as there are specific things needed to tie Win32 and GL api.
     if (ImGuiIOInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -278,7 +237,7 @@ i32 main(i32 argc, char **argv)
         }
 
         // Start the Dear ImGui frame
-        OpenGL2_NewFrame();
+        OpenGl2_NewFrame();
         Win32_NewFrame();
         ImGui::NewFrame();
 
@@ -334,7 +293,7 @@ i32 main(i32 argc, char **argv)
         glViewport(0, 0, GlobalWidth, GlobalHeight);
         glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, ClearColor.w);
         glClear(GL_COLOR_BUFFER_BIT);
-        OpenGL2_RenderDrawData(ImGui::GetDrawData());
+        OpenGl2_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
         if (ImGuiIOInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -350,11 +309,11 @@ i32 main(i32 argc, char **argv)
         SwapBuffers(GlobalMainWindowData.DeviceContext);
     }
 
-    OpenGL2_Shutdown();
+    OpenGl2_Shutdown();
     Win32_Shutdown();
     ImGui::DestroyContext();
 
-    CleanupDeviceWGL(Window, &GlobalMainWindowData);
+    OpenGl2_CleanupDeviceWGL(Window, &GlobalMainWindowData);
     wglDeleteContext(GlobalOpenGLRenderingContext);
     DestroyWindow(Window);
     UnregisterClassW(MainWindowClass.lpszClassName, MainWindowClass.hInstance);
