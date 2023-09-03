@@ -1,12 +1,26 @@
-// Dear ImGui: standalone example application for DirectX 11
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
-
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_dx11.h"
+#include <windows.h>
+#include <windowsx.h>
+#include <dwmapi.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <d3d11.h>
+#include <d3dcompiler.h>
 #include <tchar.h>
+#include <shellscalingapi.h>
+
+#include "..\..\miscellaneous\base_types.h"
+#include "..\..\miscellaneous\basic_defines.h"
+
+#define ENABLE_ASSERTIONS 1
+#include "..\..\miscellaneous\assertions.h"
+
+#include "..\..\imgui\imgui.h"
+
+#include "win32_backend.h"
+#include "dx11_backend.h"
+
+#include "win32_backend.cpp"
+#include "dx11_backend.cpp"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = nullptr;

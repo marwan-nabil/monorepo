@@ -1,7 +1,6 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "files.exclude": {
-        // "windows_apps/imgui_demo/**": true,
-        // "imgui/backends/**": true
+        // "imgui/**": true
     }
 }

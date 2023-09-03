@@ -25,6 +25,54 @@ static window_data GlobalMainWindowData;
 static i32 GlobalWidth;
 static i32 GlobalHeight;
 
+
+static bool Win32_InitializeForOpenGL(void *Window)
+{
+    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    Assert(ImGuiIoInterface->BackendPlatformUserData == NULL && "Already initialized a platform backend!");
+
+    i64 PerformanceCounterFrequency;
+    i64 PerformanceCounter;
+    if (!QueryPerformanceFrequency((LARGE_INTEGER*)&PerformanceCounterFrequency))
+    {
+        return false;
+    }
+    
+    if (!QueryPerformanceCounter((LARGE_INTEGER*)&PerformanceCounter))
+    {
+        return false;
+    }
+
+    // Setup backend capabilities Flags
+    win32_backend_data *BackendData = (win32_backend_data *)ImGui::MemAlloc(sizeof(win32_backend_data));
+    *BackendData = {};
+
+    ImGuiIoInterface->BackendPlatformUserData = (void *)BackendData;
+    ImGuiIoInterface->BackendPlatformName = "win32";
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor ImGuiIoInterface->WantSetMousePos requests (optional, rarely used)
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_PlatformHasViewports; // We can create multi-viewports on the Platform side (optional)
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can call ImGuiIoInterface->AddMouseViewportEvent() with correct data (optional)
+
+    BackendData->Window = (HWND)Window;
+    BackendData->WantUpdateMonitors = true;
+    BackendData->TicksPerSecond = PerformanceCounterFrequency;
+    BackendData->Time = PerformanceCounter;
+    BackendData->LastMouseCursor = ImGuiMouseCursor_COUNT;
+
+    // Our mouse update function expect PlatformHandle to be filled for the main ViewPort
+    ImGuiViewport *MainViewport = ImGui::GetMainViewport();
+    MainViewport->PlatformHandle = (void *)BackendData->Window;
+    MainViewport->PlatformHandleRaw = (void *)BackendData->Window;
+
+    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        Win32_InitPlatformInterface();
+    }
+
+    return true;
+}
+
 static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 {
     // Win32 message handler

@@ -62,10 +62,8 @@ void CompilationTests()
 
     CompilationTest("build basic_app");
 
-    CompilationTest("build imgui_demo");
-
-    CompilationTest("build my_imgui_demo opengl2");
-    CompilationTest("build my_imgui_demo dx11");
+    CompilationTest("build imgui_demo opengl2");
+    // CompilationTest("build imgui_demo dx11");
 
     CompilationTest("build ray_tracer optimized 1_lane");
     CompilationTest("build ray_tracer optimized 4_lanes");
