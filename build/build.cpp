@@ -17,7 +17,7 @@ void DisplayHelp()
     printf("          build build\n");
     printf("          build test\n");
     printf("          build imgui_demo\n");
-    printf("          build my_imgui_demo\n");
+    printf("          build my_imgui_demo [opengl2, dx11]\n");
     printf("          build basic_app\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
@@ -153,6 +153,9 @@ int main(int argc, char **argv)
         char OutputBinaryPath[1024];
         ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
 
+        // ----------------------------------------------------------
+        // first argument
+        // ----------------------------------------------------------
         if
         (
             (strcmp(argv[1], "build") == 0) ||
@@ -186,7 +189,7 @@ int main(int argc, char **argv)
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main.cpp ");
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_opengl2.cpp ");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_opengl3.cpp ");
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_win32.cpp ");
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
@@ -208,8 +211,6 @@ int main(int argc, char **argv)
         else if (strcmp(argv[1], "my_imgui_demo") == 0)
         {
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\my_imgui_demo\\main.cpp ");
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
@@ -217,7 +218,7 @@ int main(int argc, char **argv)
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib user32.lib Gdi32.lib dwmapi.lib ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
         }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
@@ -242,36 +243,80 @@ int main(int argc, char **argv)
             return 1;
         }
 
+        // ----------------------------------------------------------
+        // second argument
+        // ----------------------------------------------------------
         if
         (
-            (strcmp(argv[1], "ray_tracer") == 0)
+            (
+                (strcmp(argv[1], "ray_tracer") == 0)
+                ||
+                (strcmp(argv[1], "my_imgui_demo") == 0)
+            )
+            &&
+            (argc < 3)
         )
         {
-            if (argc >= 3)
+            printf("ERROR: invalid number of arguments for build ...\n");
+            DisplayHelp();
+            return 1;
+        }
+
+        if (strcmp(argv[1], "ray_tracer") == 0)
+        {
+            if (strcmp(argv[2], "optimized") == 0)
             {
-                if (strcmp(argv[2], "optimized") == 0)
-                {
-                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-O2 ");
-                }
-                else if (strcmp(argv[2], "non_optimized") == 0)
-                {
-                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
-                }
-                else
-                {
-                    printf("ERROR: invalid argument \"%s\" for build ...\n", argv[2]);
-                    DisplayHelp();
-                    return 1;
-                }
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-O2 ");
+            }
+            else if (strcmp(argv[2], "non_optimized") == 0)
+            {
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
             }
             else
             {
-                printf("ERROR: invalid number of arguments for build ...\n");
+                printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[2]);
+                DisplayHelp();
+                return 1;
+            }
+        }
+        else if (strcmp(argv[1], "my_imgui_demo") == 0)
+        {
+            if (strcmp(argv[2], "opengl2") == 0)
+            {
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\my_imgui_demo\\main_win32_opengl2.cpp ");
+
+                StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
+            }
+            else if (strcmp(argv[2], "dx11") == 0)
+            {
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_dx11.cpp ");
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_win32.cpp ");
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\my_imgui_demo\\main_win32_dx11.cpp ");
+
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui\\backends ");
+
+                StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d11.lib d3dcompiler.lib ");
+            }
+            else
+            {
+                printf("ERROR: invalid argument \"%s\" for build my_imgui_demo ...\n", argv[2]);
                 DisplayHelp();
                 return 1;
             }
         }
 
+        // ----------------------------------------------------------
+        // third argument
+        // ----------------------------------------------------------
         if (strcmp(argv[1], "ray_tracer") == 0)
         {
             if (argc >= 4)
