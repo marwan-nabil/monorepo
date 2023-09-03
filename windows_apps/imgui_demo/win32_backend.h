@@ -21,6 +21,12 @@ struct win32_viewport_data
     DWORD ExtendedStyleFlags;
 };
 
+enum win32_renderer_backend
+{
+    W32RB_OPENGL2,
+    W32RB_D3D11
+};
+
 typedef HRESULT(WINAPI *SetProcessDpiAwarenessFunctionType)(PROCESS_DPI_AWARENESS);
 typedef HRESULT(WINAPI *GetDpiForMonitorFunctionType)(HMONITOR, MONITOR_DPI_TYPE, u32 *, u32 *);
 typedef DPI_AWARENESS_CONTEXT(WINAPI *SetThreadDpiAwarenessContextFunctionType)(DPI_AWARENESS_CONTEXT);

@@ -1304,51 +1304,97 @@ static LRESULT CALLBACK Win32_WindowProcedureHandler(HWND Window, u32 Message, W
     return DefWindowProc(Window, Message, WParam, LParam);
 }
 
-static void Win32_InitPlatformInterface()
+static bool Win32_Initialize(void *Window, win32_renderer_backend RendererType)
 {
-    WNDCLASSEX WindowClassExtended;
-    WindowClassExtended.cbSize = sizeof(WNDCLASSEX);
-    WindowClassExtended.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    WindowClassExtended.lpfnWndProc = Win32_WindowProcedureHandler;
-    WindowClassExtended.cbClsExtra = 0;
-    WindowClassExtended.cbWndExtra = 0;
-    WindowClassExtended.hInstance = GetModuleHandle(NULL);
-    WindowClassExtended.hIcon = NULL;
-    WindowClassExtended.hCursor = NULL;
-    WindowClassExtended.hbrBackground = (HBRUSH)(COLOR_BACKGROUND + 1);
-    WindowClassExtended.lpszMenuName = NULL;
-    WindowClassExtended.lpszClassName = L"ImGui Platform";
-    WindowClassExtended.hIconSm = NULL;
-    RegisterClassEx(&WindowClassExtended);
+    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    Assert(ImGuiIoInterface->BackendPlatformUserData == NULL && "Already initialized a platform backend!");
 
-    Win32_UpdateMonitors();
+    i64 PerformanceCounterFrequency;
+    i64 PerformanceCounter;
+    if (!QueryPerformanceFrequency((LARGE_INTEGER*)&PerformanceCounterFrequency))
+    {
+        return false;
+    }
+    
+    if (!QueryPerformanceCounter((LARGE_INTEGER*)&PerformanceCounter))
+    {
+        return false;
+    }
 
-    // Register platform interface (will be coupled with a renderer interface)
-    ImGuiPlatformIO *ImGuiPlatformIoInterface = &ImGui::GetPlatformIO();
-    ImGuiPlatformIoInterface->Platform_CreateWindow = Win32_CreateWindow;
-    ImGuiPlatformIoInterface->Platform_DestroyWindow = Win32_DestroyWindow;
-    ImGuiPlatformIoInterface->Platform_ShowWindow = Win32_ShowWindow;
-    ImGuiPlatformIoInterface->Platform_SetWindowPos = Win32_SetWindowPos;
-    ImGuiPlatformIoInterface->Platform_GetWindowPos = Win32_GetWindowPos;
-    ImGuiPlatformIoInterface->Platform_SetWindowSize = Win32_SetWindowSize;
-    ImGuiPlatformIoInterface->Platform_GetWindowSize = Win32_GetWindowSize;
-    ImGuiPlatformIoInterface->Platform_SetWindowFocus = Win32_SetWindowFocus;
-    ImGuiPlatformIoInterface->Platform_GetWindowFocus = Win32_GetWindowFocus;
-    ImGuiPlatformIoInterface->Platform_GetWindowMinimized = Win32_GetWindowMinimized;
-    ImGuiPlatformIoInterface->Platform_SetWindowTitle = Win32_SetWindowTitle;
-    ImGuiPlatformIoInterface->Platform_SetWindowAlpha = Win32_SetWindowAlpha;
-    ImGuiPlatformIoInterface->Platform_UpdateWindow = Win32_UpdateWindow;
-    ImGuiPlatformIoInterface->Platform_GetWindowDpiScale = Win32_GetWindowDpiScale; // FIXME-DPI
-    ImGuiPlatformIoInterface->Platform_OnChangedViewport = Win32_OnChangedViewport; // FIXME-DPI
+    // Setup backend capabilities Flags
+    win32_backend_data *BackendData = (win32_backend_data *)ImGui::MemAlloc(sizeof(win32_backend_data));
+    *BackendData = {};
 
-    // Register main window handle (which is owned by the main application, not by us)
-    // This is mostly for simplicity and consistency, so that our code (e.g. mouse handling etc.) can use same logic for main and secondary viewports.
+    ImGuiIoInterface->BackendPlatformUserData = (void *)BackendData;
+    ImGuiIoInterface->BackendPlatformName = "win32";
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor ImGuiIoInterface->WantSetMousePos requests (optional, rarely used)
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_PlatformHasViewports; // We can create multi-viewports on the Platform side (optional)
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can call ImGuiIoInterface->AddMouseViewportEvent() with correct data (optional)
+
+    BackendData->Window = (HWND)Window;
+    BackendData->WantUpdateMonitors = true;
+    BackendData->TicksPerSecond = PerformanceCounterFrequency;
+    BackendData->Time = PerformanceCounter;
+    BackendData->LastMouseCursor = ImGuiMouseCursor_COUNT;
+
+    // Our mouse update function expect PlatformHandle to be filled for the main ViewPort
     ImGuiViewport *MainViewport = ImGui::GetMainViewport();
-    win32_backend_data *BackendData = Win32_GetBackendData();
-    win32_viewport_data *ViewPortData = (win32_viewport_data *)ImGui::MemAlloc(sizeof(win32_viewport_data));
-    *ViewPortData = {};
-    ViewPortData->Window = BackendData->Window;
-    ViewPortData->WindowOwned = false;
-    MainViewport->PlatformUserData = ViewPortData;
     MainViewport->PlatformHandle = (void *)BackendData->Window;
+    MainViewport->PlatformHandleRaw = (void *)BackendData->Window;
+
+    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        WNDCLASSEX WindowClassExtended;
+        WindowClassExtended.cbSize = sizeof(WNDCLASSEX);
+        WindowClassExtended.style = CS_HREDRAW | CS_VREDRAW;
+        if (RendererType == W32RB_OPENGL2)
+        {
+            WindowClassExtended.style |= CS_OWNDC;
+        }
+        WindowClassExtended.lpfnWndProc = Win32_WindowProcedureHandler;
+        WindowClassExtended.cbClsExtra = 0;
+        WindowClassExtended.cbWndExtra = 0;
+        WindowClassExtended.hInstance = GetModuleHandle(NULL);
+        WindowClassExtended.hIcon = NULL;
+        WindowClassExtended.hCursor = NULL;
+        WindowClassExtended.hbrBackground = (HBRUSH)(COLOR_BACKGROUND + 1);
+        WindowClassExtended.lpszMenuName = NULL;
+        WindowClassExtended.lpszClassName = L"ImGui Platform";
+        WindowClassExtended.hIconSm = NULL;
+        RegisterClassEx(&WindowClassExtended);
+
+        Win32_UpdateMonitors();
+
+        // Register platform interface (will be coupled with a renderer interface)
+        ImGuiPlatformIO *ImGuiPlatformIoInterface = &ImGui::GetPlatformIO();
+        ImGuiPlatformIoInterface->Platform_CreateWindow = Win32_CreateWindow;
+        ImGuiPlatformIoInterface->Platform_DestroyWindow = Win32_DestroyWindow;
+        ImGuiPlatformIoInterface->Platform_ShowWindow = Win32_ShowWindow;
+        ImGuiPlatformIoInterface->Platform_SetWindowPos = Win32_SetWindowPos;
+        ImGuiPlatformIoInterface->Platform_GetWindowPos = Win32_GetWindowPos;
+        ImGuiPlatformIoInterface->Platform_SetWindowSize = Win32_SetWindowSize;
+        ImGuiPlatformIoInterface->Platform_GetWindowSize = Win32_GetWindowSize;
+        ImGuiPlatformIoInterface->Platform_SetWindowFocus = Win32_SetWindowFocus;
+        ImGuiPlatformIoInterface->Platform_GetWindowFocus = Win32_GetWindowFocus;
+        ImGuiPlatformIoInterface->Platform_GetWindowMinimized = Win32_GetWindowMinimized;
+        ImGuiPlatformIoInterface->Platform_SetWindowTitle = Win32_SetWindowTitle;
+        ImGuiPlatformIoInterface->Platform_SetWindowAlpha = Win32_SetWindowAlpha;
+        ImGuiPlatformIoInterface->Platform_UpdateWindow = Win32_UpdateWindow;
+        ImGuiPlatformIoInterface->Platform_GetWindowDpiScale = Win32_GetWindowDpiScale; // FIXME-DPI
+        ImGuiPlatformIoInterface->Platform_OnChangedViewport = Win32_OnChangedViewport; // FIXME-DPI
+
+        // Register main window handle (which is owned by the main application, not by us)
+        // This is mostly for simplicity and consistency, so that our code (e.g. mouse handling etc.) can use same logic for main and secondary viewports.
+        ImGuiViewport *MainViewport = ImGui::GetMainViewport();
+        win32_backend_data *BackendData = Win32_GetBackendData();
+        win32_viewport_data *ViewPortData = (win32_viewport_data *)ImGui::MemAlloc(sizeof(win32_viewport_data));
+        *ViewPortData = {};
+        ViewPortData->Window = BackendData->Window;
+        ViewPortData->WindowOwned = false;
+        MainViewport->PlatformUserData = ViewPortData;
+        MainViewport->PlatformHandle = (void *)BackendData->Window;
+    }
+
+    return true;
 }

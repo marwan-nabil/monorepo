@@ -265,19 +265,8 @@ int main(int argc, char **argv)
             }
             else if (strcmp(argv[2], "dx11") == 0)
             {
-                // StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                // StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_dx11.cpp ");
-                // StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                // StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\backends\\imgui_impl_win32.cpp ");
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_win32_dx11.cpp ");
-
-                // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-                // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-                // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui ");
-                // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/I");
-                // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), RootDirectoryPath);
-                // StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "\\imgui\\backends ");
 
                 StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d11.lib d3dcompiler.lib ");
             }

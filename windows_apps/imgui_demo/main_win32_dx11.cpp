@@ -2,7 +2,6 @@
 #include <windowsx.h>
 #include <dwmapi.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <tchar.h>
@@ -22,28 +21,159 @@
 #include "win32_backend.cpp"
 #include "dx11_backend.cpp"
 
-// Data
-static ID3D11Device*            g_pd3dDevice = nullptr;
-static ID3D11DeviceContext*     g_pd3dDeviceContext = nullptr;
-static IDXGISwapChain*          g_pSwapChain = nullptr;
-static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
-static ID3D11RenderTargetView*  g_mainRenderTargetView = nullptr;
+static ID3D11Device *GlobalD3dDevice;
+static ID3D11DeviceContext *GlobalD3dDeviceContext;
+static IDXGISwapChain *GlobalSwapChain;
+static u32 GlobalResizeWidth;
+static u32 GlobalResizeHeight;
+static ID3D11RenderTargetView *GlobalMainRendererTargetView;
 
-// Forward declarations of helper functions
-bool CreateDeviceD3D(HWND hWnd);
-void CleanupDeviceD3D();
-void CreateRenderTarget();
-void CleanupRenderTarget();
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+void CleanupRenderTarget()
+{
+    if (GlobalMainRendererTargetView)
+    {
+        GlobalMainRendererTargetView->Release();
+        GlobalMainRendererTargetView = NULL;
+    }
+}
 
-// Main code
+void CreateRenderTarget()
+{
+    ID3D11Texture2D *BackBuffer;
+    GlobalSwapChain->GetBuffer(0, IID_PPV_ARGS(&BackBuffer));
+    GlobalD3dDevice->CreateRenderTargetView(BackBuffer, NULL, &GlobalMainRendererTargetView);
+    BackBuffer->Release();
+}
+
+void CleanupDeviceD3D()
+{
+    CleanupRenderTarget();
+    if (GlobalSwapChain)
+    {
+        GlobalSwapChain->Release();
+        GlobalSwapChain = NULL;
+    }
+    if (GlobalD3dDeviceContext)
+    {
+        GlobalD3dDeviceContext->Release();
+        GlobalD3dDeviceContext = NULL;
+    }
+    if (GlobalD3dDevice)
+    {
+        GlobalD3dDevice->Release();
+        GlobalD3dDevice = NULL;
+    }
+}
+
+bool CreateDeviceD3D(HWND hWnd)
+{
+    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor;
+    ZeroMemory(&SwapChainDescriptor, sizeof(SwapChainDescriptor));
+    SwapChainDescriptor.BufferCount = 2;
+    SwapChainDescriptor.BufferDesc.Width = 0;
+    SwapChainDescriptor.BufferDesc.Height = 0;
+    SwapChainDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    SwapChainDescriptor.BufferDesc.RefreshRate.Numerator = 60;
+    SwapChainDescriptor.BufferDesc.RefreshRate.Denominator = 1;
+    SwapChainDescriptor.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    SwapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    SwapChainDescriptor.OutputWindow = hWnd;
+    SwapChainDescriptor.SampleDesc.Count = 1;
+    SwapChainDescriptor.SampleDesc.Quality = 0;
+    SwapChainDescriptor.Windowed = TRUE;
+    SwapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+    UINT CreateDeviceFlags = 0;
+    //CreateDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+
+    D3D_FEATURE_LEVEL FeatureLevel;
+    D3D_FEATURE_LEVEL FeatureLevelArray[2] =
+    {
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_0
+    };
+
+    HRESULT Result = D3D11CreateDeviceAndSwapChain
+    (
+        NULL,
+        D3D_DRIVER_TYPE_HARDWARE,
+        NULL,
+        CreateDeviceFlags,
+        FeatureLevelArray,
+        2,
+        D3D11_SDK_VERSION,
+        &SwapChainDescriptor,
+        &GlobalSwapChain,
+        &GlobalD3dDevice,
+        &FeatureLevel,
+        &GlobalD3dDeviceContext
+    );
+
+    if (Result == DXGI_ERROR_UNSUPPORTED) // Try high-performance WARP software driver if hardware is not available.
+    {
+        Result = D3D11CreateDeviceAndSwapChain
+        (
+            NULL,
+            D3D_DRIVER_TYPE_WARP,
+            NULL,
+            CreateDeviceFlags,
+            FeatureLevelArray,
+            2,
+            D3D11_SDK_VERSION,
+            &SwapChainDescriptor,
+            &GlobalSwapChain,
+            &GlobalD3dDevice,
+            &FeatureLevel,
+            &GlobalD3dDeviceContext
+        );
+    }
+
+    if (Result != S_OK)
+    {
+        return false;
+    }
+
+    CreateRenderTarget();
+
+    return true;
+}
+
+// Win32 message handler
+// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+LRESULT WINAPI MainWindowProcedureHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (Win32_CustomCallbackHandler(hWnd, msg, wParam, lParam))
+        return true;
+
+    switch (msg)
+    {
+    case WM_SIZE:
+        if (wParam == SIZE_MINIMIZED)
+            return 0;
+        GlobalResizeWidth = (UINT)LOWORD(lParam); // Queue resize
+        GlobalResizeHeight = (UINT)HIWORD(lParam);
+        return 0;
+    case WM_SYSCOMMAND:
+        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+            return 0;
+        break;
+    case WM_DESTROY:
+        ::PostQuitMessage(0);
+        return 0;
+    }
+    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
 int main(int, char**)
 {
     // Create application window
-    //ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
+    //Win32_EnableDpiAwareness();
+    WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, MainWindowProcedureHandler, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -69,13 +199,13 @@ int main(int, char**)
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+    Win32_Initialize(hwnd, W32RB_D3D11);
+    ImGui_ImplDX11_Init(GlobalD3dDevice, GlobalD3dDeviceContext);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+    // - If the file cannot be loaded, the function will return a NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
     // - Read 'docs/FONTS.md' for more instructions and details.
@@ -85,8 +215,8 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+    //IM_ASSERT(font != NULL);
 
     // Our state
     bool show_demo_window = true;
@@ -98,9 +228,9 @@ int main(int, char**)
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
-        // See the WndProc() function below for our to dispatch events to the Win32 backend.
+        // See the MainWindowProcedureHandler() function below for our to dispatch events to the Win32 backend.
         MSG msg;
-        while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
+        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
         {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
@@ -111,17 +241,17 @@ int main(int, char**)
             break;
 
         // Handle window resize (we don't resize directly in the WM_SIZE handler)
-        if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
+        if (GlobalResizeWidth != 0 && GlobalResizeHeight != 0)
         {
             CleanupRenderTarget();
-            g_pSwapChain->ResizeBuffers(0, g_ResizeWidth, g_ResizeHeight, DXGI_FORMAT_UNKNOWN, 0);
-            g_ResizeWidth = g_ResizeHeight = 0;
+            GlobalSwapChain->ResizeBuffers(0, GlobalResizeWidth, GlobalResizeHeight, DXGI_FORMAT_UNKNOWN, 0);
+            GlobalResizeWidth = GlobalResizeHeight = 0;
             CreateRenderTarget();
         }
 
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
-        ImGui_ImplWin32_NewFrame();
+        Win32_NewFrame();
         ImGui::NewFrame();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -164,17 +294,17 @@ int main(int, char**)
         // Rendering
         ImGui::Render();
         const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
-        g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
+        GlobalD3dDeviceContext->OMSetRenderTargets(1, &GlobalMainRendererTargetView, NULL);
+        GlobalD3dDeviceContext->ClearRenderTargetView(GlobalMainRendererTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-        g_pSwapChain->Present(1, 0); // Present with vsync
-        //g_pSwapChain->Present(0, 0); // Present without vsync
+        GlobalSwapChain->Present(1, 0); // Present with vsync
+        //GlobalSwapChain->Present(0, 0); // Present without vsync
     }
 
     // Cleanup
     ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
+    Win32_Shutdown();
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();
@@ -184,90 +314,5 @@ int main(int, char**)
     return 0;
 }
 
-// Helper functions
-
-bool CreateDeviceD3D(HWND hWnd)
-{
-    // Setup swap chain
-    DXGI_SWAP_CHAIN_DESC sd;
-    ZeroMemory(&sd, sizeof(sd));
-    sd.BufferCount = 2;
-    sd.BufferDesc.Width = 0;
-    sd.BufferDesc.Height = 0;
-    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.BufferDesc.RefreshRate.Numerator = 60;
-    sd.BufferDesc.RefreshRate.Denominator = 1;
-    sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.OutputWindow = hWnd;
-    sd.SampleDesc.Count = 1;
-    sd.SampleDesc.Quality = 0;
-    sd.Windowed = TRUE;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-    UINT createDeviceFlags = 0;
-    //createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-    D3D_FEATURE_LEVEL featureLevel;
-    const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
-    HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
-    if (res == DXGI_ERROR_UNSUPPORTED) // Try high-performance WARP software driver if hardware is not available.
-        res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
-    if (res != S_OK)
-        return false;
-
-    CreateRenderTarget();
-    return true;
-}
-
-void CleanupDeviceD3D()
-{
-    CleanupRenderTarget();
-    if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = nullptr; }
-    if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = nullptr; }
-    if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
-}
-
-void CreateRenderTarget()
-{
-    ID3D11Texture2D* pBackBuffer;
-    g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-    g_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &g_mainRenderTargetView);
-    pBackBuffer->Release();
-}
-
-void CleanupRenderTarget()
-{
-    if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = nullptr; }
-}
-
 // Forward declare message handler from imgui_impl_win32.cpp
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-// Win32 message handler
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-        return true;
-
-    switch (msg)
-    {
-    case WM_SIZE:
-        if (wParam == SIZE_MINIMIZED)
-            return 0;
-        g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
-        g_ResizeHeight = (UINT)HIWORD(lParam);
-        return 0;
-    case WM_SYSCOMMAND:
-        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-            return 0;
-        break;
-    case WM_DESTROY:
-        ::PostQuitMessage(0);
-        return 0;
-    }
-    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
-}
+extern IMGUI_IMPL_API LRESULT Win32_CustomCallbackHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

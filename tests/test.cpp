@@ -7,15 +7,12 @@
 
 #include "console.cpp"
 #include "compilation_tests.cpp"
-#include "software_rendering_tests.cpp"
 
 int main(int argc, char **argv)
 {
     InitializeConsole();
 
     CompilationTests();
-
-    // SoftwareRenderingTests();
 
     ConsoleSwitchColor(FOREGROUND_GREEN);
     printf("\n==========================\n");
