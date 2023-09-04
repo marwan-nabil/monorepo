@@ -652,9 +652,13 @@ bool Dx11_Initialize(ID3D11Device *D3dDevice, ID3D11DeviceContext *D3dDeviceCont
     Assert(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
 
     // Setup backend capabilities flags
-    dx11_backend_data *BackendData = IM_NEW(dx11_backend_data)();
+    dx11_backend_data *BackendData = (dx11_backend_data *)ImGui::MemAlloc(sizeof(dx11_backend_data));
+    ZeroMemory(BackendData, sizeof(dx11_backend_data));
+    BackendData->VertexBufferSize = 5000;
+    BackendData->IndexBufferSize = 10000;
+
     ImGuiIoInterface->BackendRendererUserData = (void *)BackendData;
-    ImGuiIoInterface->BackendRendererName = "imgui_impl_dx11";
+    ImGuiIoInterface->BackendRendererName = "dx11";
     // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
     ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; 
 

@@ -155,11 +155,9 @@ i32 main(i32 argc, char **argv)
     UpdateWindow(Window);
 
     // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
     ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
     ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 
@@ -169,11 +167,8 @@ i32 main(i32 argc, char **argv)
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle *ImGuiStyleInterface = &ImGui::GetStyle();
-    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGuiStyleInterface->WindowRounding = 0.0f;
-        ImGuiStyleInterface->Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
+    ImGuiStyleInterface->WindowRounding = 0.0f;
+    ImGuiStyleInterface->Colors[ImGuiCol_WindowBg].w = 1.0f;
 
     // Setup Platform/Renderer backends
     Win32_Initialize(Window, W32RB_OPENGL2);
@@ -183,10 +178,10 @@ i32 main(i32 argc, char **argv)
     if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         ImGuiPlatformIO *ImGuiPlatformIoInterface = &ImGui::GetPlatformIO();
-        IM_ASSERT(ImGuiPlatformIoInterface->Renderer_CreateWindow == NULL);
-        IM_ASSERT(ImGuiPlatformIoInterface->Renderer_DestroyWindow == NULL);
-        IM_ASSERT(ImGuiPlatformIoInterface->Renderer_SwapBuffers == NULL);
-        IM_ASSERT(ImGuiPlatformIoInterface->Platform_RenderWindow == NULL);
+        Assert(ImGuiPlatformIoInterface->Renderer_CreateWindow == NULL);
+        Assert(ImGuiPlatformIoInterface->Renderer_DestroyWindow == NULL);
+        Assert(ImGuiPlatformIoInterface->Renderer_SwapBuffers == NULL);
+        Assert(ImGuiPlatformIoInterface->Platform_RenderWindow == NULL);
         ImGuiPlatformIoInterface->Renderer_CreateWindow = CreateWindowHook;
         ImGuiPlatformIoInterface->Renderer_DestroyWindow = DestroyWindowHook;
         ImGuiPlatformIoInterface->Renderer_SwapBuffers = SwapBuffersHook;
@@ -207,7 +202,7 @@ i32 main(i32 argc, char **argv)
     //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIoInterface->Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    //Assert(font != NULL);
 
     // Our state
     bool ShowDemoWindow = true;

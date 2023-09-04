@@ -216,11 +216,18 @@ i32 main(i32 argc, char **argv)
     UpdateWindow(Window);
 
     ImGui::CreateContext();
+
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    // ImGui::StyleColorsDark();
+    ImGui::StyleColorsLight();
+
+    ImGuiStyle *ImGuiStyleInterface = &ImGui::GetStyle();
+    ImGuiStyleInterface->WindowRounding = 0.0f;
+    ImGuiStyleInterface->Colors[ImGuiCol_WindowBg].w = 1.0f;
 
     // Setup Platform/Renderer backends
     Win32_Initialize(Window, W32RB_DX11);
@@ -240,7 +247,7 @@ i32 main(i32 argc, char **argv)
     //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIoInterface->Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    //Assert(font != NULL);
 
     bool ShowDemoWindow = true;
     bool ShowAnotherWindow = false;

@@ -33,4 +33,4 @@ typedef DPI_AWARENESS_CONTEXT(WINAPI *SetThreadDpiAwarenessContextFunctionType)(
 typedef u32(WINAPI *RtlVerifyVersionInfoFunctionType)(OSVERSIONINFOEXW *, u32, ULONGLONG);
 
 // There is no distinct VK_xxx for keypad enter, instead it is VK_RETURN + KF_EXTENDED, we assign it an arbitrary value to make code more readable (VK_ codes go up to 255)
-#define IM_VK_KEYPAD_ENTER (VK_RETURN + 256)
+#define VK_KEYPAD_ENTER (VK_RETURN + 256)

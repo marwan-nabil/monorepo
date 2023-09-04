@@ -95,7 +95,7 @@ static void OpenGl2_DestroyFontsTexture()
 static bool OpenGl2_Initialize()
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    IM_ASSERT(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
+    Assert(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
 
     // Setup backend capabilities flags
     opengl2_backend_data *BackendData = (opengl2_backend_data *)ImGui::MemAlloc(sizeof(opengl2_backend_data));
@@ -109,7 +109,7 @@ static bool OpenGl2_Initialize()
 static void OpenGl2_Shutdown()
 {
     opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
-    IM_ASSERT(BackendData != NULL && "No renderer backend to shutdown, or already shutdown?");
+    Assert(BackendData != NULL && "No renderer backend to shutdown, or already shutdown?");
 
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
 
@@ -124,7 +124,7 @@ static void OpenGl2_Shutdown()
 static void OpenGl2_NewFrame()
 {
     opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
-    IM_ASSERT(BackendData != NULL && "Did you call OpenGl2_Initialize()?");
+    Assert(BackendData != NULL && "Did you call OpenGl2_Initialize()?");
 
     if (!BackendData->FontTexture)
     {

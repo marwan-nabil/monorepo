@@ -436,7 +436,7 @@ static ImGuiKey Win32_VirtualKeyToImGuiKey(WPARAM WParam)
         case VK_MULTIPLY: return ImGuiKey_KeypadMultiply;
         case VK_SUBTRACT: return ImGuiKey_KeypadSubtract;
         case VK_ADD: return ImGuiKey_KeypadAdd;
-        case IM_VK_KEYPAD_ENTER: return ImGuiKey_KeypadEnter;
+        case VK_KEYPAD_ENTER: return ImGuiKey_KeypadEnter;
         case VK_LSHIFT: return ImGuiKey_LeftShift;
         case VK_LCONTROL: return ImGuiKey_LeftCtrl;
         case VK_LMENU: return ImGuiKey_LeftAlt;
@@ -697,11 +697,11 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
                 Win32_UpdateKeyModifiers();
 
                 // Obtain virtual Key code
-                // (keypad enter doesn't have its own... VK_RETURN with KF_EXTENDED flag means keypad enter, see IM_VK_KEYPAD_ENTER definition for details, it is mapped to ImGuiKey_KeyPadEnter.)
+                // (keypad enter doesn't have its own... VK_RETURN with KF_EXTENDED flag means keypad enter, see VK_KEYPAD_ENTER definition for details, it is mapped to ImGuiKey_KeyPadEnter.)
                 i32 VirtualKey = (i32)WParam;
                 if ((WParam == VK_RETURN) && (HIWORD(LParam) & KF_EXTENDED))
                 {
-                    VirtualKey = IM_VK_KEYPAD_ENTER;
+                    VirtualKey = VK_KEYPAD_ENTER;
                 }
 
                 // Submit Key event
