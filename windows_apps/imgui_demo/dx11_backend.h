@@ -2,20 +2,20 @@
 
 struct dx11_backend_data
 {
-    ID3D11Device *pd3dDevice;
-    ID3D11DeviceContext *pd3dDeviceContext;
-    IDXGIFactory *pFactory;
-    ID3D11Buffer *pVB;
-    ID3D11Buffer *pIB;
-    ID3D11VertexShader *pVertexShader;
-    ID3D11InputLayout *pInputLayout;
-    ID3D11Buffer *pVertexConstantBuffer;
-    ID3D11PixelShader *pPixelShader;
-    ID3D11SamplerState *pFontSampler;
-    ID3D11ShaderResourceView *pFontTextureView;
-    ID3D11RasterizerState *pRasterizerState;
-    ID3D11BlendState *pBlendState;
-    ID3D11DepthStencilState *pDepthStencilState;
+    ID3D11Device *D3dDevice;
+    ID3D11DeviceContext *D3dDeviceContext;
+    IDXGIFactory *DxgiFactory;
+    ID3D11Buffer *VertexBuffer;
+    ID3D11Buffer *PixelBuffer;
+    ID3D11VertexShader *VertexShader;
+    ID3D11InputLayout *InputLayout;
+    ID3D11Buffer *VertexConstantBuffer;
+    ID3D11PixelShader *PixelShader;
+    ID3D11SamplerState *FontSampler;
+    ID3D11ShaderResourceView *FontTextureView;
+    ID3D11RasterizerState *RasterizerState;
+    ID3D11BlendState *BlendState;
+    ID3D11DepthStencilState *DepthStencilState;
     i32 VertexBufferSize;
     i32 IndexBufferSize;
 
@@ -29,31 +29,41 @@ struct dx11_backend_data
 
 struct dx11_backup_state
 {
-    UINT ScissorRectsCount, ViewportsCount;
-    D3D11_RECT ScissorRects[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+    UINT ScissorsRectanglesCount;
+    UINT ViewportsCount;
+    D3D11_RECT ScissorsRectangles[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
     D3D11_VIEWPORT Viewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
-    ID3D11RasterizerState *RS;
+    ID3D11RasterizerState *RasterizerState;
     ID3D11BlendState *BlendState;
     FLOAT BlendFactor[4];
     UINT SampleMask;
-    UINT StencilRef;
+    UINT StencilReference;
     ID3D11DepthStencilState *DepthStencilState;
-    ID3D11ShaderResourceView *PSShaderResource;
-    ID3D11SamplerState *PSSampler;
-    ID3D11PixelShader *PS;
-    ID3D11VertexShader *VS;
-    ID3D11GeometryShader *GS;
-    UINT PSInstancesCount, VSInstancesCount, GSInstancesCount;
+    ID3D11ShaderResourceView *PixelShaderResourceView;
+    ID3D11SamplerState *PixelShaderSampler;
+    ID3D11PixelShader *PixelShader;
+    ID3D11VertexShader *VertexShader;
+    ID3D11GeometryShader *GeometryShader;
+    UINT PixelShaderInstanceCount;
+    UINT VertexShaderInstanceCount;
+    UINT GeometryShaderInstanceCount;
+
     // 256 is max according to PSSetShader documentation
-    ID3D11ClassInstance *PSInstances[256], *VSInstances[256], *GSInstances[256];
+    ID3D11ClassInstance *PixelShaderInstances[256];
+    ID3D11ClassInstance *VertexShaderInstances[256];
+    ID3D11ClassInstance *GeometryShaderInstances[256];
     D3D11_PRIMITIVE_TOPOLOGY PrimitiveTopology;
-    ID3D11Buffer *IndexBuffer, *VertexBuffer, *VSConstantBuffer;
-    UINT IndexBufferOffset, VertexBufferStride, VertexBufferOffset;
+    ID3D11Buffer *IndexBuffer;
+    ID3D11Buffer *VertexBuffer;
+    ID3D11Buffer *VertexShaderConstantBuffer;
+    UINT IndexBufferOffset;
+    UINT VertexBufferStride;
+    UINT VertexBufferOffset;
     DXGI_FORMAT IndexBufferFormat;
     ID3D11InputLayout *InputLayout;
 };
 
 struct dx11_vertex_constant_buffer
 {
-    f32 mvp[4][4];
+    f32 Mvp[4][4];
 };
