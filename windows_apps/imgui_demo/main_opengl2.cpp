@@ -17,7 +17,7 @@
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"
-#include "main_win32_opengl2.h"
+#include "main_opengl2.h"
 
 #include "opengl2_backend.cpp"
 #include "win32_backend.cpp"

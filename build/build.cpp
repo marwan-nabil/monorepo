@@ -188,9 +188,6 @@ int main(int argc, char **argv)
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo.exe");
-
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
@@ -259,14 +256,20 @@ int main(int argc, char **argv)
             if (strcmp(argv[2], "opengl2") == 0)
             {
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_win32_opengl2.cpp ");
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_opengl2.cpp ");
+
+                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
 
                 StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
             }
             else if (strcmp(argv[2], "dx11") == 0)
             {
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_win32_dx11.cpp ");
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_dx11.cpp ");
+
+                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo_dx11.exe");
 
                 StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d11.lib d3dcompiler.lib ");
             }

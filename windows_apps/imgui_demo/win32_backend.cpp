@@ -955,7 +955,7 @@ static void Win32_CreateWindow(ImGuiViewport *ViewPort)
         ViewPortData->ParentWindow, NULL, GetModuleHandle(NULL), NULL
     );
 
-    ViewPortData->WindowOwned = true;
+    ViewPortData->WindowOwned = TRUE;
     ViewPort->PlatformRequestResize = false;
     ViewPort->PlatformHandle = ViewPortData->Window;
     ViewPort->PlatformHandleRaw = ViewPortData->Window;
@@ -1387,7 +1387,7 @@ static bool Win32_Initialize(void *Window, win32_renderer_backend RendererType)
         win32_viewport_data *ViewPortData = (win32_viewport_data *)ImGui::MemAlloc(sizeof(win32_viewport_data));
         *ViewPortData = {};
         ViewPortData->Window = BackendData->Window;
-        ViewPortData->WindowOwned = false;
+        ViewPortData->WindowOwned = FALSE;
         MainViewport->PlatformUserData = ViewPortData;
         MainViewport->PlatformHandle = (void *)BackendData->Window;
     }

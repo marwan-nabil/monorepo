@@ -16,7 +16,7 @@ struct win32_viewport_data
 {
     HWND Window;
     HWND ParentWindow;
-    bool WindowOwned;
+    b32 WindowOwned;
     DWORD StyleFlags;
     DWORD ExtendedStyleFlags;
 };
