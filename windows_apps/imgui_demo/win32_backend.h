@@ -9,7 +9,7 @@ struct win32_backend_data
     i64 Time;
     i64 TicksPerSecond;
     ImGuiMouseCursor LastMouseCursor;
-    bool WantUpdateMonitors;
+    b32 MonitorsNeedUpdate;
 };
 
 struct win32_viewport_data

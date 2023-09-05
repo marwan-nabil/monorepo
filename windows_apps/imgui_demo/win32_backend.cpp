@@ -1,20 +1,15 @@
-static HMODULE ShcoreDllModule;
-static HMODULE User32DllModule;
-static HMODULE NtDllModule;
+static HMODULE GlobalShcoreDllModule;
+static HMODULE GlobalUser32DllModule;
+static HMODULE GlobalNtDllModule;
 
 static b32 Win32_IsWindowsVersionOrGreater(u16 MajorVersion, u16 MinorVersion, u16 PatchVersion)
 {
     RtlVerifyVersionInfoFunctionType RtlVerifyVersionInfoFunction = NULL;
 
-    if (!NtDllModule)
-    {
-        NtDllModule = GetModuleHandleA("ntdll.dll");
-    }
-
-    if (NtDllModule)
+    if (GlobalNtDllModule)
     {
         RtlVerifyVersionInfoFunction =
-            (RtlVerifyVersionInfoFunctionType)GetProcAddress(NtDllModule, "RtlVerifyVersionInfo");
+            (RtlVerifyVersionInfoFunctionType)GetProcAddress(GlobalNtDllModule, "RtlVerifyVersionInfo");
     }
 
     if (RtlVerifyVersionInfoFunction == NULL)
@@ -50,18 +45,13 @@ static f32 Win32_GetDpiScaleForMonitor(void *Monitor)
 
     if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0603), LOBYTE(0x0603), 0)) // _WIN32_WINNT_WINBLUE
     {
-        if (!ShcoreDllModule)
-        {
-            ShcoreDllModule = LoadLibraryA("shcore.dll"); // Reference counted per-process
-        }
-
         GetDpiForMonitorFunctionType GetDpiForMonitorFunction = NULL;
 
-        if (ShcoreDllModule)
+        if (GlobalShcoreDllModule)
         {
             GetDpiForMonitorFunction =
                 (GetDpiForMonitorFunctionType)
-                GetProcAddress(ShcoreDllModule, "GetDpiForMonitor");
+                GetProcAddress(GlobalShcoreDllModule, "GetDpiForMonitor");
         }
 
         if (GetDpiForMonitorFunction)
@@ -97,6 +87,36 @@ static win32_backend_data *Win32_GetBackendData()
     {
         return NULL;
     }
+}
+
+static b32 Win32_ConfigureDpiAwareness()
+{
+    b32 DpiAwarenessSet = FALSE;
+
+    if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10
+    {
+        SetThreadDpiAwarenessContextFunctionType SetThreadDpiAwarenessContextFunction =
+            (SetThreadDpiAwarenessContextFunctionType)GetProcAddress(GlobalUser32DllModule, "SetThreadDpiAwarenessContext");
+
+        if (SetThreadDpiAwarenessContextFunction)
+        {
+            SetThreadDpiAwarenessContextFunction(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+            DpiAwarenessSet = TRUE;
+        }
+    }
+
+    if (SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+    {
+        DpiAwarenessSet = TRUE;
+    }
+
+    return DpiAwarenessSet;
+}
+
+static f32 Win32_GetDpiScaleForHwnd(void *Window)
+{
+    HMONITOR Monitor = MonitorFromWindow((HWND)Window, MONITOR_DEFAULTTONEAREST);
+    return Win32_GetDpiScaleForMonitor(Monitor);
 }
 
 static void Win32_Shutdown()
@@ -335,7 +355,7 @@ static void Win32_UpdateMonitors()
     win32_backend_data *BackendData = Win32_GetBackendData();
     (&ImGui::GetPlatformIO())->Monitors.resize(0);
     EnumDisplayMonitors(NULL, NULL, Win32_UpdateMonitorsEnumFunction, 0);
-    BackendData->WantUpdateMonitors = false;
+    BackendData->MonitorsNeedUpdate = FALSE;
 }
 
 void Win32_NewFrame()
@@ -350,7 +370,7 @@ void Win32_NewFrame()
     ImGuiIoInterface->DisplaySize = 
         ImVec2((f32)(Rectangle.right - Rectangle.left), (f32)(Rectangle.bottom - Rectangle.top));
 
-    if (BackendData->WantUpdateMonitors)
+    if (BackendData->MonitorsNeedUpdate)
     {
         Win32_UpdateMonitors();
     }
@@ -792,49 +812,25 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
 
         case WM_DISPLAYCHANGE:
         {
-            BackendData->WantUpdateMonitors = true;
+            BackendData->MonitorsNeedUpdate = TRUE;
             return 0;
         } break;
     }
     return 0;
 }
 
-b32 Win32_EnableDpiAwareness()
+static b32 Win32_LoadNecessaryDlls()
 {
-    win32_backend_data *BackendData = Win32_GetBackendData();
-    if (BackendData)
-    {
-        BackendData->WantUpdateMonitors = true;
-    }
+    GlobalUser32DllModule = LoadLibraryA("user32.dll");
+    GlobalShcoreDllModule = LoadLibraryA("shcore.dll");
+    GlobalNtDllModule = GetModuleHandleA("ntdll.dll");
 
-    if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10
-    {
-        User32DllModule = LoadLibraryA("user32.dll");
-
-        SetThreadDpiAwarenessContextFunctionType SetThreadDpiAwarenessContextFunction =
-            (SetThreadDpiAwarenessContextFunctionType)GetProcAddress(User32DllModule, "SetThreadDpiAwarenessContext");
-
-        if (SetThreadDpiAwarenessContextFunction)
-        {
-            SetThreadDpiAwarenessContextFunction(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-            return TRUE;
-        }
-    }
-
-    if (SetProcessDPIAware())
-    {
-        return TRUE;
-    }
-    else
+    if (!GlobalUser32DllModule || !GlobalShcoreDllModule || !GlobalNtDllModule)
     {
         return FALSE;
     }
-}
 
-f32 Win32_GetDpiScaleForHwnd(void *Window)
-{
-    HMONITOR Monitor = MonitorFromWindow((HWND)Window, MONITOR_DEFAULTTONEAREST);
-    return Win32_GetDpiScaleForMonitor(Monitor);
+    return TRUE;
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -1333,7 +1329,7 @@ static bool Win32_Initialize(void *Window, win32_renderer_backend RendererType)
     ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can call ImGuiIoInterface->AddMouseViewportEvent() with correct data (optional)
 
     BackendData->Window = (HWND)Window;
-    BackendData->WantUpdateMonitors = true;
+    BackendData->MonitorsNeedUpdate = TRUE;
     BackendData->TicksPerSecond = PerformanceCounterFrequency;
     BackendData->Time = PerformanceCounter;
     BackendData->LastMouseCursor = ImGuiMouseCursor_COUNT;

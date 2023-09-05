@@ -5,6 +5,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <tchar.h>
+#include <stdio.h>
 #include <shellscalingapi.h>
 
 #include "..\..\miscellaneous\base_types.h"
@@ -179,7 +180,19 @@ LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WPara
 
 i32 main(i32 argc, char **argv)
 {
-    Win32_EnableDpiAwareness();
+    b32 Result = Win32_LoadNecessaryDlls();
+    if (!Result)
+    {
+        printf("ERROR: failed to load necessary DLLs.\n");
+        return 1;
+    }
+
+    Result = Win32_ConfigureDpiAwareness();
+    if (!Result)
+    {
+        printf("ERROR: Dpi Awareness could not be configured.\n");
+        return 1;
+    }
 
     WNDCLASSEXW WindowClass;
     WindowClass.cbSize = sizeof(WindowClass);
@@ -192,14 +205,14 @@ i32 main(i32 argc, char **argv)
     WindowClass.hCursor = NULL;
     WindowClass.hbrBackground = NULL;
     WindowClass.lpszMenuName = NULL;
-    WindowClass.lpszClassName = L"ImGui Example";
+    WindowClass.lpszClassName = L"WindowClass";
     WindowClass.hIconSm = NULL;
     RegisterClassExW(&WindowClass);
 
     HWND Window = CreateWindowW
     (
         WindowClass.lpszClassName,
-        L"Dear ImGui DirectX11 Example",
+        L"win32 - dx11 IMGUI example",
         WS_OVERLAPPEDWINDOW,
         100, 100, 1280, 800,
         NULL, NULL, WindowClass.hInstance, NULL
@@ -296,16 +309,19 @@ i32 main(i32 argc, char **argv)
         static f32 FloatValue = 0.0f;
         static i32 CounterValue = 0;
 
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        u32  CurrentDpi = GetDpiForWindow(Window);
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &ShowDemoWindow);      // Edit bools storing our window open/close state
+        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Text("This is some useful text.");
+        ImGui::Text("Current DPI is: %d", CurrentDpi);
+        ImGui::Checkbox("Demo Window", &ShowDemoWindow); // Edit bools storing our window open/close state
         ImGui::Checkbox("Another Window", &ShowAnotherWindow);
 
-        ImGui::SliderFloat("f32", &FloatValue, 0.0f, 1.0f);            // Edit 1 f32 using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat("f32", &FloatValue, 0.0f, 1.0f); // Edit 1 f32 using a slider from 0.0f to 1.0f
         ImGui::ColorEdit3("clear color", (f32*)&ClearColor); // Edit 3 floats representing a color
 
-        if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
             CounterValue++;
         }
@@ -318,7 +334,8 @@ i32 main(i32 argc, char **argv)
         // 3. Show another simple window.
         if (ShowAnotherWindow)
         {
-            ImGui::Begin("Another Window", &ShowAnotherWindow);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            ImGui::Begin("Another Window", &ShowAnotherWindow);
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
             {

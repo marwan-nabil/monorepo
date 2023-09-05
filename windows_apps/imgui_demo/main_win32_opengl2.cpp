@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <GL/GL.h>
 #include <tchar.h>
+#include <stdio.h>
 #include <shellscalingapi.h>
 
 #include "..\..\miscellaneous\base_types.h"
@@ -114,38 +115,49 @@ static void SwapBuffersHook(ImGuiViewport *ViewPort, void *RenderArgument)
 
 i32 main(i32 argc, char **argv)
 {
-    Win32_EnableDpiAwareness();
+    b32 Result = Win32_LoadNecessaryDlls();
+    if (!Result)
+    {
+        printf("ERROR: failed to load necessary DLLs.\n");
+        return 1;
+    }
 
-    WNDCLASSEXW MainWindowClass = {};
-    MainWindowClass.cbSize = sizeof(MainWindowClass);
-    MainWindowClass.style = CS_OWNDC;
-    MainWindowClass.lpfnWndProc = MainWindowCallbackHandler;
-    MainWindowClass.cbClsExtra = 0;
-    MainWindowClass.cbWndExtra = 0;
-    MainWindowClass.hInstance = GetModuleHandle(NULL);
-    MainWindowClass.hIcon = NULL;
-    MainWindowClass.hCursor = NULL;
-    MainWindowClass.hbrBackground = NULL;
-    MainWindowClass.lpszMenuName = NULL;
-    MainWindowClass.lpszClassName = L"MainWindowClass";
-    MainWindowClass.hIconSm = NULL;
+    Result = Win32_ConfigureDpiAwareness();
+    if (!Result)
+    {
+        printf("ERROR: Dpi Awareness could not be configured.\n");
+        return 1;
+    }
 
-    RegisterClassExW(&MainWindowClass);
+    WNDCLASSEXW WindowClass = {};
+    WindowClass.cbSize = sizeof(WindowClass);
+    WindowClass.style = CS_OWNDC;
+    WindowClass.lpfnWndProc = MainWindowCallbackHandler;
+    WindowClass.cbClsExtra = 0;
+    WindowClass.cbWndExtra = 0;
+    WindowClass.hInstance = GetModuleHandle(NULL);
+    WindowClass.hIcon = NULL;
+    WindowClass.hCursor = NULL;
+    WindowClass.hbrBackground = NULL;
+    WindowClass.lpszMenuName = NULL;
+    WindowClass.lpszClassName = L"WindowClass";
+    WindowClass.hIconSm = NULL;
+    RegisterClassExW(&WindowClass);
 
     HWND Window = CreateWindowW
     (
-        MainWindowClass.lpszClassName,
+        WindowClass.lpszClassName,
         L"my imgui demo",
         WS_OVERLAPPEDWINDOW,
         100, 100, 1280, 800,
-        NULL, NULL, MainWindowClass.hInstance, NULL
+        NULL, NULL, WindowClass.hInstance, NULL
     );
 
     if (!OpenGl2_CreateDevice(Window, &GlobalMainWindowData))
     {
         OpenGl2_CleanupDeviceWGL(Window, &GlobalMainWindowData);
         DestroyWindow(Window);
-        UnregisterClassW(MainWindowClass.lpszClassName, MainWindowClass.hInstance);
+        UnregisterClassW(WindowClass.lpszClassName, WindowClass.hInstance);
         return 1;
     }
     wglMakeCurrent(GlobalMainWindowData.DeviceContext, GlobalOpenGLRenderingContext);
@@ -311,7 +323,7 @@ i32 main(i32 argc, char **argv)
     OpenGl2_CleanupDeviceWGL(Window, &GlobalMainWindowData);
     wglDeleteContext(GlobalOpenGLRenderingContext);
     DestroyWindow(Window);
-    UnregisterClassW(MainWindowClass.lpszClassName, MainWindowClass.hInstance);
+    UnregisterClassW(WindowClass.lpszClassName, WindowClass.hInstance);
 
     return 0;
 }
