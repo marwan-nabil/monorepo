@@ -30,13 +30,13 @@ static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARA
 {
     // Win32 message handler
     // You can read the ImGuiIoInterface.WantCaptureMouse, ImGuiIoInterface.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    // - When ImGuiIoInterface.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-    // - When ImGuiIoInterface.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+    // - When ImGuiIoInterface.WantCaptureMouse is TRUE, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+    // - When ImGuiIoInterface.WantCaptureKeyboard is TRUE, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 
     if (Win32_CustomCallbackHandler(Window, Message, WParam, LParam))
     {
-        return true;
+        return TRUE;
     }
 
     switch (Message)
@@ -217,12 +217,12 @@ i32 main(i32 argc, char **argv)
     //Assert(font != NULL);
 
     // Our state
-    bool ShowDemoWindow = true;
-    bool ShowAnotherWindow = false;
+    b32 ShowDemoWindow = TRUE;
+    b32 ShowAnotherWindow = FALSE;
     ImVec4 ClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
-    b32 Done = false;
+    b32 Done = FALSE;
     while (!Done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
@@ -234,7 +234,7 @@ i32 main(i32 argc, char **argv)
             DispatchMessage(&Message);
             if (Message.message == WM_QUIT)
             {
-                Done = true;
+                Done = TRUE;
             }
         }
 
@@ -251,7 +251,7 @@ i32 main(i32 argc, char **argv)
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (ShowDemoWindow)
         {
-            ImGui::ShowDemoWindow(&ShowDemoWindow);
+            ImGui::ShowDemoWindow((bool *)&ShowDemoWindow);
         }
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
@@ -262,13 +262,13 @@ i32 main(i32 argc, char **argv)
             ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
             ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &ShowDemoWindow); // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &ShowAnotherWindow);
+            ImGui::Checkbox("Demo Window", (bool *)&ShowDemoWindow); // Edit bools storing our window open/close state
+            ImGui::Checkbox("Another Window", (bool *)&ShowAnotherWindow);
 
             ImGui::SliderFloat("f32", &FloatSliderValue, 0.0f, 1.0f); // Edit 1 f32 using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (f32 *)&ClearColor); // Edit 3 floats representing a color
 
-            if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("Button")) // Buttons return TRUE when clicked (most widgets return TRUE when edited/activated)
             {
                 CounterValue++;
             }
@@ -286,11 +286,11 @@ i32 main(i32 argc, char **argv)
         // 3. Show another simple window.
         if (ShowAnotherWindow)
         {
-            ImGui::Begin("Another Window", &ShowAnotherWindow);   // Pass a pointer to our b32 variable (the window will have a closing button that will clear the b32 when clicked)
+            ImGui::Begin("Another Window", (bool *)&ShowAnotherWindow);   // Pass a pointer to our b32 variable (the window will have a closing button that will clear the b32 when clicked)
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
             {
-                ShowAnotherWindow = false;
+                ShowAnotherWindow = FALSE;
             }
             ImGui::End();
         }

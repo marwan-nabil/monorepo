@@ -88,7 +88,7 @@ ProcessWindowsMessage(MSG Message, user_input *UserInput)
 
     if ((VirtualKeyCode == VK_F4) && KeyIsDown && AltKeyIsDown)
     {
-        UserInput->ExitSignal = true;
+        UserInput->ExitSignal = TRUE;
     }
 }
 
@@ -126,7 +126,7 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
         case WM_KEYDOWN:
         case WM_KEYUP:
         {
-            Assert(false);
+            Assert(FALSE);
         } break;
 
         case WM_DESTROY:
@@ -134,7 +134,7 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
         case WM_CLOSE:
         {
             window_private_data *WindowPrivateData = (window_private_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
-            *WindowPrivateData->RunningState = false;
+            *WindowPrivateData->RunningState = FALSE;
         } break;
 
         default:
@@ -155,7 +155,7 @@ WinMain
     i32 ShowCmd
 )
 {
-    b32 RunningState = false;
+    b32 RunningState = FALSE;
 
     rendering_buffer LocalRenderingBuffer = {};
     LocalRenderingBuffer.Width = 1920;
@@ -215,7 +215,7 @@ WinMain
         {
             InitializeSimulationState(&GlobalSimulationState);
 
-            RunningState = true;
+            RunningState = TRUE;
             while (RunningState)
             {
                 LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
@@ -233,7 +233,7 @@ WinMain
                             ProcessWindowsMessage(Message, &GlobalUserInput);
                             if (GlobalUserInput.ExitSignal)
                             {
-                                *WindowPrivateData.RunningState = false;
+                                *WindowPrivateData.RunningState = FALSE;
                             }
                         } break;
 

@@ -66,7 +66,7 @@ void CleanupDeviceD3D()
     }
 }
 
-bool CreateDeviceD3D(HWND Window)
+b32 CreateDeviceD3D(HWND Window)
 {
     DXGI_SWAP_CHAIN_DESC SwapChainDescriptor;
     ZeroMemory(&SwapChainDescriptor, sizeof(SwapChainDescriptor));
@@ -132,19 +132,19 @@ bool CreateDeviceD3D(HWND Window)
 
     if (Result != S_OK)
     {
-        return false;
+        return FALSE;
     }
 
     CreateRenderTarget();
 
-    return true;
+    return TRUE;
 }
 
 LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 {
     if (Win32_CustomCallbackHandler(Window, Message, WParam, LParam))
     {
-        return true;
+        return TRUE;
     }
 
     switch (Message)
@@ -262,11 +262,11 @@ i32 main(i32 argc, char **argv)
     //ImFont* font = ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIoInterface->Fonts->GetGlyphRangesJapanese());
     //Assert(font != NULL);
 
-    bool ShowDemoWindow = true;
-    bool ShowAnotherWindow = false;
+    b32 ShowDemoWindow = TRUE;
+    b32 ShowAnotherWindow = FALSE;
     ImVec4 ClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    bool Done = false;
+    b32 Done = FALSE;
     while (!Done)
     {
         MSG Message;
@@ -276,7 +276,7 @@ i32 main(i32 argc, char **argv)
             DispatchMessage(&Message);
             if (Message.message == WM_QUIT)
             {
-                Done = true;
+                Done = TRUE;
             }
         }
 
@@ -302,7 +302,7 @@ i32 main(i32 argc, char **argv)
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (ShowDemoWindow)
         {
-            ImGui::ShowDemoWindow(&ShowDemoWindow);
+            ImGui::ShowDemoWindow((bool *)&ShowDemoWindow);
         }
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
@@ -315,13 +315,13 @@ i32 main(i32 argc, char **argv)
 
         ImGui::Text("This is some useful text.");
         ImGui::Text("Current DPI is: %d", CurrentDpi);
-        ImGui::Checkbox("Demo Window", &ShowDemoWindow); // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &ShowAnotherWindow);
+        ImGui::Checkbox("Demo Window", (bool *)&ShowDemoWindow); // Edit bools storing our window open/close state
+        ImGui::Checkbox("Another Window", (bool *)&ShowAnotherWindow);
 
         ImGui::SliderFloat("f32", &FloatValue, 0.0f, 1.0f); // Edit 1 f32 using a slider from 0.0f to 1.0f
         ImGui::ColorEdit3("clear color", (f32*)&ClearColor); // Edit 3 floats representing a color
 
-        if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+        if (ImGui::Button("Button")) // Buttons return TRUE when clicked (most widgets return TRUE when edited/activated)
         {
             CounterValue++;
         }
@@ -334,12 +334,12 @@ i32 main(i32 argc, char **argv)
         // 3. Show another simple window.
         if (ShowAnotherWindow)
         {
-            // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Begin("Another Window", &ShowAnotherWindow);
+            // Pass a pointer to our b32 variable (the window will have a closing button that will clear the b32 when clicked)
+            ImGui::Begin("Another Window", (bool *)&ShowAnotherWindow);
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
             {
-                ShowAnotherWindow = false;
+                ShowAnotherWindow = FALSE;
             }
             ImGui::End();
         }

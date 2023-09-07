@@ -13,11 +13,11 @@ static b32 OpenGl2_CreateDevice(HWND Window, window_data *WindowData)
     i32 PixelFormat = ChoosePixelFormat(DeviceContext, &PixelFormatDescriptor);
     if (PixelFormat == 0)
     {
-        return false;
+        return FALSE;
     }
     if (SetPixelFormat(DeviceContext, PixelFormat, &PixelFormatDescriptor) == FALSE)
     {
-        return false;
+        return FALSE;
     }
     ReleaseDC(Window, DeviceContext);
 
@@ -27,7 +27,7 @@ static b32 OpenGl2_CreateDevice(HWND Window, window_data *WindowData)
         GlobalOpenGLRenderingContext = wglCreateContext(WindowData->DeviceContext);
     }
 
-    return true;
+    return TRUE;
 }
 
 static void OpenGl2_CleanupDeviceWGL(HWND Window, window_data *WindowData)
@@ -50,7 +50,7 @@ static opengl2_backend_data *OpenGl2_GetBackendData()
     }
 }
 
-static bool OpenGl2_CreateFontsTexture()
+static b32 OpenGl2_CreateFontsTexture()
 {
     // Build texture atlas
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
@@ -61,7 +61,7 @@ static bool OpenGl2_CreateFontsTexture()
     ImGuiIoInterface->Fonts->GetTexDataAsRGBA32(&Pixels, &Width, &Height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
 
     // Upload texture to graphics system
-    // (Bilinear sampling is required by default. Set 'ImGuiIoInterface->Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = false' to allow point/nearest sampling)
+    // (Bilinear sampling is required by default. Set 'ImGuiIoInterface->Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = FALSE' to allow point/nearest sampling)
     GLint LastTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &LastTexture);
     glGenTextures(1, &BackendData->FontTexture);
@@ -77,7 +77,7 @@ static bool OpenGl2_CreateFontsTexture()
     // Restore state
     glBindTexture(GL_TEXTURE_2D, LastTexture);
 
-    return true;
+    return TRUE;
 }
 
 static void OpenGl2_DestroyFontsTexture()
@@ -92,7 +92,7 @@ static void OpenGl2_DestroyFontsTexture()
     }
 }
 
-static bool OpenGl2_Initialize()
+static b32 OpenGl2_Initialize()
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     Assert(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
@@ -103,7 +103,7 @@ static bool OpenGl2_Initialize()
     ImGuiIoInterface->BackendRendererUserData = (void *)BackendData;
     ImGuiIoInterface->BackendRendererName = "opengl2";
 
-    return true;
+    return TRUE;
 }
 
 static void OpenGl2_Shutdown()

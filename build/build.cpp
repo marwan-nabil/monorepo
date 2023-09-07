@@ -53,7 +53,7 @@ u32 CleanPerExtension(const char *ExtensionToClean, const char *OutputDirectoryP
                 StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                 StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
 
-                BOOL DeleteResult = DeleteFile(FoundFilePath);
+                b32 DeleteResult = DeleteFile(FoundFilePath);
                 if (DeleteResult == 0)
                 {
                     DWORD LastError = GetLastError();
@@ -331,7 +331,7 @@ int main(int argc, char **argv)
         StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /link ");
         StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), LinkerFlags);
 
-        BOOL CreateSucceeded = CreateProcess
+        b32 CreateSucceeded = CreateProcess
         (
             NULL,
             CompilerCommand,
@@ -345,7 +345,7 @@ int main(int argc, char **argv)
             &CompilerProcessProcessInfo
         );
 
-        if (CreateSucceeded == false)
+        if (CreateSucceeded == FALSE)
         {
             printf("ERROR: failed to create the compiler process, please debug the build system.\n");
             fflush(stdout);

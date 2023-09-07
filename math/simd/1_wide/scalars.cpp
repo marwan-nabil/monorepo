@@ -30,7 +30,7 @@ MaskIsAllZeroes(u32_lane Mask)
 {
     if (Mask)
     {
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }

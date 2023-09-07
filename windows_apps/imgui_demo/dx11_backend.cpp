@@ -404,7 +404,7 @@ static void Dx11_CreateFontsTexture()
     ImGuiIoInterface->Fonts->SetTexID((ImTextureID)BackendData->FontTextureView);
 
     // Create texture sampler
-    // (Bilinear sampling is required by default. Set 'ImGuiIoInterface->Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = false' to allow point/nearest sampling)
+    // (Bilinear sampling is required by default. Set 'ImGuiIoInterface->Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = FALSE' to allow point/nearest sampling)
     D3D11_SAMPLER_DESC SamplerDescriptor;
     ZeroMemory(&SamplerDescriptor, sizeof(SamplerDescriptor));
     SamplerDescriptor.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -418,13 +418,13 @@ static void Dx11_CreateFontsTexture()
     BackendData->D3dDevice->CreateSamplerState(&SamplerDescriptor, &BackendData->FontSampler);
 }
 
-bool Dx11_CreateDeviceObjects()
+b32 Dx11_CreateDeviceObjects()
 {
     dx11_backend_data *BackendData = Dx11_GetBackendData();
 
     if (!BackendData->D3dDevice)
     {
-        return false;
+        return FALSE;
     }
 
     if (BackendData->FontSampler)
@@ -489,7 +489,7 @@ bool Dx11_CreateDeviceObjects()
     if (FAILED(Result))
     {
         // NB: Pass ID3DBlob *pErrorBlob to D3DCompile() to get error showing in (const char*)pErrorBlob->GetBufferPointer(). Make sure to Release() the blob!
-        return false;
+        return FALSE;
     }
 
     Result = BackendData->D3dDevice->CreateVertexShader
@@ -503,7 +503,7 @@ bool Dx11_CreateDeviceObjects()
     if (Result != S_OK)
     {
         VertexShaderBlob->Release();
-        return false;
+        return FALSE;
     }
 
     // -----------------------
@@ -528,7 +528,7 @@ bool Dx11_CreateDeviceObjects()
     if (Result != S_OK)
     {
         VertexShaderBlob->Release();
-        return false;
+        return FALSE;
     }
     VertexShaderBlob->Release();
 
@@ -582,7 +582,7 @@ bool Dx11_CreateDeviceObjects()
     if (FAILED(Result))
     {
         // NB: Pass ID3DBlob *pErrorBlob to D3DCompile() to get error showing in (const char*)pErrorBlob->GetBufferPointer(). Make sure to Release() the blob!
-        return false;
+        return FALSE;
     }
 
     Result = BackendData->D3dDevice->CreatePixelShader
@@ -596,7 +596,7 @@ bool Dx11_CreateDeviceObjects()
     if (Result != S_OK)
     {
         PixelShaderBlob->Release();
-        return false;
+        return FALSE;
     }
     PixelShaderBlob->Release();
 
@@ -605,8 +605,8 @@ bool Dx11_CreateDeviceObjects()
     // -------------------------
     D3D11_BLEND_DESC BlendDescriptor;
     ZeroMemory(&BlendDescriptor, sizeof(BlendDescriptor));
-    BlendDescriptor.AlphaToCoverageEnable = false;
-    BlendDescriptor.RenderTarget[0].BlendEnable = true;
+    BlendDescriptor.AlphaToCoverageEnable = FALSE;
+    BlendDescriptor.RenderTarget[0].BlendEnable = TRUE;
     BlendDescriptor.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
     BlendDescriptor.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
     BlendDescriptor.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
@@ -623,17 +623,17 @@ bool Dx11_CreateDeviceObjects()
     ZeroMemory(&RasterizerDescriptor, sizeof(RasterizerDescriptor));
     RasterizerDescriptor.FillMode = D3D11_FILL_SOLID;
     RasterizerDescriptor.CullMode = D3D11_CULL_NONE;
-    RasterizerDescriptor.ScissorEnable = true;
-    RasterizerDescriptor.DepthClipEnable = true;
+    RasterizerDescriptor.ScissorEnable = TRUE;
+    RasterizerDescriptor.DepthClipEnable = TRUE;
     BackendData->D3dDevice->CreateRasterizerState(&RasterizerDescriptor, &BackendData->RasterizerState);
 
     // Create depth-stencil State
     D3D11_DEPTH_STENCIL_DESC DepthStencilDescriptor;
     ZeroMemory(&DepthStencilDescriptor, sizeof(DepthStencilDescriptor));
-    DepthStencilDescriptor.DepthEnable = false;
+    DepthStencilDescriptor.DepthEnable = FALSE;
     DepthStencilDescriptor.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
     DepthStencilDescriptor.DepthFunc = D3D11_COMPARISON_ALWAYS;
-    DepthStencilDescriptor.StencilEnable = false;
+    DepthStencilDescriptor.StencilEnable = FALSE;
     DepthStencilDescriptor.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
     DepthStencilDescriptor.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
     DepthStencilDescriptor.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
@@ -643,10 +643,10 @@ bool Dx11_CreateDeviceObjects()
 
     Dx11_CreateFontsTexture();
 
-    return true;
+    return TRUE;
 }
 
-bool Dx11_Initialize(ID3D11Device *D3dDevice, ID3D11DeviceContext *D3dDeviceContext)
+b32 Dx11_Initialize(ID3D11Device *D3dDevice, ID3D11DeviceContext *D3dDeviceContext)
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     Assert(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
@@ -696,7 +696,7 @@ bool Dx11_Initialize(ID3D11Device *D3dDevice, ID3D11DeviceContext *D3dDeviceCont
     BackendData->D3dDevice->AddRef();
     BackendData->D3dDeviceContext->AddRef();
 
-    return true;
+    return TRUE;
 }
 
 void Dx11_Shutdown()

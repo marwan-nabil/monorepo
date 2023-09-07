@@ -11,7 +11,7 @@ void CompilationTest(char *TestCommand)
     TestProcessStartupInfo.hStdOutput = (HANDLE)_get_osfhandle(_fileno(stdout));
     TestProcessStartupInfo.hStdError = (HANDLE)_get_osfhandle(_fileno(stdout));
 
-    BOOL CreateSucceeded = CreateProcess
+    b32 CreateSucceeded = CreateProcess
     (
         NULL,
         TestCommand,
@@ -25,7 +25,7 @@ void CompilationTest(char *TestCommand)
         &TestProcessProcessInfo
     );
 
-    if (CreateSucceeded == false)
+    if (CreateSucceeded == FALSE)
     {
         ConsolePrintColored("ERROR: failed to create a test process, please debug the test system.\n", FOREGROUND_RED);
         exit(1);
@@ -50,7 +50,7 @@ void CompilationTest(char *TestCommand)
     ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
 }
 
-void CompilationTests()
+void RunCompilationTests()
 {
     ConsoleSwitchColor(FOREGROUND_BLUE);
     printf("\n============= Compilation Tests =============\n");

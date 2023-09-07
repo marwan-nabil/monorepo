@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
     InitializeConsole();
 
-    CompilationTests();
+    RunCompilationTests();
 
     ConsoleSwitchColor(FOREGROUND_GREEN);
     printf("\n==========================\n");

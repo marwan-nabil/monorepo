@@ -262,7 +262,7 @@ RenderTile(work_queue *WorkQueue)
     u64 WorkOrderIndex = InterlockedExchangeAdd64(&WorkQueue->NextWorkOrderIndex, 1);
     if (WorkOrderIndex >= WorkQueue->WorkOrderCount)
     {
-        return false;
+        return FALSE;
     }
 
     work_order *WorkOrder = &WorkQueue->WorkOrders[WorkOrderIndex];
@@ -316,7 +316,7 @@ RenderTile(work_queue *WorkQueue)
 
     InterlockedExchangeAdd64(&WorkQueue->TotalTilesDone, 1);
     InterlockedExchangeAdd64(&WorkQueue->TotalRayBouncesComputed, BouncesComputedPerTile);
-    return true;
+    return TRUE;
 }
 
 static DWORD WINAPI
