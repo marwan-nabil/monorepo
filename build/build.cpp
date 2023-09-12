@@ -203,7 +203,7 @@ int main(int argc, char **argv)
         else if (strcmp(argv[1], "ray_tracer") == 0)
         {
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\ray_tracer\\main.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\ray_tracer\\main.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");

@@ -14,64 +14,95 @@
 
 #define ENABLE_ASSERTIONS 0
 
-#include "..\miscellaneous\assertions.h"
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\bitmap_utils.h"
+#include "..\..\miscellaneous\assertions.h"
+#include "..\..\miscellaneous\base_types.h"
+#include "..\..\miscellaneous\basic_defines.h"
 
-#include "..\math\constants.h"
-#include "..\math\random.h"
-#include "..\math\vector2.h"
-#include "..\math\vector3.h"
-#include "..\math\vector4.h"
+#include "..\..\math\constants.h"
+#include "..\..\math\random.h"
+#include "..\..\math\vector2.h"
+#include "..\..\math\vector3.h"
+#include "..\..\math\vector4.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\math\simd\1_wide\math.h"
+#   include "..\..\math\simd\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\math\simd\4_wide\math.h"
+#   include "..\..\math\simd\4_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\math\simd\shared\random.h"
-#   include "..\math\simd\shared\math.h"
+#   include "..\..\math\simd\shared\random.h"
+#   include "..\..\math\simd\shared\math.h"
 #endif
 
 #include "ray_tracer.h"
 
-#include "..\math\random.cpp"
-#include "..\math\conversions.cpp"
-#include "..\math\integers.cpp"
-#include "..\math\floats.cpp"
-#include "..\math\vector2.cpp"
-#include "..\math\vector3.cpp"
-#include "..\math\vector4.cpp"
-
-#include "..\miscellaneous\bitmap_utils.cpp"
+#include "..\..\math\random.cpp"
+#include "..\..\math\conversions.cpp"
+#include "..\..\math\integers.cpp"
+#include "..\..\math\floats.cpp"
+#include "..\..\math\vector2.cpp"
+#include "..\..\math\vector3.cpp"
+#include "..\..\math\vector4.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "..\math\simd\1_wide\conversions.cpp"
-#   include "..\math\simd\1_wide\scalars.cpp"
-#   include "..\math\simd\1_wide\vector3.cpp"
-#   include "..\math\simd\1_wide\random.cpp"
-#   include "..\math\simd\1_wide\assertions.cpp"
+#   include "..\..\math\simd\1_wide\conversions.cpp"
+#   include "..\..\math\simd\1_wide\scalars.cpp"
+#   include "..\..\math\simd\1_wide\vector3.cpp"
+#   include "..\..\math\simd\1_wide\random.cpp"
+#   include "..\..\math\simd\1_wide\assertions.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "..\math\simd\4_wide\conversions.cpp"
-#   include "..\math\simd\4_wide\assertions.cpp"
-#   include "..\math\simd\4_wide\integers.cpp"
-#   include "..\math\simd\4_wide\floats.cpp"
+#   include "..\..\math\simd\4_wide\conversions.cpp"
+#   include "..\..\math\simd\4_wide\assertions.cpp"
+#   include "..\..\math\simd\4_wide\integers.cpp"
+#   include "..\..\math\simd\4_wide\floats.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif
 
 #if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\math\simd\shared\conversions.cpp"
-#   include "..\math\simd\shared\integers.cpp"
-#   include "..\math\simd\shared\floats.cpp"
-#   include "..\math\simd\shared\vector3.cpp"
-#   include "..\math\simd\shared\random.cpp"
+#   include "..\..\math\simd\shared\conversions.cpp"
+#   include "..\..\math\simd\shared\integers.cpp"
+#   include "..\..\math\simd\shared\floats.cpp"
+#   include "..\..\math\simd\shared\vector3.cpp"
+#   include "..\..\math\simd\shared\random.cpp"
 #endif
+
+inline void
+WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, const char *FileName)
+{
+    u32 OutputPixelSize = WidthInPixels * HeightInPixels * sizeof(u32);
+
+    bitmap_header BitmapHeader = {};
+    BitmapHeader.FileType = 0x4D42;
+    BitmapHeader.FileSize = sizeof(BitmapHeader) + OutputPixelSize;
+    BitmapHeader.BitmapOffset = sizeof(BitmapHeader);
+    BitmapHeader.Size = sizeof(BitmapHeader) - 14;
+    BitmapHeader.Width = WidthInPixels;
+    BitmapHeader.Height = -(i32)HeightInPixels;
+    BitmapHeader.Planes = 1;
+    BitmapHeader.BitsPerPixel = 32;
+    BitmapHeader.Compression = 0;
+    BitmapHeader.SizeOfBitmap = OutputPixelSize;
+    BitmapHeader.HorizontalResolution = 0;
+    BitmapHeader.VerticalResolution = 0;
+    BitmapHeader.ColorsUsed = 0;
+    BitmapHeader.ColorsImportant = 0;
+
+    FILE *OutputFile = fopen(FileName, "wb");
+    if (OutputFile)
+    {
+        fwrite(&BitmapHeader, sizeof(BitmapHeader), 1, OutputFile);
+        fwrite((void *)Pixels, OutputPixelSize, 1, OutputFile);
+        fclose(OutputFile);
+    }
+    else
+    {
+        printf("ERROR: unable to create the output bitmap file.\n");
+    }
+}
 
 inline image_u32
 CreateImage(u32 Width, u32 Height)

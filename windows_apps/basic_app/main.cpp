@@ -13,7 +13,7 @@
 #include "..\..\math\vector4.h"
 #include "..\..\math\rectangle2.h"
 
-#include "..\..\rendering\software_rendering.h"
+#include "software_rendering.h"
 
 #include "internal_types.h"
 
@@ -25,7 +25,7 @@
 #include "..\..\math\vector4.cpp"
 #include "..\..\math\rectangle2.cpp"
 
-#include "..\..\rendering\software_rendering.cpp"
+#include "software_rendering.cpp"
 
 #include "state_update.cpp"
 #include "rendering.cpp"
