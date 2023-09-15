@@ -1,4 +1,4 @@
-#if ENABLE_ASSERTIONS
+#ifdef ENABLE_ASSERTIONS
 
 inline void
 AssertGoodMask(u32_lane Mask, u32 FaultIndex)

@@ -10,30 +10,29 @@
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\basic_defines.h"
 
-#define ENABLE_ASSERTIONS 1
 #include "..\..\miscellaneous\assertions.h"
 
 #include "..\..\imgui\imgui.h"
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"
-#include "main_opengl2.h"
 
 #include "opengl2_backend.cpp"
 #include "win32_backend.cpp"
 
-static window_data GlobalMainWindowData;
-static i32 GlobalWidth;
-static i32 GlobalHeight;
+static struct window_data
+{
+    HDC DeviceContext;
+} GlobalMainWindowData;
+
+static struct global_parameters
+{
+    u32 Width;
+    u32 Height;
+} GlobalParameters;
 
 static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 {
-    // Win32 message handler
-    // You can read the ImGuiIoInterface.WantCaptureMouse, ImGuiIoInterface.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    // - When ImGuiIoInterface.WantCaptureMouse is TRUE, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-    // - When ImGuiIoInterface.WantCaptureKeyboard is TRUE, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-
     if (Win32_CustomCallbackHandler(Window, Message, WParam, LParam))
     {
         return TRUE;
@@ -43,12 +42,16 @@ static LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARA
     {
         case WM_SIZE:
         {
-            if (WParam != SIZE_MINIMIZED)
+            if (WParam == SIZE_MINIMIZED)
             {
-                GlobalWidth = LOWORD(LParam);
-                GlobalHeight = HIWORD(LParam);
+                return 0;
             }
-            return 0;
+            else
+            {
+                GlobalParameters.Width = LOWORD(LParam);
+                GlobalParameters.Height = HIWORD(LParam);
+                return 0;
+            }
         } break;
 
         case WM_SYSCOMMAND:
@@ -78,7 +81,7 @@ static void CreateWindowHook(ImGuiViewport *ViewPort)
 
     window_data *WindowData = (window_data *)ImGui::MemAlloc(sizeof(window_data));
     *WindowData = {};
-    OpenGl2_CreateDevice((HWND)ViewPort->PlatformHandle, WindowData);
+    OpenGl2_CreateDevice((HWND)ViewPort->PlatformHandle, &WindowData->DeviceContext);
     ViewPort->RendererUserData = WindowData;
 }
 
@@ -87,7 +90,7 @@ static void DestroyWindowHook(ImGuiViewport *ViewPort)
     if (ViewPort->RendererUserData != NULL)
     {
         window_data *WindowData = (window_data *)ViewPort->RendererUserData;
-        OpenGl2_CleanupDeviceWGL((HWND)ViewPort->PlatformHandle, WindowData);
+        OpenGl2_CleanupDeviceWGL((HWND)ViewPort->PlatformHandle, WindowData->DeviceContext);
         if (WindowData)
         {
             ImGui::MemFree(WindowData);
@@ -153,9 +156,9 @@ i32 main(i32 argc, char **argv)
         NULL, NULL, WindowClass.hInstance, NULL
     );
 
-    if (!OpenGl2_CreateDevice(Window, &GlobalMainWindowData))
+    if (!OpenGl2_CreateDevice(Window, &GlobalMainWindowData.DeviceContext))
     {
-        OpenGl2_CleanupDeviceWGL(Window, &GlobalMainWindowData);
+        OpenGl2_CleanupDeviceWGL(Window, GlobalMainWindowData.DeviceContext);
         DestroyWindow(Window);
         UnregisterClassW(WindowClass.lpszClassName, WindowClass.hInstance);
         return 1;
@@ -297,7 +300,7 @@ i32 main(i32 argc, char **argv)
 
         // Rendering
         ImGui::Render();
-        glViewport(0, 0, GlobalWidth, GlobalHeight);
+        glViewport(0, 0, GlobalParameters.Width, GlobalParameters.Height);
         glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, ClearColor.w);
         glClear(GL_COLOR_BUFFER_BIT);
         OpenGl2_RenderDrawData(ImGui::GetDrawData());
@@ -320,7 +323,7 @@ i32 main(i32 argc, char **argv)
     Win32_Shutdown();
     ImGui::DestroyContext();
 
-    OpenGl2_CleanupDeviceWGL(Window, &GlobalMainWindowData);
+    OpenGl2_CleanupDeviceWGL(Window, GlobalMainWindowData.DeviceContext);
     wglDeleteContext(GlobalOpenGLRenderingContext);
     DestroyWindow(Window);
     UnregisterClassW(WindowClass.lpszClassName, WindowClass.hInstance);

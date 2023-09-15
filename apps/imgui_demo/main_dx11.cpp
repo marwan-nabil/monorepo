@@ -10,8 +10,6 @@
 
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\basic_defines.h"
-
-#define ENABLE_ASSERTIONS 1
 #include "..\..\miscellaneous\assertions.h"
 
 #include "..\..\imgui\imgui.h"
@@ -22,47 +20,62 @@
 #include "win32_backend.cpp"
 #include "dx11_backend.cpp"
 
-static ID3D11Device *GlobalD3dDevice;
-static ID3D11DeviceContext *GlobalD3dDeviceContext;
-static IDXGISwapChain *GlobalSwapChain;
-static u32 GlobalResizeWidth;
-static u32 GlobalResizeHeight;
-static ID3D11RenderTargetView *GlobalMainRendererTargetView;
+static struct global_d3d_handles
+{
+    ID3D11Device *Device;
+    ID3D11DeviceContext *DeviceContext;
+    IDXGISwapChain *SwapChain;
+    ID3D11RenderTargetView *MainRenderTargetView;
+} GlobalD3dHandles;
+
+static struct global_parameters
+{
+    u32 ResizeWidth;
+    u32 ResizeHeight;
+} GlobalParameters;
 
 void CleanupRenderTarget()
 {
-    if (GlobalMainRendererTargetView)
+    if (GlobalD3dHandles.MainRenderTargetView)
     {
-        GlobalMainRendererTargetView->Release();
-        GlobalMainRendererTargetView = NULL;
+        GlobalD3dHandles.MainRenderTargetView->Release();
+        GlobalD3dHandles.MainRenderTargetView = NULL;
     }
 }
 
 void CreateRenderTarget()
 {
     ID3D11Texture2D *BackBuffer;
-    GlobalSwapChain->GetBuffer(0, IID_PPV_ARGS(&BackBuffer));
-    GlobalD3dDevice->CreateRenderTargetView(BackBuffer, NULL, &GlobalMainRendererTargetView);
+    GlobalD3dHandles.SwapChain->GetBuffer(0, IID_PPV_ARGS(&BackBuffer));
+    GlobalD3dHandles.Device->CreateRenderTargetView
+    (
+        BackBuffer,
+        NULL,
+        &GlobalD3dHandles.MainRenderTargetView
+    );
     BackBuffer->Release();
 }
 
-void CleanupDeviceD3D()
+void CleanupD3dDevice()
 {
     CleanupRenderTarget();
-    if (GlobalSwapChain)
+
+    if (GlobalD3dHandles.SwapChain)
     {
-        GlobalSwapChain->Release();
-        GlobalSwapChain = NULL;
+        GlobalD3dHandles.SwapChain->Release();
+        GlobalD3dHandles.SwapChain = NULL;
     }
-    if (GlobalD3dDeviceContext)
+
+    if (GlobalD3dHandles.DeviceContext)
     {
-        GlobalD3dDeviceContext->Release();
-        GlobalD3dDeviceContext = NULL;
+        GlobalD3dHandles.DeviceContext->Release();
+        GlobalD3dHandles.DeviceContext = NULL;
     }
-    if (GlobalD3dDevice)
+
+    if (GlobalD3dHandles.Device)
     {
-        GlobalD3dDevice->Release();
-        GlobalD3dDevice = NULL;
+        GlobalD3dHandles.Device->Release();
+        GlobalD3dHandles.Device = NULL;
     }
 }
 
@@ -104,10 +117,10 @@ b32 CreateDeviceD3D(HWND Window)
         2,
         D3D11_SDK_VERSION,
         &SwapChainDescriptor,
-        &GlobalSwapChain,
-        &GlobalD3dDevice,
+        &GlobalD3dHandles.SwapChain,
+        &GlobalD3dHandles.Device,
         &ReturnedFeatureLevel,
-        &GlobalD3dDeviceContext
+        &GlobalD3dHandles.DeviceContext
     );
 
     // Try high-performance WARP software driver if hardware is not available.
@@ -123,10 +136,10 @@ b32 CreateDeviceD3D(HWND Window)
             2,
             D3D11_SDK_VERSION,
             &SwapChainDescriptor,
-            &GlobalSwapChain,
-            &GlobalD3dDevice,
+            &GlobalD3dHandles.SwapChain,
+            &GlobalD3dHandles.Device,
             &ReturnedFeatureLevel,
-            &GlobalD3dDeviceContext
+            &GlobalD3dHandles.DeviceContext
         );
     }
 
@@ -155,9 +168,12 @@ LRESULT WINAPI MainWindowCallbackHandler(HWND Window, UINT Message, WPARAM WPara
             {
                 return 0;
             }
-            GlobalResizeWidth = (UINT)LOWORD(LParam); // Queue resize
-            GlobalResizeHeight = (UINT)HIWORD(LParam);
-            return 0;
+            else
+            {
+                GlobalParameters.ResizeWidth = (UINT)LOWORD(LParam);
+                GlobalParameters.ResizeHeight = (UINT)HIWORD(LParam);
+                return 0;
+            }
         } break;
 
         case WM_SYSCOMMAND:
@@ -220,7 +236,7 @@ i32 main(i32 argc, char **argv)
 
     if (!CreateDeviceD3D(Window))
     {
-        CleanupDeviceD3D();
+        CleanupD3dDevice();
         UnregisterClassW(WindowClass.lpszClassName, WindowClass.hInstance);
         return 1;
     }
@@ -230,21 +246,21 @@ i32 main(i32 argc, char **argv)
 
     ImGui::CreateContext();
 
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    ImGuiIoInterface->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
+    ImGuiIo->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGuiIo->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGuiIo->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-    // ImGui::StyleColorsDark();
-    ImGui::StyleColorsLight();
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
 
-    ImGuiStyle *ImGuiStyleInterface = &ImGui::GetStyle();
-    ImGuiStyleInterface->WindowRounding = 0.0f;
-    ImGuiStyleInterface->Colors[ImGuiCol_WindowBg].w = 1.0f;
+    ImGuiStyle *ImGuiStyle = &ImGui::GetStyle();
+    ImGuiStyle->WindowRounding = 0.0f;
+    ImGuiStyle->Colors[ImGuiCol_WindowBg].w = 1.0f;
 
     // Setup Platform/Renderer backends
     Win32_Initialize(Window, W32RB_DX11);
-    Dx11_Initialize(GlobalD3dDevice, GlobalD3dDeviceContext);
+    Dx11_Initialize(GlobalD3dHandles.Device, GlobalD3dHandles.DeviceContext);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -253,13 +269,12 @@ i32 main(i32 argc, char **argv)
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
     // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //ImGuiIoInterface->Fonts->AddFontDefault();
-    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //ImGuiIoInterface->Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = ImGuiIoInterface->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIoInterface->Fonts->GetGlyphRangesJapanese());
+    //ImGuiIo->Fonts->AddFontDefault();
+    //ImGuiIo->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    //ImGuiIo->Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+    //ImGuiIo->Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+    //ImGuiIo->Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+    //ImFont* font = ImGuiIo->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, ImGuiIo->Fonts->GetGlyphRangesJapanese());
     //Assert(font != NULL);
 
     b32 ShowDemoWindow = TRUE;
@@ -286,12 +301,12 @@ i32 main(i32 argc, char **argv)
         }
 
         // Handle window resize (we don't resize directly in the WM_SIZE handler)
-        if ((GlobalResizeWidth != 0) && (GlobalResizeHeight != 0))
+        if ((GlobalParameters.ResizeWidth != 0) && (GlobalParameters.ResizeHeight != 0))
         {
             CleanupRenderTarget();
-            GlobalSwapChain->ResizeBuffers(0, GlobalResizeWidth, GlobalResizeHeight, DXGI_FORMAT_UNKNOWN, 0);
-            GlobalResizeWidth = 0;
-            GlobalResizeHeight = 0;
+            GlobalD3dHandles.SwapChain->ResizeBuffers(0, GlobalParameters.ResizeWidth, GlobalParameters.ResizeHeight, DXGI_FORMAT_UNKNOWN, 0);
+            GlobalParameters.ResizeWidth = 0;
+            GlobalParameters.ResizeHeight = 0;
             CreateRenderTarget();
         }
 
@@ -328,7 +343,7 @@ i32 main(i32 argc, char **argv)
         ImGui::SameLine();
         ImGui::Text("CounterValue = %d", CounterValue);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGuiIoInterface->Framerate, ImGuiIoInterface->Framerate);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGuiIo->Framerate, ImGuiIo->Framerate);
         ImGui::End();
 
         // 3. Show another simple window.
@@ -353,12 +368,12 @@ i32 main(i32 argc, char **argv)
             ClearColor.z * ClearColor.w,
             ClearColor.w
         };
-        GlobalD3dDeviceContext->OMSetRenderTargets(1, &GlobalMainRendererTargetView, NULL);
-        GlobalD3dDeviceContext->ClearRenderTargetView(GlobalMainRendererTargetView, ClearColorWithAlpha);
+        GlobalD3dHandles.DeviceContext->OMSetRenderTargets(1, &GlobalD3dHandles.MainRenderTargetView, NULL);
+        GlobalD3dHandles.DeviceContext->ClearRenderTargetView(GlobalD3dHandles.MainRenderTargetView, ClearColorWithAlpha);
         Dx11_RenderDrawData(ImGui::GetDrawData());
 
-        GlobalSwapChain->Present(1, 0); // Present with vsync
-        //GlobalSwapChain->Present(0, 0); // Present without vsync
+        GlobalD3dHandles.SwapChain->Present(1, 0); // Present with vsync
+        //GlobalD3dHandles.SwapChain->Present(0, 0); // Present without vsync
     }
 
     // Cleanup
@@ -366,7 +381,7 @@ i32 main(i32 argc, char **argv)
     Win32_Shutdown();
     ImGui::DestroyContext();
 
-    CleanupDeviceD3D();
+    CleanupD3dDevice();
     DestroyWindow(Window);
     UnregisterClassW(WindowClass.lpszClassName, WindowClass.hInstance);
 

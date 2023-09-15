@@ -1,8 +1,9 @@
 static HGLRC GlobalOpenGLRenderingContext;
 
-static b32 OpenGl2_CreateDevice(HWND Window, window_data *WindowData)
+static b32 OpenGl2_CreateDevice(HWND Window, HDC *ResultDeviceContext)
 {
     HDC DeviceContext = GetDC(Window);
+
     PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {};
     PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
     PixelFormatDescriptor.nVersion = 1;
@@ -21,19 +22,19 @@ static b32 OpenGl2_CreateDevice(HWND Window, window_data *WindowData)
     }
     ReleaseDC(Window, DeviceContext);
 
-    WindowData->DeviceContext = GetDC(Window);
+    *ResultDeviceContext = GetDC(Window);
     if (!GlobalOpenGLRenderingContext)
     {
-        GlobalOpenGLRenderingContext = wglCreateContext(WindowData->DeviceContext);
+        GlobalOpenGLRenderingContext = wglCreateContext(*ResultDeviceContext);
     }
 
     return TRUE;
 }
 
-static void OpenGl2_CleanupDeviceWGL(HWND Window, window_data *WindowData)
+static void OpenGl2_CleanupDeviceWGL(HWND Window, HDC DeviceContext)
 {
     wglMakeCurrent(NULL, NULL);
-    ReleaseDC(Window, WindowData->DeviceContext);
+    ReleaseDC(Window, DeviceContext);
 }
 
 // Backend data stored in ImGuiIoInterface.BackendRendererUserData to allow support for multiple Dear ImGui contexts

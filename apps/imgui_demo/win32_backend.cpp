@@ -1,15 +1,13 @@
-static HMODULE GlobalShcoreDllModule;
-static HMODULE GlobalUser32DllModule;
-static HMODULE GlobalNtDllModule;
+win32_global_handles Win32GlobalHandles;
 
 static b32 Win32_IsWindowsVersionOrGreater(u16 MajorVersion, u16 MinorVersion, u16 PatchVersion)
 {
     RtlVerifyVersionInfoFunctionType RtlVerifyVersionInfoFunction = NULL;
 
-    if (GlobalNtDllModule)
+    if (Win32GlobalHandles.NtDllModule)
     {
         RtlVerifyVersionInfoFunction =
-            (RtlVerifyVersionInfoFunctionType)GetProcAddress(GlobalNtDllModule, "RtlVerifyVersionInfo");
+            (RtlVerifyVersionInfoFunctionType)GetProcAddress(Win32GlobalHandles.NtDllModule, "RtlVerifyVersionInfo");
     }
 
     if (RtlVerifyVersionInfoFunction == NULL)
@@ -47,11 +45,11 @@ static f32 Win32_GetDpiScaleForMonitor(void *Monitor)
     {
         GetDpiForMonitorFunctionType GetDpiForMonitorFunction = NULL;
 
-        if (GlobalShcoreDllModule)
+        if (Win32GlobalHandles.ShcoreDllModule)
         {
             GetDpiForMonitorFunction =
                 (GetDpiForMonitorFunctionType)
-                GetProcAddress(GlobalShcoreDllModule, "GetDpiForMonitor");
+                GetProcAddress(Win32GlobalHandles.ShcoreDllModule, "GetDpiForMonitor");
         }
 
         if (GetDpiForMonitorFunction)
@@ -96,7 +94,7 @@ static b32 Win32_ConfigureDpiAwareness()
     if (Win32_IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10
     {
         SetThreadDpiAwarenessContextFunctionType SetThreadDpiAwarenessContextFunction =
-            (SetThreadDpiAwarenessContextFunctionType)GetProcAddress(GlobalUser32DllModule, "SetThreadDpiAwarenessContext");
+            (SetThreadDpiAwarenessContextFunctionType)GetProcAddress(Win32GlobalHandles.User32DllModule, "SetThreadDpiAwarenessContext");
 
         if (SetThreadDpiAwarenessContextFunction)
         {
@@ -124,12 +122,12 @@ static void Win32_Shutdown()
     win32_backend_data *BackendData = Win32_GetBackendData();
     Assert(BackendData != NULL && "No platform backend to shutdown, or already shutdown?");
 
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
 
     Win32_ShutdownPlatformInterface();
 
-    ImGuiIoInterface->BackendPlatformName = NULL;
-    ImGuiIoInterface->BackendPlatformUserData = NULL;
+    ImGuiIo->BackendPlatformName = NULL;
+    ImGuiIo->BackendPlatformUserData = NULL;
 
     ImGuiBackendFlags FlagsToClear =
         ImGuiBackendFlags_HasMouseCursors |
@@ -138,21 +136,21 @@ static void Win32_Shutdown()
         ImGuiBackendFlags_PlatformHasViewports |
         ImGuiBackendFlags_HasMouseHoveredViewport;
 
-    ImGuiIoInterface->BackendFlags &= ~FlagsToClear;
+    ImGuiIo->BackendFlags &= ~FlagsToClear;
 
     ImGui::MemFree(BackendData);
 }
 
 static b32 Win32_UpdateMouseCursor()
 {
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
+    if (ImGuiIo->ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
     {
         return FALSE;
     }
 
     ImGuiMouseCursor ImGuiCursor = ImGui::GetMouseCursor();
-    if (ImGuiCursor == ImGuiMouseCursor_None || ImGuiIoInterface->MouseDrawCursor)
+    if (ImGuiCursor == ImGuiMouseCursor_None || ImGuiIo->MouseDrawCursor)
     {
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
         SetCursor(NULL);
@@ -192,9 +190,9 @@ static b32 Win32_IsVkDown(i32 VirtualKey)
 
 static void Win32_AddKeyEvent(ImGuiKey Key, b32 Down, i32 NativeKeyCode, i32 NativeScanCode)
 {
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    ImGuiIoInterface->AddKeyEvent(Key, Down);
-    ImGuiIoInterface->SetKeyEventNativeData(Key, NativeKeyCode, NativeScanCode);
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
+    ImGuiIo->AddKeyEvent(Key, Down);
+    ImGuiIo->SetKeyEventNativeData(Key, NativeKeyCode, NativeScanCode);
 }
 
 static void Win32_ProcessKeyEventsWorkarounds()
@@ -224,11 +222,11 @@ static void Win32_ProcessKeyEventsWorkarounds()
 
 static void Win32_UpdateKeyModifiers()
 {
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    ImGuiIoInterface->AddKeyEvent(ImGuiMod_Ctrl, Win32_IsVkDown(VK_CONTROL));
-    ImGuiIoInterface->AddKeyEvent(ImGuiMod_Shift, Win32_IsVkDown(VK_SHIFT));
-    ImGuiIoInterface->AddKeyEvent(ImGuiMod_Alt, Win32_IsVkDown(VK_MENU));
-    ImGuiIoInterface->AddKeyEvent(ImGuiMod_Super, Win32_IsVkDown(VK_APPS));
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
+    ImGuiIo->AddKeyEvent(ImGuiMod_Ctrl, Win32_IsVkDown(VK_CONTROL));
+    ImGuiIo->AddKeyEvent(ImGuiMod_Shift, Win32_IsVkDown(VK_SHIFT));
+    ImGuiIo->AddKeyEvent(ImGuiMod_Alt, Win32_IsVkDown(VK_MENU));
+    ImGuiIo->AddKeyEvent(ImGuiMod_Super, Win32_IsVkDown(VK_APPS));
 }
 
 // This code supports multi-viewports (multiple OS Windows mapped into different Dear ImGui viewports)
@@ -236,7 +234,7 @@ static void Win32_UpdateKeyModifiers()
 static void Win32_UpdateMouseData()
 {
     win32_backend_data *BackendData = Win32_GetBackendData();
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
     Assert(BackendData->Window != 0);
 
     POINT MouseScreenPosition;
@@ -257,15 +255,15 @@ static void Win32_UpdateMouseData()
     {
         // (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
         // When multi-viewports are enabled, all Dear ImGui positions are same as OS positions.
-        if (ImGuiIoInterface->WantSetMousePos)
+        if (ImGuiIo->WantSetMousePos)
         {
             POINT MousePosition =
             {
-                (i32)ImGuiIoInterface->MousePos.x,
-                (i32)ImGuiIoInterface->MousePos.y
+                (i32)ImGuiIo->MousePos.x,
+                (i32)ImGuiIo->MousePos.y
             };
 
-            if ((ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) == 0)
+            if ((ImGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) == 0)
             {
                 ClientToScreen(FocusedWindow, &MousePosition);
             }
@@ -276,25 +274,25 @@ static void Win32_UpdateMouseData()
         // This also fills a short gap when clicking non-client Area: WM_NCMOUSELEAVE -> modal OS move -> gap -> WM_NCMOUSEMOVE
         if
         (
-            !ImGuiIoInterface->WantSetMousePos &&
+            !ImGuiIo->WantSetMousePos &&
             BackendData->MouseTrackedArea == 0 &&
             HasMouseScreenPosition
         )
         {
-            // Single ViewPort mode: mouse position in client window coordinates (ImGuiIoInterface->MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
+            // Single ViewPort mode: mouse position in client window coordinates (ImGuiIo->MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
             // (This is the position you can get with GetCursorPos() + ScreenToClient() or WM_MOUSEMOVE.)
-            // Multi-ViewPort mode: mouse position in OS absolute coordinates (ImGuiIoInterface->MousePos is (0,0) when the mouse is on the upper-left of the primary Monitor)
+            // Multi-ViewPort mode: mouse position in OS absolute coordinates (ImGuiIo->MousePos is (0,0) when the mouse is on the upper-left of the primary Monitor)
             // (This is the position you can get with GetCursorPos() or WM_MOUSEMOVE + ClientToScreen(). In theory adding ViewPort->Pos to a client position would also be the same.)
             POINT MousePosition = MouseScreenPosition;
-            if (!(ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
+            if (!(ImGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
             {
                 ScreenToClient(BackendData->Window, &MousePosition);
             }
-            ImGuiIoInterface->AddMousePosEvent((f32)MousePosition.x, (f32)MousePosition.y);
+            ImGuiIo->AddMousePosEvent((f32)MousePosition.x, (f32)MousePosition.y);
         }
     }
 
-    // (Optional) When using multiple viewports: call ImGuiIoInterface->AddMouseViewportEvent() with the ViewPort the OS mouse cursor is hovering.
+    // (Optional) When using multiple viewports: call ImGuiIo->AddMouseViewportEvent() with the ViewPort the OS mouse cursor is hovering.
     // If ImGuiBackendFlags_HasMouseHoveredViewport is not set by the backend, Dear imGui will ignore this field and infer the information using its flawed heuristic.
     // - [X] Win32 backend correctly ignore viewports with the _NoInputs flag (here using WindowFromPoint with WM_NCHITTEST + HTTRANSPARENT in WndProc does that)
     //       Some backend are not able to handle that correctly. If a backend report an hovered ViewPort that has the _NoInputs flag (e.g. when dragging a window
@@ -315,7 +313,7 @@ static void Win32_UpdateMouseData()
             }
         }
     }
-    ImGuiIoInterface->AddMouseViewportEvent(MouseViewportId);
+    ImGuiIo->AddMouseViewportEvent(MouseViewportId);
 }
 
 static i32 CALLBACK Win32_UpdateMonitorsEnumFunction(HMONITOR Monitor, HDC, LPRECT, LPARAM)
@@ -336,15 +334,15 @@ static i32 CALLBACK Win32_UpdateMonitorsEnumFunction(HMONITOR Monitor, HDC, LPRE
     ImGuiMonitor.DpiScale = Win32_GetDpiScaleForMonitor(Monitor);
     ImGuiMonitor.PlatformHandle = (void *)Monitor;
 
-    ImGuiPlatformIO *ImGuiIoInterface = &ImGui::GetPlatformIO();
+    ImGuiPlatformIO *ImGuiIo = &ImGui::GetPlatformIO();
 
     if (MonitorInfo.dwFlags & MONITORINFOF_PRIMARY)
     {
-        ImGuiIoInterface->Monitors.push_front(ImGuiMonitor);
+        ImGuiIo->Monitors.push_front(ImGuiMonitor);
     }
     else
     {
-        ImGuiIoInterface->Monitors.push_back(ImGuiMonitor);
+        ImGuiIo->Monitors.push_back(ImGuiMonitor);
     }
 
     return TRUE;
@@ -360,14 +358,14 @@ static void Win32_UpdateMonitors()
 
 void Win32_NewFrame()
 {
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
     win32_backend_data *BackendData = Win32_GetBackendData();
     Assert(BackendData != NULL && "Did you call ImGui_ImplWin32_Init()?");
 
     // Setup display size (every frame to accommodate for window resizing)
     RECT Rectangle = {0, 0, 0, 0};
     GetClientRect(BackendData->Window, &Rectangle);
-    ImGuiIoInterface->DisplaySize = 
+    ImGuiIo->DisplaySize = 
         ImVec2((f32)(Rectangle.right - Rectangle.left), (f32)(Rectangle.bottom - Rectangle.top));
 
     if (BackendData->MonitorsNeedUpdate)
@@ -378,7 +376,7 @@ void Win32_NewFrame()
     // Setup time step
     i64 CurrentTime = 0;
     QueryPerformanceCounter((LARGE_INTEGER *)&CurrentTime);
-    ImGuiIoInterface->DeltaTime = (f32)(CurrentTime - BackendData->Time) / BackendData->TicksPerSecond;
+    ImGuiIo->DeltaTime = (f32)(CurrentTime - BackendData->Time) / BackendData->TicksPerSecond;
     BackendData->Time = CurrentTime;
 
     // Update OS mouse position
@@ -389,7 +387,7 @@ void Win32_NewFrame()
 
     // Update OS mouse cursor with the cursor requested by imgui
     ImGuiMouseCursor MouseCursor;
-    if (ImGuiIoInterface->MouseDrawCursor)
+    if (ImGuiIo->MouseDrawCursor)
     {
         MouseCursor = ImGuiMouseCursor_None;
     }
@@ -520,9 +518,9 @@ static ImGuiKey Win32_VirtualKeyToImGuiKey(WPARAM WParam)
 
 // Win32 message handler (process Win32 mouse/keyboard inputs, etc.)
 // Call from your application's message handler. Keep calling your message handler unless this function returns TRUE.
-// When implementing your own backend, you can read the ImGuiIoInterface.WantCaptureMouse, ImGuiIoInterface.WantCaptureKeyboard Flags to tell if Dear ImGui wants to use your inputs.
-// - When ImGuiIoInterface.WantCaptureMouse is TRUE, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-// - When ImGuiIoInterface.WantCaptureKeyboard is TRUE, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+// When implementing your own backend, you can read the ImGuiIo.WantCaptureMouse, ImGuiIo.WantCaptureKeyboard Flags to tell if Dear ImGui wants to use your inputs.
+// - When ImGuiIo.WantCaptureMouse is TRUE, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+// - When ImGuiIo.WantCaptureKeyboard is TRUE, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
 // Generally you may always pass all inputs to Dear ImGui, and hide them from your application based on those two Flags.
 // PS: In this Win32 handler, we use the capture API (GetCapture/SetCapture/ReleaseCapture) to be able to read mouse coordinates when dragging mouse outside of our window bounds.
 // PS: We treat DBLCLK messages as regular mouse Down messages, so this code will work on windows classes that have the CS_DBLCLKS flag set. Our own example app code doesn't set this flag.
@@ -553,7 +551,7 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
         return 0;
     }
 
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
     win32_backend_data *BackendData = Win32_GetBackendData();
 
     switch (Message)
@@ -592,7 +590,7 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
             }
 
             POINT MousePosition = {(LONG)GET_X_LPARAM(LParam), (LONG)GET_Y_LPARAM(LParam)};
-            b32 WantAbsolutePosition = (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
+            b32 WantAbsolutePosition = (ImGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0;
             if (Message == WM_MOUSEMOVE && WantAbsolutePosition)    // WM_MOUSEMOVE are client-relative coordinates.
             {
                 ClientToScreen(Window, &MousePosition);
@@ -603,8 +601,8 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
                 ScreenToClient(Window, &MousePosition);
             }
 
-            ImGuiIoInterface->AddMouseSourceEvent(MouseSource);
-            ImGuiIoInterface->AddMousePosEvent((f32)MousePosition.x, (f32)MousePosition.y);
+            ImGuiIo->AddMouseSourceEvent(MouseSource);
+            ImGuiIo->AddMousePosEvent((f32)MousePosition.x, (f32)MousePosition.y);
         } break;
 
         case WM_MOUSELEAVE:
@@ -619,7 +617,7 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
                 }
 
                 BackendData->MouseTrackedArea = 0;
-                ImGuiIoInterface->AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+                ImGuiIo->AddMousePosEvent(-FLT_MAX, -FLT_MAX);
             }
         } break;
 
@@ -653,8 +651,8 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
             }
 
             BackendData->MouseButtonsDown |= 1 << Button;
-            ImGuiIoInterface->AddMouseSourceEvent(MouseSource);
-            ImGuiIoInterface->AddMouseButtonEvent(Button, TRUE);
+            ImGuiIo->AddMouseSourceEvent(MouseSource);
+            ImGuiIo->AddMouseButtonEvent(Button, TRUE);
             return 0;
         } break;
 
@@ -688,20 +686,20 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
             }
 
             ImGuiMouseSource MouseSource = Win32_GetMouseSourceFromMessageExtraInfo();
-            ImGuiIoInterface->AddMouseSourceEvent(MouseSource);
-            ImGuiIoInterface->AddMouseButtonEvent(Button, FALSE);
+            ImGuiIo->AddMouseSourceEvent(MouseSource);
+            ImGuiIo->AddMouseButtonEvent(Button, FALSE);
             return 0;
         } break;
 
         case WM_MOUSEWHEEL:
         {
-            ImGuiIoInterface->AddMouseWheelEvent(0.0f, (f32)GET_WHEEL_DELTA_WPARAM(WParam) / (f32)WHEEL_DELTA);
+            ImGuiIo->AddMouseWheelEvent(0.0f, (f32)GET_WHEEL_DELTA_WPARAM(WParam) / (f32)WHEEL_DELTA);
             return 0;
         } break;
 
         case WM_MOUSEHWHEEL:
         {
-            ImGuiIoInterface->AddMouseWheelEvent(-(f32)GET_WHEEL_DELTA_WPARAM(WParam) / (f32)WHEEL_DELTA, 0.0f);
+            ImGuiIo->AddMouseWheelEvent(-(f32)GET_WHEEL_DELTA_WPARAM(WParam) / (f32)WHEEL_DELTA, 0.0f);
             return 0;
         } break;
 
@@ -774,7 +772,7 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
         case WM_SETFOCUS:
         case WM_KILLFOCUS:
         {
-            ImGuiIoInterface->AddFocusEvent(Message == WM_SETFOCUS);
+            ImGuiIo->AddFocusEvent(Message == WM_SETFOCUS);
             return 0;
         } break;
 
@@ -785,14 +783,14 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
                 // You can also use ToAscii()+GetKeyboardState() to retrieve characters.
                 if ((WParam > 0) && (WParam < 0x10000))
                 {
-                    ImGuiIoInterface->AddInputCharacterUTF16((u16)WParam);
+                    ImGuiIo->AddInputCharacterUTF16((u16)WParam);
                 }
             }
             else
             {
                 wchar_t WideChar = 0;
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, (char *)&WParam, 1, &WideChar, 1);
-                ImGuiIoInterface->AddInputCharacter(WideChar);
+                ImGuiIo->AddInputCharacter(WideChar);
             }
             return 0;
         } break;
@@ -821,11 +819,11 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
 
 static b32 Win32_LoadNecessaryDlls()
 {
-    GlobalUser32DllModule = LoadLibraryA("user32.dll");
-    GlobalShcoreDllModule = LoadLibraryA("shcore.dll");
-    GlobalNtDllModule = GetModuleHandleA("ntdll.dll");
+    Win32GlobalHandles.User32DllModule = LoadLibraryA("user32.dll");
+    Win32GlobalHandles.ShcoreDllModule = LoadLibraryA("shcore.dll");
+    Win32GlobalHandles.NtDllModule = GetModuleHandleA("ntdll.dll");
 
-    if (!GlobalUser32DllModule || !GlobalShcoreDllModule || !GlobalNtDllModule)
+    if (!Win32GlobalHandles.User32DllModule || !Win32GlobalHandles.ShcoreDllModule || !Win32GlobalHandles.NtDllModule)
     {
         return FALSE;
     }
@@ -833,13 +831,6 @@ static b32 Win32_LoadNecessaryDlls()
     return TRUE;
 }
 
-//---------------------------------------------------------------------------------------------------------
-// Transparency related helpers (optional)
-//--------------------------------------------------------------------------------------------------------
-
-// [experimental]
-// Borrowed from GLFW's function updateFramebufferTransparency() in src/win32_window.c
-// (the Dwm* functions are Vista era functions but we are borrowing logic from GLFW)
 void Win32_EnableAlphaCompositing(void *Window)
 {
     if (!Win32_IsWindowsVersionOrGreater(HIBYTE(0x0600), LOBYTE(0x0600), 0)) // _WIN32_WINNT_VISTA
@@ -1285,7 +1276,7 @@ static LRESULT CALLBACK Win32_WindowProcedureHandler(HWND Window, u32 Message, W
 
             case WM_NCHITTEST:
             {
-                // Let mouse pass-through the window. This will allow the backend to call ImGuiIoInterface.AddMouseViewportEvent() correctly. (which is optional).
+                // Let mouse pass-through the window. This will allow the backend to call ImGuiIo.AddMouseViewportEvent() correctly. (which is optional).
                 // The ImGuiViewportFlags_NoInputs flag is set while dragging a ViewPort, as want to detect the window behind the one we are dragging.
                 // If you cannot easily access those ViewPort Flags from your windowing/event code: you may manually synchronize its state e.g. in
                 // your main loop after calling UpdatePlatformWindows(). Iterate all viewports/platform windows and pass the flag to your windowing system.
@@ -1302,8 +1293,8 @@ static LRESULT CALLBACK Win32_WindowProcedureHandler(HWND Window, u32 Message, W
 
 static b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType)
 {
-    ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
-    Assert(ImGuiIoInterface->BackendPlatformUserData == NULL && "Already initialized a platform backend!");
+    ImGuiIO *ImGuiIo = &ImGui::GetIO();
+    Assert(ImGuiIo->BackendPlatformUserData == NULL && "Already initialized a platform backend!");
 
     i64 PerformanceCounterFrequency;
     i64 PerformanceCounter;
@@ -1311,7 +1302,7 @@ static b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType)
     {
         return FALSE;
     }
-    
+
     if (!QueryPerformanceCounter((LARGE_INTEGER*)&PerformanceCounter))
     {
         return FALSE;
@@ -1321,12 +1312,12 @@ static b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType)
     win32_backend_data *BackendData = (win32_backend_data *)ImGui::MemAlloc(sizeof(win32_backend_data));
     *BackendData = {};
 
-    ImGuiIoInterface->BackendPlatformUserData = (void *)BackendData;
-    ImGuiIoInterface->BackendPlatformName = "win32";
-    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
-    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor ImGuiIoInterface->WantSetMousePos requests (optional, rarely used)
-    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_PlatformHasViewports; // We can create multi-viewports on the Platform side (optional)
-    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can call ImGuiIoInterface->AddMouseViewportEvent() with correct data (optional)
+    ImGuiIo->BackendPlatformUserData = (void *)BackendData;
+    ImGuiIo->BackendPlatformName = "win32";
+    ImGuiIo->BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
+    ImGuiIo->BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor ImGuiIo->WantSetMousePos requests (optional, rarely used)
+    ImGuiIo->BackendFlags |= ImGuiBackendFlags_PlatformHasViewports; // We can create multi-viewports on the Platform side (optional)
+    ImGuiIo->BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can call ImGuiIo->AddMouseViewportEvent() with correct data (optional)
 
     BackendData->Window = (HWND)Window;
     BackendData->MonitorsNeedUpdate = TRUE;
@@ -1339,7 +1330,7 @@ static b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType)
     MainViewport->PlatformHandle = (void *)BackendData->Window;
     MainViewport->PlatformHandleRaw = (void *)BackendData->Window;
 
-    if (ImGuiIoInterface->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    if (ImGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         WNDCLASSEX WindowClassExtended;
         WindowClassExtended.cbSize = sizeof(WNDCLASSEX);

@@ -2,8 +2,6 @@
 #include <stdint.h>
 #include <math.h>
 
-#define ENABLE_ASSERTIONS 1
-
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\assertions.h"
 #include "..\..\miscellaneous\basic_defines.h"

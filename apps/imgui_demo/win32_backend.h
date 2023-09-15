@@ -27,10 +27,16 @@ enum win32_renderer_backend
     W32RB_DX11
 };
 
-typedef HRESULT(WINAPI *SetProcessDpiAwarenessFunctionType)(PROCESS_DPI_AWARENESS);
-typedef HRESULT(WINAPI *GetDpiForMonitorFunctionType)(HMONITOR, MONITOR_DPI_TYPE, u32 *, u32 *);
-typedef DPI_AWARENESS_CONTEXT(WINAPI *SetThreadDpiAwarenessContextFunctionType)(DPI_AWARENESS_CONTEXT);
-typedef u32(WINAPI *RtlVerifyVersionInfoFunctionType)(OSVERSIONINFOEXW *, u32, ULONGLONG);
+struct win32_global_handles
+{
+    HMODULE ShcoreDllModule;
+    HMODULE User32DllModule;
+    HMODULE NtDllModule;
+};
 
-// There is no distinct VK_xxx for keypad enter, instead it is VK_RETURN + KF_EXTENDED, we assign it an arbitrary value to make code more readable (VK_ codes go up to 255)
+typedef HRESULT (WINAPI *SetProcessDpiAwarenessFunctionType)(PROCESS_DPI_AWARENESS);
+typedef HRESULT (WINAPI *GetDpiForMonitorFunctionType)(HMONITOR, MONITOR_DPI_TYPE, u32 *, u32 *);
+typedef DPI_AWARENESS_CONTEXT (WINAPI *SetThreadDpiAwarenessContextFunctionType)(DPI_AWARENESS_CONTEXT);
+typedef u32 (WINAPI *RtlVerifyVersionInfoFunctionType)(OSVERSIONINFOEXW *, u32, ULONGLONG);
+
 #define VK_KEYPAD_ENTER (VK_RETURN + 256)

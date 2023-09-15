@@ -153,7 +153,7 @@ int main(int argc, char **argv)
         ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
 
         // ----------------------------------------------------------
-        // first argument
+        // first argument (target selection)
         // ----------------------------------------------------------
         if
         (
@@ -163,8 +163,9 @@ int main(int argc, char **argv)
             (strcmp(argv[1], "ray_tracer") == 0)
         )
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-nologo -Z7 -FC -Oi -GR- -EHa- -MTd -fp:fast -fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-W4 -WX -wd4201 -wd4100 -wd4189 -wd4505 -wd4456 -wd4996 -wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
         }
@@ -183,30 +184,28 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
         }
-        else if (strcmp(argv[1], "imgui_demo") == 0)
-        {
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
-
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE ");
-
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
-        }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\basic_app\\main.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\basic_app\\main.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_app.exe");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Od ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows ");
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)
         {
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\ray_tracer\\main.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\ray_tracer\\main.cpp");
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
+        }
+        else if (strcmp(argv[1], "imgui_demo") == 0)
+        {
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
         }
         else
         {
@@ -256,7 +255,7 @@ int main(int argc, char **argv)
             if (strcmp(argv[2], "opengl2") == 0)
             {
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_opengl2.cpp ");
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\imgui_demo\\main_opengl2.cpp ");
 
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
@@ -266,7 +265,7 @@ int main(int argc, char **argv)
             else if (strcmp(argv[2], "dx11") == 0)
             {
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\windows_apps\\imgui_demo\\main_dx11.cpp ");
+                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\imgui_demo\\main_dx11.cpp ");
 
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo_dx11.exe");

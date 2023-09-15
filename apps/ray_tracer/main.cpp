@@ -12,8 +12,6 @@
 #define SIMD_NUMBEROF_LANES 4
 #endif
 
-#define ENABLE_ASSERTIONS 0
-
 #include "..\..\miscellaneous\assertions.h"
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\basic_defines.h"
