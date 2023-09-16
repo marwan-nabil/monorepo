@@ -1,4 +1,4 @@
-#if !defined(HANDMADE_ENTITY_H)
+#pragma once
 
 #define INVALID_ENTITY_POSITION V3(100000.0f, 100000.0f, 100000.0f)
 
@@ -134,6 +134,3 @@ ClearAllFlags(entity *Entity)
 {
     Entity->Flags = 0;
 }
-
-#define HANDMADE_ENTITY_H
-#endif

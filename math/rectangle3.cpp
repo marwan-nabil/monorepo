@@ -104,8 +104,8 @@ GetbarycentricPoint(rectangle3 Volume, v3 Point)
 inline rectangle2
 Rectangle3ToRectangle2(rectangle3 A)
 {
-	rectangle2 Result;
-	Result.MinPoint = A.MinPoint.XY;
-	Result.MaxPoint = A.MaxPoint.XY;
-	return Result;
+    rectangle2 Result;
+    Result.MinPoint = A.MinPoint.XY;
+    Result.MaxPoint = A.MaxPoint.XY;
+    return Result;
 }

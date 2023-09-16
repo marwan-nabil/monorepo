@@ -1,16 +1,9 @@
-#if !defined(HANDMADE_H)
-
-#include "handmade_platform.h"
-#include "handmade_intrinsics.h"
-#include "handmade_math.h"
-
-#include "handmade_entity.h"
-#include "handmade_world.h"
+#pragma once
 
 struct memory_arena
 {
-    memory_index Size;
-    memory_index Used;
+    size_t Size;
+    size_t Used;
     u8 *Base;
 };
 
@@ -54,7 +47,7 @@ struct game_state
     world_position CameraPosition;
     u32 StorageIndexOfEntityThatCameraFollows;
 
-    controlled_hero_input ControllerToHeroInputMap[ArrayCount(((game_input *)0)->ControllerStates)];
+    controlled_hero_input ControllerToHeroInputMap[ArrayLength(((game_input *)0)->ControllerStates)];
 
     pairwise_collision_rule *CollisionRulesTable[256];
     pairwise_collision_rule *FreeCollisionRulesListHead;
@@ -87,16 +80,8 @@ struct entity_render_peice_group
 #define PushStruct(Arena, DataType) (DataType *)PushSize_((Arena), sizeof(DataType))
 #define PushArray(Arena, Count, DataType) (DataType *)PushSize_((Arena), (Count) * sizeof(DataType))
 
-inline void
-InitializeMemoryArena(memory_arena *Arena, memory_index Size, void *Base)
-{
-    Arena->Size = Size;
-    Arena->Used = 0;
-    Arena->Base = (u8 *)Base;
-}
-
 inline void *
-PushSize_(memory_arena *Arena, memory_index PushSize)
+PushSize_(memory_arena *Arena, size_t PushSize)
 {
     Assert((Arena->Used + PushSize) <= Arena->Size);
     void *Result = Arena->Base + Arena->Used;
@@ -120,7 +105,7 @@ GetStorageEntity(game_state *GameState, u32 StorageIndex)
 #define ZeroStruct(Struct) ZeroSize(&(Struct), sizeof(Struct))
 
 inline void
-ZeroSize(void *Base, memory_index Size)
+ZeroSize(void *Base, size_t Size)
 {
     u8 *Byte = (u8 *)Base;
     while (Size--)
@@ -129,11 +114,8 @@ ZeroSize(void *Base, memory_index Size)
     }
 }
 
-internal void
+static void
 AddPairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex, b32 ShouldCollide);
 
-internal void
+static void
 ClearAllPairwiseCollisionRule(game_state *GameState, u32 StorageIndex);
-
-#define HANDMADE_H
-#endif

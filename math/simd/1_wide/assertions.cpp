@@ -25,4 +25,4 @@ AssertGoodMask(u32_lane Mask, u32 FaultIndex)
 
 #define AssertGoodMask(Mask, FaultIndex)
 
-#endif
+#endif // ENABLE_ASSERTIONS

@@ -85,14 +85,8 @@ Max(f32 A, f32 B)
 inline f32
 AbsoluteValue(f32 A)
 {
-	if (A < 0)
-	{
-		return -A;
-	}
-	else
-	{
-		return A;
-	}
+	f32 Result = (f32)fabs(A);
+    return Result;
 }
 
 inline f32

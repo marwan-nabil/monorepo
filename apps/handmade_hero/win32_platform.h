@@ -1,6 +1,16 @@
 #pragma once
 
-#define WIN32_FILENAME_LENGTH MAX_PATH
+#define XINPUT_GET_STATE(name) DWORD WINAPI name(DWORD dwUserIndex, XINPUT_STATE *pState)
+#define XINPUT_SET_STATE(name) DWORD WINAPI name(DWORD dwUserIndex, XINPUT_VIBRATION *pVibration)
+#define DIRECTSOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter)
+
+#define XInputGetState XInputGetState_
+#define XInputSetState XInputSetState_
+#define DirectSoundCreate DirectSoundCreate_
+
+typedef XINPUT_GET_STATE(xinput_get_state);
+typedef XINPUT_SET_STATE(xinput_set_state);
+typedef DIRECTSOUND_CREATE(directsound_create);
 
 struct win32_pixel_buffer
 {
@@ -46,32 +56,43 @@ struct win32_game_code
 {
     HMODULE GameCodeDll;
     FILETIME LastWriteTimeForLoadedDLL;
-    game_update_and_render_function *UpdateAndRender;
-    game_get_sound_samples_function *GetSoundSamples;
+    game_update_and_render *UpdateAndRender;
+    game_get_sound_samples *GetSoundSamples;
     b32 IsValid;
 };
 
-struct win32_game_input_buffer
+struct win32_input_buffer
 {
-    char InputBufferFileName[WIN32_FILENAME_LENGTH];
+    char InputBufferFileName[MAX_PATH];
     HANDLE FileHandle;
     HANDLE MemoryMapHandle;
     void *MemoryBlock;
 };
 
-struct win32_state
+struct win32_platform_state
 {
     u64 GameMemoryBlockSize;
     void *GameMemoryBlock;
 
-    win32_game_input_buffer GameInputBuffers[4];
+    win32_input_buffer GameInputBuffers[4];
 
     u32 CurrentGameInputRecordingBufferIndex;
     HANDLE CurrentGameInputRecordingFileHandle;
-    
+
     u32 CurrentGameInputPlaybackBufferIndex;
     HANDLE CurrentInputPlaybackFileHandle;
 
-    char ExeFilePath[WIN32_FILENAME_LENGTH];
+    char ExeFilePath[MAX_PATH];
     char *ExeFilePathOnePastLastSlash;
+
+    b32 IsRunning;
+    b32 Pause;
+    b32 ShowCursor;
+
+    win32_pixel_buffer BackBuffer;
+    LPDIRECTSOUNDBUFFER SecondarySoundBuffer;
+    WINDOWPLACEMENT PreviousWindowPlacement;
 };
+
+XINPUT_GET_STATE(XInputGetStateStub);
+XINPUT_SET_STATE(XInputSetStateStub);

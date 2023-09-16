@@ -10,7 +10,7 @@
 
 #ifndef SIMD_NUMBEROF_LANES
 #define SIMD_NUMBEROF_LANES 4
-#endif
+#endif // SIMD_NUMBEROF_LANES
 
 #include "..\..\miscellaneous\assertions.h"
 #include "..\..\miscellaneous\base_types.h"
@@ -28,17 +28,17 @@
 #   include "..\..\math\simd\4_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
-#endif
+#endif // SIMD_NUMBEROF_LANES
 
 #if (SIMD_NUMBEROF_LANES != 1)
 #   include "..\..\math\simd\shared\random.h"
 #   include "..\..\math\simd\shared\math.h"
-#endif
+#endif // SIMD_NUMBEROF_LANES
 
 #include "ray_tracer.h"
 
 #include "..\..\math\random.cpp"
-#include "..\..\math\conversions.cpp"
+#include "..\..\math\scalar_conversions.cpp"
 #include "..\..\math\integers.cpp"
 #include "..\..\math\floats.cpp"
 #include "..\..\math\vector2.cpp"
@@ -58,7 +58,7 @@
 #   include "..\..\math\simd\4_wide\floats.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
-#endif
+#endif // SIMD_NUMBEROF_LANES
 
 #if (SIMD_NUMBEROF_LANES != 1)
 #   include "..\..\math\simd\shared\conversions.cpp"
@@ -66,7 +66,7 @@
 #   include "..\..\math\simd\shared\floats.cpp"
 #   include "..\..\math\simd\shared\vector3.cpp"
 #   include "..\..\math\simd\shared\random.cpp"
-#endif
+#endif // SIMD_NUMBEROF_LANES
 
 inline void
 WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, const char *FileName)
@@ -165,7 +165,7 @@ RenderPixel
 
             BouncesComputedPerRayBatch += U32LaneFromU32(1) & LaneMask;
 
-            f32_lane MinimumHitDistanceFound = F32LaneFromF32(F32MAX);
+            f32_lane MinimumHitDistanceFound = F32LaneFromF32(FLT_MAX);
             u32_lane HitMaterialIndex = U32LaneFromU32(0);
 
             for (u32 PlaneIndex = 0; PlaneIndex < World->PlanesCount; PlaneIndex++)
@@ -250,7 +250,7 @@ RenderPixel
 
             v3_lane HitMaterialEmmissionColor = 
                 LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
-#endif
+#endif // SIMD_NUMBEROF_LANES
 
             RayBatchColor += HadamardProduct(RayBatchColorAttenuation, HitMaterialEmmissionColor);
 
@@ -519,7 +519,7 @@ main(i32 argc, u8 **argv)
             );
 #else
             WorkOrder->Entropy.State = TileX * 52350329 + TileY * 793083851 + 63274279;
-#endif
+#endif // SIMD_NUMBEROF_LANES
         }
     }
 
@@ -573,7 +573,6 @@ main(i32 argc, u8 **argv)
         "performance metric: %f ns/bounce\n", 
         (f64)TotalTimeElapsed / (f64)WorkQueue.TotalRayBouncesComputed * 1000000.0f
     );
-
 #endif
     return 0;
 }

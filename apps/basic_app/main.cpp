@@ -15,7 +15,7 @@
 
 #include "internal_types.h"
 
-#include "..\..\math\conversions.cpp"
+#include "..\..\math\scalar_conversions.cpp"
 #include "..\..\math\floats.cpp"
 #include "..\..\math\integers.cpp"
 #include "..\..\math\vector2.cpp"

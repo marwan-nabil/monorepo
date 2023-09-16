@@ -1,13 +1,8 @@
-#include "handmade_platform.h"
-#include "handmade_math.h"
-#include "handmade_simulation_region.h"
-#include "handmade_entity.h"
-
 inline move_spec
 DefaultMoveSpec()
 {
     move_spec Result;
-    Result.NormalizeAcceleration = false;
+    Result.NormalizeAcceleration = FALSE;
     Result.SpeedInXYPlane = 1.0f;
     Result.DragInXYPlane = 0;
     return Result;

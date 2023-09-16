@@ -1,16 +1,9 @@
-#include "handmade_platform.h"
-#include "handmade_math.h"
-#include "handmade_intrinsics.h"
-#include "handmade.h"
-#include "handmade_world.h"
-#include "handmade_simulation_region.h"
-
-internal entity *
+static entity *
 AddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion,
           u32 StorageIndex, storage_entity *SourceStorageEntity,
           v3 *InitialPositionInSimulationRegion);
 
-internal entity_table_entry *
+static entity_table_entry *
 GetEntityHashtableEntry(simulation_region *SimulationRegion, u32 StorageIndex)
 {
     Assert(StorageIndex);
@@ -20,11 +13,11 @@ GetEntityHashtableEntry(simulation_region *SimulationRegion, u32 StorageIndex)
     for
     (
         u32 ProbingOffset = 0;
-        ProbingOffset < ArrayCount(SimulationRegion->EntityTable);
+        ProbingOffset < ArrayLength(SimulationRegion->EntityTable);
         ProbingOffset++
     )
     {
-        u32 HashTableIndex = (InitialHashTableIndex + ProbingOffset) & (ArrayCount(SimulationRegion->EntityTable) - 1);
+        u32 HashTableIndex = (InitialHashTableIndex + ProbingOffset) & (ArrayLength(SimulationRegion->EntityTable) - 1);
         entity_table_entry *HashtableEntry = SimulationRegion->EntityTable + HashTableIndex;
 
         if ((HashtableEntry->StorageIndex == 0) || (HashtableEntry->StorageIndex == StorageIndex))
@@ -93,7 +86,7 @@ StoreEntityReference(entity_reference *EntityReference)
     }
 }
 
-internal entity *
+static entity *
 RawAddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion, u32 StorageIndex, storage_entity *SourceStorageEntity)
 {
     Assert(StorageIndex);
@@ -120,7 +113,7 @@ RawAddEntityToSimulation(game_state *GameState, simulation_region *SimulationReg
             }
 
             Result->StorageIndex = StorageIndex;
-            Result->CanUpdate = false;
+            Result->CanUpdate = FALSE;
         }
         else
         {
@@ -139,7 +132,7 @@ DoesEntityCollisionMeshOverlapRectangle(v3 EntityPosition, entity_collision_mesh
     return Result;
 }
 
-internal entity *
+static entity *
 AddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion,
                       u32 StorageIndex, storage_entity *SourceStorageEntity,
                       v3 *InitialPositionInSimulationRegion)
@@ -166,7 +159,7 @@ AddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion
     return Result;
 }
 
-internal simulation_region *
+static simulation_region *
 BeginSimulation(game_state *GameState, world *World, memory_arena *SimulationArena, 
                 world_position RegionOrigin, rectangle3 UpdateBounds, f32 TimeDelta)
 {
@@ -242,7 +235,7 @@ BeginSimulation(game_state *GameState, world *World, memory_arena *SimulationAre
     return SimulationRegion;
 }
 
-internal void 
+static void 
 EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
 {
     entity *Entity = SimulationRegion->Entities;
@@ -306,7 +299,7 @@ EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
     }
 }
 
-internal b32
+static b32
 TestWall
 (
     f32 SquareCenterRelativeWallX,
@@ -315,7 +308,7 @@ TestWall
     f32 *OriginalMinimalTParameter, f32 SquareCenterRelativeMinimumOrthogonalWallY, f32 SquareCenterRelativeMaximumOrthogonalWallY
 )
 {
-    b32 DidMovingEntityHitWall = false;
+    b32 DidMovingEntityHitWall = FALSE;
 
     if (MovingEntityMovementVectorX != 0.0f)
     {
@@ -331,7 +324,7 @@ TestWall
             {
                 f32 ToleranceEpsilon = 0.001f;
                 *OriginalMinimalTParameter = Maximum(0, TParameter - ToleranceEpsilon);
-                DidMovingEntityHitWall = true;
+                DidMovingEntityHitWall = TRUE;
             }
         }
     }
@@ -350,19 +343,19 @@ SortEntityPointersByEntityTypes(entity **A, entity **B)
     }
 }
 
-internal b32
+static b32
 ProcessCollisionEvent(game_state *GameState, entity *MovingEntity, entity *StaticEntity)
 {
-    b32 MovingEntityShouldStopOnCollision = false;
+    b32 MovingEntityShouldStopOnCollision = FALSE;
 
     if (MovingEntity->Type == ET_SWORD)
     {
-        AddPairwiseCollisionRule(GameState, MovingEntity->StorageIndex, StaticEntity->StorageIndex, false);
-        MovingEntityShouldStopOnCollision = false;
+        AddPairwiseCollisionRule(GameState, MovingEntity->StorageIndex, StaticEntity->StorageIndex, FALSE);
+        MovingEntityShouldStopOnCollision = FALSE;
     }
     else
     {
-        MovingEntityShouldStopOnCollision = true;
+        MovingEntityShouldStopOnCollision = TRUE;
     }
 
     entity *LowerTypeEntity = MovingEntity;
@@ -380,10 +373,10 @@ ProcessCollisionEvent(game_state *GameState, entity *MovingEntity, entity *Stati
     return MovingEntityShouldStopOnCollision;
 }
 
-internal b32
+static b32
 CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
 {
-    b32 Result = false;
+    b32 Result = FALSE;
 
     if (A != B)
     {
@@ -393,10 +386,10 @@ CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
         {
             if (!IsFlagSet(A, EF_NON_SPATIAL) && !IsFlagSet(B, EF_NON_SPATIAL))
             {
-                Result = true;
+                Result = TRUE;
             }
 
-            u32 HashTableIndex = A->StorageIndex & (ArrayCount(GameState->CollisionRulesTable) - 1);
+            u32 HashTableIndex = A->StorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
             for
             (
                 pairwise_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashTableIndex];
@@ -420,22 +413,22 @@ CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
     return Result;
 }
 
-internal b32
+static b32
 CanEntitiesOverlap(game_state *GameState, entity *MovingEntity, entity *TestEntity)
 {
-    b32 Result = false;
+    b32 Result = FALSE;
     if 
     (
         (MovingEntity != TestEntity) &&
         (TestEntity->Type == ET_STAIRS)
     )
     {
-        Result = true;
+        Result = TRUE;
     }
     return Result;
 }
 
-internal void
+static void
 HandleEntityOverlapWithStairs(game_state *GameState, entity *MovingEntity, entity *TestEntity, f32 TimeDelta, f32 *CurrentGroundLevel)
 {
     if (TestEntity->Type == ET_STAIRS)
@@ -444,10 +437,10 @@ HandleEntityOverlapWithStairs(game_state *GameState, entity *MovingEntity, entit
     }
 }
 
-internal b32
+static b32
 SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
 {
-    b32 WillEntitiesCollide = true;
+    b32 WillEntitiesCollide = TRUE;
     if (TestEntity->Type == ET_STAIRS)
     {
         f32 StairStepHeight = 0.1f;
@@ -467,7 +460,7 @@ SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
     return WillEntitiesCollide;
 }
 
-internal void
+static void
 MoveEntity(game_state *GameState, simulation_region *SimulationRegion, entity *MovingEntity,
            v3 Acceleration, f32 TimeDelta, move_spec *MoveSpec)
 {
@@ -538,7 +531,7 @@ MoveEntity(game_state *GameState, simulation_region *SimulationRegion, entity *M
                 {
                     if (CanEntitiesCollide(GameState, TestEntity, MovingEntity))
                     {
-                        b32 TestEntityWasHit = false;
+                        b32 TestEntityWasHit = FALSE;
                         v3 CollisionPointNormal = V3(0, 0, 0);
                         f32 TestTMin = TMin;
 
@@ -581,7 +574,7 @@ MoveEntity(game_state *GameState, simulation_region *SimulationRegion, entity *M
                                                  &TestTMin, CollisionAreaMinCorner.Y, CollisionAreaMaxCorner.Y))
                                     {
                                         CollisionPointNormal = V3(-1, 0, 0);
-                                        TestEntityWasHit = true;
+                                        TestEntityWasHit = TRUE;
                                     }
 
                                     if (TestWall(CollisionAreaMaxCorner.X, TestMeshToMovingMesh.X, TestMeshToMovingMesh.Y,
@@ -589,7 +582,7 @@ MoveEntity(game_state *GameState, simulation_region *SimulationRegion, entity *M
                                                  &TestTMin, CollisionAreaMinCorner.Y, CollisionAreaMaxCorner.Y))
                                     {
                                         CollisionPointNormal = V3(1, 0, 0);
-                                        TestEntityWasHit = true;
+                                        TestEntityWasHit = TRUE;
                                     }
 
                                     if (TestWall(CollisionAreaMinCorner.Y, TestMeshToMovingMesh.Y, TestMeshToMovingMesh.X,
@@ -597,7 +590,7 @@ MoveEntity(game_state *GameState, simulation_region *SimulationRegion, entity *M
                                                  &TestTMin, CollisionAreaMinCorner.X, CollisionAreaMaxCorner.X))
                                     {
                                         CollisionPointNormal = V3(0, -1, 0);
-                                        TestEntityWasHit = true;
+                                        TestEntityWasHit = TRUE;
                                     }
 
                                     if (TestWall(CollisionAreaMaxCorner.Y, TestMeshToMovingMesh.Y, TestMeshToMovingMesh.X,
@@ -605,7 +598,7 @@ MoveEntity(game_state *GameState, simulation_region *SimulationRegion, entity *M
                                                  &TestTMin, CollisionAreaMinCorner.X, CollisionAreaMaxCorner.X))
                                     {
                                         CollisionPointNormal = V3(0, 1, 0);
-                                        TestEntityWasHit = true;
+                                        TestEntityWasHit = TRUE;
                                     }
 
                                     if (TestEntityWasHit)

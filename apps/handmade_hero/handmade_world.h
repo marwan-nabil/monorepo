@@ -1,7 +1,4 @@
-#if !defined(HANDMADE_WORLD_H)
-
-#include "handmade_platform.h"
-#include "handmade_entity.h"
+#pragma once
 
 #define TILES_PER_CHUNK 16
 
@@ -32,6 +29,3 @@ struct world
     u32 StorageEntitiesCount;
     storage_entity StorageEntities[100000];
 };
-
-#define HANDMADE_WORLD_H
-#endif

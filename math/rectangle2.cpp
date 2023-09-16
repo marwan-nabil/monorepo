@@ -106,3 +106,17 @@ ClampPointToRectangle(v2 Point, rectangle2 Rectangle)
     Result.Y = Clamp(Point.Y, Rectangle.MinPoint.Y, Rectangle.MaxPoint.Y);
     return Result;
 }
+
+inline b32
+IsInRectangle(rectangle2 Rectangle, v2 TestPoint)
+{
+	b32 Result =
+	(
+		TestPoint.X >= Rectangle.MinPoint.X &&
+		TestPoint.Y >= Rectangle.MinPoint.Y &&
+		TestPoint.X < Rectangle.MaxPoint.X &&
+		TestPoint.Y < Rectangle.MaxPoint.Y
+	);
+
+	return Result;
+}

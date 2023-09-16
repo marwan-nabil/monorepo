@@ -12,7 +12,7 @@ XORShift32(random_series *Series)
 inline f32
 RandomUnilateral(random_series *Series)
 {
-    f32 Result = (f32)XORShift32(Series) / (f32)U32MAX;
+    f32 Result = (f32)XORShift32(Series) / (f32)UINT32_MAX;
     return Result;
 }
 

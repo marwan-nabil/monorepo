@@ -1,18 +1,40 @@
-#include "handmade_platform.h"
-#include "handmade_math.h"
-#include "handmade_intrinsics.h"
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
 
-#include "handmade.h"
-#include "handmade_random.h"
-#include "handmade_world.h"
-#include "handmade_entity.h"
-#include "handmade_simulation_region.h"
+#include "../../miscellaneous/base_types.h"
+#include "../../miscellaneous/assertions.h"
+#include "../../miscellaneous/basic_defines.h"
 
-#include "handmade_world.cpp"
-#include "handmade_entity.cpp"
-#include "handmade_simulation_region.cpp"
+#include "../../math/constants.h"
+#include "../../math/vector2.h"
+#include "../../math/vector3.h"
+#include "../../math/vector4.h"
+#include "../../math/vector4.h"
+#include "../../math/rectangle2.h"
+#include "../../math/rectangle3.h"
+#include "../../math/bit_operations.h"
 
-internal void
+#include "game_interface.h"
+
+// =====================================================
+#include "../../math/floats.cpp"
+#include "../../math/integers.cpp"
+#include "../../math/scalar_conversions.cpp"
+#include "../../math/transcendentals.cpp"
+#include "../../math/bit_operations.cpp"
+
+#include "game_interface.cpp"
+
+inline void
+InitializeMemoryArena(memory_arena *Arena, size_t Size, void *Base)
+{
+    Arena->Size = Size;
+    Arena->Used = 0;
+    Arena->Base = (u8 *)Base;
+}
+
+static void
 DrawRectangle
 (
     game_pixel_buffer *PixelBuffer,
@@ -106,12 +128,12 @@ struct bitmap_header
 };
 #pragma pack(pop)
 
-internal loaded_bitmap
-DEBUGLoadBMP(debug_platform_read_entire_file *ReadEntireFile, thread_context *ThreadContext, char *FileName)
+static loaded_bitmap
+DEBUGLoadBMP(platform_read_file *ReadEntireFile, thread_context *ThreadContext, char *FileName)
 {
     loaded_bitmap Result = {};
 
-    debug_read_file_result ReadResult = ReadEntireFile(ThreadContext, FileName);
+    read_file_result ReadResult = ReadEntireFile(ThreadContext, FileName);
     if (ReadResult.ConstentsSize)
     {
         bitmap_header *Header = (bitmap_header *)ReadResult.FileContents;
@@ -167,7 +189,7 @@ DEBUGLoadBMP(debug_platform_read_entire_file *ReadEntireFile, thread_context *Th
     return Result;
 }
 
-internal void
+static void
 GameOutputSound(game_state *GameState, game_sound_request *SoundRequest, u32 Frequency)
 {
     i16 ToneVolume = 200;
@@ -187,10 +209,10 @@ GameOutputSound(game_state *GameState, game_sound_request *SoundRequest, u32 Fre
 
         i16 SampleValue = (i16)(ToneVolume * SinValue);
 
-        GameState->SinParameterInRadians += 1.0f * 2.0f * PI / (f32)SamplesPerCycle;
-        if (GameState->SinParameterInRadians > 2.0f * PI)
+        GameState->SinParameterInRadians += 1.0f * 2.0f * PI32 / (f32)SamplesPerCycle;
+        if (GameState->SinParameterInRadians > 2.0f * PI32)
         {
-            GameState->SinParameterInRadians -= 2.0f * PI;
+            GameState->SinParameterInRadians -= 2.0f * PI32;
         }
 #else
         i16 SampleValue = 0;
@@ -200,7 +222,7 @@ GameOutputSound(game_state *GameState, game_sound_request *SoundRequest, u32 Fre
     }
 }
 
-internal void
+static void
 DrawBitmap
 (
     loaded_bitmap *SourceBitMap, game_pixel_buffer *DestinationBuffer, 
@@ -284,10 +306,10 @@ struct add_storage_entity_result
     storage_entity *StorageEntity;
 };
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddStorageEntity(game_state *GameState, entity_type Type, world_position WorldPosition)
 {
-    Assert(GameState->World->StorageEntitiesCount < ArrayCount(GameState->World->StorageEntities));
+    Assert(GameState->World->StorageEntitiesCount < ArrayLength(GameState->World->StorageEntities));
 
     add_storage_entity_result Result;
 
@@ -304,7 +326,7 @@ AddStorageEntity(game_state *GameState, entity_type Type, world_position WorldPo
     return Result;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddGoundBasedStorageEntity
 (
     game_state *GameState, entity_type Type, world_position GroundPoint,
@@ -317,7 +339,7 @@ AddGoundBasedStorageEntity
     return Result;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     world_position RoomPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
@@ -330,10 +352,10 @@ AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return RoomStorageEntityResult;
 }
 
-internal void
+static void
 InitHitpoints(storage_entity *StorageEntity, u32 HitpointsCount)
 {
-    Assert(HitpointsCount < ArrayCount(StorageEntity->Entity.HitPoints));
+    Assert(HitpointsCount < ArrayLength(StorageEntity->Entity.HitPoints));
 
     StorageEntity->Entity.HitPointsMax = HitpointsCount;
 
@@ -344,7 +366,7 @@ InitHitpoints(storage_entity *StorageEntity, u32 HitpointsCount)
     }
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddSword(game_state *GameState)
 {
     add_storage_entity_result SwordStorageEntityResult = AddStorageEntity(GameState, ET_SWORD, InvalidWorldPosition());
@@ -356,7 +378,7 @@ AddSword(game_state *GameState)
     return SwordStorageEntityResult;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddPlayer(game_state *GameState)
 {
     add_storage_entity_result PlayerStorageEntityResult = 
@@ -376,7 +398,7 @@ AddPlayer(game_state *GameState)
     return PlayerStorageEntityResult;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     world_position MonsterPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
@@ -390,7 +412,7 @@ AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return MonsterStorageEntityResult;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
 {
     world_position FamiliarPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
@@ -403,7 +425,7 @@ AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
     return FamiliarStorageEntityResult;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     world_position WallGroundPosition =
@@ -417,7 +439,7 @@ AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return WallStorageEntityResult;
 }
 
-internal add_storage_entity_result
+static add_storage_entity_result
 AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     world_position StairsGroundPosition = GetWorldPositionFromTilePosition
@@ -453,7 +475,7 @@ PushRenderPeice
     v4 Color, f32 EntityJumpZCoefficient, v2 RectangleDimensions
 )
 {
-    Assert(PeiceGroup->Count < ArrayCount(PeiceGroup->Peices));
+    Assert(PeiceGroup->Count < ArrayLength(PeiceGroup->Peices));
 
     entity_render_peice *NewRenderPiece = PeiceGroup->Peices + PeiceGroup->Count++;
     NewRenderPiece->Bitmap = Bitmap;
@@ -543,7 +565,7 @@ DrawHitpoints(game_state *GameState, entity_render_peice_group *EntityPeiceGroup
     }
 }
 
-internal void
+static void
 AddPairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex, b32 CanCollide)
 {
     pairwise_collision_rule *ResultRule = 0;
@@ -555,7 +577,7 @@ AddPairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32
         SecondEntityStorageIndex = SwappingTemporaryStorageIndex;
     }
 
-    u32 HashValue = FirstEntityStorageIndex & (ArrayCount(GameState->CollisionRulesTable) - 1);
+    u32 HashValue = FirstEntityStorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
     for
     (
         pairwise_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashValue];
@@ -596,16 +618,16 @@ AddPairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32
     }
 }
 
-internal b32
+static b32
 RemovePairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex)
 {
 }
 
-internal void
+static void
 ClearAllPairwiseCollisionRule(game_state *GameState, u32 StorageIndex)
 {
     // TODO: improve collision rule storage data structure to optimize for insertion and clearing
-    for (u32 HashValue = 0; HashValue < ArrayCount(GameState->CollisionRulesTable); HashValue++)
+    for (u32 HashValue = 0; HashValue < ArrayLength(GameState->CollisionRulesTable); HashValue++)
     {
         for
         (
@@ -666,7 +688,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     (
         (&GameInput->ControllerStates[0].Start - &GameInput->ControllerStates[0].Buttons[0])
         ==
-        (ArrayCount(GameInput->ControllerStates[0].Buttons) - 1)
+        (ArrayLength(GameInput->ControllerStates[0].Buttons) - 1)
     );
     Assert(sizeof(game_state) <= GameMemory->PermanentStorageSize);
 
@@ -674,13 +696,13 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
     if (!GameMemory->IsInitialized)
     {
-        GameMemory->IsInitialized = true;
+        GameMemory->IsInitialized = TRUE;
 
         InitializeMemoryArena
         (
             &GameState->WorldArena,
             GameMemory->PermanentStorageSize - sizeof(game_state),
-            (void *)((memory_index)GameMemory->PermanentStorage + sizeof(game_state))
+            (void *)((size_t)GameMemory->PermanentStorage + sizeof(game_state))
         );
 
         u32 TilesPerScreenWidth = 17;
@@ -707,50 +729,50 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.5f));
 
         GameState->BackDropBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/../data/test/test_background.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_background.bmp");
         GameState->ShadowBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/../data/test/test_hero_shadow.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_hero_shadow.bmp");
         GameState->TreeBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test2/tree00.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/tree00.bmp");
         GameState->StairWellBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test2/rock02.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock02.bmp");
         GameState->SwordBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test2/rock03.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock03.bmp");
 
         hero_bitmap_group *HeroBitmapGroup = &GameState->HeroBitmapGroups[0];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_right_head.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_right_cape.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_right_torso.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[1];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_back_head.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_back_cape.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_back_torso.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[2];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_left_head.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_left_cape.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_left_torso.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[3];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_front_head.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_front_cape.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_front_torso.bmp");
+            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         world *World = PushStruct(&GameState->WorldArena, world);
@@ -775,26 +797,26 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         u32 NextScreenY = PreviousScreenY;
         u32 NextScreenZ = PreviousScreenZ;
         
-        b32 PreviousDoorLeft = false;
-        b32 PreviousDoorRight = false;
-        b32 PreviousDoorTop = false;
-        b32 PreviousDoorBottom = false;
-        b32 PreviousDoorUpStairs = false;
-        b32 PreviousDoorDownStairs = false;
+        b32 PreviousDoorLeft = FALSE;
+        b32 PreviousDoorRight = FALSE;
+        b32 PreviousDoorTop = FALSE;
+        b32 PreviousDoorBottom = FALSE;
+        b32 PreviousDoorUpStairs = FALSE;
+        b32 PreviousDoorDownStairs = FALSE;
 
         for (u32 ScreenIndex = 0; ScreenIndex < 2000; ScreenIndex++)
         {
             u32 CurrentScreenX = NextScreenX;
             u32 CurrentScreenY = NextScreenY;
             u32 CurrentScreenZ = NextScreenZ;
-            b32 CurrentDoorLeft = false;
-            b32 CurrentDoorRight = false;
-            b32 CurrentDoorTop = false;
-            b32 CurrentDoorBottom = false;
-            b32 CurrentDoorUpStairs = false;
-            b32 CurrentDoorDownStairs = false;
+            b32 CurrentDoorLeft = FALSE;
+            b32 CurrentDoorRight = FALSE;
+            b32 CurrentDoorTop = FALSE;
+            b32 CurrentDoorBottom = FALSE;
+            b32 CurrentDoorUpStairs = FALSE;
+            b32 CurrentDoorDownStairs = FALSE;
 
-            Assert(RandomNumbersIndex < ArrayCount(RandomNumberTable));
+            Assert(RandomNumbersIndex < ArrayLength(RandomNumberTable));
             u32 RandomChoice = 0;
 
             if
@@ -812,7 +834,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                 RandomChoice = RandomNumberTable[RandomNumbersIndex++] % 3;
             }
 
-            if (RandomNumbersIndex == ArrayCount(RandomNumberTable))
+            if (RandomNumbersIndex == ArrayLength(RandomNumberTable))
             {
                 RandomNumbersIndex = 0;
             }
@@ -821,12 +843,12 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 if (PreviousDoorLeft && (CurrentScreenX < PreviousScreenX))
                 {
-                    CurrentDoorTop = true;
+                    CurrentDoorTop = TRUE;
                     NextScreenY = CurrentScreenY + 1;
                 }
                 else
                 {
-                    CurrentDoorRight = true;
+                    CurrentDoorRight = TRUE;
                     NextScreenX = CurrentScreenX + 1;
                 }
             }
@@ -834,12 +856,12 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 if (PreviousDoorBottom && (CurrentScreenY < PreviousScreenY))
                 {
-                    CurrentDoorRight = true;
+                    CurrentDoorRight = TRUE;
                     NextScreenX = CurrentScreenX + 1;
                 }
                 else
                 {
-                    CurrentDoorTop = true;
+                    CurrentDoorTop = TRUE;
                     NextScreenY = CurrentScreenY + 1;
                 }
             }
@@ -847,39 +869,39 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 if (CurrentScreenZ == StartScreenZ)
                 {
-                    CurrentDoorUpStairs = true;
+                    CurrentDoorUpStairs = TRUE;
                     NextScreenZ = StartScreenZ + 1;
                 }
                 else
                 {
-                    CurrentDoorDownStairs = true;
+                    CurrentDoorDownStairs = TRUE;
                     NextScreenZ = StartScreenZ;
                 }
             }
 
             if (CurrentScreenX < PreviousScreenX)
             {
-                CurrentDoorRight = true;
+                CurrentDoorRight = TRUE;
             }
             else if (CurrentScreenX > PreviousScreenX)
             {
-                CurrentDoorLeft = true;
+                CurrentDoorLeft = TRUE;
             }
             else if (CurrentScreenY < PreviousScreenY)
             {
-                CurrentDoorTop = true;
+                CurrentDoorTop = TRUE;
             }
             else if (CurrentScreenY > PreviousScreenY)
             {
-                CurrentDoorBottom = true;
+                CurrentDoorBottom = TRUE;
             }
             else if (CurrentScreenZ < PreviousScreenZ)
             {
-                CurrentDoorUpStairs = true;
+                CurrentDoorUpStairs = TRUE;
             }
             else if (CurrentScreenZ > PreviousScreenZ)
             {
-                CurrentDoorDownStairs = true;
+                CurrentDoorDownStairs = TRUE;
             }
 
             AddStandardRoom
@@ -975,7 +997,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
 #if 0
         // NOTE: Dummy filler low freq. entities
-        while (GameState->StorageEntitiesCount < (ArrayCount(GameState->LowEntities) - 16))
+        while (GameState->StorageEntitiesCount < (ArrayLength(GameState->LowEntities) - 16))
         {
             u32 Coordinate = 1024 + GameState->StorageEntitiesCount;
             AddWall(GameState, Coordinate, Coordinate, Coordinate);
@@ -993,13 +1015,13 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         for (u32 FamiliarIndex = 0; FamiliarIndex < 1; FamiliarIndex++)
         {
             i32 FamiliarXOffset = (RandomNumberTable[RandomNumbersIndex++] % 6) - 3;
-            if (RandomNumbersIndex == ArrayCount(RandomNumberTable))
+            if (RandomNumbersIndex == ArrayLength(RandomNumberTable))
             {
                 RandomNumbersIndex = 0;
             }
             
             i32 FamiliarYOffset = (RandomNumberTable[RandomNumbersIndex++] % 4) - 2;
-            if (RandomNumbersIndex == ArrayCount(RandomNumberTable))
+            if (RandomNumbersIndex == ArrayLength(RandomNumberTable))
             {
                 RandomNumbersIndex = 0;
             }
@@ -1013,7 +1035,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
     world *World = GameState->World;
     
-    for (u32 ControllerIndex = 0; ControllerIndex < ArrayCount(GameInput->ControllerStates); ControllerIndex++)
+    for (u32 ControllerIndex = 0; ControllerIndex < ArrayLength(GameInput->ControllerStates); ControllerIndex++)
     {
         game_controller_state *ControllerInput = GetController(GameInput, ControllerIndex);
         controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControllerIndex;
@@ -1131,7 +1153,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
             case ET_HERO:
             {
-                for (u32 ControlledHeroInputIndex = 0; ControlledHeroInputIndex < ArrayCount(GameState->ControllerToHeroInputMap); ControlledHeroInputIndex++)
+                for (u32 ControlledHeroInputIndex = 0; ControlledHeroInputIndex < ArrayLength(GameState->ControllerToHeroInputMap); ControlledHeroInputIndex++)
                 {
                     controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControlledHeroInputIndex;
                     if (ControlledHeroInput->HeroEntityStorageIndex == CurrentEntity->StorageIndex)
@@ -1141,7 +1163,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                             CurrentEntity->Velocity.Z = ControlledHeroInput->InputJumpVelocity;
                         }
 
-                        EntityMoveSpec.NormalizeAcceleration = true;
+                        EntityMoveSpec.NormalizeAcceleration = TRUE;
                         EntityMoveSpec.SpeedInXYPlane = 50.0f;
                         EntityMoveSpec.DragInXYPlane = 4.0f;
 
@@ -1158,7 +1180,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                                 
                                 SwordEntity->MovementDistanceLimit = 5.0f;
                                 
-                                AddPairwiseCollisionRule(GameState, SwordEntity->StorageIndex, CurrentEntity->StorageIndex, false);
+                                AddPairwiseCollisionRule(GameState, SwordEntity->StorageIndex, CurrentEntity->StorageIndex, FALSE);
                             }
                         }
                     }
@@ -1184,7 +1206,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
             case ET_SWORD:
             {
-                EntityMoveSpec.NormalizeAcceleration = false;
+                EntityMoveSpec.NormalizeAcceleration = FALSE;
                 EntityMoveSpec.SpeedInXYPlane = 0;
                 EntityMoveSpec.DragInXYPlane = 0;
                 
@@ -1211,7 +1233,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 EntityAcceleration = V3(0, 0, 0);
 
-                EntityMoveSpec.NormalizeAcceleration = true;
+                EntityMoveSpec.NormalizeAcceleration = TRUE;
                 EntityMoveSpec.SpeedInXYPlane = 50.0f;
                 EntityMoveSpec.DragInXYPlane = 4.0f;
 
@@ -1245,9 +1267,9 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                 }
 #endif
                 CurrentEntity->BobbingSinParameter += 5.0f * GameInput->TimeDeltaForFrame;
-                if (CurrentEntity->BobbingSinParameter > 2.0f * PI)
+                if (CurrentEntity->BobbingSinParameter > 2.0f * PI32)
                 {
-                    CurrentEntity->BobbingSinParameter -= 2.0f * PI;
+                    CurrentEntity->BobbingSinParameter -= 2.0f * PI32;
                 }
                 f32 BobbingSin = Sin(CurrentEntity->BobbingSinParameter);
                 ShadowAlphaFactor = 0.5f * ShadowAlphaFactor + 0.2f * BobbingSin;

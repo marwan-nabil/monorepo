@@ -249,7 +249,7 @@ int main(int argc, char **argv)
         {
             "obj", "pdb", "exe", "log", "ilk", "sln", "bmp",
             "txt", "ini", "dll", "exp", "lib", "map", "hmi",
-            "cso"
+            "cso", "lock"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
@@ -466,10 +466,9 @@ int main(int argc, char **argv)
             char LockFilePath[MAX_PATH];
             ZeroMemory(LockFilePath, ArrayLength(LockFilePath));
             StringCchCatA(LockFilePath, ArrayLength(LockFilePath), "compilation.lock");
+
             CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-
             DeleteFileA(LockFilePath);
 
             ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
@@ -481,15 +480,15 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Fmwin32_handmade.map ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\win32_handmade.cpp ");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\win32_platform.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\win32_handmade.exe");
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\win32_platform.exe");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompilationSuccess && InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "directx_demo") == 0)
         {

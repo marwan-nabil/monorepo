@@ -1,10 +1,4 @@
-#if !defined(HANDMADE_SIMULATION_REGION_H)
-
-#include "handmade_platform.h"
-#include "handmade_math.h"
-
-#include "handmade_entity.h"
-#include "handmade_world.h"
+#pragma once
 
 struct move_spec
 {
@@ -36,6 +30,3 @@ struct simulation_region
 
     entity_table_entry EntityTable[4096];
 };
-
-#define HANDMADE_SIMULATION_REGION_H
-#endif

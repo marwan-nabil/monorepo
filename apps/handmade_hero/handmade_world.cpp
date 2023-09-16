@@ -1,12 +1,3 @@
-#include "handmade_platform.h"
-#include "handmade_intrinsics.h"
-#include "handmade_math.h"
-
-#include "handmade.h"
-#include "handmade_simulation_region.h"
-#include "handmade_world.h"
-#include "handmade_entity.h"
-
 // TODO: determine a good safety margin
 #define MAX_CHUNK_DISTANCE_FROM_CENTER (INT32_MAX/64)
 #define CHUNK_POSITION_UNINITIALIZED_VALUE INT32_MAX
@@ -25,7 +16,7 @@ IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
     return Result;
 }
 
-internal b32
+static b32
 IsChunkCenterOffsetCanonical(world *World, v3 OffsetFromChunkCenter)
 {
     b32 Result =
@@ -81,8 +72,8 @@ GetChunk(world *World, memory_arena *MemoryArena, i32 ChunkX, i32 ChunkY, i32 Ch
 
     chunk *Result = 0;
 
-    u32 HashTableIndex = (u32)(19 * ChunkX + 7 * ChunkY + 3 * ChunkZ) & (u32)(ArrayCount(World->ChunksTable) - 1);
-    Assert(HashTableIndex < ArrayCount(World->ChunksTable));
+    u32 HashTableIndex = (u32)(19 * ChunkX + 7 * ChunkY + 3 * ChunkZ) & (u32)(ArrayLength(World->ChunksTable) - 1);
+    Assert(HashTableIndex < ArrayLength(World->ChunksTable));
 
     chunk *CurrentChunk = World->ChunksTable + HashTableIndex;
     while (CurrentChunk)
@@ -190,7 +181,7 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
     World->ChunkDiameterInMeters.Z = TileDepthInMeters;
     World->StorageEntitiesIndicesBlocksFreeListHead = 0;
 
-    for (u32 Index = 0; Index < ArrayCount(World->ChunksTable); Index++)
+    for (u32 Index = 0; Index < ArrayLength(World->ChunksTable); Index++)
     {
         World->ChunksTable[Index].ChunkX = CHUNK_POSITION_UNINITIALIZED_VALUE;
         World->ChunksTable[Index].FirstStorageEntitiesIndicesBlock.StorageEntitiesCount = 0;
@@ -198,7 +189,7 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
     }
 }
 
-internal void
+static void
 RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u32 StorageIndex, world_position *OldPosition, world_position *NewPosition)
 {
     Assert(!OldPosition || IsWorldPositionValid(*OldPosition));
@@ -223,7 +214,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
                 CurrentIndicesBlock = CurrentIndicesBlock->NextBlock
             )
             {
-                b32 OuterBreakFlag = false;
+                b32 OuterBreakFlag = FALSE;
                 for
                 (
                     u32 StorageEntityIndexIndex = 0; 
@@ -247,7 +238,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
                             World->StorageEntitiesIndicesBlocksFreeListHead = SecondBlock;
                         }
 
-                        OuterBreakFlag = true;
+                        OuterBreakFlag = TRUE;
                         break;
                     }
                 }
@@ -262,7 +253,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
             Assert(NewLocationChunk);
             storage_entities_indices_block *FirstBlock = &NewLocationChunk->FirstStorageEntitiesIndicesBlock;
 
-            if (FirstBlock->StorageEntitiesCount == ArrayCount(FirstBlock->StorageEntitiesIndices))
+            if (FirstBlock->StorageEntitiesCount == ArrayLength(FirstBlock->StorageEntitiesIndices))
             {
                 storage_entities_indices_block *NewBlock;
                 if (World->StorageEntitiesIndicesBlocksFreeListHead)
@@ -281,13 +272,13 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
                 FirstBlock->StorageEntitiesCount = 0;
             }
 
-            Assert(FirstBlock->StorageEntitiesCount < ArrayCount(FirstBlock->StorageEntitiesIndices));
+            Assert(FirstBlock->StorageEntitiesCount < ArrayLength(FirstBlock->StorageEntitiesIndices));
             FirstBlock->StorageEntitiesIndices[FirstBlock->StorageEntitiesCount++] = StorageIndex;
         }
     }
 }
 
-internal void
+static void
 ChangeStorageEntityLocationInWorld
 (
     world *World, memory_arena *MemoryArena, u32 StorageIndex, 
@@ -324,7 +315,7 @@ ChangeStorageEntityLocationInWorld
     }
 }
 
-internal world_position
+static world_position
 GetWorldPositionFromTilePosition(world *World, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ, v3 OffsetFromTileCenter)
 {
     // TODO: fix buggy Z handling here
