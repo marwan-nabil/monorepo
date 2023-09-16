@@ -12,7 +12,7 @@
 #include "..\..\miscellaneous\basic_defines.h"
 #include "..\..\miscellaneous\assertions.h"
 
-#include "..\..\imgui\imgui.h"
+#include "..\..\libraries\imgui\imgui.h"
 
 #include "win32_backend.h"
 #include "dx11_backend.h"

@@ -5,7 +5,7 @@
 
 #include "..\miscellaneous\base_types.h"
 
-#include "console.cpp"
+#include "..\miscellaneous\console.cpp"
 #include "compilation_tests.cpp"
 
 int main(int argc, char **argv)

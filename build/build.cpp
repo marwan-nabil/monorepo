@@ -19,6 +19,7 @@ void DisplayHelp()
     printf("          build test\n");
     printf("          build basic_app\n");
     printf("          build handmade_hero\n");
+    printf("          build directx_demo\n");
     printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
@@ -222,9 +223,9 @@ int main(int argc, char **argv)
 
         if (strcmp(argv[1], "build") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\build.cpp");
@@ -335,7 +336,7 @@ int main(int argc, char **argv)
             }
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\libraries\\imgui\\imgui*.cpp ");
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
@@ -427,6 +428,24 @@ int main(int argc, char **argv)
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+        }
+        else if (strcmp(argv[1], "directx_demo") == 0)
+        {
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- /Zi /MD ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), " ");
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx\\directx_tutorial\\main.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d9.lib d3dx9.lib user32.lib ");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\directx_tutorial.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }

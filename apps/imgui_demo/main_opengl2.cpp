@@ -12,7 +12,7 @@
 
 #include "..\..\miscellaneous\assertions.h"
 
-#include "..\..\imgui\imgui.h"
+#include "..\..\libraries\imgui\imgui.h"
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"
