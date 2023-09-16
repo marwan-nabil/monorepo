@@ -707,50 +707,50 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.5f));
 
         GameState->BackDropBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_background.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/../data/test/test_background.bmp");
         GameState->ShadowBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_shadow.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/../data/test/test_hero_shadow.bmp");
         GameState->TreeBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test2/tree00.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test2/tree00.bmp");
         GameState->StairWellBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test2/rock02.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test2/rock02.bmp");
         GameState->SwordBitMap = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test2/rock03.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test2/rock03.bmp");
 
         hero_bitmap_group *HeroBitmapGroup = &GameState->HeroBitmapGroups[0];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_right_head.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_right_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_right_cape.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_right_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_right_torso.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_right_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[1];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_back_head.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_back_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_back_cape.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_back_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_back_torso.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_back_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[2];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_left_head.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_left_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_left_cape.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_left_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_left_torso.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_left_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[3];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_front_head.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_front_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_front_cape.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_front_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"test/test_hero_front_torso.bmp");
+            DEBUGLoadBMP(GameMemory->DebugPlatformReadEntireFile, ThreadContext, (char *)"../data/test/test_hero_front_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         world *World = PushStruct(&GameState->WorldArena, world);

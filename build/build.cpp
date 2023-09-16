@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 #include <strsafe.h>
 #include <stdio.h>
@@ -16,16 +17,17 @@ void DisplayHelp()
     printf("          build clean\n");
     printf("          build build\n");
     printf("          build test\n");
-    printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build basic_app\n");
+    printf("          build handmade_hero\n");
+    printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
 }
 
-u32 CleanPerExtension(const char *ExtensionToClean, const char *OutputDirectoryPath)
+u32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath)
 {
     char FilesWildcard[MAX_PATH];
     ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
-    StringCchCatA(FilesWildcard, MAX_PATH, OutputDirectoryPath);
+    StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.");
     StringCchCatA(FilesWildcard, MAX_PATH, ExtensionToClean);
 
@@ -49,7 +51,7 @@ u32 CleanPerExtension(const char *ExtensionToClean, const char *OutputDirectoryP
             {
                 char FoundFilePath[512];
                 ZeroMemory(FoundFilePath, 512);
-                StringCchCatA(FoundFilePath, MAX_PATH, OutputDirectoryPath);
+                StringCchCatA(FoundFilePath, MAX_PATH, DirectoryPath);
                 StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                 StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
 
@@ -100,6 +102,69 @@ u32 CleanPerExtension(const char *ExtensionToClean, const char *OutputDirectoryP
     return 0;
 }
 
+b32 InvokeCompiler
+(
+    char *CompilerFlags,
+    char *SourcesString,
+    char *OutputBinaryPath,
+    char *LinkerFlags
+)
+{
+    STARTUPINFO CompilerProcessStartupInfo = {};
+    CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
+    PROCESS_INFORMATION CompilerProcessProcessInfo = {};
+
+    char CompilerCommand[1024];
+    ZeroMemory(CompilerCommand, ArrayLength(CompilerCommand));
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "cl.exe ");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " ");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), SourcesString);
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /Fe:\"");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), OutputBinaryPath);
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "\" ");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "/link ");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), LinkerFlags);
+
+    b32 CreateSucceeded = CreateProcess
+    (
+        NULL,
+        CompilerCommand,
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        &CompilerProcessStartupInfo,
+        &CompilerProcessProcessInfo
+    );
+
+    if (CreateSucceeded == FALSE)
+    {
+        printf("ERROR: failed to create the compiler process, please debug the build system.\n");
+        fflush(stdout);
+        return FALSE;
+    }
+    else
+    {
+        WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
+
+        DWORD ProcessExitCode;
+        GetExitCodeProcess(CompilerProcessProcessInfo.hProcess, &ProcessExitCode);
+
+        CloseHandle(CompilerProcessProcessInfo.hProcess);
+        CloseHandle(CompilerProcessProcessInfo.hThread);
+
+        if (ProcessExitCode != 0)
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 int main(int argc, char **argv)
 {
     char OutputDirectoryPath[1024];
@@ -122,13 +187,14 @@ int main(int argc, char **argv)
     {
         const char *ExtensionsToClean[] = 
         {
-            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp", "txt", "ini"
+            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp",
+            "txt", "ini", "dll", "exp", "lib", "map", "hmi"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
         {
-            u32 Result = CleanPerExtension(ExtensionsToClean[ExtensionIndex], OutputDirectoryPath);
-            if (Result)
+            u32 CompilationSuccess = CleanExtensionFromDirectory(ExtensionsToClean[ExtensionIndex], OutputDirectoryPath);
+            if (CompilationSuccess)
             {
                 return 2;
             }
@@ -140,6 +206,8 @@ int main(int argc, char **argv)
     }
     else
     {
+        b32 CompilationSuccess = FALSE;
+
         char CompilerFlags[1024];
         ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
 
@@ -152,96 +220,74 @@ int main(int argc, char **argv)
         char OutputBinaryPath[1024];
         ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
 
-        // ----------------------------------------------------------
-        // first argument (target selection)
-        // ----------------------------------------------------------
-        if
-        (
-            (strcmp(argv[1], "build") == 0) ||
-            (strcmp(argv[1], "test") == 0) ||
-            (strcmp(argv[1], "basic_app") == 0) ||
-            (strcmp(argv[1], "ray_tracer") == 0)
-        )
+        if (strcmp(argv[1], "build") == 0)
+        {
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S ");
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\build.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\build.temp.exe");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+        }
+        else if (strcmp(argv[1], "test") == 0)
         {
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-        }
 
-        if (strcmp(argv[1], "build") == 0)
-        {
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\build.cpp");
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\build.temp.exe");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
-        }
-        else if (strcmp(argv[1], "test") == 0)
-        {
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\tests\\test.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\basic_app\\main.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_app.exe");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Od ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows ");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)
         {
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\ray_tracer\\main.cpp");
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console ");
-        }
-        else if (strcmp(argv[1], "imgui_demo") == 0)
-        {
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
-        }
-        else
-        {
-            printf("ERROR: invalid build target \"%s\".\n", argv[1]);
-            DisplayHelp();
-            return 1;
-        }
+            if (argc < 4)
+            {
+                printf("ERROR: invalid number of arguments for build ray_tracer ...\n");
+                DisplayHelp();
+                return 1;
+            }
 
-        // ----------------------------------------------------------
-        // second argument
-        // ----------------------------------------------------------
-        if
-        (
-            (
-                (strcmp(argv[1], "ray_tracer") == 0)
-                ||
-                (strcmp(argv[1], "imgui_demo") == 0)
-            )
-            &&
-            (argc < 3)
-        )
-        {
-            printf("ERROR: invalid number of arguments for build ...\n");
-            DisplayHelp();
-            return 1;
-        }
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
-        if (strcmp(argv[1], "ray_tracer") == 0)
-        {
             if (strcmp(argv[2], "optimized") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-O2 ");
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/O2 ");
             }
             else if (strcmp(argv[2], "non_optimized") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-Od ");
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Od ");
             }
             else
             {
@@ -249,9 +295,53 @@ int main(int argc, char **argv)
                 DisplayHelp();
                 return 1;
             }
+
+            if (strcmp(argv[3], "1_lane") == 0)
+            {
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DSIMD_NUMBEROF_LANES=1 ");
+            }
+            else if (strcmp(argv[3], "4_lanes") == 0)
+            {
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DSIMD_NUMBEROF_LANES=4 ");
+            }
+            else if (strcmp(argv[3], "8_lanes") == 0)
+            {
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DSIMD_NUMBEROF_LANES=8 ");
+            }
+            else
+            {
+                printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[3]);
+                DisplayHelp();
+                return 1;
+            }
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\ray_tracer\\main.cpp");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "imgui_demo") == 0)
         {
+            if (argc < 3)
+            {
+                printf("ERROR: invalid number of arguments for build imgui_demo ...\n");
+                DisplayHelp();
+                return 1;
+            }
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\imgui\\imgui*.cpp ");
+
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
+
             if (strcmp(argv[2], "opengl2") == 0)
             {
                 StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
@@ -278,92 +368,78 @@ int main(int argc, char **argv)
                 DisplayHelp();
                 return 1;
             }
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
-
-        // ----------------------------------------------------------
-        // third argument
-        // ----------------------------------------------------------
-        if (strcmp(argv[1], "ray_tracer") == 0)
+        else if (strcmp(argv[1], "handmade_hero") == 0)
         {
-            if (argc >= 4)
-            {
-                if (strcmp(argv[3], "1_lane") == 0)
-                {
-                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-DSIMD_NUMBEROF_LANES=1 ");
-                }
-                else if (strcmp(argv[3], "4_lanes") == 0)
-                {
-                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-DSIMD_NUMBEROF_LANES=4 ");
-                }
-                else if (strcmp(argv[3], "8_lanes") == 0)
-                {
-                    StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "-DSIMD_NUMBEROF_LANES=8 ");
-                }
-                else
-                {
-                    printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[3]);
-                    DisplayHelp();
-                    return 1;
-                }
-            }
-            else
-            {
-                printf("ERROR: invalid number of arguments for build ray_tracer ...\n");
-                DisplayHelp();
-                return 1;
-            }
-        }
+            char SharedCompilerFlags[1024];
+            ZeroMemory(SharedCompilerFlags, ArrayLength(SharedCompilerFlags));
 
-        STARTUPINFO CompilerProcessStartupInfo = {};
-        CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
-        PROCESS_INFORMATION CompilerProcessProcessInfo = {};
+            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
+            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 ");
+            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
 
-        char CompilerCommand[1024];
-        ZeroMemory(CompilerCommand, ArrayLength(CompilerCommand));
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "cl.exe ");
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), CompilerFlags);
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " ");
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), SourcesString);
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /Fe:\"");
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), OutputBinaryPath);
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "\"");
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /link ");
-        StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), LinkerFlags);
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), SharedCompilerFlags);
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/LD /Fmhandmade.map ");
 
-        b32 CreateSucceeded = CreateProcess
-        (
-            NULL,
-            CompilerCommand,
-            NULL,
-            NULL,
-            FALSE,
-            0,
-            NULL,
-            NULL,
-            &CompilerProcessStartupInfo,
-            &CompilerProcessProcessInfo
-        );
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\handmade.cpp ");
 
-        if (CreateSucceeded == FALSE)
-        {
-            printf("ERROR: failed to create the compiler process, please debug the build system.\n");
-            fflush(stdout);
-            return 1;
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\handmade.dll");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender ");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/PDB:handmade_");
+            char RandomString[5];
+            ZeroMemory(RandomString, ArrayLength(RandomString));
+            u32 RandomNumber;
+            rand_s(&RandomNumber);
+            RandomNumber = (u32)((f32)RandomNumber / (f32)UINT_MAX * 9999.0f);
+            StringCchPrintfA(RandomString, ArrayLength(RandomString), "%d", RandomNumber);
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), RandomString);
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), ".pdb ");
+
+            char LockFilePath[MAX_PATH];
+            ZeroMemory(LockFilePath, ArrayLength(LockFilePath));
+            StringCchCatA(LockFilePath, ArrayLength(LockFilePath), "compilation.lock");
+            CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+
+            DeleteFileA(LockFilePath);
+
+            ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
+            ZeroMemory(SourcesString, ArrayLength(SourcesString));
+            ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
+            ZeroMemory(LinkerFlags, ArrayLength(LinkerFlags));
+
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), SharedCompilerFlags);
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Fmwin32_handmade.map ");
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\win32_handmade.cpp ");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\win32_handmade.exe");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else
         {
-            WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
+            printf("ERROR: invalid build target \"%s\".\n", argv[1]);
+            DisplayHelp();
+            return 1;
+        }
 
-            DWORD ProcessExitCode;
-            GetExitCodeProcess(CompilerProcessProcessInfo.hProcess, &ProcessExitCode);
-
-            CloseHandle(CompilerProcessProcessInfo.hProcess);
-            CloseHandle(CompilerProcessProcessInfo.hThread);
-
-            if (ProcessExitCode != 0)
-            {
-                return 1;
-            }
+        if (!CompilationSuccess)
+        {
+            return 1;
         }
     }
 

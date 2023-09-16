@@ -69,4 +69,6 @@ void RunCompilationTests()
     CompilationTest("build ray_tracer optimized 4_lanes");
     CompilationTest("build ray_tracer non_optimized 1_lane");
     CompilationTest("build ray_tracer non_optimized 4_lanes");
+
+    CompilationTest("build handmade_hero");
 }

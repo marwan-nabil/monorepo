@@ -4,3 +4,4 @@
 **/*.ilk
 **/*.ini
 **/.vs
+output/**
