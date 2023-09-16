@@ -103,6 +103,65 @@ u32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
     return 0;
 }
 
+b32 CompileShader
+(
+    char *CompilerFlags,
+    char *SourcesString,
+    char *OutputBinaryPath
+)
+{
+    STARTUPINFO CompilerProcessStartupInfo = {};
+    CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
+    PROCESS_INFORMATION CompilerProcessProcessInfo = {};
+
+    char CompilerCommand[1024];
+    ZeroMemory(CompilerCommand, ArrayLength(CompilerCommand));
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "fxc.exe ");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /Fo \"");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), OutputBinaryPath);
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "\" ");
+    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), SourcesString);
+
+    b32 CreateSucceeded = CreateProcess
+    (
+        NULL,
+        CompilerCommand,
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        &CompilerProcessStartupInfo,
+        &CompilerProcessProcessInfo
+    );
+
+    if (CreateSucceeded == FALSE)
+    {
+        printf("ERROR: failed to create the compiler process, please debug the build system.\n");
+        fflush(stdout);
+        return FALSE;
+    }
+    else
+    {
+        WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
+
+        DWORD ProcessExitCode;
+        GetExitCodeProcess(CompilerProcessProcessInfo.hProcess, &ProcessExitCode);
+
+        CloseHandle(CompilerProcessProcessInfo.hProcess);
+        CloseHandle(CompilerProcessProcessInfo.hThread);
+
+        if (ProcessExitCode != 0)
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 b32 InvokeCompiler
 (
     char *CompilerFlags,
@@ -189,7 +248,8 @@ int main(int argc, char **argv)
         const char *ExtensionsToClean[] = 
         {
             "obj", "pdb", "exe", "log", "ilk", "sln", "bmp",
-            "txt", "ini", "dll", "exp", "lib", "map", "hmi"
+            "txt", "ini", "dll", "exp", "lib", "map", "hmi",
+            "cso"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
@@ -436,18 +496,45 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- /Zi /MD ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), " ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx\\directx_tutorial\\main.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx_demo\\*.cpp");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d9.lib d3dx9.lib user32.lib ");
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d11.lib gdi32.lib user32.lib ");
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\directx_tutorial.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+
+            ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
+            ZeroMemory(SourcesString, ArrayLength(SourcesString));
+            ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
+
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/T ps_4_0_level_9_1");
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx_demo\\CubePixelShader.hlsl");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\CubePixelShader.cso");
+
+            CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
+
+            ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
+            ZeroMemory(SourcesString, ArrayLength(SourcesString));
+            ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
+
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/T vs_4_0_level_9_1");
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx_demo\\CubeVertexShader.hlsl");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\CubeVertexShader.cso");
+
+            CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
         }
         else
         {

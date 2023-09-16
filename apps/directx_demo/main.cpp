@@ -105,36 +105,31 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     // Instantiate the renderer.
     CreateDeviceDependentResources();
     // We have a window, so initialize window size-dependent resources.
-    //CreateWindowResources(hWnd);
-    CreateWindowSizeDependentResources();
-
+    CreateWindowResources(hWnd);
+    // CreateWindowSizeDependentResources();
 
     // show the window
-    ShowWindow(hWnd, nCmdShow);
-    UpdateWindow(hWnd);
+    // ShowWindow(hWnd, nCmdShow);
+    // UpdateWindow(hWnd);
 
     // ----------------
     // the message loop
     // ----------------
     Running = true;
-    MSG msg;
     while (Running)
     {
+        MSG msg;
         // BUG: message saturation happens
         // TODO: fix the message saturation problem
-	    if(PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0)
+	    while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
 	    {
 	        TranslateMessage(&msg);
 	        DispatchMessage(&msg);
 	    }
-	    else
-	    {
-	        RendererUpdate();
 
-	        RendererRender();
-
-            Present();
-	    }
+        RendererUpdate();
+        RendererRender();
+        Present();
     }
  
     return Result;

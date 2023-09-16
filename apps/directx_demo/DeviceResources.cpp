@@ -142,7 +142,6 @@ HRESULT CreateDeviceResources(HWND Window)
     ViewPort.MinDepth = 0;
     ViewPort.MaxDepth = 1;
 
-
     D3D_DeviceContext->RSSetViewports(
         1,
         &ViewPort
@@ -160,40 +159,40 @@ HRESULT CreateDeviceResources(HWND Window)
 
 
 // creates SwapChain
-//HRESULT CreateWindowResources(HWND Window)
-//{
-//    HRESULT Result = S_OK;
-//
-//    DXGI_SWAP_CHAIN_DESC SwapChainDescription;
-//    ZeroMemory(&SwapChainDescription, sizeof(DXGI_SWAP_CHAIN_DESC));
-//    SwapChainDescription.Windowed = TRUE; // Sets the initial state of full-screen mode.
-//    SwapChainDescription.BufferCount = 2;
-//    SwapChainDescription.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-//    SwapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-//    SwapChainDescription.SampleDesc.Count = 1;      // multisampling setting
-//    SwapChainDescription.SampleDesc.Quality = 0;    // vendor-specific flag
-//    SwapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-//    SwapChainDescription.OutputWindow = Window;
-//
-//    // Create the DXGI device object to use in other factories, such as Direct2D.
-//    IDXGIDevice *Device = (IDXGIDevice *) D3D_Device;
-//    // Create swap chain.
-//    IDXGIAdapter *Adapter = NULL;
-//    IDXGIFactory *Factory = NULL;
-//
-//    Result = Device->GetAdapter(&Adapter);
-//
-//    if(SUCCEEDED(Result))
-//    {
-//        Adapter->GetParent(IID_PPV_ARGS(&Factory));
-//
-//        Result = Factory->
-//            CreateSwapChain(D3D_Device, &SwapChainDescription, &SwapChain);
-//    }
-//
-//    Result = ConfigureBackBuffer();
-//    return Result;
-//}
+HRESULT CreateWindowResources(HWND Window)
+{
+   HRESULT Result = S_OK;
+
+   DXGI_SWAP_CHAIN_DESC SwapChainDescription;
+   ZeroMemory(&SwapChainDescription, sizeof(DXGI_SWAP_CHAIN_DESC));
+   SwapChainDescription.Windowed = TRUE; // Sets the initial state of full-screen mode.
+   SwapChainDescription.BufferCount = 2;
+   SwapChainDescription.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+   SwapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+   SwapChainDescription.SampleDesc.Count = 1;      // multisampling setting
+   SwapChainDescription.SampleDesc.Quality = 0;    // vendor-specific flag
+   SwapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+   SwapChainDescription.OutputWindow = Window;
+
+   // Create the DXGI device object to use in other factories, such as Direct2D.
+   IDXGIDevice *Device = (IDXGIDevice *) D3D_Device;
+   // Create swap chain.
+   IDXGIAdapter *Adapter = NULL;
+   IDXGIFactory *Factory = NULL;
+
+   Result = Device->GetAdapter(&Adapter);
+
+   if(SUCCEEDED(Result))
+   {
+       Adapter->GetParent(IID_PPV_ARGS(&Factory));
+
+       Result = Factory->
+           CreateSwapChain(D3D_Device, &SwapChainDescription, &SwapChain);
+   }
+
+   Result = ConfigureBackBuffer();
+   return Result;
+}
 
 
 // creates BackBuffer, RenderTarget, BackBufferDescription, 
@@ -226,14 +225,14 @@ HRESULT ConfigureBackBuffer()
     DepthStencilDescription.CPUAccessFlags = 0;
     DepthStencilDescription.MiscFlags = 0;
 
-    D3D_Device->CreateTexture2D(&DepthStencilDescription,
+    Result = D3D_Device->CreateTexture2D(&DepthStencilDescription,
                                 nullptr,
                                 &DepthStencil);
 
     // TODO: change this to c
     CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
 
-    D3D_Device->CreateDepthStencilView(DepthStencil,
+    Result = D3D_Device->CreateDepthStencilView(DepthStencil,
                                        &depthStencilViewDesc,
                                        &DepthStencilView);
 
@@ -288,7 +287,7 @@ HRESULT GoFullScreen()
 
     // Before calling ResizeBuffers, you have to release all references to the back 
     // buffer device resource.
-    ReleaseBackBuffer();
+    Result = ReleaseBackBuffer();
 
     // Now we can call ResizeBuffers.
     Result = SwapChain->ResizeBuffers(
@@ -316,7 +315,7 @@ HRESULT GoWindowed()
 
     // Before calling ResizeBuffers, you have to release all references to the back 
     // buffer device resource.
-    ReleaseBackBuffer();
+    Result = ReleaseBackBuffer();
 
     // Now we can call ResizeBuffers.
     Result = SwapChain->ResizeBuffers(
@@ -344,5 +343,6 @@ float GetAspectRatio()
 // Show the frame on the primary surface.
 void Present()
 {
-    SwapChain->Present(1, 0);
+    HRESULT Result;
+    Result = SwapChain->Present(1, 0);
 }
