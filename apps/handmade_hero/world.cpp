@@ -1,6 +1,4 @@
 // TODO: determine a good safety margin
-#define MAX_CHUNK_DISTANCE_FROM_CENTER (INT32_MAX/64)
-#define CHUNK_POSITION_UNINITIALIZED_VALUE INT32_MAX
 
 inline b32
 IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
@@ -288,7 +286,7 @@ ChangeStorageEntityLocationInWorld
     world_position *OldPosition = 0;
     if
     (
-        !IsFlagSet(&StorageEntity->Entity, EF_NON_SPATIAL) &&
+        !IsEntityFlagSet(&StorageEntity->Entity, EF_NON_SPATIAL) &&
         IsWorldPositionValid(StorageEntity->WorldPosition)
     )
     {
@@ -306,12 +304,12 @@ ChangeStorageEntityLocationInWorld
     if (NewPosition)
     {
         StorageEntity->WorldPosition = *NewPosition;
-        ClearFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
+        ClearEntityFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
     }
     else
     {
         StorageEntity->WorldPosition = InvalidWorldPosition();
-        SetFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
+        SetEntityFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
     }
 }
 

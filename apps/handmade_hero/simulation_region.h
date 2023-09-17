@@ -1,11 +1,6 @@
 #pragma once
 
-struct move_spec
-{
-    b32 NormalizeAcceleration;
-    f32 DragInXYPlane;
-    f32 SpeedInXYPlane;
-};
+#define INIFINTE_MOVEMENT_DISTANCE 10000.0f
 
 struct entity_table_entry
 {

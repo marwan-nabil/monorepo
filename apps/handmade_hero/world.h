@@ -1,6 +1,8 @@
 #pragma once
 
 #define TILES_PER_CHUNK 16
+#define MAX_CHUNK_DISTANCE_FROM_CENTER (INT32_MAX/64)
+#define CHUNK_POSITION_UNINITIALIZED_VALUE INT32_MAX
 
 struct storage_entities_indices_block
 {
@@ -28,4 +30,10 @@ struct world
 
     u32 StorageEntitiesCount;
     storage_entity StorageEntities[100000];
+};
+
+struct world_position
+{
+    i32 ChunkX, ChunkY, ChunkZ;
+    v3 OffsetFromChunkCenter;
 };

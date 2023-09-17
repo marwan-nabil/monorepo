@@ -34,6 +34,15 @@ InitializeMemoryArena(memory_arena *Arena, size_t Size, void *Base)
     Arena->Base = (u8 *)Base;
 }
 
+inline void *
+PushOntoMemoryArena(memory_arena *Arena, size_t PushSize)
+{
+    Assert((Arena->Used + PushSize) <= Arena->Size);
+    void *Result = Arena->Base + Arena->Used;
+    Arena->Used += PushSize;
+    return Result;
+}
+
 static void
 DrawRectangle
 (
@@ -129,7 +138,7 @@ struct bitmap_header
 #pragma pack(pop)
 
 static loaded_bitmap
-DEBUGLoadBMP(platform_read_file *ReadEntireFile, thread_context *ThreadContext, char *FileName)
+LoadBitmap(platform_read_file *ReadEntireFile, thread_context *ThreadContext, char *FileName)
 {
     loaded_bitmap Result = {};
 
@@ -300,184 +309,17 @@ DrawBitmap
     }
 }
 
-struct add_storage_entity_result
-{
-    u32 StorageIndex;
-    storage_entity *StorageEntity;
-};
-
-static add_storage_entity_result
-AddStorageEntity(game_state *GameState, entity_type Type, world_position WorldPosition)
-{
-    Assert(GameState->World->StorageEntitiesCount < ArrayLength(GameState->World->StorageEntities));
-
-    add_storage_entity_result Result;
-
-    Result.StorageIndex = GameState->World->StorageEntitiesCount++;
-    Result.StorageEntity = GameState->World->StorageEntities + Result.StorageIndex;
-
-    *Result.StorageEntity = {};
-    Result.StorageEntity->Entity.Type = Type;
-    Result.StorageEntity->Entity.CollisionMeshGroup = GameState->NullCollisionMeshGroupTemplate;
-    Result.StorageEntity->WorldPosition = InvalidWorldPosition();
-
-    ChangeStorageEntityLocationInWorld(GameState->World, &GameState->WorldArena, Result.StorageIndex, Result.StorageEntity, &WorldPosition);
-
-    return Result;
-}
-
-static add_storage_entity_result
-AddGoundBasedStorageEntity
-(
-    game_state *GameState, entity_type Type, world_position GroundPoint,
-    entity_collision_mesh_group *EntityCollisionMeshGroup
-)
-{
-    // TODO(marwan): fix buggy Z handling here?
-    add_storage_entity_result Result = AddStorageEntity(GameState, Type, GroundPoint);
-    Result.StorageEntity->Entity.CollisionMeshGroup = EntityCollisionMeshGroup;
-    return Result;
-}
-
-static add_storage_entity_result
-AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
-{
-    world_position RoomPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
-
-    add_storage_entity_result RoomStorageEntityResult =
-        AddGoundBasedStorageEntity(GameState, ET_SPACE, RoomPosition, GameState->StandardRoomCollisionMeshGroupTemplate);
-
-    SetFlags(&RoomStorageEntityResult.StorageEntity->Entity, EF_TRAVERSABLE);
-
-    return RoomStorageEntityResult;
-}
-
-static void
-InitHitpoints(storage_entity *StorageEntity, u32 HitpointsCount)
-{
-    Assert(HitpointsCount < ArrayLength(StorageEntity->Entity.HitPoints));
-
-    StorageEntity->Entity.HitPointsMax = HitpointsCount;
-
-    for (u32 HitPointIndex = 0; HitPointIndex < HitpointsCount; HitPointIndex++)
-    {
-        StorageEntity->Entity.HitPoints[HitPointIndex].FilledAmount = HIT_POINT_SUB_COUNT;
-        StorageEntity->Entity.HitPoints[HitPointIndex].Flags = 0;
-    }
-}
-
-static add_storage_entity_result
-AddSword(game_state *GameState)
-{
-    add_storage_entity_result SwordStorageEntityResult = AddStorageEntity(GameState, ET_SWORD, InvalidWorldPosition());
-
-    SwordStorageEntityResult.StorageEntity->Entity.CollisionMeshGroup = GameState->SwordCollisionMeshGroupTemplate;
-
-    SetFlags(&SwordStorageEntityResult.StorageEntity->Entity, EF_NON_SPATIAL | EF_MOVEABLE);
-    
-    return SwordStorageEntityResult;
-}
-
-static add_storage_entity_result
-AddPlayer(game_state *GameState)
-{
-    add_storage_entity_result PlayerStorageEntityResult = 
-        AddGoundBasedStorageEntity(GameState, ET_HERO, GameState->CameraPosition, GameState->PlayerCollisionMeshGroupTemplate);
-
-    SetFlags(&PlayerStorageEntityResult.StorageEntity->Entity, EF_COLLIDES | EF_MOVEABLE);
-    InitHitpoints(PlayerStorageEntityResult.StorageEntity, 3);
-
-    add_storage_entity_result SwordStorageEntityResult = AddSword(GameState);
-    PlayerStorageEntityResult.StorageEntity->Entity.SwordEntityReference.StorageIndex = SwordStorageEntityResult.StorageIndex;
-
-    if (GameState->StorageIndexOfEntityThatCameraFollows == 0)
-    {
-        GameState->StorageIndexOfEntityThatCameraFollows = PlayerStorageEntityResult.StorageIndex;
-    }
-
-    return PlayerStorageEntityResult;
-}
-
-static add_storage_entity_result
-AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
-{
-    world_position MonsterPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
-
-    add_storage_entity_result MonsterStorageEntityResult = 
-        AddGoundBasedStorageEntity(GameState, ET_MONSTER, MonsterPosition, GameState->MonsterCollisionMeshGroupTemplate);
-
-    SetFlags(&MonsterStorageEntityResult.StorageEntity->Entity, EF_COLLIDES | EF_MOVEABLE);
-    InitHitpoints(MonsterStorageEntityResult.StorageEntity, 3);
-
-    return MonsterStorageEntityResult;
-}
-
-static add_storage_entity_result
-AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
-{
-    world_position FamiliarPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
-
-    add_storage_entity_result FamiliarStorageEntityResult = 
-        AddGoundBasedStorageEntity(GameState, ET_FAMILIAR, FamiliarPosition, GameState->FamiliarCollisionMeshGroupTemplate);
-
-    SetFlags(&FamiliarStorageEntityResult.StorageEntity->Entity, EF_COLLIDES | EF_MOVEABLE);
-
-    return FamiliarStorageEntityResult;
-}
-
-static add_storage_entity_result
-AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
-{
-    world_position WallGroundPosition =
-        GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
-
-    add_storage_entity_result WallStorageEntityResult = 
-        AddGoundBasedStorageEntity(GameState, ET_WALL, WallGroundPosition, GameState->WallCollisionMeshGroupTemplate);
-
-    SetFlags(&WallStorageEntityResult.StorageEntity->Entity, EF_COLLIDES);
-
-    return WallStorageEntityResult;
-}
-
-static add_storage_entity_result
-AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
-{
-    world_position StairsGroundPosition = GetWorldPositionFromTilePosition
-    (
-        GameState->World, AbsTileX, AbsTileY, AbsTileZ,
-        V3(0, 0, 0)
-    );
-
-    // NOTE(marwan): this is the correct thing
-    //world_position StairsGroundPosition = GetWorldPositionFromTilePosition
-    //(
-    //    GameState->World, AbsTileX, AbsTileY, AbsTileZ,
-    //    V3(0, 0, -0.5f * StairDiameter.Z)
-    //);
-
-    add_storage_entity_result StairStorageEntityResult =
-        AddGoundBasedStorageEntity(GameState, ET_STAIRS, StairsGroundPosition, GameState->StairsCollisionMeshGroupTemplate);
-
-    SetFlags(&StairStorageEntityResult.StorageEntity->Entity, EF_COLLIDES);
-
-    StairStorageEntityResult.StorageEntity->Entity.WalkableHeight = GameState->World->TileDepthInMeters;
-    StairStorageEntityResult.StorageEntity->Entity.WalkableDiameter =
-        StairStorageEntityResult.StorageEntity->Entity.CollisionMeshGroup->TotalCollisionMesh.Diameter.XY;
-
-    return StairStorageEntityResult;
-}
-
 inline void
 PushRenderPeice
 (
-    game_state *GameState, entity_render_peice_group *PeiceGroup, 
+    game_state *GameState, render_peice_group *PeiceGroup, 
     loaded_bitmap *Bitmap, v3 Offset, v2 BitmapAlignment,
     v4 Color, f32 EntityJumpZCoefficient, v2 RectangleDimensions
 )
 {
     Assert(PeiceGroup->Count < ArrayLength(PeiceGroup->Peices));
 
-    entity_render_peice *NewRenderPiece = PeiceGroup->Peices + PeiceGroup->Count++;
+    render_piece *NewRenderPiece = PeiceGroup->Peices + PeiceGroup->Count++;
     NewRenderPiece->Bitmap = Bitmap;
     NewRenderPiece->Offset.XY = V2(Offset.X, -Offset.Y) * GameState->PixelsToMetersRatio - BitmapAlignment;
     NewRenderPiece->Offset.Z = Offset.Z;
@@ -489,7 +331,7 @@ PushRenderPeice
 inline void
 PushBitmapRenderPiece
 (
-    game_state *GameState, entity_render_peice_group *PeiceGroup, 
+    game_state *GameState, render_peice_group *PeiceGroup, 
     loaded_bitmap *Bitmap, v3 Offset, v2 BitmapAlignment,
     f32 Alpha, f32 EntityJumpZCoefficient
 )
@@ -500,7 +342,7 @@ PushBitmapRenderPiece
 inline void
 PushRectangleRenderPiece
 (
-    game_state *GameState, entity_render_peice_group *PeiceGroup, v3 Offset,
+    game_state *GameState, render_peice_group *PeiceGroup, v3 Offset,
     v2 RectangleDimensions, v4 Color, f32 EntityJumpZCoefficient
 )
 {
@@ -510,7 +352,7 @@ PushRectangleRenderPiece
 inline void
 PushRectangleOutlineRenderPieces
 (
-    game_state *GameState, entity_render_peice_group *PeiceGroup,
+    game_state *GameState, render_peice_group *PeiceGroup,
     v3 Offset, v2 RectangleDimensions, v4 Color, f32 EntityJumpZCoefficient
 )
 {
@@ -538,7 +380,7 @@ PushRectangleOutlineRenderPieces
 }
 
 inline void
-DrawHitpoints(game_state *GameState, entity_render_peice_group *EntityPeiceGroup, entity *Entity)
+DrawHitpoints(game_state *GameState, render_peice_group *EntityPeiceGroup, entity *Entity)
 {
     if (Entity->HitPointsMax >= 1)
     {
@@ -549,7 +391,7 @@ DrawHitpoints(game_state *GameState, entity_render_peice_group *EntityPeiceGroup
 
         for (u32 HitPointIndex = 0; HitPointIndex < Entity->HitPointsMax; HitPointIndex++)
         {
-            hit_point *HitPoint = Entity->HitPoints + HitPointIndex;
+            entity_hit_point *HitPoint = Entity->HitPoints + HitPointIndex;
             v4 Color = V4(1.0f, 0, 0, 1.0f);
             if (HitPoint->FilledAmount == 0)
             {
@@ -561,94 +403,6 @@ DrawHitpoints(game_state *GameState, entity_render_peice_group *EntityPeiceGroup
                 GameState, EntityPeiceGroup, HitPointOffset, HitPointDimension, Color, 0.0f
             );
             HitPointOffset += HitPointDelta;
-        }
-    }
-}
-
-static void
-AddPairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex, b32 CanCollide)
-{
-    pairwise_collision_rule *ResultRule = 0;
-
-    if (FirstEntityStorageIndex > SecondEntityStorageIndex)
-    {
-        u32 SwappingTemporaryStorageIndex = FirstEntityStorageIndex;
-        FirstEntityStorageIndex = SecondEntityStorageIndex;
-        SecondEntityStorageIndex = SwappingTemporaryStorageIndex;
-    }
-
-    u32 HashValue = FirstEntityStorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
-    for
-    (
-        pairwise_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashValue];
-        CurrentRule;
-        CurrentRule = CurrentRule->Next
-    )
-    {
-        if ((CurrentRule->EntityAStorageIndex == FirstEntityStorageIndex) &&
-            (CurrentRule->EntityBStorageIndex == SecondEntityStorageIndex))
-        {
-            ResultRule = CurrentRule;
-            break;
-        }
-    }
-
-    if (!ResultRule)
-    {
-        if (!GameState->FreeCollisionRulesListHead)
-        {
-            ResultRule = PushStruct(&GameState->WorldArena, pairwise_collision_rule);
-        }
-        else
-        {
-            ResultRule = GameState->FreeCollisionRulesListHead;
-            GameState->FreeCollisionRulesListHead = GameState->FreeCollisionRulesListHead->Next;
-        }
-
-        ResultRule->Next = GameState->CollisionRulesTable[HashValue];
-        GameState->CollisionRulesTable[HashValue] = ResultRule;
-    }
-
-    Assert(ResultRule);
-    if (ResultRule)
-    {
-        ResultRule->EntityAStorageIndex = FirstEntityStorageIndex;
-        ResultRule->EntityBStorageIndex = SecondEntityStorageIndex;
-        ResultRule->CanCollide = CanCollide;
-    }
-}
-
-static b32
-RemovePairwiseCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex)
-{
-}
-
-static void
-ClearAllPairwiseCollisionRule(game_state *GameState, u32 StorageIndex)
-{
-    // TODO: improve collision rule storage data structure to optimize for insertion and clearing
-    for (u32 HashValue = 0; HashValue < ArrayLength(GameState->CollisionRulesTable); HashValue++)
-    {
-        for
-        (
-            pairwise_collision_rule **CurrentRulePointer = &GameState->CollisionRulesTable[HashValue];
-            *CurrentRulePointer;
-        )
-        {
-            if (((*CurrentRulePointer)->EntityAStorageIndex == StorageIndex) ||
-                ((*CurrentRulePointer)->EntityBStorageIndex == StorageIndex))
-            {
-                pairwise_collision_rule *RuleToRemove = *CurrentRulePointer;
-                
-                *CurrentRulePointer = (*CurrentRulePointer)->Next;
-
-                RuleToRemove->Next = GameState->FreeCollisionRulesListHead;
-                GameState->FreeCollisionRulesListHead = RuleToRemove;
-            }
-            else
-            {
-                CurrentRulePointer = &(*CurrentRulePointer)->Next;
-            }
         }
     }
 }
@@ -729,50 +483,50 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.5f));
 
         GameState->BackDropBitMap = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_background.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_background.bmp");
         GameState->ShadowBitMap = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_hero_shadow.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_hero_shadow.bmp");
         GameState->TreeBitMap = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/tree00.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/tree00.bmp");
         GameState->StairWellBitMap = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock02.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock02.bmp");
         GameState->SwordBitMap = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock03.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock03.bmp");
 
         hero_bitmap_group *HeroBitmapGroup = &GameState->HeroBitmapGroups[0];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[1];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[2];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[3];
         HeroBitmapGroup->Head = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_head.bmp");
         HeroBitmapGroup->Cape = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_cape.bmp");
         HeroBitmapGroup->Torso = 
-            DEBUGLoadBMP(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         world *World = PushStruct(&GameState->WorldArena, world);
@@ -816,7 +570,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             b32 CurrentDoorUpStairs = FALSE;
             b32 CurrentDoorDownStairs = FALSE;
 
-            Assert(RandomNumbersIndex < ArrayLength(RandomNumberTable));
+            Assert(RandomNumbersIndex < ArrayLength(RandomNumbersTable));
             u32 RandomChoice = 0;
 
             if
@@ -827,14 +581,14 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 // we can't have upstairs/downstairs movement,
                 // previous room is directly above or below us
-                RandomChoice = RandomNumberTable[RandomNumbersIndex++] % 2;
+                RandomChoice = RandomNumbersTable[RandomNumbersIndex++] % 2;
             }
             else
             {
-                RandomChoice = RandomNumberTable[RandomNumbersIndex++] % 3;
+                RandomChoice = RandomNumbersTable[RandomNumbersIndex++] % 3;
             }
 
-            if (RandomNumbersIndex == ArrayLength(RandomNumberTable))
+            if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
             {
                 RandomNumbersIndex = 0;
             }
@@ -1014,14 +768,14 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
         for (u32 FamiliarIndex = 0; FamiliarIndex < 1; FamiliarIndex++)
         {
-            i32 FamiliarXOffset = (RandomNumberTable[RandomNumbersIndex++] % 6) - 3;
-            if (RandomNumbersIndex == ArrayLength(RandomNumberTable))
+            i32 FamiliarXOffset = (RandomNumbersTable[RandomNumbersIndex++] % 6) - 3;
+            if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
             {
                 RandomNumbersIndex = 0;
             }
             
-            i32 FamiliarYOffset = (RandomNumberTable[RandomNumbersIndex++] % 4) - 2;
-            if (RandomNumbersIndex == ArrayLength(RandomNumberTable))
+            i32 FamiliarYOffset = (RandomNumbersTable[RandomNumbersIndex++] % 4) - 2;
+            if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
             {
                 RandomNumbersIndex = 0;
             }
@@ -1124,7 +878,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     DrawBitmap(&GameState->BackDropBitMap, PixelBuffer, 0, 0, 0, 0, 1);
 #endif
 
-    entity_render_peice_group EntityRenderPeiceGroup = {};
+    render_peice_group EntityRenderPeiceGroup = {};
 
     entity *CurrentEntity = CameraSimulationRegion->Entities;
     for
@@ -1146,7 +900,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                 ShadowAlphaFactor = 0;
             }
 
-            move_spec EntityMoveSpec = DefaultMoveSpec();
+            entity_movement_parameters EntityMoveSpec = DefaultEntityMovementParameters();
             v3 EntityAcceleration = V3(0, 0, 0);
 
             switch (CurrentEntity->Type)
@@ -1172,7 +926,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                         if ((ControlledHeroInput->InputSwordDirection.X != 0) || (ControlledHeroInput->InputSwordDirection.Y != 0))
                         {
                             entity *SwordEntity = CurrentEntity->SwordEntityReference.Entity;
-                            if (SwordEntity && IsFlagSet(SwordEntity, EF_NON_SPATIAL))
+                            if (SwordEntity && IsEntityFlagSet(SwordEntity, EF_NON_SPATIAL))
                             {
                                 MakeEntitySpatial(SwordEntity,
                                                   CurrentEntity->Position,
@@ -1180,7 +934,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                                 
                                 SwordEntity->MovementDistanceLimit = 5.0f;
                                 
-                                AddPairwiseCollisionRule(GameState, SwordEntity->StorageIndex, CurrentEntity->StorageIndex, FALSE);
+                                AddEntityCollisionRule(GameState, SwordEntity->StorageIndex, CurrentEntity->StorageIndex, FALSE);
                             }
                         }
                     }
@@ -1214,7 +968,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
                 if (CurrentEntity->MovementDistanceLimit == 0)
                 {
-                    ClearAllPairwiseCollisionRule(GameState, CurrentEntity->StorageIndex);
+                    ClearAllEnrityCollisionRules(GameState, CurrentEntity->StorageIndex);
                     MakeEntityNonSpatial(CurrentEntity);
                 }
 
@@ -1297,14 +1051,14 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
             if
             (
-                !IsFlagSet(CurrentEntity, EF_NON_SPATIAL) &&
-                IsFlagSet(CurrentEntity, EF_MOVEABLE)
+                !IsEntityFlagSet(CurrentEntity, EF_NON_SPATIAL) &&
+                IsEntityFlagSet(CurrentEntity, EF_MOVEABLE)
             )
             {
                 MoveEntity(GameState, CameraSimulationRegion, CurrentEntity, EntityAcceleration, GameInput->TimeDeltaForFrame, &EntityMoveSpec);
             }
 
-            entity_render_peice *RenderPiece = EntityRenderPeiceGroup.Peices;
+            render_piece *RenderPiece = EntityRenderPeiceGroup.Peices;
             for (u32 PieceIndex = 0; PieceIndex < EntityRenderPeiceGroup.Count; PieceIndex++, RenderPiece++)
             {
                 v3 EntityBasePoint = GetEntityGroundPoint(CurrentEntity);

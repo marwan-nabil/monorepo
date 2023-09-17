@@ -445,7 +445,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/LD /Fmhandmade.map ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\handmade.cpp ");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\game.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\handmade.dll");

@@ -1,13 +1,13 @@
 #pragma once
 
 #define INVALID_ENTITY_POSITION V3(100000.0f, 100000.0f, 100000.0f)
+#define ENTITY_HIT_POINT_SUBCOUNT 4
 
-struct entity;
-
-struct world_position
+struct entity_movement_parameters
 {
-    i32 ChunkX, ChunkY, ChunkZ;
-    v3 OffsetFromChunkCenter;
+    b32 NormalizeAcceleration;
+    f32 DragInXYPlane;
+    f32 SpeedInXYPlane;
 };
 
 union entity_reference
@@ -16,8 +16,7 @@ union entity_reference
     u32 StorageIndex;
 };
 
-#define HIT_POINT_SUB_COUNT 4
-struct hit_point
+struct entity_hit_point
 {
     u8 Flags;
     u8 FilledAmount;
@@ -35,7 +34,7 @@ enum entity_type
     ET_STAIRS
 };
 
-enum entity_flags
+enum entity_flag
 {
     EF_COLLIDES = (1 << 0u),
     EF_NON_SPATIAL = (1 << 1u),
@@ -78,7 +77,7 @@ struct entity
     i32 DiffAbsTileZ; // unused
 
     u32 HitPointsMax;
-    hit_point HitPoints[16];
+    entity_hit_point HitPoints[16];
 
     u32 BitmapFacingDirection;
 
@@ -95,42 +94,16 @@ struct storage_entity
     world_position WorldPosition;
 };
 
-struct pairwise_collision_rule
+struct entity_collision_rule
 {
     u32 EntityAStorageIndex;
     u32 EntityBStorageIndex;
     b32 CanCollide;
-    pairwise_collision_rule *Next;
+    entity_collision_rule *Next;
 };
 
-inline b32
-IsFlagSet(entity *Entity, u32 Flag)
+struct add_storage_entity_result
 {
-    b32 Result = ((Entity->Flags & Flag) != 0);
-    return Result;
-}
-
-inline b32
-AreAnyOfFlagsSet(entity *Entity, u32 Flags)
-{
-    b32 Result = ((Entity->Flags & Flags) != 0);
-    return Result;
-}
-
-inline void
-SetFlags(entity *Entity, u32 Flags)
-{
-    Entity->Flags |= Flags;
-}
-
-inline void
-ClearFlags(entity *Entity, u32 Flags)
-{
-    Entity->Flags &= ~Flags;
-}
-
-inline void
-ClearAllFlags(entity *Entity)
-{
-    Entity->Flags = 0;
-}
+    u32 StorageIndex;
+    storage_entity *StorageEntity;
+};
