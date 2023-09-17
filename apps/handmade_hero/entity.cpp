@@ -220,7 +220,7 @@ GetStorageEntity(game_state *GameState, u32 StorageIndex)
 {
     storage_entity *Result = 0;
 
-    if ((StorageIndex > 0) && (StorageIndex < GameState->World->StorageEntitiesCount))
+    if ((StorageIndex > 0) && (StorageIndex < GameState->World->StorageEntityCount))
     {
         Result = GameState->World->StorageEntities + StorageIndex;
     }
@@ -231,11 +231,11 @@ GetStorageEntity(game_state *GameState, u32 StorageIndex)
 static add_storage_entity_result
 AddStorageEntity(game_state *GameState, entity_type Type, world_position WorldPosition)
 {
-    Assert(GameState->World->StorageEntitiesCount < ArrayLength(GameState->World->StorageEntities));
+    Assert(GameState->World->StorageEntityCount < ArrayLength(GameState->World->StorageEntities));
 
     add_storage_entity_result Result;
 
-    Result.StorageIndex = GameState->World->StorageEntitiesCount++;
+    Result.StorageIndex = GameState->World->StorageEntityCount++;
     Result.StorageEntity = GameState->World->StorageEntities + Result.StorageIndex;
 
     *Result.StorageEntity = {};

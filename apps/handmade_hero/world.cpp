@@ -182,7 +182,7 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
     for (u32 Index = 0; Index < ArrayLength(World->ChunksTable); Index++)
     {
         World->ChunksTable[Index].ChunkX = CHUNK_POSITION_UNINITIALIZED_VALUE;
-        World->ChunksTable[Index].FirstStorageEntitiesIndicesBlock.StorageEntitiesCount = 0;
+        World->ChunksTable[Index].FirstStorageEntitiesIndicesBlock.StorageEntityIndicesCount = 0;
         World->ChunksTable[Index].FirstStorageEntitiesIndicesBlock.NextBlock = 0;
     }
 }
@@ -204,10 +204,10 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
             chunk *OldLocationChunk = GetChunk(World, 0, OldPosition->ChunkX, OldPosition->ChunkY, OldPosition->ChunkZ);
             Assert(OldLocationChunk);
 
-            storage_entities_indices_block *FirstBlockInChunk = &OldLocationChunk->FirstStorageEntitiesIndicesBlock;
+            storage_entity_indices_block *FirstBlockInChunk = &OldLocationChunk->FirstStorageEntitiesIndicesBlock;
             for
             (
-                storage_entities_indices_block *CurrentIndicesBlock = FirstBlockInChunk; 
+                storage_entity_indices_block *CurrentIndicesBlock = FirstBlockInChunk; 
                 CurrentIndicesBlock; 
                 CurrentIndicesBlock = CurrentIndicesBlock->NextBlock
             )
@@ -216,20 +216,20 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
                 for
                 (
                     u32 StorageEntityIndexIndex = 0; 
-                    StorageEntityIndexIndex < CurrentIndicesBlock->StorageEntitiesCount; 
+                    StorageEntityIndexIndex < CurrentIndicesBlock->StorageEntityIndicesCount; 
                     StorageEntityIndexIndex++
                 )
                 {
-                    if (CurrentIndicesBlock->StorageEntitiesIndices[StorageEntityIndexIndex] == StorageIndex)
+                    if (CurrentIndicesBlock->StorageEntityIndices[StorageEntityIndexIndex] == StorageIndex)
                     {
-                        Assert(FirstBlockInChunk->StorageEntitiesCount > 0);
+                        Assert(FirstBlockInChunk->StorageEntityIndicesCount > 0);
 
-                        CurrentIndicesBlock->StorageEntitiesIndices[StorageEntityIndexIndex] =
-                            FirstBlockInChunk->StorageEntitiesIndices[--FirstBlockInChunk->StorageEntitiesCount];
+                        CurrentIndicesBlock->StorageEntityIndices[StorageEntityIndexIndex] =
+                            FirstBlockInChunk->StorageEntityIndices[--FirstBlockInChunk->StorageEntityIndicesCount];
 
-                        if ((FirstBlockInChunk->StorageEntitiesCount == 0) && (FirstBlockInChunk->NextBlock))
+                        if ((FirstBlockInChunk->StorageEntityIndicesCount == 0) && (FirstBlockInChunk->NextBlock))
                         {
-                            storage_entities_indices_block *SecondBlock = FirstBlockInChunk->NextBlock;
+                            storage_entity_indices_block *SecondBlock = FirstBlockInChunk->NextBlock;
                             *FirstBlockInChunk = *SecondBlock;
 
                             SecondBlock->NextBlock = World->StorageEntitiesIndicesBlocksFreeListHead;
@@ -249,11 +249,11 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
         {
             chunk *NewLocationChunk = GetChunk(World, MemoryArena, NewPosition->ChunkX, NewPosition->ChunkY, NewPosition->ChunkZ);
             Assert(NewLocationChunk);
-            storage_entities_indices_block *FirstBlock = &NewLocationChunk->FirstStorageEntitiesIndicesBlock;
+            storage_entity_indices_block *FirstBlock = &NewLocationChunk->FirstStorageEntitiesIndicesBlock;
 
-            if (FirstBlock->StorageEntitiesCount == ArrayLength(FirstBlock->StorageEntitiesIndices))
+            if (FirstBlock->StorageEntityIndicesCount == ArrayLength(FirstBlock->StorageEntityIndices))
             {
-                storage_entities_indices_block *NewBlock;
+                storage_entity_indices_block *NewBlock;
                 if (World->StorageEntitiesIndicesBlocksFreeListHead)
                 {
                     NewBlock = World->StorageEntitiesIndicesBlocksFreeListHead;
@@ -261,17 +261,17 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
                 }
                 else
                 {
-                    NewBlock = PushStruct(MemoryArena, storage_entities_indices_block);
+                    NewBlock = PushStruct(MemoryArena, storage_entity_indices_block);
                 }
 
                 *NewBlock = *FirstBlock;
 
                 FirstBlock->NextBlock = NewBlock;
-                FirstBlock->StorageEntitiesCount = 0;
+                FirstBlock->StorageEntityIndicesCount = 0;
             }
 
-            Assert(FirstBlock->StorageEntitiesCount < ArrayLength(FirstBlock->StorageEntitiesIndices));
-            FirstBlock->StorageEntitiesIndices[FirstBlock->StorageEntitiesCount++] = StorageIndex;
+            Assert(FirstBlock->StorageEntityIndicesCount < ArrayLength(FirstBlock->StorageEntityIndices));
+            FirstBlock->StorageEntityIndices[FirstBlock->StorageEntityIndicesCount++] = StorageIndex;
         }
     }
 }

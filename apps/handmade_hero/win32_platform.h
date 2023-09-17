@@ -6,7 +6,6 @@
 
 #define XInputGetState XInputGetState_
 #define XInputSetState XInputSetState_
-#define DirectSoundCreate DirectSoundCreate_
 
 typedef XINPUT_GET_STATE(xinput_get_state);
 typedef XINPUT_SET_STATE(xinput_set_state);

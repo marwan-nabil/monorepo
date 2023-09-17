@@ -285,7 +285,7 @@ int main(int argc, char **argv)
         {
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\build.cpp");
@@ -438,7 +438,7 @@ int main(int argc, char **argv)
             ZeroMemory(SharedCompilerFlags, ArrayLength(SharedCompilerFlags));
 
             StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
-            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 ");
+            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
             StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
 
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), SharedCompilerFlags);

@@ -45,19 +45,6 @@ enum entity_flag
     EF_SIMULATING = (1 << 30u)
 };
 
-struct entity_collision_mesh
-{
-    v3 Diameter;
-    v3 Offset;
-};
-
-struct entity_collision_mesh_group
-{
-    u32 MeshCount;
-    entity_collision_mesh *Meshes;
-    entity_collision_mesh TotalCollisionMesh;
-};
-
 struct entity
 {
     entity_type Type;
@@ -92,14 +79,6 @@ struct storage_entity
 {
     entity Entity;
     world_position WorldPosition;
-};
-
-struct entity_collision_rule
-{
-    u32 EntityAStorageIndex;
-    u32 EntityBStorageIndex;
-    b32 CanCollide;
-    entity_collision_rule *Next;
 };
 
 struct add_storage_entity_result

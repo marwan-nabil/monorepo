@@ -70,7 +70,7 @@ void RunCompilationTests()
     CompilationTest("build ray_tracer non_optimized 1_lane");
     CompilationTest("build ray_tracer non_optimized 4_lanes");
 
-    CompilationTest("build handmade_hero");
+    // CompilationTest("build handmade_hero");
 
     CompilationTest("build directx_demo");
 

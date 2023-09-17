@@ -195,14 +195,14 @@ BeginSimulation(game_state *GameState, world *World, memory_arena *SimulationAre
                 {
                     for
                     (
-                        storage_entities_indices_block *Block = &CurrentChunk->FirstStorageEntitiesIndicesBlock;
+                        storage_entity_indices_block *Block = &CurrentChunk->FirstStorageEntitiesIndicesBlock;
                         Block;
                         Block = Block->NextBlock
                     )
                     {
-                        for (u32 StorageEntityIndexIndex = 0; StorageEntityIndexIndex < Block->StorageEntitiesCount; StorageEntityIndexIndex++)
+                        for (u32 StorageEntityIndexIndex = 0; StorageEntityIndexIndex < Block->StorageEntityIndicesCount; StorageEntityIndexIndex++)
                         {
-                            u32 StorageIndex = Block->StorageEntitiesIndices[StorageEntityIndexIndex];
+                            u32 StorageIndex = Block->StorageEntityIndices[StorageEntityIndexIndex];
                             storage_entity *StorageEntity = GetStorageEntity(GameState, StorageIndex);
 
                             if (!IsEntityFlagSet(&StorageEntity->Entity, EF_NON_SPATIAL))
