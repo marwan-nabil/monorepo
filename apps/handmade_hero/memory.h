@@ -2,7 +2,7 @@
 
 #define PushStruct(Arena, DataType) (DataType *)PushOntoMemoryArena((Arena), sizeof(DataType))
 #define PushArray(Arena, Count, DataType) (DataType *)PushOntoMemoryArena((Arena), (Count) * sizeof(DataType))
-#define ZeroStruct(Struct) ZeroMemory(&(Struct), sizeof(Struct))
+#define ZeroStruct(Struct) memset(&(Struct), 0, sizeof(Struct))
 
 struct memory_arena
 {

@@ -22,7 +22,7 @@ struct game_state
 
     f32 PixelsToMetersRatio;
 
-    world_position CameraPosition;
+    entity_world_position CameraPosition;
     u32 StorageIndexOfEntityThatCameraFollows;
 
     controlled_hero_input ControllerToHeroInputMap[ArrayLength(((game_input *)0)->ControllerStates)];

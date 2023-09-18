@@ -94,12 +94,12 @@ operator/=(v2 &A, f32 B)
 }
 
 inline v2 
-Hadamard(v2 A, v2 B)
+HadamardProduct(v2 A, v2 B)
 {
-	v2 Result;
-	Result.X = A.X * B.X;
-	Result.Y = A.Y * B.Y;
-	return Result;
+    v2 Result;
+    Result.X = A.X * B.X;
+    Result.Y = A.Y * B.Y;
+    return Result;
 }
 
 inline f32

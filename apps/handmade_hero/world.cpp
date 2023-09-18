@@ -1,5 +1,4 @@
 // TODO: determine a good safety margin
-
 inline b32
 IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
 {
@@ -26,23 +25,23 @@ IsChunkCenterOffsetCanonical(world *World, v3 OffsetFromChunkCenter)
     return Result;
 }
 
-inline world_position
+inline entity_world_position
 InvalidWorldPosition()
 {
-    world_position Result = {};
+    entity_world_position Result = {};
     Result.ChunkX = CHUNK_POSITION_UNINITIALIZED_VALUE;
     return Result;
 }
 
 inline b32
-IsWorldPositionValid(world_position WorldPosition)
+IsWorldPositionValid(entity_world_position WorldPosition)
 {
     b32 Result = (WorldPosition.ChunkX != CHUNK_POSITION_UNINITIALIZED_VALUE);
     return Result;
 }
 
 inline b32
-AreInTheSameChunk(world *World, world_position *A, world_position *B)
+AreInTheSameChunk(world *World, entity_world_position *A, entity_world_position *B)
 {
     Assert(IsChunkCenterOffsetCanonical(World, A->OffsetFromChunkCenter));
     Assert(IsChunkCenterOffsetCanonical(World, B->OffsetFromChunkCenter));
@@ -143,10 +142,10 @@ CanonicalizeIntervalIndexAndOffset(f32 IntervalLength, i32 *IntervalIndex, f32 *
     Assert(IsOffsetWithinInterval(IntervalLength, *OffsetFromIntervalCenter));
 }
 
-inline world_position
-MapIntoWorldPosition(world *World, world_position BasePosition, v3 OffsetFromBase)
+inline entity_world_position
+MapIntoWorldPosition(world *World, entity_world_position BasePosition, v3 OffsetFromBase)
 {
-    world_position Result = BasePosition;
+    entity_world_position Result = BasePosition;
     Result.OffsetFromChunkCenter += OffsetFromBase;
     CanonicalizeIntervalIndexAndOffset(World->ChunkDiameterInMeters.X, &Result.ChunkX, &Result.OffsetFromChunkCenter.X);
     CanonicalizeIntervalIndexAndOffset(World->ChunkDiameterInMeters.Y, &Result.ChunkY, &Result.OffsetFromChunkCenter.Y);
@@ -155,7 +154,7 @@ MapIntoWorldPosition(world *World, world_position BasePosition, v3 OffsetFromBas
 }
 
 inline v3
-SubtractPositions(world *World, world_position *A, world_position *B)
+SubtractPositions(world *World, entity_world_position *A, entity_world_position *B)
 {
     v3 Result = V3
     (
@@ -164,7 +163,7 @@ SubtractPositions(world *World, world_position *A, world_position *B)
         (f32)A->ChunkZ - (f32)B->ChunkZ
     );
 
-    Result = Hadamard(World->ChunkDiameterInMeters, Result) + (A->OffsetFromChunkCenter - B->OffsetFromChunkCenter);
+    Result = HadamardProduct(World->ChunkDiameterInMeters, Result) + (A->OffsetFromChunkCenter - B->OffsetFromChunkCenter);
 
     return Result;
 }
@@ -187,146 +186,20 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
     }
 }
 
-static void
-RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u32 StorageIndex, world_position *OldPosition, world_position *NewPosition)
-{
-    Assert(!OldPosition || IsWorldPositionValid(*OldPosition));
-    Assert(!NewPosition || IsWorldPositionValid(*NewPosition));
-    Assert(MemoryArena);
-
-    if (OldPosition && NewPosition && AreInTheSameChunk(World, OldPosition, NewPosition))
-    {
-    }
-    else
-    {
-        if (OldPosition)
-        {
-            chunk *OldLocationChunk = GetChunk(World, 0, OldPosition->ChunkX, OldPosition->ChunkY, OldPosition->ChunkZ);
-            Assert(OldLocationChunk);
-
-            storage_entity_indices_block *FirstBlockInChunk = &OldLocationChunk->FirstStorageEntitiesIndicesBlock;
-            for
-            (
-                storage_entity_indices_block *CurrentIndicesBlock = FirstBlockInChunk; 
-                CurrentIndicesBlock; 
-                CurrentIndicesBlock = CurrentIndicesBlock->NextBlock
-            )
-            {
-                b32 OuterBreakFlag = FALSE;
-                for
-                (
-                    u32 StorageEntityIndexIndex = 0; 
-                    StorageEntityIndexIndex < CurrentIndicesBlock->StorageEntityIndicesCount; 
-                    StorageEntityIndexIndex++
-                )
-                {
-                    if (CurrentIndicesBlock->StorageEntityIndices[StorageEntityIndexIndex] == StorageIndex)
-                    {
-                        Assert(FirstBlockInChunk->StorageEntityIndicesCount > 0);
-
-                        CurrentIndicesBlock->StorageEntityIndices[StorageEntityIndexIndex] =
-                            FirstBlockInChunk->StorageEntityIndices[--FirstBlockInChunk->StorageEntityIndicesCount];
-
-                        if ((FirstBlockInChunk->StorageEntityIndicesCount == 0) && (FirstBlockInChunk->NextBlock))
-                        {
-                            storage_entity_indices_block *SecondBlock = FirstBlockInChunk->NextBlock;
-                            *FirstBlockInChunk = *SecondBlock;
-
-                            SecondBlock->NextBlock = World->StorageEntitiesIndicesBlocksFreeListHead;
-                            World->StorageEntitiesIndicesBlocksFreeListHead = SecondBlock;
-                        }
-
-                        OuterBreakFlag = TRUE;
-                        break;
-                    }
-                }
-
-                if (OuterBreakFlag) break;
-            }
-        }
-
-        if (NewPosition)
-        {
-            chunk *NewLocationChunk = GetChunk(World, MemoryArena, NewPosition->ChunkX, NewPosition->ChunkY, NewPosition->ChunkZ);
-            Assert(NewLocationChunk);
-            storage_entity_indices_block *FirstBlock = &NewLocationChunk->FirstStorageEntitiesIndicesBlock;
-
-            if (FirstBlock->StorageEntityIndicesCount == ArrayLength(FirstBlock->StorageEntityIndices))
-            {
-                storage_entity_indices_block *NewBlock;
-                if (World->StorageEntitiesIndicesBlocksFreeListHead)
-                {
-                    NewBlock = World->StorageEntitiesIndicesBlocksFreeListHead;
-                    World->StorageEntitiesIndicesBlocksFreeListHead = World->StorageEntitiesIndicesBlocksFreeListHead->NextBlock;
-                }
-                else
-                {
-                    NewBlock = PushStruct(MemoryArena, storage_entity_indices_block);
-                }
-
-                *NewBlock = *FirstBlock;
-
-                FirstBlock->NextBlock = NewBlock;
-                FirstBlock->StorageEntityIndicesCount = 0;
-            }
-
-            Assert(FirstBlock->StorageEntityIndicesCount < ArrayLength(FirstBlock->StorageEntityIndices));
-            FirstBlock->StorageEntityIndices[FirstBlock->StorageEntityIndicesCount++] = StorageIndex;
-        }
-    }
-}
-
-static void
-ChangeStorageEntityLocationInWorld
-(
-    world *World, memory_arena *MemoryArena, u32 StorageIndex, 
-    storage_entity *StorageEntity, world_position *NewWorldPosition
-)
-{
-    world_position *OldPosition = 0;
-    if
-    (
-        !IsEntityFlagSet(&StorageEntity->Entity, EF_NON_SPATIAL) &&
-        IsWorldPositionValid(StorageEntity->WorldPosition)
-    )
-    {
-        OldPosition = &StorageEntity->WorldPosition;
-    }
-
-    world_position *NewPosition = 0;
-    if (IsWorldPositionValid(*NewWorldPosition))
-    {
-        NewPosition = NewWorldPosition;
-    }
-
-    RawChangeStorageEntityLocationInWorld(World, MemoryArena, StorageIndex, OldPosition, NewPosition);
-
-    if (NewPosition)
-    {
-        StorageEntity->WorldPosition = *NewPosition;
-        ClearEntityFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
-    }
-    else
-    {
-        StorageEntity->WorldPosition = InvalidWorldPosition();
-        SetEntityFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
-    }
-}
-
-static world_position
+static entity_world_position
 GetWorldPositionFromTilePosition(world *World, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ, v3 OffsetFromTileCenter)
 {
     // TODO: fix buggy Z handling here
 
-    world_position BasePosition = {};
+    entity_world_position BasePosition = {};
 
     v3 TileDiameter = V3(World->TileSideInMeters, World->TileSideInMeters, World->TileDepthInMeters);
     v3 AbsoluteWorldOffset = 
-        Hadamard(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) + 
+        HadamardProduct(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) + 
         OffsetFromTileCenter;
-    //v3 AbsoluteWorldOffset = Hadamard(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) + OffsetFromTileCenter + 0.5f * TileDiameter;
+    //v3 AbsoluteWorldOffset = HadamardProduct(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) + OffsetFromTileCenter + 0.5f * TileDiameter;
 
-    world_position Result = MapIntoWorldPosition(World, BasePosition, AbsoluteWorldOffset);
+    entity_world_position Result = MapIntoWorldPosition(World, BasePosition, AbsoluteWorldOffset);
 
     Assert(IsChunkCenterOffsetCanonical(World, Result.OffsetFromChunkCenter));
 

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <intrin.h>
+#include <string.h>
 
 #include "../../miscellaneous/base_types.h"
 #include "../../miscellaneous/assertions.h"
@@ -16,15 +17,35 @@
 #include "../../math/bit_operations.h"
 
 #include "game_interface.h"
+#include "memory.h"
+#include "collision.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "entity.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
 
-// =====================================================
 #include "../../math/floats.cpp"
 #include "../../math/integers.cpp"
 #include "../../math/scalar_conversions.cpp"
 #include "../../math/transcendentals.cpp"
 #include "../../math/bit_operations.cpp"
+#include "../../math/vector2.cpp"
+#include "../../math/vector3.cpp"
+#include "../../math/vector4.cpp"
+#include "../../math/rectangle2.cpp"
+#include "../../math/rectangle3.cpp"
 
 #include "game_interface.cpp"
+#include "memory.cpp"
+#include "bitmap.cpp"
+#include "renderer.cpp"
+#include "random_numbers_table.cpp"
+#include "world.cpp"
+#include "entity.cpp"
+#include "collision.cpp"
+#include "simulation.cpp"
 
 extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 {
@@ -495,148 +516,150 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
             switch (CurrentEntity->Type)
             {
-            case ET_HERO:
-            {
-                for (u32 ControlledHeroInputIndex = 0; ControlledHeroInputIndex < ArrayLength(GameState->ControllerToHeroInputMap); ControlledHeroInputIndex++)
+                case ET_HERO:
                 {
-                    controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControlledHeroInputIndex;
-                    if (ControlledHeroInput->HeroEntityStorageIndex == CurrentEntity->StorageIndex)
+                    for (u32 ControlledHeroInputIndex = 0; ControlledHeroInputIndex < ArrayLength(GameState->ControllerToHeroInputMap); ControlledHeroInputIndex++)
                     {
-                        if (ControlledHeroInput->InputJumpVelocity != 0)
+                        controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControlledHeroInputIndex;
+                        if (ControlledHeroInput->HeroEntityStorageIndex == CurrentEntity->StorageIndex)
                         {
-                            CurrentEntity->Velocity.Z = ControlledHeroInput->InputJumpVelocity;
-                        }
-
-                        EntityMoveSpec.NormalizeAcceleration = TRUE;
-                        EntityMoveSpec.SpeedInXYPlane = 50.0f;
-                        EntityMoveSpec.DragInXYPlane = 4.0f;
-
-                        EntityAcceleration = ControlledHeroInput->InputAcceleration;
-
-                        if ((ControlledHeroInput->InputSwordDirection.X != 0) || (ControlledHeroInput->InputSwordDirection.Y != 0))
-                        {
-                            entity *SwordEntity = CurrentEntity->SwordEntityReference.Entity;
-                            if (SwordEntity && IsEntityFlagSet(SwordEntity, EF_NON_SPATIAL))
+                            if (ControlledHeroInput->InputJumpVelocity != 0)
                             {
-                                MakeEntitySpatial(SwordEntity,
-                                                  CurrentEntity->Position,
-                                                  CurrentEntity->Velocity + 5.0f * V3(ControlledHeroInput->InputSwordDirection, 0));
-                                
-                                SwordEntity->MovementDistanceLimit = 5.0f;
-                                
-                                AddEntityCollisionRule(GameState, SwordEntity->StorageIndex, CurrentEntity->StorageIndex, FALSE);
+                                CurrentEntity->Velocity.Z = ControlledHeroInput->InputJumpVelocity;
+                            }
+
+                            EntityMoveSpec.NormalizeAcceleration = TRUE;
+                            EntityMoveSpec.SpeedInXYPlane = 50.0f;
+                            EntityMoveSpec.DragInXYPlane = 4.0f;
+
+                            EntityAcceleration = ControlledHeroInput->InputAcceleration;
+
+                            if ((ControlledHeroInput->InputSwordDirection.X != 0) || (ControlledHeroInput->InputSwordDirection.Y != 0))
+                            {
+                                entity *SwordEntity = CurrentEntity->SwordEntityReference.Entity;
+                                if (SwordEntity && IsEntityFlagSet(SwordEntity, EF_NON_SPATIAL))
+                                {
+                                    MakeEntitySpatial
+                                    (
+                                        SwordEntity,
+                                        CurrentEntity->Position,
+                                        CurrentEntity->Velocity + 5.0f * V3(ControlledHeroInput->InputSwordDirection, 0)
+                                    );
+                                    SwordEntity->MovementDistanceLimit = 5.0f;
+
+                                    AddEntityCollisionRule(GameState, SwordEntity->StorageIndex, CurrentEntity->StorageIndex, FALSE);
+                                }
                             }
                         }
                     }
-                }
 
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Torso, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Cape, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Head, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
-                DrawHitpoints(GameState, &EntityRenderPeiceGroup, CurrentEntity);
-            } break;
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Torso, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Cape, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Head, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
+                    DrawHitpoints(GameState, &EntityRenderPeiceGroup, CurrentEntity);
+                } break;
 
-            case ET_WALL:
-            {
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->TreeBitMap, V3(0, 0, 0), V2(40, 80), 1, 1.0f);
-            } break;
-
-            case ET_STAIRS:
-            {
-                PushRectangleRenderPiece(GameState, &EntityRenderPeiceGroup, V3(0, 0, 0), CurrentEntity->WalkableDiameter, V4(1, 0.5f, 0, 1), 0);
-                PushRectangleRenderPiece(GameState, &EntityRenderPeiceGroup, V3(0, 0, CurrentEntity->WalkableHeight), CurrentEntity->WalkableDiameter, V4(1, 1, 0, 1), 0);
-            } break;
-
-            case ET_SWORD:
-            {
-                EntityMoveSpec.NormalizeAcceleration = FALSE;
-                EntityMoveSpec.SpeedInXYPlane = 0;
-                EntityMoveSpec.DragInXYPlane = 0;
-                
-                EntityAcceleration = V3(0, 0, 0);
-
-                if (CurrentEntity->MovementDistanceLimit == 0)
+                case ET_WALL:
                 {
-                    ClearAllEnrityCollisionRules(GameState, CurrentEntity->StorageIndex);
-                    MakeEntityNonSpatial(CurrentEntity);
-                }
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->TreeBitMap, V3(0, 0, 0), V2(40, 80), 1, 1.0f);
+                } break;
 
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->SwordBitMap, V3(0, 0, 0), V2(29, 10), 1, 1.0f);
-            } break;
-
-            case ET_MONSTER:
-            {
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Torso, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
-                DrawHitpoints(GameState, &EntityRenderPeiceGroup, CurrentEntity);
-            } break;
-
-            case ET_FAMILIAR:
-            {
-                EntityAcceleration = V3(0, 0, 0);
-
-                EntityMoveSpec.NormalizeAcceleration = TRUE;
-                EntityMoveSpec.SpeedInXYPlane = 50.0f;
-                EntityMoveSpec.DragInXYPlane = 4.0f;
-
-#if 0
-                entity *ClosestHeroEntity = 0;
-                f32 ClosestHeroDistanceSquared = 100.0f;
-
-                entity *TestEntity = CameraSimulationRegion->Entities;
-                for (u32 TestEntityIndex = 0; TestEntityIndex < CameraSimulationRegion->CurrentEntityCount; TestEntityIndex++, TestEntity++)
+                case ET_STAIRS:
                 {
-                    if (TestEntity->Type == ET_HERO)
+                    PushRectangleRenderPiece(GameState, &EntityRenderPeiceGroup, V3(0, 0, 0), CurrentEntity->WalkableDiameter, V4(1, 0.5f, 0, 1), 0);
+                    PushRectangleRenderPiece(GameState, &EntityRenderPeiceGroup, V3(0, 0, CurrentEntity->WalkableHeight), CurrentEntity->WalkableDiameter, V4(1, 1, 0, 1), 0);
+                } break;
+
+                case ET_SWORD:
+                {
+                    EntityMoveSpec.NormalizeAcceleration = FALSE;
+                    EntityMoveSpec.SpeedInXYPlane = 0;
+                    EntityMoveSpec.DragInXYPlane = 0;
+                    
+                    EntityAcceleration = V3(0, 0, 0);
+
+                    if (CurrentEntity->MovementDistanceLimit == 0)
                     {
-                        f32 ThisHeroDistanceSquared = LengthSquared(TestEntity->GroundPoint - CurrentEntity->GroundPoint);
-                        if (ThisHeroDistanceSquared < ClosestHeroDistanceSquared)
+                        ClearAllEnrityCollisionRules(GameState, CurrentEntity->StorageIndex);
+                        MakeEntityNonSpatial(CurrentEntity);
+                    }
+
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->SwordBitMap, V3(0, 0, 0), V2(29, 10), 1, 1.0f);
+                } break;
+
+                case ET_MONSTER:
+                {
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Torso, V3(0, 0, 0), HeroBitmapGroup->Alignment, 1, 1.0f);
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
+                    DrawHitpoints(GameState, &EntityRenderPeiceGroup, CurrentEntity);
+                } break;
+
+                case ET_FAMILIAR:
+                {
+                    EntityAcceleration = V3(0, 0, 0);
+
+                    EntityMoveSpec.NormalizeAcceleration = TRUE;
+                    EntityMoveSpec.SpeedInXYPlane = 50.0f;
+                    EntityMoveSpec.DragInXYPlane = 4.0f;
+
+    #if 0
+                    entity *ClosestHeroEntity = 0;
+                    f32 ClosestHeroDistanceSquared = 100.0f;
+
+                    entity *TestEntity = CameraSimulationRegion->Entities;
+                    for (u32 TestEntityIndex = 0; TestEntityIndex < CameraSimulationRegion->CurrentEntityCount; TestEntityIndex++, TestEntity++)
+                    {
+                        if (TestEntity->Type == ET_HERO)
                         {
-                            ClosestHeroDistanceSquared = ThisHeroDistanceSquared;
-                            ClosestHeroEntity = TestEntity;
+                            f32 ThisHeroDistanceSquared = LengthSquared(TestEntity->GroundPoint - CurrentEntity->GroundPoint);
+                            if (ThisHeroDistanceSquared < ClosestHeroDistanceSquared)
+                            {
+                                ClosestHeroDistanceSquared = ThisHeroDistanceSquared;
+                                ClosestHeroEntity = TestEntity;
+                            }
                         }
                     }
-                }
 
-                if (ClosestHeroEntity && (ClosestHeroDistanceSquared > Square(3.0f)))
+                    if (ClosestHeroEntity && (ClosestHeroDistanceSquared > Square(3.0f)))
+                    {
+                        f32 AccelerationMultiplier = 0.5f;
+                        f32 OneOverClosestHeroDistance = 1.0f / SquareRoot(ClosestHeroDistanceSquared);
+
+                        EntityAcceleration =
+                            AccelerationMultiplier *
+                            OneOverClosestHeroDistance *
+                            (ClosestHeroEntity->GroundPoint - CurrentEntity->GroundPoint);
+                    }
+    #endif
+                    CurrentEntity->BobbingSinParameter += 5.0f * GameInput->TimeDeltaForFrame;
+                    if (CurrentEntity->BobbingSinParameter > 2.0f * PI32)
+                    {
+                        CurrentEntity->BobbingSinParameter -= 2.0f * PI32;
+                    }
+                    f32 BobbingSin = Sin(CurrentEntity->BobbingSinParameter);
+                    ShadowAlphaFactor = 0.5f * ShadowAlphaFactor + 0.2f * BobbingSin;
+
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
+                    PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Head, V3(0, 0, 0.25f * BobbingSin), HeroBitmapGroup->Alignment, 1, 1.0f);
+                } break;
+
+                case ET_SPACE:
                 {
-                    f32 AccelerationMultiplier = 0.5f;
-                    f32 OneOverClosestHeroDistance = 1.0f / SquareRoot(ClosestHeroDistanceSquared);
+                    for (u32 MeshIndex = 0; MeshIndex < CurrentEntity->CollisionMeshGroup->MeshCount; MeshIndex++)
+                    {
+                        entity_collision_mesh *CurrnetCollisionMesh =  CurrentEntity->CollisionMeshGroup->Meshes + MeshIndex;
 
-                    EntityAcceleration =
-                        AccelerationMultiplier *
-                        OneOverClosestHeroDistance *
-                        (ClosestHeroEntity->GroundPoint - CurrentEntity->GroundPoint);
-                }
-#endif
-                CurrentEntity->BobbingSinParameter += 5.0f * GameInput->TimeDeltaForFrame;
-                if (CurrentEntity->BobbingSinParameter > 2.0f * PI32)
+                        PushRectangleOutlineRenderPieces(GameState, &EntityRenderPeiceGroup, V3(CurrnetCollisionMesh->Offset.XY, 0),
+                                                        CurrnetCollisionMesh->Diameter.XY, V4(0, 0.5f, 1.0f, 1.0f), 0);
+                    }
+                } break;
+
+                default:
                 {
-                    CurrentEntity->BobbingSinParameter -= 2.0f * PI32;
-                }
-                f32 BobbingSin = Sin(CurrentEntity->BobbingSinParameter);
-                ShadowAlphaFactor = 0.5f * ShadowAlphaFactor + 0.2f * BobbingSin;
-
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &GameState->ShadowBitMap, V3(0, 0, 0), HeroBitmapGroup->Alignment, ShadowAlphaFactor, 0.0f);
-                PushBitmapRenderPiece(GameState, &EntityRenderPeiceGroup, &HeroBitmapGroup->Head, V3(0, 0, 0.25f * BobbingSin), HeroBitmapGroup->Alignment, 1, 1.0f);
-            } break;
-
-            case ET_SPACE:
-            {
-                for (u32 MeshIndex = 0; MeshIndex < CurrentEntity->CollisionMeshGroup->MeshCount; MeshIndex++)
-                {
-                    entity_collision_mesh *CurrnetCollisionMesh =  CurrentEntity->CollisionMeshGroup->Meshes + MeshIndex;
-
-                    PushRectangleOutlineRenderPieces(GameState, &EntityRenderPeiceGroup, V3(CurrnetCollisionMesh->Offset.XY, 0),
-                                                     CurrnetCollisionMesh->Diameter.XY, V4(0, 0.5f, 1.0f, 1.0f), 0);
-                }
-            } break;
-
-            default:
-            {
-                InvalidCodepath;
-            } break;
+                    InvalidCodepath;
+                } break;
             }
 
             if
@@ -688,7 +711,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         }
     }
 
-    world_position OriginWorldPosition = {};
+    entity_world_position OriginWorldPosition = {};
     v3 Diff = SubtractPositions(CameraSimulationRegion->World, &OriginWorldPosition, &CameraSimulationRegion->Origin);
     v2 Origin = V2(Diff.X, Diff.Y);
     DrawRectangle(PixelBuffer, Origin, Origin + V2(10.0f, 10.0f), 1.0f, 1.0f, 0.0f, 1.0f);

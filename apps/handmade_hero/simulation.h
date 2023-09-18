@@ -1,7 +1,5 @@
 #pragma once
 
-#define INIFINTE_MOVEMENT_DISTANCE 10000.0f
-
 struct entity_table_entry
 {
     entity *Entity;
@@ -12,7 +10,7 @@ struct simulation_region
 {
     world *World;
     
-    world_position Origin;
+    entity_world_position Origin;
     rectangle3 SimulationBounds;
     rectangle3 UpdateBounds;
 
@@ -25,3 +23,5 @@ struct simulation_region
 
     entity_table_entry EntityTable[4096];
 };
+
+inline void LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, entity_reference *EntityReference);

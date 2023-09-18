@@ -1,6 +1,10 @@
 void CompilationTest(char *TestCommand)
 {
-    printf("\n> %s\n", TestCommand);
+    printf("\n");
+    ConsoleSwitchColor(BACKGROUND_BLUE);
+    printf("> %s", TestCommand);
+    ConsoleResetColor();
+    printf("\n");
     fflush(stdout);
 
     PROCESS_INFORMATION TestProcessProcessInfo = {};
@@ -56,6 +60,7 @@ void RunCompilationTests()
     printf("\n============= Compilation Tests =============\n");
     printf("These tests compile all available build targets to make sure\n");
     printf("that refactoring doesn't break the build of any target.\n");
+    fflush(stdout);
     ConsoleResetColor();
 
     CompilationTest("build build");
@@ -70,7 +75,7 @@ void RunCompilationTests()
     CompilationTest("build ray_tracer non_optimized 1_lane");
     CompilationTest("build ray_tracer non_optimized 4_lanes");
 
-    // CompilationTest("build handmade_hero");
+    CompilationTest("build handmade_hero");
 
     CompilationTest("build directx_demo");
 

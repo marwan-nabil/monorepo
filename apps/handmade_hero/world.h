@@ -33,9 +33,3 @@ struct world
     u32 StorageEntityCount;
     storage_entity StorageEntities[100000];
 };
-
-struct world_position
-{
-    i32 ChunkX, ChunkY, ChunkZ;
-    v3 OffsetFromChunkCenter;
-};

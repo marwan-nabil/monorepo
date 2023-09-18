@@ -31,6 +31,15 @@ ClearAllEntityFlags(entity *Entity)
 }
 
 inline void
+StoreEntityReference(entity_reference *EntityReference)
+{
+    if (EntityReference->Entity)
+    {
+        EntityReference->StorageIndex = EntityReference->Entity->StorageIndex;
+    }
+}
+
+inline void
 SortEntityPointersByEntityTypes(entity **A, entity **B)
 {
     if ((*A)->Type > (*B)->Type)
@@ -39,76 +48,6 @@ SortEntityPointersByEntityTypes(entity **A, entity **B)
         *A = *B;
         *B = SwappingTemporary;
     }
-}
-
-static b32
-ProcessCollisionEvent(game_state *GameState, entity *MovingEntity, entity *StaticEntity)
-{
-    b32 MovingEntityShouldStopOnCollision = FALSE;
-
-    if (MovingEntity->Type == ET_SWORD)
-    {
-        AddEntityCollisionRule(GameState, MovingEntity->StorageIndex, StaticEntity->StorageIndex, FALSE);
-        MovingEntityShouldStopOnCollision = FALSE;
-    }
-    else
-    {
-        MovingEntityShouldStopOnCollision = TRUE;
-    }
-
-    entity *LowerTypeEntity = MovingEntity;
-    entity *HigherTypeEntity = StaticEntity;
-    SortEntityPointersByEntityTypes(&LowerTypeEntity, &HigherTypeEntity);
-
-    if ((LowerTypeEntity->Type == ET_MONSTER) && (HigherTypeEntity->Type == ET_SWORD))
-    {
-        if (LowerTypeEntity->HitPointsMax > 0)
-        {
-            LowerTypeEntity->HitPointsMax--;
-        }
-    }
-
-    return MovingEntityShouldStopOnCollision;
-}
-
-static b32
-CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
-{
-    b32 Result = FALSE;
-
-    if (A != B)
-    {
-        SortEntityPointersByEntityTypes(&A, &B);
-
-        if (IsEntityFlagSet(A, EF_COLLIDES) && IsEntityFlagSet(B, EF_COLLIDES))
-        {
-            if (!IsEntityFlagSet(A, EF_NON_SPATIAL) && !IsEntityFlagSet(B, EF_NON_SPATIAL))
-            {
-                Result = TRUE;
-            }
-
-            u32 HashTableIndex = A->StorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
-            for
-            (
-                entity_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashTableIndex];
-                CurrentRule;
-                CurrentRule = CurrentRule->Next
-            )
-            {
-                if
-                (
-                    (CurrentRule->EntityAStorageIndex == A->StorageIndex) &&
-                    (CurrentRule->EntityBStorageIndex == B->StorageIndex)
-                )
-                {
-                    Result = CurrentRule->CanCollide;
-                    break;
-                }
-            }
-        }
-    }
-
-    return Result;
 }
 
 static b32
@@ -191,7 +130,6 @@ HandleEntityOverlapWithStairs(game_state *GameState, entity *MovingEntity, entit
     }
 }
 
-
 static b32
 SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
 {
@@ -215,6 +153,132 @@ SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
     return WillEntitiesCollide;
 }
 
+static void
+RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u32 StorageIndex, entity_world_position *OldPosition, entity_world_position *NewPosition)
+{
+    Assert(!OldPosition || IsWorldPositionValid(*OldPosition));
+    Assert(!NewPosition || IsWorldPositionValid(*NewPosition));
+    Assert(MemoryArena);
+
+    if (OldPosition && NewPosition && AreInTheSameChunk(World, OldPosition, NewPosition))
+    {
+    }
+    else
+    {
+        if (OldPosition)
+        {
+            chunk *OldLocationChunk = GetChunk(World, 0, OldPosition->ChunkX, OldPosition->ChunkY, OldPosition->ChunkZ);
+            Assert(OldLocationChunk);
+
+            storage_entity_indices_block *FirstBlockInChunk = &OldLocationChunk->FirstStorageEntitiesIndicesBlock;
+            for
+            (
+                storage_entity_indices_block *CurrentIndicesBlock = FirstBlockInChunk; 
+                CurrentIndicesBlock; 
+                CurrentIndicesBlock = CurrentIndicesBlock->NextBlock
+            )
+            {
+                b32 OuterBreakFlag = FALSE;
+                for
+                (
+                    u32 StorageEntityIndexIndex = 0; 
+                    StorageEntityIndexIndex < CurrentIndicesBlock->StorageEntityIndicesCount; 
+                    StorageEntityIndexIndex++
+                )
+                {
+                    if (CurrentIndicesBlock->StorageEntityIndices[StorageEntityIndexIndex] == StorageIndex)
+                    {
+                        Assert(FirstBlockInChunk->StorageEntityIndicesCount > 0);
+
+                        CurrentIndicesBlock->StorageEntityIndices[StorageEntityIndexIndex] =
+                            FirstBlockInChunk->StorageEntityIndices[--FirstBlockInChunk->StorageEntityIndicesCount];
+
+                        if ((FirstBlockInChunk->StorageEntityIndicesCount == 0) && (FirstBlockInChunk->NextBlock))
+                        {
+                            storage_entity_indices_block *SecondBlock = FirstBlockInChunk->NextBlock;
+                            *FirstBlockInChunk = *SecondBlock;
+
+                            SecondBlock->NextBlock = World->StorageEntitiesIndicesBlocksFreeListHead;
+                            World->StorageEntitiesIndicesBlocksFreeListHead = SecondBlock;
+                        }
+
+                        OuterBreakFlag = TRUE;
+                        break;
+                    }
+                }
+
+                if (OuterBreakFlag) break;
+            }
+        }
+
+        if (NewPosition)
+        {
+            chunk *NewLocationChunk = GetChunk(World, MemoryArena, NewPosition->ChunkX, NewPosition->ChunkY, NewPosition->ChunkZ);
+            Assert(NewLocationChunk);
+            storage_entity_indices_block *FirstBlock = &NewLocationChunk->FirstStorageEntitiesIndicesBlock;
+
+            if (FirstBlock->StorageEntityIndicesCount == ArrayLength(FirstBlock->StorageEntityIndices))
+            {
+                storage_entity_indices_block *NewBlock;
+                if (World->StorageEntitiesIndicesBlocksFreeListHead)
+                {
+                    NewBlock = World->StorageEntitiesIndicesBlocksFreeListHead;
+                    World->StorageEntitiesIndicesBlocksFreeListHead = World->StorageEntitiesIndicesBlocksFreeListHead->NextBlock;
+                }
+                else
+                {
+                    NewBlock = PushStruct(MemoryArena, storage_entity_indices_block);
+                }
+
+                *NewBlock = *FirstBlock;
+
+                FirstBlock->NextBlock = NewBlock;
+                FirstBlock->StorageEntityIndicesCount = 0;
+            }
+
+            Assert(FirstBlock->StorageEntityIndicesCount < ArrayLength(FirstBlock->StorageEntityIndices));
+            FirstBlock->StorageEntityIndices[FirstBlock->StorageEntityIndicesCount++] = StorageIndex;
+        }
+    }
+}
+
+static void
+ChangeStorageEntityLocationInWorld
+(
+    world *World, memory_arena *MemoryArena, u32 StorageIndex, 
+    storage_entity *StorageEntity, entity_world_position *NewWorldPosition
+)
+{
+    entity_world_position *OldPosition = 0;
+    if
+    (
+        !IsEntityFlagSet(&StorageEntity->Entity, EF_NON_SPATIAL) &&
+        IsWorldPositionValid(StorageEntity->WorldPosition)
+    )
+    {
+        OldPosition = &StorageEntity->WorldPosition;
+    }
+
+    entity_world_position *NewPosition = 0;
+    if (IsWorldPositionValid(*NewWorldPosition))
+    {
+        NewPosition = NewWorldPosition;
+    }
+
+    RawChangeStorageEntityLocationInWorld(World, MemoryArena, StorageIndex, OldPosition, NewPosition);
+
+    if (NewPosition)
+    {
+        StorageEntity->WorldPosition = *NewPosition;
+        ClearEntityFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
+    }
+    else
+    {
+        StorageEntity->WorldPosition = InvalidWorldPosition();
+        SetEntityFlags(&StorageEntity->Entity, EF_NON_SPATIAL);
+    }
+}
+
 inline storage_entity *
 GetStorageEntity(game_state *GameState, u32 StorageIndex)
 {
@@ -222,14 +286,14 @@ GetStorageEntity(game_state *GameState, u32 StorageIndex)
 
     if ((StorageIndex > 0) && (StorageIndex < GameState->World->StorageEntityCount))
     {
-        Result = GameState->World->StorageEntities + StorageIndex;
+        Result = &GameState->World->StorageEntities[StorageIndex];
     }
 
     return Result;
 }
 
 static add_storage_entity_result
-AddStorageEntity(game_state *GameState, entity_type Type, world_position WorldPosition)
+AddStorageEntity(game_state *GameState, entity_type Type, entity_world_position WorldPosition)
 {
     Assert(GameState->World->StorageEntityCount < ArrayLength(GameState->World->StorageEntities));
 
@@ -251,7 +315,7 @@ AddStorageEntity(game_state *GameState, entity_type Type, world_position WorldPo
 static add_storage_entity_result
 AddGoundBasedStorageEntity
 (
-    game_state *GameState, entity_type Type, world_position GroundPoint,
+    game_state *GameState, entity_type Type, entity_world_position GroundPoint,
     entity_collision_mesh_group *EntityCollisionMeshGroup
 )
 {
@@ -264,7 +328,7 @@ AddGoundBasedStorageEntity
 static add_storage_entity_result
 AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
-    world_position RoomPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
+    entity_world_position RoomPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
     add_storage_entity_result RoomStorageEntityResult =
         AddGoundBasedStorageEntity(GameState, ET_SPACE, RoomPosition, GameState->StandardRoomCollisionMeshGroupTemplate);
@@ -273,7 +337,6 @@ AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 
     return RoomStorageEntityResult;
 }
-
 
 static add_storage_entity_result
 AddSword(game_state *GameState)
@@ -310,7 +373,7 @@ AddPlayer(game_state *GameState)
 static add_storage_entity_result
 AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
-    world_position MonsterPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
+    entity_world_position MonsterPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
     add_storage_entity_result MonsterStorageEntityResult = 
         AddGoundBasedStorageEntity(GameState, ET_MONSTER, MonsterPosition, GameState->MonsterCollisionMeshGroupTemplate);
@@ -324,7 +387,7 @@ AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 static add_storage_entity_result
 AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
 {
-    world_position FamiliarPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
+    entity_world_position FamiliarPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
     add_storage_entity_result FamiliarStorageEntityResult = 
         AddGoundBasedStorageEntity(GameState, ET_FAMILIAR, FamiliarPosition, GameState->FamiliarCollisionMeshGroupTemplate);
@@ -337,7 +400,7 @@ AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
 static add_storage_entity_result
 AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
-    world_position WallGroundPosition =
+    entity_world_position WallGroundPosition =
         GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
     add_storage_entity_result WallStorageEntityResult = 
@@ -351,14 +414,14 @@ AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 static add_storage_entity_result
 AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
-    world_position StairsGroundPosition = GetWorldPositionFromTilePosition
+    entity_world_position StairsGroundPosition = GetWorldPositionFromTilePosition
     (
         GameState->World, AbsTileX, AbsTileY, AbsTileZ,
         V3(0, 0, 0)
     );
 
     // NOTE(marwan): this is the correct thing
-    //world_position StairsGroundPosition = GetWorldPositionFromTilePosition
+    //entity_world_position StairsGroundPosition = GetWorldPositionFromTilePosition
     //(
     //    GameState->World, AbsTileX, AbsTileY, AbsTileZ,
     //    V3(0, 0, -0.5f * StairDiameter.Z)
@@ -376,92 +439,37 @@ AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return StairStorageEntityResult;
 }
 
-static void
-AddEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex, b32 CanCollide)
-{
-    entity_collision_rule *ResultRule = 0;
-
-    if (FirstEntityStorageIndex > SecondEntityStorageIndex)
-    {
-        u32 SwappingTemporaryStorageIndex = FirstEntityStorageIndex;
-        FirstEntityStorageIndex = SecondEntityStorageIndex;
-        SecondEntityStorageIndex = SwappingTemporaryStorageIndex;
-    }
-
-    u32 HashValue = FirstEntityStorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
-    for
-    (
-        entity_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashValue];
-        CurrentRule;
-        CurrentRule = CurrentRule->Next
-    )
-    {
-        if ((CurrentRule->EntityAStorageIndex == FirstEntityStorageIndex) &&
-            (CurrentRule->EntityBStorageIndex == SecondEntityStorageIndex))
-        {
-            ResultRule = CurrentRule;
-            break;
-        }
-    }
-
-    if (!ResultRule)
-    {
-        if (!GameState->FreeCollisionRulesListHead)
-        {
-            ResultRule = PushStruct(&GameState->WorldArena, entity_collision_rule);
-        }
-        else
-        {
-            ResultRule = GameState->FreeCollisionRulesListHead;
-            GameState->FreeCollisionRulesListHead = GameState->FreeCollisionRulesListHead->Next;
-        }
-
-        ResultRule->Next = GameState->CollisionRulesTable[HashValue];
-        GameState->CollisionRulesTable[HashValue] = ResultRule;
-    }
-
-    Assert(ResultRule);
-    if (ResultRule)
-    {
-        ResultRule->EntityAStorageIndex = FirstEntityStorageIndex;
-        ResultRule->EntityBStorageIndex = SecondEntityStorageIndex;
-        ResultRule->CanCollide = CanCollide;
-    }
-}
-
 static b32
-RemoveEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex)
+TestWall
+(
+    f32 SquareCenterRelativeWallX,
+    f32 SquareCenterToMovingEntityOriginalPositionX, f32 SquareCenterToMovingEntityOriginalPositionY, 
+    f32 MovingEntityMovementVectorX, f32 MovingEntityMovementVectorY, 
+    f32 *OriginalMinimalTParameter, f32 SquareCenterRelativeMinimumOrthogonalWallY, f32 SquareCenterRelativeMaximumOrthogonalWallY
+)
 {
-}
+    b32 DidMovingEntityHitWall = FALSE;
 
-static void
-ClearAllEnrityCollisionRules(game_state *GameState, u32 StorageIndex)
-{
-    // TODO: improve collision rule storage data structure to optimize for insertion and clearing
-    for (u32 HashValue = 0; HashValue < ArrayLength(GameState->CollisionRulesTable); HashValue++)
+    if (MovingEntityMovementVectorX != 0.0f)
     {
-        for
+        f32 TParameter = (SquareCenterRelativeWallX - SquareCenterToMovingEntityOriginalPositionX) / MovingEntityMovementVectorX;
+        f32 SquareCenterRelativeCollisionPointY = SquareCenterToMovingEntityOriginalPositionY + TParameter * MovingEntityMovementVectorY;
+        if 
         (
-            entity_collision_rule **CurrentRulePointer = &GameState->CollisionRulesTable[HashValue];
-            *CurrentRulePointer;
+            (SquareCenterRelativeCollisionPointY >= SquareCenterRelativeMinimumOrthogonalWallY) && 
+            (SquareCenterRelativeCollisionPointY <= SquareCenterRelativeMaximumOrthogonalWallY)
         )
         {
-            if (((*CurrentRulePointer)->EntityAStorageIndex == StorageIndex) ||
-                ((*CurrentRulePointer)->EntityBStorageIndex == StorageIndex))
+            if ((TParameter >= 0) && (TParameter < *OriginalMinimalTParameter))
             {
-                entity_collision_rule *RuleToRemove = *CurrentRulePointer;
-                
-                *CurrentRulePointer = (*CurrentRulePointer)->Next;
-
-                RuleToRemove->Next = GameState->FreeCollisionRulesListHead;
-                GameState->FreeCollisionRulesListHead = RuleToRemove;
-            }
-            else
-            {
-                CurrentRulePointer = &(*CurrentRulePointer)->Next;
+                f32 ToleranceEpsilon = 0.001f;
+                *OriginalMinimalTParameter = Max(0.0f, TParameter - ToleranceEpsilon);
+                DidMovingEntityHitWall = TRUE;
             }
         }
     }
+    
+    return DidMovingEntityHitWall;
 }
 
 static void
@@ -504,7 +512,7 @@ MoveEntity
     f32 RemainingMovementDistance = MovingEntity->MovementDistanceLimit;
     if (RemainingMovementDistance == 0)
     {
-        RemainingMovementDistance = INIFINTE_MOVEMENT_DISTANCE;
+        RemainingMovementDistance = ENTITY_INIFINTE_MOVEMENT_DISTANCE;
     }
 
     for (u32 CollisionDetectionIteration = 0; CollisionDetectionIteration < 4; CollisionDetectionIteration++)
@@ -548,7 +556,9 @@ MoveEntity
                             MovingEntityCollisionMeshIndex++
                         )
                         {
-                            entity_collision_mesh *MovingEntityCollisionMesh = &MovingEntity->CollisionMeshGroup->Meshes[MovingEntityCollisionMeshIndex];
+                            entity_collision_mesh *MovingEntityCollisionMesh = 
+                                &MovingEntity->CollisionMeshGroup->Meshes[MovingEntityCollisionMeshIndex];
+
                             for
                             (
                                 u32 TestEntityCollisionMeshIndex = 0;
@@ -556,9 +566,11 @@ MoveEntity
                                 TestEntityCollisionMeshIndex++
                             )
                             {
-                                entity_collision_mesh *TestEntityCollisionMesh = &TestEntity->CollisionMeshGroup->Meshes[TestEntityCollisionMeshIndex];
+                                entity_collision_mesh *TestEntityCollisionMesh =
+                                    &TestEntity->CollisionMeshGroup->Meshes[TestEntityCollisionMeshIndex];
 
-                                v3 MinkowskiCollisionDiameter = TestEntityCollisionMesh->Diameter + MovingEntityCollisionMesh->Diameter;
+                                v3 MinkowskiCollisionDiameter =
+                                    TestEntityCollisionMesh->Diameter + MovingEntityCollisionMesh->Diameter;
 
                                 v3 CollisionAreaMinCorner = -0.5f * MinkowskiCollisionDiameter;
                                 v3 CollisionAreaMaxCorner = CollisionAreaMinCorner + MinkowskiCollisionDiameter;
@@ -575,33 +587,57 @@ MoveEntity
 
                                 if (EntitiesOverlapInZ)
                                 {
-                                    if (TestWall(CollisionAreaMinCorner.X, TestMeshToMovingMesh.X, TestMeshToMovingMesh.Y,
-                                                 MovementOffset.X, MovementOffset.Y,
-                                                 &TestTMin, CollisionAreaMinCorner.Y, CollisionAreaMaxCorner.Y))
+                                    if
+                                    (
+                                        TestWall
+                                        (
+                                            CollisionAreaMinCorner.X, TestMeshToMovingMesh.X, TestMeshToMovingMesh.Y,
+                                            MovementOffset.X, MovementOffset.Y,
+                                            &TestTMin, CollisionAreaMinCorner.Y, CollisionAreaMaxCorner.Y
+                                        )
+                                    )
                                     {
                                         CollisionPointNormal = V3(-1, 0, 0);
                                         TestEntityWasHit = TRUE;
                                     }
 
-                                    if (TestWall(CollisionAreaMaxCorner.X, TestMeshToMovingMesh.X, TestMeshToMovingMesh.Y,
-                                                 MovementOffset.X, MovementOffset.Y,
-                                                 &TestTMin, CollisionAreaMinCorner.Y, CollisionAreaMaxCorner.Y))
+                                    if
+                                    (
+                                        TestWall
+                                        (
+                                            CollisionAreaMaxCorner.X, TestMeshToMovingMesh.X, TestMeshToMovingMesh.Y,
+                                            MovementOffset.X, MovementOffset.Y,
+                                            &TestTMin, CollisionAreaMinCorner.Y, CollisionAreaMaxCorner.Y
+                                        )
+                                    )
                                     {
                                         CollisionPointNormal = V3(1, 0, 0);
                                         TestEntityWasHit = TRUE;
                                     }
 
-                                    if (TestWall(CollisionAreaMinCorner.Y, TestMeshToMovingMesh.Y, TestMeshToMovingMesh.X,
-                                                 MovementOffset.Y, MovementOffset.X,
-                                                 &TestTMin, CollisionAreaMinCorner.X, CollisionAreaMaxCorner.X))
+                                    if
+                                    (
+                                        TestWall
+                                        (
+                                            CollisionAreaMinCorner.Y, TestMeshToMovingMesh.Y, TestMeshToMovingMesh.X,
+                                            MovementOffset.Y, MovementOffset.X,
+                                            &TestTMin, CollisionAreaMinCorner.X, CollisionAreaMaxCorner.X
+                                        )
+                                    )
                                     {
                                         CollisionPointNormal = V3(0, -1, 0);
                                         TestEntityWasHit = TRUE;
                                     }
 
-                                    if (TestWall(CollisionAreaMaxCorner.Y, TestMeshToMovingMesh.Y, TestMeshToMovingMesh.X,
-                                                 MovementOffset.Y, MovementOffset.X,
-                                                 &TestTMin, CollisionAreaMinCorner.X, CollisionAreaMaxCorner.X))
+                                    if
+                                    (
+                                        TestWall
+                                        (
+                                            CollisionAreaMaxCorner.Y, TestMeshToMovingMesh.Y, TestMeshToMovingMesh.X,
+                                            MovementOffset.Y, MovementOffset.X,
+                                            &TestTMin, CollisionAreaMinCorner.X, CollisionAreaMaxCorner.X
+                                        )
+                                    )
                                     {
                                         CollisionPointNormal = V3(0, 1, 0);
                                         TestEntityWasHit = TRUE;
@@ -629,12 +665,12 @@ MoveEntity
 
             if (HitEntity)
             {
-                b32 EntityStoppedOnCollision = ProcessCollisionEvent(GameState, MovingEntity, HitEntity);
+                b32 EntityStoppedOnCollision = ProcessEntityCollision(GameState, MovingEntity, HitEntity);
                 if (EntityStoppedOnCollision)
                 {
-                    MovementOffset = MovementOffset - 1 * Inner(MovementOffset, CollisionNormal) * CollisionNormal;
+                    MovementOffset = MovementOffset - 1 * InnerProduct(MovementOffset, CollisionNormal) * CollisionNormal;
                     MovingEntity->Velocity =
-                        MovingEntity->Velocity - 1 * Inner(MovingEntity->Velocity, CollisionNormal) * CollisionNormal;
+                        MovingEntity->Velocity - 1 * InnerProduct(MovingEntity->Velocity, CollisionNormal) * CollisionNormal;
                 }
             }
             else

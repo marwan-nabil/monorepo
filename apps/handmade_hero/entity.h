@@ -1,26 +1,8 @@
 #pragma once
 
+#define ENTITY_INIFINTE_MOVEMENT_DISTANCE 10000.0f
 #define INVALID_ENTITY_POSITION V3(100000.0f, 100000.0f, 100000.0f)
 #define ENTITY_HIT_POINT_SUBCOUNT 4
-
-struct entity_movement_parameters
-{
-    b32 NormalizeAcceleration;
-    f32 DragInXYPlane;
-    f32 SpeedInXYPlane;
-};
-
-union entity_reference
-{
-    entity *Entity;
-    u32 StorageIndex;
-};
-
-struct entity_hit_point
-{
-    u8 Flags;
-    u8 FilledAmount;
-};
 
 enum entity_type
 {
@@ -43,6 +25,33 @@ enum entity_flag
     EF_TRAVERSABLE = (1 << 4u),
 
     EF_SIMULATING = (1 << 30u)
+};
+
+struct entity_movement_parameters
+{
+    b32 NormalizeAcceleration;
+    f32 DragInXYPlane;
+    f32 SpeedInXYPlane;
+};
+
+struct entity_world_position
+{
+    i32 ChunkX, ChunkY, ChunkZ;
+    v3 OffsetFromChunkCenter;
+};
+
+struct entity_hit_point
+{
+    u8 Flags;
+    u8 FilledAmount;
+};
+
+struct entity;
+
+union entity_reference
+{
+    entity *Entity;
+    u32 StorageIndex;
 };
 
 struct entity
@@ -78,7 +87,7 @@ struct entity
 struct storage_entity
 {
     entity Entity;
-    world_position WorldPosition;
+    entity_world_position WorldPosition;
 };
 
 struct add_storage_entity_result

@@ -40,46 +40,12 @@ GetSimulationRegionRelativePosition(simulation_region *SimulationRegion, storage
     return Result;
 }
 
-inline entity *
-GetEntity(simulation_region *SimulationRegion, u32 StorageIndex)
+inline b32
+DoesEntityCollisionMeshOverlapRectangle(v3 EntityPosition, entity_collision_mesh CollisionMesh, rectangle3 TestingRectangle)
 {
-    entity_table_entry *EntityHashTableEntry =
-        GetEntityHashtableEntry(SimulationRegion, StorageIndex);
-
-    entity *Result = EntityHashTableEntry->Entity;
+    rectangle3 ExpandedTestingRectangle = ExpandRectangle(TestingRectangle, CollisionMesh.Diameter);
+    b32 Result = IsInRectangle(ExpandedTestingRectangle, EntityPosition + CollisionMesh.Offset);
     return Result;
-}
-
-inline void
-LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, entity_reference *EntityReference)
-{
-    if (EntityReference->StorageIndex)
-    {
-        entity_table_entry *EntityHashTableEntry =
-            GetEntityHashtableEntry(SimulationRegion, EntityReference->StorageIndex);
-        
-        if (EntityHashTableEntry->Entity == 0)
-        {
-            storage_entity *ReferencedStorageEntity = GetStorageEntity(GameState, EntityReference->StorageIndex);
-            v3 SimulationRegionRelativePosition = GetSimulationRegionRelativePosition(SimulationRegion, ReferencedStorageEntity);
-
-            EntityHashTableEntry->StorageIndex = EntityReference->StorageIndex;
-            EntityHashTableEntry->Entity =
-                AddEntityToSimulation(GameState, SimulationRegion, EntityReference->StorageIndex,
-                          ReferencedStorageEntity, &SimulationRegionRelativePosition);
-        }
-
-        EntityReference->Entity = EntityHashTableEntry->Entity;
-    }
-}
-
-inline void
-StoreEntityReference(entity_reference *EntityReference)
-{
-    if (EntityReference->Entity)
-    {
-        EntityReference->StorageIndex = EntityReference->Entity->StorageIndex;
-    }
 }
 
 static entity *
@@ -120,18 +86,13 @@ RawAddEntityToSimulation(game_state *GameState, simulation_region *SimulationReg
     return Result;
 }
 
-inline b32
-DoesEntityCollisionMeshOverlapRectangle(v3 EntityPosition, entity_collision_mesh CollisionMesh, rectangle3 TestingRectangle)
-{
-    rectangle3 ExpandedTestingRectangle = ExpandRectangle(TestingRectangle, CollisionMesh.Diameter);
-    b32 Result = IsInRectangle(ExpandedTestingRectangle, EntityPosition + CollisionMesh.Offset);
-    return Result;
-}
-
 static entity *
-AddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion,
-                      u32 StorageIndex, storage_entity *SourceStorageEntity,
-                      v3 *InitialPositionInSimulationRegion)
+AddEntityToSimulation
+(
+    game_state *GameState, simulation_region *SimulationRegion,
+    u32 StorageIndex, storage_entity *SourceStorageEntity,
+    v3 *InitialPositionInSimulationRegion
+)
 {
     entity *Result = RawAddEntityToSimulation(GameState, SimulationRegion, StorageIndex, SourceStorageEntity);
     if (Result)
@@ -155,9 +116,40 @@ AddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion
     return Result;
 }
 
+inline void
+LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, entity_reference *EntityReference)
+{
+    if (EntityReference->StorageIndex)
+    {
+        entity_table_entry *EntityHashTableEntry =
+            GetEntityHashtableEntry(SimulationRegion, EntityReference->StorageIndex);
+
+        if (EntityHashTableEntry->Entity == 0)
+        {
+            storage_entity *ReferencedStorageEntity =
+                GetStorageEntity(GameState, EntityReference->StorageIndex);
+
+            v3 SimulationRegionRelativePosition =
+                GetSimulationRegionRelativePosition(SimulationRegion, ReferencedStorageEntity);
+
+            EntityHashTableEntry->StorageIndex = EntityReference->StorageIndex;
+            EntityHashTableEntry->Entity = AddEntityToSimulation
+            (
+                GameState, SimulationRegion, EntityReference->StorageIndex,
+                ReferencedStorageEntity, &SimulationRegionRelativePosition
+            );
+        }
+
+        EntityReference->Entity = EntityHashTableEntry->Entity;
+    }
+}
+
 static simulation_region *
-BeginSimulation(game_state *GameState, world *World, memory_arena *SimulationArena, 
-                world_position RegionOrigin, rectangle3 UpdateBounds, f32 TimeDelta)
+BeginSimulation
+(
+    game_state *GameState, world *World, memory_arena *SimulationArena, 
+    entity_world_position RegionOrigin, rectangle3 UpdateBounds, f32 TimeDelta
+)
 {
     simulation_region *SimulationRegion = PushStruct(SimulationArena, simulation_region);
     ZeroStruct(SimulationRegion->EntityTable);
@@ -181,8 +173,8 @@ BeginSimulation(game_state *GameState, world *World, memory_arena *SimulationAre
     SimulationRegion->CurrentEntityCount = 0;
     SimulationRegion->Entities = PushArray(SimulationArena, SimulationRegion->MaxEntityCount, entity);
 
-    world_position SimulationAreaMinChunkPosition = MapIntoWorldPosition(World, SimulationRegion->Origin, GetMinCorner(SimulationRegion->SimulationBounds));
-    world_position SimulationAreaMaxChunkPosition = MapIntoWorldPosition(World, SimulationRegion->Origin, GetMaxCorner(SimulationRegion->SimulationBounds));
+    entity_world_position SimulationAreaMinChunkPosition = MapIntoWorldPosition(World, SimulationRegion->Origin, GetMinCorner(SimulationRegion->SimulationBounds));
+    entity_world_position SimulationAreaMaxChunkPosition = MapIntoWorldPosition(World, SimulationRegion->Origin, GetMaxCorner(SimulationRegion->SimulationBounds));
 
     for (i32 ChunkZ = SimulationAreaMinChunkPosition.ChunkZ; ChunkZ <= SimulationAreaMaxChunkPosition.ChunkZ; ChunkZ++)
     {
@@ -250,7 +242,7 @@ EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
 
         StoreEntityReference(&StorageEntity->Entity.SwordEntityReference);
 
-        world_position NewWorldPosition;
+        entity_world_position NewWorldPosition;
         if (IsEntityFlagSet(Entity, EF_NON_SPATIAL))
         {
             NewWorldPosition = InvalidWorldPosition();
@@ -266,7 +258,7 @@ EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
 
         if (Entity->StorageIndex == GameState->StorageIndexOfEntityThatCameraFollows)
         {
-            world_position NewCameraPosition;
+            entity_world_position NewCameraPosition;
 #if 0
 
             if (MovingEntity->Position.X > (0.5f * TilesPerScreenWidth * TileSideInMeters))
@@ -293,37 +285,4 @@ EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
             GameState->CameraPosition = NewCameraPosition;
         }
     }
-}
-
-static b32
-TestWall
-(
-    f32 SquareCenterRelativeWallX,
-    f32 SquareCenterToMovingEntityOriginalPositionX, f32 SquareCenterToMovingEntityOriginalPositionY, 
-    f32 MovingEntityMovementVectorX, f32 MovingEntityMovementVectorY, 
-    f32 *OriginalMinimalTParameter, f32 SquareCenterRelativeMinimumOrthogonalWallY, f32 SquareCenterRelativeMaximumOrthogonalWallY
-)
-{
-    b32 DidMovingEntityHitWall = FALSE;
-
-    if (MovingEntityMovementVectorX != 0.0f)
-    {
-        f32 TParameter = (SquareCenterRelativeWallX - SquareCenterToMovingEntityOriginalPositionX) / MovingEntityMovementVectorX;
-        f32 SquareCenterRelativeCollisionPointY = SquareCenterToMovingEntityOriginalPositionY + TParameter * MovingEntityMovementVectorY;
-        if 
-        (
-            (SquareCenterRelativeCollisionPointY >= SquareCenterRelativeMinimumOrthogonalWallY) && 
-            (SquareCenterRelativeCollisionPointY <= SquareCenterRelativeMaximumOrthogonalWallY)
-        )
-        {
-            if ((TParameter >= 0) && (TParameter < *OriginalMinimalTParameter))
-            {
-                f32 ToleranceEpsilon = 0.001f;
-                *OriginalMinimalTParameter = Maximum(0, TParameter - ToleranceEpsilon);
-                DidMovingEntityHitWall = TRUE;
-            }
-        }
-    }
-    
-    return DidMovingEntityHitWall;
 }

@@ -1,17 +1,17 @@
 #pragma once
 
+#define PLATFORM_READ_FILE(name) read_file_result name(thread_context *Thread, char *FileName)
+#define PLATFORM_WRITE_FILE(name) b32 name(thread_context *Thread, char *FileName, void *DataToWrite, u32 DataSize)
+#define PLATFORM_FREE_FILE_MEMORY(name) void name(thread_context *Thread, void *FileMemory)
+#define GAME_UPDATE_AND_RENDER(name) void name(thread_context *ThreadContext, game_pixel_buffer *PixelBuffer, game_input *GameInput, game_memory *GameMemory)
+#define GAME_GET_SOUND_SAMPLES(name) void name(thread_context *ThreadContext, game_sound_request *SoundRequest, game_memory *GameMemory)
+
 struct read_file_result;
 struct thread_context;
 struct game_pixel_buffer;
 struct game_input;
 struct game_memory;
 struct game_sound_request;
-
-#define PLATFORM_READ_FILE(name) read_file_result name(thread_context *Thread, char *FileName)
-#define PLATFORM_WRITE_FILE(name) b32 name(thread_context *Thread, char *FileName, void *DataToWrite, u32 DataSize)
-#define PLATFORM_FREE_FILE_MEMORY(name) void name(thread_context *Thread, void *FileMemory)
-#define GAME_UPDATE_AND_RENDER(name) void name(thread_context *ThreadContext, game_pixel_buffer *PixelBuffer, game_input *GameInput, game_memory *GameMemory)
-#define GAME_GET_SOUND_SAMPLES(name) void name(thread_context *ThreadContext, game_sound_request *SoundRequest, game_memory *GameMemory)
 
 typedef PLATFORM_READ_FILE(platform_read_file);
 typedef PLATFORM_WRITE_FILE(platform_write_file);

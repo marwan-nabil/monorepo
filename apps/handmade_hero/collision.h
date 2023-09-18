@@ -20,3 +20,9 @@ struct entity_collision_rule
     b32 CanCollide;
     entity_collision_rule *Next;
 };
+
+struct game_state;
+struct entity;
+
+static b32 CanEntitiesCollide(game_state *GameState, entity *A, entity *B);
+static b32 ProcessEntityCollision(game_state *GameState, entity *MovingEntity, entity *StaticEntity);
