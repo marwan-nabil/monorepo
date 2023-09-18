@@ -391,7 +391,7 @@ Win32FillGlobalSoundBuffer
     )
     {
         // TODO: assert that the returned region sizes are valid (multiples of 4 bytes)
-        i16 *SourceHalfSample = GameSoundBuffer->SamplesMemory;
+        i16 *SourceHalfSample = GameSoundBuffer->OutputSamples;
         i16 *DestinationHalfSample = (i16 *)BufferRegion1;
         u32 Region1SampleCount = BufferRegion1Size / SoundBufferConfiguration->BytesPerSample;
 
@@ -455,7 +455,7 @@ Win32ClearSoundBuffer(win32_sound_configuration *SoundBufferConfiguration, LPDIR
 }
 
 static void
-Win32ProcessButton(game_button_state *NewButtonState, b32 IsDown)
+Win32ProcessButton(button_state *NewButtonState, b32 IsDown)
 {
     if (NewButtonState->IsDown != IsDown)
     {
@@ -560,8 +560,8 @@ Win32ProcessStickDeadzone(SHORT StickValueIn, SHORT DeadzoneThreshold)
 static void
 Win32CaptureGamepadControllerSample
 (
-    game_controller_state *NewControllerState, 
-    game_controller_state *OldControllerState, 
+    controller_state *NewControllerState, 
+    controller_state *OldControllerState, 
     XINPUT_STATE *SampledControllerState
 )
 {
@@ -847,7 +847,7 @@ static void
 Win32ProcessPendingMessagesSynchronous
 (
     win32_platform_state *PlatformState,
-    game_controller_state *KeyboardController
+    controller_state *KeyboardController
 )
 {
     MSG WindowsMessage;
@@ -1196,8 +1196,8 @@ WinMain
                         }
                     }
 
-                    game_controller_state *OldKeyboardController = GetController(OldTotalGameInput, 0);
-                    game_controller_state *NewKeyboardController = GetController(NewTotalGameInput, 0);
+                    controller_state *OldKeyboardController = GetController(OldTotalGameInput, 0);
+                    controller_state *NewKeyboardController = GetController(NewTotalGameInput, 0);
                     *NewKeyboardController = {};
 
                     DWORD MaxControllerCount = XUSER_MAX_COUNT;
@@ -1262,10 +1262,10 @@ WinMain
                         
                         for (DWORD ControllerIndex = 0; ControllerIndex < MaxControllerCount; ControllerIndex++)
                         {
-                            game_controller_state *OldControllerState =
+                            controller_state *OldControllerState =
                                 GetController(OldTotalGameInput, ControllerIndex + 1);
 
-                            game_controller_state *NewControllerState =
+                            controller_state *NewControllerState =
                                 GetController(NewTotalGameInput, ControllerIndex + 1);
 
                             XINPUT_STATE SampledControllerState;
@@ -1393,7 +1393,7 @@ WinMain
                                 SoundBufferConfiguration.SamplesPerSecond;
                             GameSoundRequest.OutputSamplesCount =
                                 BytesToWrite / SoundBufferConfiguration.BytesPerSample;
-                            GameSoundRequest.SamplesMemory = GameSoundSamples;
+                            GameSoundRequest.OutputSamples = GameSoundSamples;
 
                             if (GameCode.GetSoundSamples)
                             {

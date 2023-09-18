@@ -8,5 +8,5 @@ struct memory_arena
 {
     size_t Size;
     size_t Used;
-    u8 *Base;
+    u8 *BaseAddress;
 };

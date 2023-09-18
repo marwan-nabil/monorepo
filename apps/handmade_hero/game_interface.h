@@ -1,10 +1,15 @@
 #pragma once
 
-#define PLATFORM_READ_FILE(name) read_file_result name(thread_context *Thread, char *FileName)
-#define PLATFORM_WRITE_FILE(name) b32 name(thread_context *Thread, char *FileName, void *DataToWrite, u32 DataSize)
-#define PLATFORM_FREE_FILE_MEMORY(name) void name(thread_context *Thread, void *FileMemory)
-#define GAME_UPDATE_AND_RENDER(name) void name(thread_context *ThreadContext, game_pixel_buffer *PixelBuffer, game_input *GameInput, game_memory *GameMemory)
-#define GAME_GET_SOUND_SAMPLES(name) void name(thread_context *ThreadContext, game_sound_request *SoundRequest, game_memory *GameMemory)
+#define PLATFORM_READ_FILE(name)\
+    read_file_result name(thread_context *Thread, char *FileName)
+#define PLATFORM_WRITE_FILE(name)\
+    b32 name(thread_context *Thread, char *FileName, void *DataToWrite, u32 DataSize)
+#define PLATFORM_FREE_FILE_MEMORY(name)\
+    void name(thread_context *Thread, void *FileMemory)
+#define GAME_UPDATE_AND_RENDER(name)\
+    void name(thread_context *ThreadContext, game_pixel_buffer *PixelBuffer, game_input *GameInput, game_memory *GameMemory)
+#define GAME_GET_SOUND_SAMPLES(name)\
+    void name(thread_context *ThreadContext, game_sound_request *SoundRequest, game_memory *GameMemory)
 
 struct read_file_result;
 struct thread_context;
@@ -37,16 +42,16 @@ struct game_sound_request
 {
     u32 OutputSamplesCount;
     u32 SamplesPerSecond;
-    i16 *SamplesMemory;
+    i16 *OutputSamples;
 };
 
-struct game_button_state
+struct button_state
 {
     i32 TransitionsCount;
     b32 IsDown;
 };
 
-struct game_controller_state
+struct controller_state
 {
     b32 IsConnected;
     b32 MovementIsAnalog;
@@ -55,21 +60,21 @@ struct game_controller_state
 
     union
     {
-        game_button_state Buttons[12];
+        button_state Buttons[12];
         struct
         {
-            game_button_state MoveUp;
-            game_button_state MoveDown;
-            game_button_state MoveLeft;
-            game_button_state MoveRight;
-            game_button_state ActionUp;
-            game_button_state ActionDown;
-            game_button_state ActionLeft;
-            game_button_state ActionRight;
-            game_button_state LeftShoulder;
-            game_button_state RightShoulder;
-            game_button_state Back;
-            game_button_state Start;
+            button_state MoveUp;
+            button_state MoveDown;
+            button_state MoveLeft;
+            button_state MoveRight;
+            button_state ActionUp;
+            button_state ActionDown;
+            button_state ActionLeft;
+            button_state ActionRight;
+            button_state LeftShoulder;
+            button_state RightShoulder;
+            button_state Back;
+            button_state Start;
             // NOTE: put all new buttons above the Start button
         };
     };
@@ -78,18 +83,20 @@ struct game_controller_state
 struct game_input
 {
     f32 TimeDeltaForFrame;
-    game_button_state MouseButtons[5];
+    button_state MouseButtons[5];
     i32 MouseX;
     i32 MouseY;
     i32 MouseZ;
-    game_controller_state ControllerStates[5];
+    controller_state ControllerStates[5];
 };
 
 struct game_memory
 {
     b32 IsInitialized;
+
     u64 PermanentStorageSize;
     void *PermanentStorage;
+
     u64 TransientStorageSize;
     void *TransientStorage;
 

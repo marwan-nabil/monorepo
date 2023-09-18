@@ -11,7 +11,6 @@
 #include "../../math/vector2.h"
 #include "../../math/vector3.h"
 #include "../../math/vector4.h"
-#include "../../math/vector4.h"
 #include "../../math/rectangle2.h"
 #include "../../math/rectangle3.h"
 #include "../../math/bit_operations.h"
@@ -402,7 +401,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     
     for (u32 ControllerIndex = 0; ControllerIndex < ArrayLength(GameInput->ControllerStates); ControllerIndex++)
     {
-        game_controller_state *ControllerInput = GetController(GameInput, ControllerIndex);
+        controller_state *ControllerInput = GetController(GameInput, ControllerIndex);
         controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControllerIndex;
 
         if (ControlledHeroInput->HeroEntityStorageIndex == 0)
@@ -727,7 +726,7 @@ extern "C" GAME_GET_SOUND_SAMPLES(GameGetSoundSamples)
     i16 ToneVolume = 200;
     u32 SamplesPerTonePeriod = SoundRequest->SamplesPerSecond / ToneFrequency;
 
-    i16 *SampleOut = SoundRequest->SamplesMemory;
+    i16 *OutputSamples = SoundRequest->OutputSamples;
 
     for
     (
@@ -747,7 +746,7 @@ extern "C" GAME_GET_SOUND_SAMPLES(GameGetSoundSamples)
 #else
         i16 SampleValue = 0;
 #endif
-        *SampleOut++ = SampleValue;
-        *SampleOut++ = SampleValue;
+        *OutputSamples++ = SampleValue;
+        *OutputSamples++ = SampleValue;
     }
 }

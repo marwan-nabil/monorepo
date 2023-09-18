@@ -1,4 +1,4 @@
-inline game_controller_state *
+inline controller_state *
 GetController(game_input *GameInput, i32 ControllerIndex)
 {
     Assert(ControllerIndex < ArrayLength(GameInput->ControllerStates));

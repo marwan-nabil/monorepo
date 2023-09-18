@@ -1,16 +1,17 @@
 inline void
-InitializeMemoryArena(memory_arena *Arena, size_t Size, void *Base)
+InitializeMemoryArena(memory_arena *Arena, size_t Size, void *BaseAddress)
 {
     Arena->Size = Size;
     Arena->Used = 0;
-    Arena->Base = (u8 *)Base;
+    Arena->BaseAddress = (u8 *)BaseAddress;
 }
 
 inline void *
 PushOntoMemoryArena(memory_arena *Arena, size_t PushSize)
 {
     Assert((Arena->Used + PushSize) <= Arena->Size);
-    void *Result = Arena->Base + Arena->Used;
+
+    void *Result = Arena->BaseAddress + Arena->Used;
     Arena->Used += PushSize;
     return Result;
 }
