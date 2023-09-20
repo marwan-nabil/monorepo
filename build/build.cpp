@@ -543,7 +543,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\linter\\main.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\linter.cpp");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
 
