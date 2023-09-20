@@ -141,7 +141,7 @@ void Dx11_RenderDrawData(ImDrawData *DrawData)
     // Create and grow vertex/index buffers if needed
     if
     (
-        !BackendData->VertexBuffer || 
+        !BackendData->VertexBuffer ||
         (BackendData->VertexBufferSize < DrawData->TotalVtxCount)
     )
     {
@@ -167,7 +167,7 @@ void Dx11_RenderDrawData(ImDrawData *DrawData)
 
     if
     (
-        !BackendData->PixelBuffer || 
+        !BackendData->PixelBuffer ||
         (BackendData->IndexBufferSize < DrawData->TotalIdxCount)
     )
     {
@@ -659,7 +659,7 @@ b32 Dx11_Initialize(ID3D11Device *D3dDevice, ID3D11DeviceContext *D3dDeviceConte
     ImGuiIoInterface->BackendRendererUserData = (void *)BackendData;
     ImGuiIoInterface->BackendRendererName = "dx11";
     // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
-    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; 
+    ImGuiIoInterface->BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
     // Get factory from D3dDevice
     IDXGIDevice *DxgiDevice = NULL;
