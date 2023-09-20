@@ -216,13 +216,51 @@ int main(int argc, char **argv)
     StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), OutputDirectoryPath);
     StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), "\\..");
 
-    char DirectoryToLint[1024];
-    ZeroMemory(DirectoryToLint, ArrayLength(DirectoryToLint));
+    b32 Result = TRUE;
 
-    StringCchCatA(DirectoryToLint, ArrayLength(DirectoryToLint), RootDirectoryPath);
-    StringCchCatA(DirectoryToLint, ArrayLength(DirectoryToLint), "\\apps\\handmade_hero");
+    if (strcmp(argv[1], "all") == 0)
+    {
+        const char *DirectoriesToLint[] =
+        {
+            "\\apps\\basic_app",
+            "\\apps\\directx_demo",
+            "\\apps\\handmade_hero",
+            "\\apps\\imgui_demo",
+            "\\apps\\ray_tracer",
+            "\\build",
+            "\\math",
+            "\\math\\simd\\1_wide",
+            "\\math\\simd\\4_wide",
+            "\\math\\simd\\8_wide",
+            "\\math\\simd\\shared",
+            "\\miscellaneous",
+            "\\tests"
+        };
 
-    LintDirectory(DirectoryToLint);
+        for (u32 DirectoryIndex = 0; DirectoryIndex < ArrayLength(DirectoriesToLint); DirectoryIndex++)
+        {
+            char DirectoryToLint[1024];
+            ZeroMemory(DirectoryToLint, ArrayLength(DirectoryToLint));
+            StringCchCatA(DirectoryToLint, ArrayLength(DirectoryToLint), RootDirectoryPath);
+            StringCchCatA(DirectoryToLint, ArrayLength(DirectoryToLint), DirectoriesToLint[DirectoryIndex]);
+            Result = Result && LintDirectory(DirectoryToLint);
+        }
+    }
+    else
+    {
+        char DirectoryToLint[1024];
+        ZeroMemory(DirectoryToLint, ArrayLength(DirectoryToLint));
+        StringCchCatA(DirectoryToLint, ArrayLength(DirectoryToLint), RootDirectoryPath);
+        StringCchCatA(DirectoryToLint, ArrayLength(DirectoryToLint), argv[1]);
+        Result = LintDirectory(DirectoryToLint);
+    }
 
-    return 0;
+    if (Result)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }

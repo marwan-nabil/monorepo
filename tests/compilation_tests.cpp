@@ -79,5 +79,7 @@ void RunCompilationTests()
 
     CompilationTest("build directx_demo");
 
+    CompilationTest("build linter");
+
     CompilationTest("build clean");
 }

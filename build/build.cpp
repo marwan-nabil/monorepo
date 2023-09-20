@@ -76,7 +76,7 @@ u32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
 
                     printf
                     (
-                        "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %lu == %s", 
+                        "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %lu == %s",
                         FoundFilePath, LastError, (const char *)ErrorMessageFromSystem
                     );
 
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
 
     if (strcmp(argv[1], "clean") == 0)
     {
-        const char *ExtensionsToClean[] = 
+        const char *ExtensionsToClean[] =
         {
             "obj", "pdb", "exe", "log", "ilk", "sln", "bmp",
             "txt", "ini", "dll", "exp", "lib", "map", "hmi",
