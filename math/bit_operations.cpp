@@ -6,7 +6,7 @@ FindLeastSignificantSetBit(u32 Value)
     return Result;
 }
 
-inline u32 
+inline u32
 RotateLeft(u32 Value, i32 Rotation)
 {
     u32 Result = _rotl(Value, Rotation);

@@ -46,7 +46,7 @@ AreInTheSameChunk(world *World, entity_world_position *A, entity_world_position 
     Assert(IsChunkCenterOffsetCanonical(World, A->OffsetFromChunkCenter));
     Assert(IsChunkCenterOffsetCanonical(World, B->OffsetFromChunkCenter));
 
-    b32 Result = 
+    b32 Result =
     (
         (A->ChunkX == B->ChunkX) &&
         (A->ChunkY == B->ChunkY) &&
@@ -194,8 +194,8 @@ GetWorldPositionFromTilePosition(world *World, i32 AbsTileX, i32 AbsTileY, i32 A
     entity_world_position BasePosition = {};
 
     v3 TileDiameter = V3(World->TileSideInMeters, World->TileSideInMeters, World->TileDepthInMeters);
-    v3 AbsoluteWorldOffset = 
-        HadamardProduct(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) + 
+    v3 AbsoluteWorldOffset =
+        HadamardProduct(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) +
         OffsetFromTileCenter;
     //v3 AbsoluteWorldOffset = HadamardProduct(TileDiameter, V3((f32)AbsTileX, (f32)AbsTileY, (f32)AbsTileZ)) + OffsetFromTileCenter + 0.5f * TileDiameter;
 

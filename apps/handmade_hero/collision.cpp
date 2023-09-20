@@ -100,7 +100,7 @@ ClearAllEnrityCollisionRules(game_state *GameState, u32 StorageIndex)
                 ((*CurrentRulePointer)->EntityBStorageIndex == StorageIndex))
             {
                 entity_collision_rule *RuleToRemove = *CurrentRulePointer;
-                
+
                 *CurrentRulePointer = (*CurrentRulePointer)->Next;
 
                 RuleToRemove->Next = GameState->FreeCollisionRulesListHead;

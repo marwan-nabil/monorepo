@@ -1,7 +1,7 @@
 /******************************************/
 /*              constructors              */
 /******************************************/
-inline v3_lane 
+inline v3_lane
 V3Lane(f32_lane X, f32_lane Y, f32_lane Z)
 {
     v3_lane Result;
@@ -11,7 +11,7 @@ V3Lane(f32_lane X, f32_lane Y, f32_lane Z)
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 V3Lane(f32 X, f32 Y, f32 Z)
 {
     v3_lane Result;
@@ -24,7 +24,7 @@ V3Lane(f32 X, f32 Y, f32 Z)
 /******************************************/
 /*              Addition                  */
 /******************************************/
-inline v3_lane 
+inline v3_lane
 operator+(v3_lane A, v3_lane B)
 {
     v3_lane Result;
@@ -44,7 +44,7 @@ operator+=(v3_lane &A, v3_lane B)
 /******************************************/
 /*              subtraction               */
 /******************************************/
-inline v3_lane 
+inline v3_lane
 operator-(v3_lane A, v3_lane B)
 {
     v3_lane Result;
@@ -61,7 +61,7 @@ operator-=(v3_lane &A, v3_lane B)
     return A;
 }
 
-inline v3_lane 
+inline v3_lane
 operator-(v3_lane A)
 {
     v3_lane Result;
@@ -84,21 +84,21 @@ operator*(f32_lane A, v3_lane B)
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 operator*(v3_lane A, f32_lane B)
 {
     v3_lane Result = B * A;
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 operator*(v3_lane A, f32 B)
 {
     v3_lane Result = A * F32LaneFromF32(B);
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 operator*(f32 A, v3_lane B)
 {
     v3_lane Result = F32LaneFromF32(A) * B;
@@ -108,7 +108,7 @@ operator*(f32 A, v3_lane B)
 /******************************************/
 /*                division                */
 /******************************************/
-inline v3_lane 
+inline v3_lane
 operator/(v3_lane A, f32_lane B)
 {
     v3_lane Result;
@@ -118,7 +118,7 @@ operator/(v3_lane A, f32_lane B)
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 operator/(v3_lane A, f32 B)
 {
     v3_lane Result;
@@ -138,7 +138,7 @@ operator/=(v3_lane &A, f32_lane B)
 /******************************************/
 /*                bitwise                 */
 /******************************************/
-inline v3_lane 
+inline v3_lane
 operator&(u32_lane Mask, v3_lane Value)
 {
     v3_lane Result =
@@ -150,7 +150,7 @@ operator&(u32_lane Mask, v3_lane Value)
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 operator&(v3_lane Value, u32_lane Mask)
 {
     v3_lane Result = Mask & Value;
@@ -166,7 +166,7 @@ operator&(v3_lane Value, u32_lane Mask)
 inline v3_lane
 GatherV3Implementation(v3 *Base, u32 Stride, u32_lane Indices)
 {
-    v3_lane Result = 
+    v3_lane Result =
     {
         GatherF32Implementation(&Base->X, Stride, Indices),
         GatherF32Implementation(&Base->Y, Stride, Indices),
@@ -200,14 +200,14 @@ LengthSquared(v3_lane A)
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 Length(v3_lane A)
 {
     f32_lane Result = SquareRoot(LengthSquared(A));
     return Result;
 }
 
-inline v3_lane 
+inline v3_lane
 Normalize(v3_lane A)
 {
     v3_lane Result = {};
@@ -249,7 +249,7 @@ Lerp(v3_lane A, v3_lane B, f32_lane t)
 inline v3
 HorizontalAdd(v3_lane WideValue)
 {
-    v3 Result = 
+    v3 Result =
     {
         HorizontalAdd(WideValue.X),
         HorizontalAdd(WideValue.Y),

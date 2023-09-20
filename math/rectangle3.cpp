@@ -41,7 +41,7 @@ IsInRectangle(rectangle3 Rectangle, v3 TestPoint)
 		TestPoint.Y >= Rectangle.MinPoint.Y &&
 		TestPoint.Z >= Rectangle.MinPoint.Z &&
 		TestPoint.X < Rectangle.MaxPoint.X &&
-		TestPoint.Y < Rectangle.MaxPoint.Y && 
+		TestPoint.Y < Rectangle.MaxPoint.Y &&
 		TestPoint.Z < Rectangle.MaxPoint.Z
 	);
 	return Result;

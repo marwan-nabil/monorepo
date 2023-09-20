@@ -62,14 +62,14 @@ struct entity
 
     v3 Position;
     v3 Velocity;
-    
+
     f32 BobbingSinParameter;
     f32 MovementDistanceLimit;
-    
+
     u32 StorageIndex;
 
     entity_collision_mesh_group *CollisionMeshGroup;
-    
+
     i32 DiffAbsTileZ; // unused
 
     u32 HitPointsMax;

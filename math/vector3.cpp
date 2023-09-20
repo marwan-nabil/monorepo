@@ -1,4 +1,4 @@
-inline v3 
+inline v3
 V3(f32 X, f32 Y, f32 Z)
 {
     v3 Result;
@@ -18,7 +18,7 @@ V3(v2 XY, f32 Z)
 	return Result;
 }
 
-inline v3 
+inline v3
 operator+(v3 A, v3 B)
 {
     v3 Result;
@@ -37,7 +37,7 @@ operator+=(v3 &A, v3 B)
     return A;
 }
 
-inline v3 
+inline v3
 operator-(v3 A, v3 B)
 {
     v3 Result;
@@ -47,7 +47,7 @@ operator-(v3 A, v3 B)
     return Result;
 }
 
-inline v3 
+inline v3
 operator-(v3 A)
 {
     v3 Result;
@@ -66,7 +66,7 @@ operator-=(v3 &A, v3 B)
     return A;
 }
 
-inline v3 
+inline v3
 operator*(f32 A, v3 B)
 {
     v3 Result;
@@ -76,7 +76,7 @@ operator*(f32 A, v3 B)
     return Result;
 }
 
-inline v3 
+inline v3
 operator*(v3 A, f32 B)
 {
     v3 Result;
@@ -95,7 +95,7 @@ operator*=(v3 &A, f32 B)
     return A;
 }
 
-inline v3 
+inline v3
 operator/(v3 A, f32 B)
 {
     v3 Result;
@@ -114,7 +114,7 @@ operator/=(v3 &A, f32 B)
     return A;
 }
 
-inline f32 
+inline f32
 InnerProduct(v3 A, v3 B)
 {
     f32 Result = A.X * B.X + A.Y * B.Y + A.Z * B.Z;
@@ -140,21 +140,21 @@ CrossProduct(v3 A, v3 B)
     return Result;
 }
 
-inline f32 
+inline f32
 LengthSquared(v3 A)
 {
     f32 Result = InnerProduct(A, A);
     return Result;
 }
 
-inline f32 
+inline f32
 Length(v3 A)
 {
     f32 Result = SquareRoot(LengthSquared(A));
     return Result;
 }
 
-inline v3 
+inline v3
 Normalize(v3 A)
 {
     v3 Result;

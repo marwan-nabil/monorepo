@@ -163,14 +163,14 @@ operator>=(f32_lane A, f32 B)
 /******************************************/
 /*                masking                 */
 /******************************************/
-inline f32_lane 
+inline f32_lane
 operator&(u32_lane Mask, f32_lane Value)
 {
     f32_lane Result = StaticCastU32LaneToF32Lane(Mask) & Value;
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 operator&(f32_lane Value, u32_lane Mask)
 {
     f32_lane Result = Mask & Value;
@@ -186,7 +186,7 @@ operator&(f32_lane Value, u32_lane Mask)
 /******************************************/
 /*             other operations           */
 /******************************************/
-inline f32_lane 
+inline f32_lane
 Square(f32_lane A)
 {
     return A * A;
@@ -196,8 +196,8 @@ inline void
 ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
 {
     // ConditionalAssign((u32_lane *)Destination, *(u32_lane *)&Source, Mask);
-    *Destination = 
-        (AndNot(StaticCastU32LaneToF32Lane(Mask), *Destination)) | 
+    *Destination =
+        (AndNot(StaticCastU32LaneToF32Lane(Mask), *Destination)) |
         (StaticCastU32LaneToF32Lane(Mask) & Source);
 }
 

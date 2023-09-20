@@ -147,7 +147,7 @@ LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, 
 static simulation_region *
 BeginSimulation
 (
-    game_state *GameState, world *World, memory_arena *SimulationArena, 
+    game_state *GameState, world *World, memory_arena *SimulationArena,
     entity_world_position RegionOrigin, rectangle3 UpdateBounds, f32 TimeDelta
 )
 {
@@ -162,7 +162,7 @@ BeginSimulation
     f32 SimulationBoundsSafetyMargin = SimulationRegion->MaxEntityRadius + SimulationRegion->MaxEntityVelocity * TimeDelta;
 
     SimulationRegion->UpdateBounds =
-        ExpandRectangle(UpdateBounds, 
+        ExpandRectangle(UpdateBounds,
                         2 * V3(SimulationRegion->MaxEntityRadius, SimulationRegion->MaxEntityRadius, SimulationRegion->MaxEntityRadius));
 
     SimulationRegion->SimulationBounds =
@@ -204,7 +204,7 @@ BeginSimulation
                                 (
                                     DoesEntityCollisionMeshOverlapRectangle
                                     (
-                                        Position, 
+                                        Position,
                                         StorageEntity->Entity.CollisionMeshGroup->TotalCollisionMesh,
                                         SimulationRegion->SimulationBounds
                                     )
@@ -223,7 +223,7 @@ BeginSimulation
     return SimulationRegion;
 }
 
-static void 
+static void
 EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
 {
     entity *Entity = SimulationRegion->Entities;
@@ -263,7 +263,7 @@ EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
 
             if (MovingEntity->Position.X > (0.5f * TilesPerScreenWidth * TileSideInMeters))
             {
-                // new camera position = old camera position + 
+                // new camera position = old camera position +
                 NewCameraPosition.OffsetFromChunkCenter += V2((f32)TileSideInMeters * TilesPerScreenWidth, 0.0f);
             }
             if (StorageEntityThatCameraFollows.High->PositionRelativeToCamera.X < -(0.5f * TilesPerScreenWidth * TileSideInMeters))

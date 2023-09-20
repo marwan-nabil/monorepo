@@ -47,23 +47,23 @@ F32FromF32Lane(f32_lane Value, u32 Index)
         {
             *(u32 *)&Result = _mm_extract_ps(Value, 0);
         } break;
-        
+
         case 1:
         {
             *(u32 *)&Result = _mm_extract_ps(Value, 1);
         } break;
-        
+
         case 2:
         {
             *(u32 *)&Result = _mm_extract_ps(Value, 2);
         } break;
-        
+
         case 3:
         {
             *(u32 *)&Result = _mm_extract_ps(Value, 3);
         } break;
     }
-    return Result; 
+    return Result;
 }
 
 /******************************************/
@@ -100,21 +100,21 @@ U32FromU32Lane(u32_lane Value, u32 Index)
         {
             Result = _mm_extract_epi32(Value, 0);
         } break;
-        
+
         case 1:
         {
             Result = _mm_extract_epi32(Value, 1);
         } break;
-        
+
         case 2:
         {
             Result = _mm_extract_epi32(Value, 2);
         } break;
-        
+
         case 3:
         {
             Result = _mm_extract_epi32(Value, 3);
         } break;
     }
-    return Result; 
+    return Result;
 }

@@ -57,7 +57,7 @@ RenderSimulation(rendering_buffer *Buffer, simulation_state *SimulationState)
 
     DrawGraph
     (
-        Buffer, SimulationState->DataValues, SimulationState->DataColors, 
+        Buffer, SimulationState->DataValues, SimulationState->DataColors,
         SimulationState->DataPointCount, 1000, GraphRect
     );
 }

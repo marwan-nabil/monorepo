@@ -9,7 +9,7 @@ struct entity_table_entry
 struct simulation_region
 {
     world *World;
-    
+
     entity_world_position Origin;
     rectangle3 SimulationBounds;
     rectangle3 UpdateBounds;

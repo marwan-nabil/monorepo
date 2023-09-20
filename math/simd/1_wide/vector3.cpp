@@ -1,4 +1,4 @@
-inline v3_lane 
+inline v3_lane
 V3Lane(f32_lane X, f32_lane Y, f32_lane Z)
 {
     v3_lane Result;
@@ -24,7 +24,7 @@ operator&(u32_lane A, v3_lane B)
 inline v3
 HorizontalAdd(v3_lane WideValue)
 {
-    v3 NarrowValue = 
+    v3 NarrowValue =
     {
         HorizontalAdd(WideValue.X),
         HorizontalAdd(WideValue.Y),

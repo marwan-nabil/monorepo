@@ -75,67 +75,67 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         f32 TileDepthInMeters = 3.0f;
         i32 TileSideInPixels = 60;
 
-        GameState->NullCollisionMeshGroupTemplate = 
+        GameState->NullCollisionMeshGroupTemplate =
             MakeNullCollisionMeshTemplate(GameState);
-        GameState->SwordCollisionMeshGroupTemplate = 
+        GameState->SwordCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.1f));
-        GameState->WallCollisionMeshGroupTemplate = 
+        GameState->WallCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(TileSideInMeters, TileSideInMeters, TileDepthInMeters));
-        GameState->StandardRoomCollisionMeshGroupTemplate = 
+        GameState->StandardRoomCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(TilesPerScreenWidth * TileSideInMeters, TilesPerScreenHeight * TileSideInMeters, 0.9f * TileDepthInMeters));
-        GameState->StairsCollisionMeshGroupTemplate = 
+        GameState->StairsCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(TileSideInMeters, 2 * TileSideInMeters, 1.1f * TileDepthInMeters));
-        GameState->PlayerCollisionMeshGroupTemplate = 
+        GameState->PlayerCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 1.2f));
-        GameState->FamiliarCollisionMeshGroupTemplate = 
+        GameState->FamiliarCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.5f));
-        GameState->MonsterCollisionMeshGroupTemplate = 
+        GameState->MonsterCollisionMeshGroupTemplate =
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.5f));
 
-        GameState->BackDropBitMap = 
+        GameState->BackDropBitMap =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_background.bmp");
-        GameState->ShadowBitMap = 
+        GameState->ShadowBitMap =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/../data/test/test_hero_shadow.bmp");
-        GameState->TreeBitMap = 
+        GameState->TreeBitMap =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/tree00.bmp");
-        GameState->StairWellBitMap = 
+        GameState->StairWellBitMap =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock02.bmp");
-        GameState->SwordBitMap = 
+        GameState->SwordBitMap =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test2/rock03.bmp");
 
         hero_bitmap_group *HeroBitmapGroup = &GameState->HeroBitmapGroups[0];
-        HeroBitmapGroup->Head = 
+        HeroBitmapGroup->Head =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_head.bmp");
-        HeroBitmapGroup->Cape = 
+        HeroBitmapGroup->Cape =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_cape.bmp");
-        HeroBitmapGroup->Torso = 
+        HeroBitmapGroup->Torso =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_right_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[1];
-        HeroBitmapGroup->Head = 
+        HeroBitmapGroup->Head =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_head.bmp");
-        HeroBitmapGroup->Cape = 
+        HeroBitmapGroup->Cape =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_cape.bmp");
-        HeroBitmapGroup->Torso = 
+        HeroBitmapGroup->Torso =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_back_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[2];
-        HeroBitmapGroup->Head = 
+        HeroBitmapGroup->Head =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_head.bmp");
-        HeroBitmapGroup->Cape = 
+        HeroBitmapGroup->Cape =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_cape.bmp");
-        HeroBitmapGroup->Torso = 
+        HeroBitmapGroup->Torso =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_left_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[3];
-        HeroBitmapGroup->Head = 
+        HeroBitmapGroup->Head =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_head.bmp");
-        HeroBitmapGroup->Cape = 
+        HeroBitmapGroup->Cape =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_cape.bmp");
-        HeroBitmapGroup->Torso = 
+        HeroBitmapGroup->Torso =
             LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/test/test_hero_front_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
@@ -144,7 +144,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         InitializeWorld(World, TileSideInMeters, TileDepthInMeters);
 
         GameState->PixelsToMetersRatio = (f32)TileSideInPixels / TileSideInMeters;
-        
+
         AddStorageEntity(GameState, ET_NULL, InvalidWorldPosition());
 
         u32 RandomNumbersIndex = 99;
@@ -152,15 +152,15 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         u32 StartScreenX = 0;// INT16_MAX / TilesPerScreenWidth / 2;
         u32 StartScreenY = 0;//INT16_MAX / TilesPerScreenHeight / 2;
         u32 StartScreenZ = 0;//INT16_MAX / 2;
-      
+
         u32 PreviousScreenX = StartScreenX;
         u32 PreviousScreenY = StartScreenY;
         u32 PreviousScreenZ = StartScreenZ;
-      
+
         u32 NextScreenX = PreviousScreenX;
         u32 NextScreenY = PreviousScreenY;
         u32 NextScreenZ = PreviousScreenZ;
-        
+
         b32 PreviousDoorLeft = FALSE;
         b32 PreviousDoorRight = FALSE;
         b32 PreviousDoorTop = FALSE;
@@ -383,7 +383,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 RandomNumbersIndex = 0;
             }
-            
+
             i32 FamiliarYOffset = (RandomNumbersTable[RandomNumbersIndex++] % 4) - 2;
             if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
             {
@@ -398,7 +398,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     }
 
     world *World = GameState->World;
-    
+
     for (u32 ControllerIndex = 0; ControllerIndex < ArrayLength(GameInput->ControllerStates); ControllerIndex++)
     {
         controller_state *ControllerInput = GetController(GameInput, ControllerIndex);
@@ -420,7 +420,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
             if (ControllerInput->MovementIsAnalog)
             {
-                ControlledHeroInput->InputAcceleration = 
+                ControlledHeroInput->InputAcceleration =
                     V3(ControllerInput->StickAverageX, ControllerInput->StickAverageY, 0);
             }
             else
@@ -493,7 +493,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     entity *CurrentEntity = CameraSimulationRegion->Entities;
     for
     (
-        u32 EntityIndex = 0; 
+        u32 EntityIndex = 0;
         EntityIndex < CameraSimulationRegion->CurrentEntityCount;
         EntityIndex++, CurrentEntity++
     )
@@ -575,7 +575,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                     EntityMoveSpec.NormalizeAcceleration = FALSE;
                     EntityMoveSpec.SpeedInXYPlane = 0;
                     EntityMoveSpec.DragInXYPlane = 0;
-                    
+
                     EntityAcceleration = V3(0, 0, 0);
 
                     if (CurrentEntity->MovementDistanceLimit == 0)
@@ -678,8 +678,8 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                 f32 ZFudge = 1 + 0.1f * (EntityBasePoint.Z + RenderPiece->Offset.Z);
 
                 v2 ScreenCenterOffset = 0.5f * V2((f32)PixelBuffer->WidthInPixels, (f32)PixelBuffer->HeightInPixels);
-            
-                v2 EntityGroundPoint = 
+
+                v2 EntityGroundPoint =
                 {
                     ScreenCenterOffset.X + EntityBasePoint.X * ZFudge * GameState->PixelsToMetersRatio,
                     ScreenCenterOffset.Y - EntityBasePoint.Y * ZFudge * GameState->PixelsToMetersRatio

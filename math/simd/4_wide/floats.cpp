@@ -1,28 +1,28 @@
 /******************************************/
 /*         arithmetic operations          */
 /******************************************/
-inline f32_lane 
+inline f32_lane
 operator+(f32_lane A, f32_lane B)
 {
     f32_lane Result = _mm_add_ps(A, B);
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 operator-(f32_lane A, f32_lane B)
 {
     f32_lane Result = _mm_sub_ps(A, B);
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 operator*(f32_lane A, f32_lane B)
 {
     f32_lane Result = _mm_mul_ps(A, B);
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 operator/(f32_lane A, f32_lane B)
 {
     f32_lane Result = _mm_div_ps(A, B);
@@ -126,7 +126,7 @@ GatherF32Implementation(void *Base, u32 Stride, u32_lane Indices)
 /******************************************/
 /*             Common Functions           */
 /******************************************/
-inline f32_lane 
+inline f32_lane
 SquareRoot(f32_lane A)
 {
     f32_lane Result = _mm_sqrt_ps(A);
@@ -137,7 +137,7 @@ inline f32
 HorizontalAdd(f32_lane WideValue)
 {
     f32 *ElementPointer = (f32 *)&WideValue;
-    f32 NarrowValue = 
+    f32 NarrowValue =
         ElementPointer[0] +
         ElementPointer[1] +
         ElementPointer[2] +
@@ -159,7 +159,7 @@ Min(f32_lane A, f32_lane B)
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 Power(f32_lane A, f32 Exponent)
 {
     f32_lane Result = F32LaneFromF32
@@ -172,7 +172,7 @@ Power(f32_lane A, f32 Exponent)
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 Power(f32 A, f32_lane Exponent)
 {
     f32_lane Result = F32LaneFromF32
@@ -185,7 +185,7 @@ Power(f32 A, f32_lane Exponent)
     return Result;
 }
 
-inline f32_lane 
+inline f32_lane
 Power(f32_lane A, f32_lane Exponent)
 {
     f32_lane Result = F32LaneFromF32

@@ -2,7 +2,7 @@ static void
 DrawRectangle
 (
     game_pixel_buffer *PixelBuffer,
-    v2 MinCorner, v2 MaxCorner, 
+    v2 MinCorner, v2 MaxCorner,
     f32 Red, f32 Green, f32 Blue, f32 Alpha
 )
 {
@@ -70,7 +70,7 @@ DrawRectangle
 static void
 DrawBitmap
 (
-    loaded_bitmap *SourceBitMap, game_pixel_buffer *DestinationBuffer, 
+    loaded_bitmap *SourceBitMap, game_pixel_buffer *DestinationBuffer,
     f32 DestinationX, f32 DestinationY, f32 AlphaFactor
 )
 {
@@ -106,9 +106,9 @@ DrawBitmap
         SourceOffsetX +
         SourceBitMap->Width * (SourceBitMap->Height - 1 - SourceOffsetY);
 
-    u8 *DestinationRow = 
-        (u8 *)DestinationBuffer->PixelsMemory + 
-        DestMinX * DestinationBuffer->BytesPerPixel + 
+    u8 *DestinationRow =
+        (u8 *)DestinationBuffer->PixelsMemory +
+        DestMinX * DestinationBuffer->BytesPerPixel +
         DestMinY * DestinationBuffer->BytesPerRow;
 
     for (i32 Y = DestMinY; Y < DestMaxY; Y++)
@@ -148,7 +148,7 @@ DrawBitmap
 inline void
 PushRenderPeice
 (
-    game_state *GameState, render_peice_group *PeiceGroup, 
+    game_state *GameState, render_peice_group *PeiceGroup,
     loaded_bitmap *Bitmap, v3 Offset, v2 BitmapAlignment,
     v4 Color, f32 EntityJumpZCoefficient, v2 RectangleDimensions
 )
@@ -167,7 +167,7 @@ PushRenderPeice
 inline void
 PushBitmapRenderPiece
 (
-    game_state *GameState, render_peice_group *PeiceGroup, 
+    game_state *GameState, render_peice_group *PeiceGroup,
     loaded_bitmap *Bitmap, v3 Offset, v2 BitmapAlignment,
     f32 Alpha, f32 EntityJumpZCoefficient
 )

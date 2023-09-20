@@ -82,7 +82,7 @@ HRESULT CreateDeviceResources(HWND Window)
     if(FAILED(Result))
     {
         // Handle device interface creation failure if it occurs.
-        // For example, reduce the feature level requirement, or fail over 
+        // For example, reduce the feature level requirement, or fail over
         // to WARP rendering.
     }
 
@@ -195,7 +195,7 @@ HRESULT CreateWindowResources(HWND Window)
 }
 
 
-// creates BackBuffer, RenderTarget, BackBufferDescription, 
+// creates BackBuffer, RenderTarget, BackBufferDescription,
 // DepthStencil, DepthStencilView and ViewPort
 HRESULT ConfigureBackBuffer()
 {
@@ -266,7 +266,7 @@ HRESULT ReleaseBackBuffer()
     DepthStencil->Release();
     DepthStencil = NULL;
 
-    // After releasing references to these resources, we need to call Flush() to 
+    // After releasing references to these resources, we need to call Flush() to
     // ensure that Direct3D also releases any references it might still have to
     // the same resources - such as pipeline bindings.
     D3D_DeviceContext->Flush();
@@ -282,10 +282,10 @@ HRESULT GoFullScreen()
 
 
     // Swap chains created with the DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL flag need to
-    // call ResizeBuffers in order to realize a full-screen mode switch. Otherwise, 
+    // call ResizeBuffers in order to realize a full-screen mode switch. Otherwise,
     // your next call to Present will fail.
 
-    // Before calling ResizeBuffers, you have to release all references to the back 
+    // Before calling ResizeBuffers, you have to release all references to the back
     // buffer device resource.
     Result = ReleaseBackBuffer();
 
@@ -310,10 +310,10 @@ HRESULT GoWindowed()
     Result = SwapChain->SetFullscreenState(FALSE, NULL);
 
     // Swap chains created with the DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL flag need to
-    // call ResizeBuffers in order to realize a change to windowed mode. Otherwise, 
+    // call ResizeBuffers in order to realize a change to windowed mode. Otherwise,
     // your next call to Present will fail.
 
-    // Before calling ResizeBuffers, you have to release all references to the back 
+    // Before calling ResizeBuffers, you have to release all references to the back
     // buffer device resource.
     Result = ReleaseBackBuffer();
 

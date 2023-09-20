@@ -1,10 +1,10 @@
-inline f32 
+inline f32
 Square(f32 A)
 {
     return A * A;
 }
 
-inline f32 
+inline f32
 SquareRoot(f32 A)
 {
     f32 Result = sqrtf(A);

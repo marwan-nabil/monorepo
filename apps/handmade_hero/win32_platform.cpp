@@ -227,7 +227,7 @@ Win32InitDSound(HWND Window, win32_sound_configuration *SoundBufferConfiguratoin
     HMODULE DSoundDLL = LoadLibraryA("dsound.dll");
     if (DSoundDLL)
     {
-        directsound_create *DirectSoundCreate = 
+        directsound_create *DirectSoundCreate =
             (directsound_create *)GetProcAddress(DSoundDLL, "DirectSoundCreate");
 
         LPDIRECTSOUND DirectSound;
@@ -323,7 +323,7 @@ Win32DisplayBufferInWindow(HDC DeviceContext, win32_window_dimensions WindowDime
         PatBlt
         (
             DeviceContext,
-            0, OffsetY + PixelBuffer->HeightInPixels, 
+            0, OffsetY + PixelBuffer->HeightInPixels,
             WindowDimensions.WidthInPixels, WindowDimensions.HeightInPixels,
             BLACKNESS
         );
@@ -375,16 +375,16 @@ Win32FillGlobalSoundBuffer
     DWORD BufferRegion1Size;
     void *BufferRegion2;
     DWORD BufferRegion2Size;
-    
-    if 
+
+    if
     (
         SUCCEEDED
         (
             SecondarySoundBuffer->Lock
             (
-                ByteToLock, BytesToWrite, 
-                &BufferRegion1, &BufferRegion1Size, 
-                &BufferRegion2, &BufferRegion2Size, 
+                ByteToLock, BytesToWrite,
+                &BufferRegion1, &BufferRegion1Size,
+                &BufferRegion2, &BufferRegion2Size,
                 0
             )
         )
@@ -430,9 +430,9 @@ Win32ClearSoundBuffer(win32_sound_configuration *SoundBufferConfiguration, LPDIR
         (
             SecondarySoundBuffer->Lock
             (
-                0, SoundBufferConfiguration->SoundBufferSize, 
-                &BufferRegion1, &BufferRegion1Size, 
-                &BufferRegion2, &BufferRegion2Size, 
+                0, SoundBufferConfiguration->SoundBufferSize,
+                &BufferRegion1, &BufferRegion1Size,
+                &BufferRegion2, &BufferRegion2Size,
                 0
             )
         )
@@ -560,8 +560,8 @@ Win32ProcessStickDeadzone(SHORT StickValueIn, SHORT DeadzoneThreshold)
 static void
 Win32CaptureGamepadControllerSample
 (
-    controller_state *NewControllerState, 
-    controller_state *OldControllerState, 
+    controller_state *NewControllerState,
+    controller_state *OldControllerState,
     XINPUT_STATE *SampledControllerState
 )
 {
@@ -609,63 +609,63 @@ Win32CaptureGamepadControllerSample
 
     Win32ProcessButton
     (
-        &NewControllerState->MoveLeft, 
+        &NewControllerState->MoveLeft,
         ((NewControllerState->StickAverageX < -AnalogStickDigitalThreshold) ? 1 : 0)
     );
     Win32ProcessButton
     (
-        &NewControllerState->MoveRight, 
+        &NewControllerState->MoveRight,
         ((NewControllerState->StickAverageX > AnalogStickDigitalThreshold) ? 1 : 0)
     );
     Win32ProcessButton
     (
-        &NewControllerState->MoveUp, 
+        &NewControllerState->MoveUp,
         ((NewControllerState->StickAverageY > AnalogStickDigitalThreshold) ? 1 : 0)
     );
     Win32ProcessButton
     (
-        &NewControllerState->MoveDown, 
+        &NewControllerState->MoveDown,
         ((NewControllerState->StickAverageY < -AnalogStickDigitalThreshold) ? 1 : 0)
     );
 
     Win32ProcessButton
     (
-        &NewControllerState->ActionUp, 
+        &NewControllerState->ActionUp,
         ((GamePadSample->wButtons & XINPUT_GAMEPAD_Y) == XINPUT_GAMEPAD_Y)
     );
     Win32ProcessButton
     (
-        &NewControllerState->ActionDown, 
+        &NewControllerState->ActionDown,
         ((GamePadSample->wButtons & XINPUT_GAMEPAD_A) == XINPUT_GAMEPAD_A)
     );
     Win32ProcessButton
     (
-        &NewControllerState->ActionLeft, 
-        ((GamePadSample->wButtons & XINPUT_GAMEPAD_X) == XINPUT_GAMEPAD_X) 
+        &NewControllerState->ActionLeft,
+        ((GamePadSample->wButtons & XINPUT_GAMEPAD_X) == XINPUT_GAMEPAD_X)
     );
     Win32ProcessButton
     (
-        &NewControllerState->ActionRight, 
-        ((GamePadSample->wButtons & XINPUT_GAMEPAD_B) == XINPUT_GAMEPAD_B) 
+        &NewControllerState->ActionRight,
+        ((GamePadSample->wButtons & XINPUT_GAMEPAD_B) == XINPUT_GAMEPAD_B)
     );
     Win32ProcessButton
     (
-        &NewControllerState->LeftShoulder, 
+        &NewControllerState->LeftShoulder,
         ((GamePadSample->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) == XINPUT_GAMEPAD_LEFT_SHOULDER)
     );
     Win32ProcessButton
     (
-        &NewControllerState->RightShoulder, 
+        &NewControllerState->RightShoulder,
         ((GamePadSample->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) == XINPUT_GAMEPAD_RIGHT_SHOULDER)
     );
     Win32ProcessButton
     (
-        &NewControllerState->Start, 
+        &NewControllerState->Start,
         ((GamePadSample->wButtons & XINPUT_GAMEPAD_START) == XINPUT_GAMEPAD_START)
     );
     Win32ProcessButton
     (
-        &NewControllerState->Back, 
+        &NewControllerState->Back,
         ((GamePadSample->wButtons & XINPUT_GAMEPAD_BACK) == XINPUT_GAMEPAD_BACK)
     );
 }
@@ -674,7 +674,7 @@ static void
 Win32GetInputOrStateFileLocation
 (
     i32 SlotIndex,
-    b32 IsInputStream, 
+    b32 IsInputStream,
     win32_platform_state *PlatformState,
     u32 DestSize,
     char *Dest
@@ -705,22 +705,22 @@ Win32GetGameInputBuffer(win32_platform_state *PlatformState, u32 Index)
 static void
 Win32BeginRecordingInput(win32_platform_state *PlatformState, u32 CurrentGameInputRecordingBufferIndex)
 {
-    win32_input_buffer *GameInputBuffer = 
+    win32_input_buffer *GameInputBuffer =
         Win32GetGameInputBuffer(PlatformState, CurrentGameInputRecordingBufferIndex);
 
     if (GameInputBuffer->MemoryBlock)
     {
-        PlatformState->CurrentGameInputRecordingBufferIndex = 
+        PlatformState->CurrentGameInputRecordingBufferIndex =
             CurrentGameInputRecordingBufferIndex;
 
         char GameInputRecordingFileName[MAX_PATH];
         Win32GetInputOrStateFileLocation
         (
-            CurrentGameInputRecordingBufferIndex, TRUE, PlatformState, 
+            CurrentGameInputRecordingBufferIndex, TRUE, PlatformState,
             sizeof(GameInputRecordingFileName), GameInputRecordingFileName
         );
 
-        PlatformState->CurrentGameInputRecordingFileHandle = 
+        PlatformState->CurrentGameInputRecordingFileHandle =
             CreateFileA(GameInputRecordingFileName, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
 
         CopyMemory(GameInputBuffer->MemoryBlock, PlatformState->GameMemoryBlock, PlatformState->GameMemoryBlockSize);
@@ -743,13 +743,13 @@ Win32BeginInputPlayback(win32_platform_state *PlatformState, u32 CurrentGameInpu
 
     if (GameInputBuffer->MemoryBlock)
     {
-        PlatformState->CurrentGameInputPlaybackBufferIndex = 
+        PlatformState->CurrentGameInputPlaybackBufferIndex =
             CurrentGameInputPlaybackBufferIndex;
 
         char CurrentGameInputPlaybackFileName[MAX_PATH];
         Win32GetInputOrStateFileLocation
         (
-            CurrentGameInputPlaybackBufferIndex, TRUE, PlatformState, 
+            CurrentGameInputPlaybackBufferIndex, TRUE, PlatformState,
             sizeof(CurrentGameInputPlaybackFileName), CurrentGameInputPlaybackFileName
         );
 
@@ -773,7 +773,7 @@ Win32RecordInput(win32_platform_state *PlatformState, game_input *GameInput)
     DWORD BytesWritten;
     WriteFile
     (
-        PlatformState->CurrentGameInputRecordingFileHandle, GameInput, 
+        PlatformState->CurrentGameInputRecordingFileHandle, GameInput,
         sizeof(game_input), &BytesWritten, 0
     );
 }
@@ -815,7 +815,7 @@ Win32ToggleFullScreen(HWND Window, win32_platform_state *PlatformState)
         MONITORINFO MonitorInfo = {sizeof(MonitorInfo)};
         b32 GetMonitorInfoResult = GetMonitorInfo(Monitor, &MonitorInfo);
 
-        b32 GetWindowPlacementResult = 
+        b32 GetWindowPlacementResult =
             GetWindowPlacement(Window, &PlatformState->PreviousWindowPlacement);
 
         if (GetWindowPlacementResult && GetMonitorInfoResult)
@@ -980,7 +980,7 @@ Win32GetWallClock()
 static f32
 Win32GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End, i64 CounterFrequency)
 {
-    f32 SecondsElapsed = 
+    f32 SecondsElapsed =
         (f32)(End.QuadPart - Start.QuadPart)
         / (f32)CounterFrequency;
     return SecondsElapsed;
@@ -1049,10 +1049,10 @@ WinMain
             HDC MainWindowDeviceContextHandle = GetDC(MainWindow);
             i32 Win32RefreshRate = GetDeviceCaps(MainWindowDeviceContextHandle, VREFRESH);
             ReleaseDC(MainWindow, MainWindowDeviceContextHandle);
-            
+
             if (Win32RefreshRate > 1)
             {
-                MonitorRefreshHz = Win32RefreshRate; 
+                MonitorRefreshHz = Win32RefreshRate;
             }
             f32 GameRefreshHz = (MonitorRefreshHz / 2.0f);
             f32 TargetSecondsPerFrame = 1.0f / (f32)GameRefreshHz;
@@ -1064,7 +1064,7 @@ WinMain
             win32_sound_configuration SoundBufferConfiguration = {};
             SoundBufferConfiguration.SamplesPerSecond = 48000;
             SoundBufferConfiguration.BytesPerSample = 2 * sizeof(i16);
-            SoundBufferConfiguration.SoundBufferSize = 
+            SoundBufferConfiguration.SoundBufferSize =
                 1 * SoundBufferConfiguration.SamplesPerSecond * SoundBufferConfiguration.BytesPerSample;
             u32 SoundBytesProducedPerFrame = (u32)
             (
@@ -1096,17 +1096,17 @@ WinMain
             GameMemory.PlatformReadFile = PlatformReadFile;
             GameMemory.PermanentStorageSize = MegaBytes(256);
             GameMemory.TransientStorageSize = MegaBytes((u64)256); // casey has this at 1GB
-            
-            Win32PlatformState.GameMemoryBlockSize = 
+
+            Win32PlatformState.GameMemoryBlockSize =
                 GameMemory.TransientStorageSize + GameMemory.PermanentStorageSize;
             Win32PlatformState.GameMemoryBlock = VirtualAlloc
             (
-                AllocationBaseAddress, (size_t)Win32PlatformState.GameMemoryBlockSize, 
+                AllocationBaseAddress, (size_t)Win32PlatformState.GameMemoryBlockSize,
                 MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE
             );
 
             GameMemory.PermanentStorage = Win32PlatformState.GameMemoryBlock;
-            GameMemory.TransientStorage = 
+            GameMemory.TransientStorage =
                 (u8 *)GameMemory.PermanentStorage + GameMemory.PermanentStorageSize;
 
             for
@@ -1116,7 +1116,7 @@ WinMain
                 BufferIndex++
             )
             {
-                win32_input_buffer *GameInputBuffer = 
+                win32_input_buffer *GameInputBuffer =
                     &Win32PlatformState.GameInputBuffers[BufferIndex];
 
                 Win32GetInputOrStateFileLocation
@@ -1259,7 +1259,7 @@ WinMain
                             &NewTotalGameInput->MouseButtons[4],
                             GetKeyState(VK_XBUTTON2) & (1 << 15)
                         );
-                        
+
                         for (DWORD ControllerIndex = 0; ControllerIndex < MaxControllerCount; ControllerIndex++)
                         {
                             controller_state *OldControllerState =
@@ -1389,7 +1389,7 @@ WinMain
                             }
 
                             game_sound_request GameSoundRequest = {};
-                            GameSoundRequest.SamplesPerSecond = 
+                            GameSoundRequest.SamplesPerSecond =
                                 SoundBufferConfiguration.SamplesPerSecond;
                             GameSoundRequest.OutputSamplesCount =
                                 BytesToWrite / SoundBufferConfiguration.BytesPerSample;
@@ -1467,7 +1467,7 @@ WinMain
                                 }
                             }
 
-                            SecondsElapsedForFrame = 
+                            SecondsElapsedForFrame =
                                 Win32GetSecondsElapsed
                                 (
                                     LastPerfCount,
@@ -1540,7 +1540,7 @@ WinMain
                         )
                         {
                             Assert(DebugTimeMarkerIndex < ArrayLength(DebugTimeMarkers));
-                            win32_debug_sound_time_marker *TimeMarker = 
+                            win32_debug_sound_time_marker *TimeMarker =
                                 &DebugTimeMarkers[DebugTimeMarkerIndex];
                             TimeMarker->FlipPlayCursor = FlipPlayCursor;
                             TimeMarker->FlipWriteCursor = FlipWriteCursor;

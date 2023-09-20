@@ -87,7 +87,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     int Width = 640;
 	int Height = 480;
 
-    HWND hWnd = CreateWindow(WindowClassName, WindowTitle, WS_OVERLAPPEDWINDOW, 
+    HWND hWnd = CreateWindow(WindowClassName, WindowTitle, WS_OVERLAPPEDWINDOW,
         			 		 CW_USEDEFAULT, CW_USEDEFAULT,
                              Width, Height,
                      		 NULL, Menu, hInstance, NULL);
@@ -95,7 +95,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     {
         return 1;
     }
-    
+
     // -------------------------
     // initialize Direct3D stuff
     // -------------------------
@@ -131,6 +131,6 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         RendererRender();
         Present();
     }
- 
+
     return Result;
 }

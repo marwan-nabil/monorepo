@@ -148,7 +148,7 @@ RenderPixel
         v3_lane RayBatchColor = V3Lane(0, 0, 0);
         v3_lane RayBatchColorAttenuation = V3Lane(1, 1, 1);
 
-        v3_lane RayBatchPositionOnFilm = 
+        v3_lane RayBatchPositionOnFilm =
             V3LaneFromV3(PixelCenterOnFilm) +
             HalfPixelWidth * RandomBilateralLane(RandomSeries) * CameraX +
             HalfPixelHeight * RandomBilateralLane(RandomSeries) * CameraY;
@@ -180,7 +180,7 @@ RenderPixel
                 if (!MaskIsAllZeroes(DenominatorMask))
                 {
                     f32_lane CurrentHitDistance = (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) / Denominator;
-                    u32_lane CurrentHitDistanceMask = 
+                    u32_lane CurrentHitDistanceMask =
                         (CurrentHitDistance < MinimumHitDistanceFound) &
                         (CurrentHitDistance > HitDistanceLowerLimit);
 
@@ -221,7 +221,7 @@ RenderPixel
                     f32_lane CurrentHitDistance = PositiveSolution;
                     ConditionalAssign(&CurrentHitDistance, NegativeSolution, NegativeSolutionMask);
 
-                    u32_lane HitDistanceMask = 
+                    u32_lane HitDistanceMask =
                         (CurrentHitDistance < MinimumHitDistanceFound) &
                         (CurrentHitDistance > HitDistanceLowerLimit);
 
@@ -242,13 +242,13 @@ RenderPixel
             v3_lane HitMaterialReflectionColor = HitMaterial->ReflectionColor;
             v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
 #elif (SIMD_NUMBEROF_LANES == 4)
-            f32_lane HitMaterialSpecularity = 
+            f32_lane HitMaterialSpecularity =
                 LaneMask & GatherF32(World->Materials, Specularity, HitMaterialIndex);
 
-            v3_lane HitMaterialReflectionColor = 
+            v3_lane HitMaterialReflectionColor =
                 LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
 
-            v3_lane HitMaterialEmmissionColor = 
+            v3_lane HitMaterialEmmissionColor =
                 LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
 #endif // SIMD_NUMBEROF_LANES
 
@@ -262,10 +262,10 @@ RenderPixel
 
             BounceOrigin += MinimumHitDistanceFound * BounceDirection;
 
-            v3_lane PureBounceDirection = 
+            v3_lane PureBounceDirection =
                 Normalize(BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal);
 
-            v3_lane RandomBounceDirection = 
+            v3_lane RandomBounceDirection =
                 Normalize(NextBounceNormal + V3Lane(RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries)));
 
             BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
@@ -315,7 +315,7 @@ RenderTile(work_queue *WorkQueue)
         {
             f32 PixelBeginX = 2.0f * ((f32)PixelX / (f32)Image->WidthInPixels) - 1.0f;
 
-            v3 PixelCenterOnFilm = 
+            v3 PixelCenterOnFilm =
                 Film->Center +
                 (PixelBeginX * Film->HalfWidth + Film->HalfPixelWidth) * CameraX +
                 (PixelBeginY * Film->HalfHeight + Film->HalfPixelHeight) * CameraY;
@@ -325,7 +325,7 @@ RenderTile(work_queue *WorkQueue)
                 WorkOrder, PixelCenterOnFilm, &BouncesComputedPerTile
             );
 
-            v4 BitmapColorRGBA = 
+            v4 BitmapColorRGBA =
             {
                 255 * TranslateLinearTosRGB(PixelColor.Red),
                 255 * TranslateLinearTosRGB(PixelColor.Green),
@@ -477,10 +477,10 @@ main(i32 argc, u8 **argv)
     // RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
-    RenderingParameters.TileCountX = 
+    RenderingParameters.TileCountX =
         (OutputImage.WidthInPixels + RenderingParameters.TileWidthInPixels - 1) / RenderingParameters.TileWidthInPixels;
 
-    RenderingParameters.TileCountY = 
+    RenderingParameters.TileCountY =
         (OutputImage.HeightInPixels + RenderingParameters.TileHeightInPixels - 1) / RenderingParameters.TileHeightInPixels;
 
     RenderingParameters.TotalTileCount = RenderingParameters.TileCountX * RenderingParameters.TileCountY;
@@ -533,7 +533,7 @@ main(i32 argc, u8 **argv)
         HANDLE ThreadHandle = CreateThread(0, 0, WorkerThreadEntry, &WorkQueue, 0, &ThreadId);
         CloseHandle(ThreadHandle);
     }
-    
+
     while (WorkQueue.TotalTilesDone < RenderingParameters.TotalTileCount)
     {
         if (RenderTile(&WorkQueue))
@@ -562,15 +562,15 @@ main(i32 argc, u8 **argv)
 
     printf
     (
-        "Using %d %dx%d tiles, %.2f KBytes/tile\n", 
-        RenderingParameters.TotalTileCount, 
-        RenderingParameters.TileWidthInPixels, RenderingParameters.TileHeightInPixels, 
+        "Using %d %dx%d tiles, %.2f KBytes/tile\n",
+        RenderingParameters.TotalTileCount,
+        RenderingParameters.TileWidthInPixels, RenderingParameters.TileHeightInPixels,
         KBytesPerTile
     );
     printf("Bounces Computed: %lld\n", WorkQueue.TotalRayBouncesComputed);
     printf
     (
-        "performance metric: %f ns/bounce\n", 
+        "performance metric: %f ns/bounce\n",
         (f64)TotalTimeElapsed / (f64)WorkQueue.TotalRayBouncesComputed * 1000000.0f
     );
 #endif

@@ -63,9 +63,9 @@ void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Colo
 
     u32 ColorU32 = PackColor(Color);
 
-    u8 *Row = 
-        (u8 *)Buffer->Memory + 
-        MinX * Buffer->BytesPerPixel + 
+    u8 *Row =
+        (u8 *)Buffer->Memory +
+        MinX * Buffer->BytesPerPixel +
         MinY * Buffer->Pitch;
 
     for (i32 Y = MinY; Y < MaxY; Y++)

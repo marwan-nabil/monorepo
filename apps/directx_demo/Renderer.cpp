@@ -247,7 +247,7 @@ void CreateViewAndPerspective()
     DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
     DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
 
-    DirectX::XMStoreFloat4x4(&ConstantBufferData.view, 
+    DirectX::XMStoreFloat4x4(&ConstantBufferData.view,
                              DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtRH(eye, at, up)));
 
     float AspectRatio = GetAspectRatio();
@@ -306,7 +306,7 @@ void RendererRender()
     ID3D11RenderTargetView *RenderTarget = GetRenderTarget();
     ID3D11DepthStencilView *DepthStencil = GetDepthStencil();
 
-    Context->UpdateSubresource(ConstantBuffer, 0, nullptr, 
+    Context->UpdateSubresource(ConstantBuffer, 0, nullptr,
                                &ConstantBufferData, 0, 0);
 
     // Clear the render target and the z-buffer.

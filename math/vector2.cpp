@@ -1,4 +1,4 @@
-inline v2 
+inline v2
 V2(f32 X, f32 Y)
 {
     v2 Result;
@@ -7,7 +7,7 @@ V2(f32 X, f32 Y)
     return Result;
 }
 
-inline v2 
+inline v2
 operator+(v2 A, v2 B)
 {
     v2 Result;
@@ -24,7 +24,7 @@ operator+=(v2 &A, v2 B)
     return A;
 }
 
-inline v2 
+inline v2
 operator-(v2 A, v2 B)
 {
     v2 Result;
@@ -33,7 +33,7 @@ operator-(v2 A, v2 B)
     return Result;
 }
 
-inline v2 
+inline v2
 operator-(v2 A)
 {
     v2 Result;
@@ -50,7 +50,7 @@ operator-=(v2 &A, v2 B)
     return A;
 }
 
-inline v2 
+inline v2
 operator*(f32 A, v2 B)
 {
     v2 Result;
@@ -59,7 +59,7 @@ operator*(f32 A, v2 B)
     return Result;
 }
 
-inline v2 
+inline v2
 operator*(v2 A, f32 B)
 {
     v2 Result;
@@ -76,7 +76,7 @@ operator*=(v2 &A, f32 B)
     return A;
 }
 
-inline v2 
+inline v2
 operator/(v2 A, f32 B)
 {
     v2 Result;
@@ -93,7 +93,7 @@ operator/=(v2 &A, f32 B)
     return A;
 }
 
-inline v2 
+inline v2
 HadamardProduct(v2 A, v2 B)
 {
     v2 Result;
@@ -123,7 +123,7 @@ Length(v2 A)
     return Result;
 }
 
-inline v2 
+inline v2
 Normalize(v2 A)
 {
     v2 Result;

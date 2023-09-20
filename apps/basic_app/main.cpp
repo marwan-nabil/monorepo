@@ -42,8 +42,8 @@ GetWindowsTimerValue()
 inline f32
 GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End, i64 ProfileCounterFrequency)
 {
-    f32 SecondsElapsed = 
-        (f32)(End.QuadPart - Start.QuadPart) / 
+    f32 SecondsElapsed =
+        (f32)(End.QuadPart - Start.QuadPart) /
         (f32)ProfileCounterFrequency;
     return SecondsElapsed;
 }

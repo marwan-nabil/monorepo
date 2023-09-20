@@ -54,7 +54,7 @@ static b32
 CanEntitiesOverlap(game_state *GameState, entity *MovingEntity, entity *TestEntity)
 {
     b32 Result = FALSE;
-    if 
+    if
     (
         (MovingEntity != TestEntity) &&
         (TestEntity->Type == ET_STAIRS)
@@ -173,16 +173,16 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
             storage_entity_indices_block *FirstBlockInChunk = &OldLocationChunk->FirstStorageEntitiesIndicesBlock;
             for
             (
-                storage_entity_indices_block *CurrentIndicesBlock = FirstBlockInChunk; 
-                CurrentIndicesBlock; 
+                storage_entity_indices_block *CurrentIndicesBlock = FirstBlockInChunk;
+                CurrentIndicesBlock;
                 CurrentIndicesBlock = CurrentIndicesBlock->NextBlock
             )
             {
                 b32 OuterBreakFlag = FALSE;
                 for
                 (
-                    u32 StorageEntityIndexIndex = 0; 
-                    StorageEntityIndexIndex < CurrentIndicesBlock->StorageEntityIndicesCount; 
+                    u32 StorageEntityIndexIndex = 0;
+                    StorageEntityIndexIndex < CurrentIndicesBlock->StorageEntityIndicesCount;
                     StorageEntityIndexIndex++
                 )
                 {
@@ -245,7 +245,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
 static void
 ChangeStorageEntityLocationInWorld
 (
-    world *World, memory_arena *MemoryArena, u32 StorageIndex, 
+    world *World, memory_arena *MemoryArena, u32 StorageIndex,
     storage_entity *StorageEntity, entity_world_position *NewWorldPosition
 )
 {
@@ -346,14 +346,14 @@ AddSword(game_state *GameState)
     SwordStorageEntityResult.StorageEntity->Entity.CollisionMeshGroup = GameState->SwordCollisionMeshGroupTemplate;
 
     SetEntityFlags(&SwordStorageEntityResult.StorageEntity->Entity, EF_NON_SPATIAL | EF_MOVEABLE);
-    
+
     return SwordStorageEntityResult;
 }
 
 static add_storage_entity_result
 AddPlayer(game_state *GameState)
 {
-    add_storage_entity_result PlayerStorageEntityResult = 
+    add_storage_entity_result PlayerStorageEntityResult =
         AddGoundBasedStorageEntity(GameState, ET_HERO, GameState->CameraPosition, GameState->PlayerCollisionMeshGroupTemplate);
 
     SetEntityFlags(&PlayerStorageEntityResult.StorageEntity->Entity, EF_COLLIDES | EF_MOVEABLE);
@@ -375,7 +375,7 @@ AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     entity_world_position MonsterPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
-    add_storage_entity_result MonsterStorageEntityResult = 
+    add_storage_entity_result MonsterStorageEntityResult =
         AddGoundBasedStorageEntity(GameState, ET_MONSTER, MonsterPosition, GameState->MonsterCollisionMeshGroupTemplate);
 
     SetEntityFlags(&MonsterStorageEntityResult.StorageEntity->Entity, EF_COLLIDES | EF_MOVEABLE);
@@ -389,7 +389,7 @@ AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
 {
     entity_world_position FamiliarPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
-    add_storage_entity_result FamiliarStorageEntityResult = 
+    add_storage_entity_result FamiliarStorageEntityResult =
         AddGoundBasedStorageEntity(GameState, ET_FAMILIAR, FamiliarPosition, GameState->FamiliarCollisionMeshGroupTemplate);
 
     SetEntityFlags(&FamiliarStorageEntityResult.StorageEntity->Entity, EF_COLLIDES | EF_MOVEABLE);
@@ -403,7 +403,7 @@ AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     entity_world_position WallGroundPosition =
         GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
-    add_storage_entity_result WallStorageEntityResult = 
+    add_storage_entity_result WallStorageEntityResult =
         AddGoundBasedStorageEntity(GameState, ET_WALL, WallGroundPosition, GameState->WallCollisionMeshGroupTemplate);
 
     SetEntityFlags(&WallStorageEntityResult.StorageEntity->Entity, EF_COLLIDES);
@@ -443,8 +443,8 @@ static b32
 TestWall
 (
     f32 SquareCenterRelativeWallX,
-    f32 SquareCenterToMovingEntityOriginalPositionX, f32 SquareCenterToMovingEntityOriginalPositionY, 
-    f32 MovingEntityMovementVectorX, f32 MovingEntityMovementVectorY, 
+    f32 SquareCenterToMovingEntityOriginalPositionX, f32 SquareCenterToMovingEntityOriginalPositionY,
+    f32 MovingEntityMovementVectorX, f32 MovingEntityMovementVectorY,
     f32 *OriginalMinimalTParameter, f32 SquareCenterRelativeMinimumOrthogonalWallY, f32 SquareCenterRelativeMaximumOrthogonalWallY
 )
 {
@@ -454,9 +454,9 @@ TestWall
     {
         f32 TParameter = (SquareCenterRelativeWallX - SquareCenterToMovingEntityOriginalPositionX) / MovingEntityMovementVectorX;
         f32 SquareCenterRelativeCollisionPointY = SquareCenterToMovingEntityOriginalPositionY + TParameter * MovingEntityMovementVectorY;
-        if 
+        if
         (
-            (SquareCenterRelativeCollisionPointY >= SquareCenterRelativeMinimumOrthogonalWallY) && 
+            (SquareCenterRelativeCollisionPointY >= SquareCenterRelativeMinimumOrthogonalWallY) &&
             (SquareCenterRelativeCollisionPointY <= SquareCenterRelativeMaximumOrthogonalWallY)
         )
         {
@@ -468,7 +468,7 @@ TestWall
             }
         }
     }
-    
+
     return DidMovingEntityHitWall;
 }
 
@@ -503,7 +503,7 @@ MoveEntity
     v3 MovementOffset =
         0.5f * Acceleration * Square(TimeDelta) +
         MovingEntity->Velocity * TimeDelta;
-    
+
     if (MovingEntity->Position.Z < 0)
     {
         MovingEntity->Position.Z = 0;
@@ -549,14 +549,14 @@ MoveEntity
                         v3 CollisionPointNormal = V3(0, 0, 0);
                         f32 TestTMin = TMin;
 
-                        for 
+                        for
                         (
-                            u32 MovingEntityCollisionMeshIndex = 0; 
-                            MovingEntityCollisionMeshIndex < MovingEntity->CollisionMeshGroup->MeshCount; 
+                            u32 MovingEntityCollisionMeshIndex = 0;
+                            MovingEntityCollisionMeshIndex < MovingEntity->CollisionMeshGroup->MeshCount;
                             MovingEntityCollisionMeshIndex++
                         )
                         {
-                            entity_collision_mesh *MovingEntityCollisionMesh = 
+                            entity_collision_mesh *MovingEntityCollisionMesh =
                                 &MovingEntity->CollisionMeshGroup->Meshes[MovingEntityCollisionMeshIndex];
 
                             for
@@ -576,7 +576,7 @@ MoveEntity
                                 v3 CollisionAreaMaxCorner = CollisionAreaMinCorner + MinkowskiCollisionDiameter;
 
                                 v3 TestMeshToMovingMesh =
-                                    (MovingEntity->Position + MovingEntityCollisionMesh->Offset) - 
+                                    (MovingEntity->Position + MovingEntityCollisionMesh->Offset) -
                                     (TestEntity->Position + TestEntityCollisionMesh->Offset);
 
                                 b32 EntitiesOverlapInZ =

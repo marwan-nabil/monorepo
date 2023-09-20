@@ -242,11 +242,11 @@ static void Win32_UpdateMouseData()
 
     HWND FocusedWindow = GetForegroundWindow();
     b32 IsAppFocused =
-    ( 
-        FocusedWindow && 
+    (
+        FocusedWindow &&
         (
-            (FocusedWindow == BackendData->Window) || 
-            IsChild(FocusedWindow, BackendData->Window) || 
+            (FocusedWindow == BackendData->Window) ||
+            IsChild(FocusedWindow, BackendData->Window) ||
             ImGui::FindViewportByPlatformHandle((void *)FocusedWindow)
         )
     );
@@ -365,7 +365,7 @@ void Win32_NewFrame()
     // Setup display size (every frame to accommodate for window resizing)
     RECT Rectangle = {0, 0, 0, 0};
     GetClientRect(BackendData->Window, &Rectangle);
-    ImGuiIo->DisplaySize = 
+    ImGuiIo->DisplaySize =
         ImVec2((f32)(Rectangle.right - Rectangle.left), (f32)(Rectangle.bottom - Rectangle.top));
 
     if (BackendData->MonitorsNeedUpdate)
@@ -1021,7 +1021,7 @@ static void Win32_UpdateWindow(ImGuiViewport *ViewPort)
     // Only reapply the Flags that have been changed from our point of view (as other Flags are being modified by Windows)
     if
     (
-        (ViewPortData->StyleFlags != NewStyle) || 
+        (ViewPortData->StyleFlags != NewStyle) ||
         (ViewPortData->ExtendedStyleFlags != NewExtendedStyle)
     )
     {

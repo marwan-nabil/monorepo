@@ -1,11 +1,11 @@
-inline rectangle2 
+inline rectangle2
 RectangleFromMinMax(v2 Min, v2 Max)
 {
     rectangle2 Result = {Min, Max};
     return Result;
 }
 
-inline rectangle2 
+inline rectangle2
 RectCenterRadius(v2 Center, v2 Radius)
 {
     rectangle2 Result = {};
@@ -14,7 +14,7 @@ RectCenterRadius(v2 Center, v2 Radius)
     return Result;
 }
 
-inline rectangle2 
+inline rectangle2
 RectCenterDiameter(v2 Center, v2 Diameter)
 {
     rectangle2 Result = {};
@@ -23,7 +23,7 @@ RectCenterDiameter(v2 Center, v2 Diameter)
     return Result;
 }
 
-inline rectangle2 
+inline rectangle2
 RectMinDiameter(v2 MinPoint, v2 Diameter)
 {
     rectangle2 Result = {};
@@ -32,7 +32,7 @@ RectMinDiameter(v2 MinPoint, v2 Diameter)
     return Result;
 }
 
-inline b32 
+inline b32
 IsPointInRectangle(rectangle2 Rectangle, v2 TestPoint)
 {
     b32 Result =

@@ -1,14 +1,14 @@
 /******************************************/
 /*          arithmetic operations         */
 /******************************************/
-inline u32_lane 
+inline u32_lane
 operator+(u32_lane A, u32_lane B)
 {
     u32_lane Result = _mm_add_epi32(A, B);
     return Result;
 }
 
-inline u32_lane 
+inline u32_lane
 operator-(u32_lane A, u32_lane B)
 {
     u32_lane Result = _mm_sub_epi32(A, B);
@@ -54,14 +54,14 @@ operator~(u32_lane A)
     return Result;
 }
 
-inline u32_lane 
+inline u32_lane
 operator<<(u32_lane Value, u32 Shift)
 {
     u32_lane Result = _mm_slli_epi32(Value, Shift);
     return Result;
 }
 
-inline u32_lane 
+inline u32_lane
 operator>>(u32_lane Value, u32 Shift)
 {
     u32_lane Result = _mm_srli_epi32(Value, Shift);
@@ -106,7 +106,7 @@ inline u64
 HorizontalAdd(u32_lane WideValue)
 {
     u32 *ElementPointer = (u32 *)&WideValue;
-    u32 NarrowValue = 
+    u32 NarrowValue =
         (u64)ElementPointer[0] +
         (u64)ElementPointer[1] +
         (u64)ElementPointer[2] +
