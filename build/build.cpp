@@ -23,6 +23,7 @@ void DisplayHelp()
     printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
     printf("          build lint\n");
+    printf("          build metadata_generator\n");
 }
 
 u32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath)
@@ -549,6 +550,22 @@ int main(int argc, char **argv)
 
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\lint.exe");
+
+            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+        }
+        else if (strcmp(argv[1], "metadata_generator") == 0)
+        {
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\metadata_generator.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref User32.lib Shlwapi.lib");
+
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\metadata_generator.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }

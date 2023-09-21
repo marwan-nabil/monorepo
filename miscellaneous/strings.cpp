@@ -30,3 +30,16 @@ StringLength(char *String)
     }
     return Count;
 }
+
+inline void
+InjectEscapeSlashes(char *SourceString, char *DestinationString)
+{
+    while (*SourceString)
+    {
+        if (*SourceString == '\\')
+        {
+            *DestinationString++ = '\\';
+        }
+        *DestinationString++ = *SourceString++;
+    }
+}
