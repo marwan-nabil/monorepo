@@ -18,16 +18,13 @@ struct directory_node
     directory_node *NextDirectoryNode;
 };
 
-void PushDirectoryNode(char *Path, directory_node **LastNode)
+struct file_node
 {
-    directory_node *NewDirectoryNode = (directory_node *)malloc(sizeof(directory_node));
-    *NewDirectoryNode = {};
-    StringCchCatA(NewDirectoryNode->DirectoryPath, ArrayLength(NewDirectoryNode->DirectoryPath), Path);
-    NewDirectoryNode->NextDirectoryNode = *LastNode;
-    *LastNode = NewDirectoryNode;
-}
+    char FilePath[1024];
+    file_node *NextFileNode;
+};
 
-b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList)
+b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList, file_node **FoundFilesList)
 {
     b32 DirectoryContainsSourceCode = FALSE;
     b32 Result = TRUE;
@@ -62,18 +59,30 @@ b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList)
                 StringCchCatA(FoundDirectoryPath, 1024, DirectoryPath);
                 StringCchCatA(FoundDirectoryPath, 1024, "\\");
                 StringCchCatA(FoundDirectoryPath, 1024, FindOperationData.cFileName);
-                Result = ProcessDirectory(FoundDirectoryPath, FoundDirectoriesList) && Result;
+                Result = ProcessDirectory(FoundDirectoryPath, FoundDirectoriesList, FoundFilesList) && Result;
             }
             else
             {
-                if (!DirectoryContainsSourceCode)
+                char *Extension = PathFindExtensionA(FindOperationData.cFileName);
+                if ((strcmp(Extension, ".cpp") == 0) || (strcmp(Extension, ".h") == 0))
                 {
-                    char *Extension = PathFindExtensionA(FindOperationData.cFileName);
-                    if ((strcmp(Extension, ".cpp") == 0) || (strcmp(Extension, ".h") == 0))
+                    if (!DirectoryContainsSourceCode)
                     {
                         DirectoryContainsSourceCode = TRUE;
-                        PushDirectoryNode(DirectoryPath, FoundDirectoriesList);
+                        directory_node *NewDirectoryNode = (directory_node *)malloc(sizeof(directory_node));
+                        *NewDirectoryNode = {};
+                        StringCchCatA(NewDirectoryNode->DirectoryPath, ArrayLength(NewDirectoryNode->DirectoryPath), DirectoryPath);
+                        NewDirectoryNode->NextDirectoryNode = *FoundDirectoriesList;
+                        *FoundDirectoriesList = NewDirectoryNode;
                     }
+
+                    file_node *NewFileNode = (file_node *)malloc(sizeof(file_node));
+                    *NewFileNode = {};
+                    StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), DirectoryPath);
+                    StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), "\\");
+                    StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), FindOperationData.cFileName);
+                    NewFileNode->NextFileNode = *FoundFilesList;
+                    *FoundFilesList = NewFileNode;
                 }
             }
         } while (FindNextFileA(FindHandle, &FindOperationData) != 0);
@@ -115,22 +124,25 @@ int main(int argc, char **argv)
     char OutputFilePath[1024];
     ZeroMemory(OutputFilePath, ArrayLength(OutputFilePath));
     StringCchCatA(OutputFilePath, ArrayLength(OutputFilePath), RootDirectoryPath);
-    StringCchCatA(OutputFilePath, ArrayLength(OutputFilePath), "\\build\\monorepo_metadata.cpp");
+    StringCchCatA(OutputFilePath, ArrayLength(OutputFilePath), "\\build\\metadata.cpp");
 
     directory_node *FoundDirectoriesList = 0;
+    file_node *FoundFilesList = 0;
 
-    ProcessDirectory(RootDirectoryPath, &FoundDirectoriesList);
+    ProcessDirectory(RootDirectoryPath, &FoundDirectoriesList, &FoundFilesList);
 
     u8 *BufferMemory = (u8 *)VirtualAlloc
     (
         0,
-        KiloBytes(5),
+        KiloBytes(100),
         MEM_RESERVE | MEM_COMMIT,
         PAGE_READWRITE
     );
-    memset(BufferMemory, 0, KiloBytes(5));
+    memset(BufferMemory, 0, KiloBytes(100));
 
     u8 *WritePointer = BufferMemory;
+
+    // ------------------------------------------------------------------------------
 
     char TemporaryString[1024];
     ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
@@ -151,11 +163,38 @@ int main(int argc, char **argv)
 
         FoundDirectoriesList = FoundDirectoriesList->NextDirectoryNode;
     }
-
     ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
-    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "};");
+    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "};\n\n");
     memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
     WritePointer += StringLength(TemporaryString);
+
+    // ------------------------------------------------------------------------------
+
+    ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
+    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "char *FilesWithSourceCode[] =\n");
+    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "{\n");
+    memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
+    WritePointer += StringLength(TemporaryString);
+
+    while (FoundFilesList != 0)
+    {
+        ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
+        StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "    \"");
+        InjectEscapeSlashes(FoundFilesList->FilePath, TemporaryString + StringLength(TemporaryString));
+        StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "\",\n");
+
+        memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
+        WritePointer += StringLength(TemporaryString);
+
+        FoundFilesList = FoundFilesList->NextFileNode;
+    }
+
+    ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
+    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "};\n");
+    memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
+    WritePointer += StringLength(TemporaryString);
+
+    // ------------------------------------------------------------------------------
 
     u64 OutputSize = WritePointer - BufferMemory;
     u8 *OutputFileMemory = (u8 *)VirtualAlloc

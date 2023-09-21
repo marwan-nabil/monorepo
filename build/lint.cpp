@@ -9,12 +9,17 @@
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\basic_defines.h"
 
-#include "monorepo_metadata.cpp"
+#if !defined(JOB_PER_DIRECTORY) && !defined(JOB_PER_FILE)
+#   define JOB_PER_FILE
+#endif
+
+#include "metadata.cpp"
 
 enum lint_job_type
 {
     LJT_FILE_LIST,
-    LJT_DIRECTORY
+    LJT_DIRECTORY,
+    LJT_FILE
 };
 
 struct lint_job
@@ -29,6 +34,7 @@ struct lint_job
             char **FilePaths;
         };
         char *DirectoryPath;
+        char *FilePath;
     };
 
     b32 Result;
@@ -278,6 +284,10 @@ void ProcessLintJob(lint_job *LintJob)
             LintJob->Result = LintFile(LintJob->FilePaths[FileIndex]) && LintJob->Result;
         }
     }
+    else if (LintJob->Type == LJT_FILE)
+    {
+        LintJob->Result = LintFile(LintJob->FilePath);
+    }
 }
 
 DWORD WINAPI
@@ -285,17 +295,20 @@ WorkerThreadEntry(void *Parameter)
 {
     lint_job_queue *LintJobQueue = (lint_job_queue *)Parameter;
 
-    u64 LintJobIndex = InterlockedExchangeAdd64(&LintJobQueue->NextJobIndex, 1);
-    if (LintJobIndex >= LintJobQueue->JobCount)
+    while (LintJobQueue->TotalJobsDone < LintJobQueue->JobCount)
     {
-        return FALSE;
+        u64 LintJobIndex = InterlockedExchangeAdd64(&LintJobQueue->NextJobIndex, 1);
+        if (LintJobIndex >= LintJobQueue->JobCount)
+        {
+            return TRUE;
+        }
+
+        ProcessLintJob(&LintJobQueue->Jobs[LintJobIndex]);
+
+        InterlockedExchangeAdd64(&LintJobQueue->TotalJobsDone, 1);
     }
 
-    ProcessLintJob(&LintJobQueue->Jobs[LintJobIndex]);
-
-    InterlockedExchangeAdd64(&LintJobQueue->TotalJobsDone, 1);
-
-    return 0;
+    return TRUE;
 }
 
 int main(int argc, char **argv)
@@ -312,7 +325,12 @@ int main(int argc, char **argv)
     clock_t StartTime = clock();
 
     lint_job_queue LintJobQueue;
+#if defined(JOB_PER_DIRECTORY)
     LintJobQueue.JobCount = ArrayLength(DirectoriesWithSourceCode);
+#endif
+#if defined(JOB_PER_FILE)
+    LintJobQueue.JobCount = ArrayLength(FilesWithSourceCode);
+#endif
     LintJobQueue.NextJobIndex = 0;
     LintJobQueue.TotalJobsDone = 0;
     LintJobQueue.Jobs = (lint_job *)malloc(LintJobQueue.JobCount * sizeof(lint_job));
@@ -322,13 +340,27 @@ int main(int argc, char **argv)
         lint_job *Job = &LintJobQueue.Jobs[JobIndex];
         ZeroMemory(Job, sizeof(lint_job));
 
+#if defined(JOB_PER_DIRECTORY)
         Job->Type = LJT_DIRECTORY;
-        Job->Result = FALSE;
         Job->DirectoryPath = DirectoriesWithSourceCode[JobIndex];
+#endif
+#if defined(JOB_PER_FILE)
+        Job->Type = LJT_FILE;
+        Job->FilePath = FilesWithSourceCode[JobIndex];
+#endif
+        Job->Result = FALSE;
     }
 
+#if defined(JOB_PER_DIRECTORY)
+    u32 ThreadCount = LintJobQueue.JobCount;
+#endif
+#if defined(JOB_PER_FILE)
+    u32 ThreadCount = LintJobQueue.JobCount / 4;
+#endif
 
-    for (u32 ThreadIndex = 0; ThreadIndex < LintJobQueue.JobCount; ThreadIndex++)
+    printf("\nCreated %d threads.\n", ThreadCount);
+
+    for (u32 ThreadIndex = 0; ThreadIndex < ThreadCount; ThreadIndex++)
     {
         DWORD ThreadId;
         HANDLE ThreadHandle =

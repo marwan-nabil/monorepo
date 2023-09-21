@@ -541,7 +541,7 @@ int main(int argc, char **argv)
         {
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS /DJOB_PER_FILE ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\lint.cpp");
