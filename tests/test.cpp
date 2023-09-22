@@ -8,11 +8,25 @@
 #include "..\miscellaneous\console.cpp"
 #include "compilation_tests.cpp"
 
+void DisplayHelp()
+{
+    printf("INFO: Available test targets:\n");
+    printf("          test compilation\n");
+}
+
 int main(int argc, char **argv)
 {
     InitializeConsole();
 
-    RunCompilationTests();
+    if (strcmp(argv[1], "compilation") == 0)
+    {
+        RunCompilationTests();
+    }
+    else
+    {
+        printf("ERROR: No test target.\n");
+        DisplayHelp();
+    }
 
     ConsoleSwitchColor(FOREGROUND_GREEN);
     printf("\n==========================\n");

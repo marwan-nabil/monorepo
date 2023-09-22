@@ -22,7 +22,7 @@ void DisplayHelp()
     printf("          build directx_demo\n");
     printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
-    printf("          build lint\n");
+    printf("          build lint [job_per_directory]\n");
     printf("          build metadata_generator\n");
 }
 
@@ -541,10 +541,22 @@ int main(int argc, char **argv)
         {
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS /DJOB_PER_FILE ");
+            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+
+            if(
+                (argc >= 3) &&
+                (strcmp(argv[2], "job_per_directory") == 0)
+            )
+            {
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DJOB_PER_DIRECTORY ");
+            }
+            else
+            {
+                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DJOB_PER_FILE ");
+            }
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\lint.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\tools\\lint.cpp");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
 
@@ -560,7 +572,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\metadata_generator.cpp");
+            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\tools\\metadata_generator.cpp");
 
             StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref User32.lib Shlwapi.lib");
 

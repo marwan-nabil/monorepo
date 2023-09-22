@@ -6,14 +6,15 @@
 #include <direct.h>
 #include <time.h>
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\basic_defines.h"
+#include "..\..\miscellaneous\base_types.h"
+#include "..\..\miscellaneous\assertions.h"
+#include "..\..\miscellaneous\basic_defines.h"
+
+#include "metadata.generated.cpp"
 
 #if !defined(JOB_PER_DIRECTORY) && !defined(JOB_PER_FILE)
 #   define JOB_PER_FILE
 #endif
-
-#include "metadata.cpp"
 
 enum lint_job_type
 {
@@ -31,10 +32,10 @@ struct lint_job
         struct
         {
             u32 NumberOfFiles;
-            char **FilePaths;
+            char **FileRelativePaths;
         };
-        char *DirectoryPath;
-        char *FilePath;
+        char *DirectoryRelativePath;
+        char *FileRelativePath;
     };
 
     b32 Result;
@@ -48,11 +49,15 @@ struct lint_job_queue
     volatile i64 TotalJobsDone;
 };
 
-char OutputDirectoryPath[1024];
 char RootDirectoryPath[1024];
 
-b32 LintFile(char *FilePath)
+b32 LintFile(char *FileRelativePath)
 {
+    char FilePath[MAX_PATH];
+    ZeroMemory(FilePath, MAX_PATH);
+    StringCchCatA(FilePath, MAX_PATH, RootDirectoryPath);
+    StringCchCatA(FilePath, MAX_PATH, FileRelativePath);
+
     HANDLE FileHandle = CreateFile
     (
         FilePath,
@@ -203,10 +208,16 @@ b32 LintFile(char *FilePath)
     return TRUE;
 }
 
-b32 LintDirectoryWithWildcard(char *DirectoryPath, char *FilesWildcard)
+b32 LintDirectoryWithWildcard(char *DirectoryRelativePath, char *FilesWildcard)
 {
+    char SearchPattern[1024];
+    ZeroMemory(SearchPattern, 1024);
+    StringCchCatA(SearchPattern, 1024, RootDirectoryPath);
+    StringCchCatA(SearchPattern, 1024, DirectoryRelativePath);
+    StringCchCatA(SearchPattern, 1024, FilesWildcard);
+
     WIN32_FIND_DATAA FindOperationData;
-    HANDLE FindHandle = FindFirstFileA(FilesWildcard, &FindOperationData);
+    HANDLE FindHandle = FindFirstFileA(SearchPattern, &FindOperationData);
 
     if (FindHandle != INVALID_HANDLE_VALUE)
     {
@@ -214,9 +225,9 @@ b32 LintDirectoryWithWildcard(char *DirectoryPath, char *FilesWildcard)
         {
             if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
             {
-                char FoundFilePath[512];
-                ZeroMemory(FoundFilePath, 512);
-                StringCchCatA(FoundFilePath, MAX_PATH, DirectoryPath);
+                char FoundFilePath[MAX_PATH];
+                ZeroMemory(FoundFilePath, MAX_PATH);
+                StringCchCatA(FoundFilePath, MAX_PATH, DirectoryRelativePath);
                 StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                 StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
 
@@ -247,20 +258,18 @@ b32 LintDirectoryWithWildcard(char *DirectoryPath, char *FilesWildcard)
     return TRUE;
 }
 
-b32 LintDirectory(char *DirectoryPath)
+b32 LintDirectory(char *DirectoryRelativePath)
 {
     char FilesWildcard[MAX_PATH];
     ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
-    StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.cpp");
 
-    b32 Result = LintDirectoryWithWildcard(DirectoryPath, FilesWildcard);
+    b32 Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard);
 
     ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
-    StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.h");
 
-    Result = Result && LintDirectoryWithWildcard(DirectoryPath, FilesWildcard);
+    Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard) && Result;
 
     return Result;
 }
@@ -271,22 +280,18 @@ void ProcessLintJob(lint_job *LintJob)
 
     if (LintJob->Type == LJT_DIRECTORY)
     {
-        char FullDirectoryPath[MAX_PATH];
-        ZeroMemory(FullDirectoryPath, ArrayLength(FullDirectoryPath));
-        StringCchCatA(FullDirectoryPath, MAX_PATH, LintJob->DirectoryPath);
-
-        LintJob->Result = LintDirectory(FullDirectoryPath);
+        LintJob->Result = LintDirectory(LintJob->DirectoryRelativePath);
     }
     else if (LintJob->Type == LJT_FILE_LIST)
     {
         for (u32 FileIndex = 0; FileIndex < LintJob->NumberOfFiles; FileIndex++)
         {
-            LintJob->Result = LintFile(LintJob->FilePaths[FileIndex]) && LintJob->Result;
+            LintJob->Result = LintFile(LintJob->FileRelativePaths[FileIndex]) && LintJob->Result;
         }
     }
     else if (LintJob->Type == LJT_FILE)
     {
-        LintJob->Result = LintFile(LintJob->FilePath);
+        LintJob->Result = LintFile(LintJob->FileRelativePath);
     }
 }
 
@@ -313,6 +318,7 @@ WorkerThreadEntry(void *Parameter)
 
 int main(int argc, char **argv)
 {
+    char OutputDirectoryPath[1024];
     ZeroMemory(OutputDirectoryPath, ArrayLength(OutputDirectoryPath));
     _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
 
@@ -339,14 +345,13 @@ int main(int argc, char **argv)
     {
         lint_job *Job = &LintJobQueue.Jobs[JobIndex];
         ZeroMemory(Job, sizeof(lint_job));
-
 #if defined(JOB_PER_DIRECTORY)
         Job->Type = LJT_DIRECTORY;
-        Job->DirectoryPath = DirectoriesWithSourceCode[JobIndex];
+        Job->DirectoryRelativePath = DirectoriesWithSourceCode[JobIndex];
 #endif
 #if defined(JOB_PER_FILE)
         Job->Type = LJT_FILE;
-        Job->FilePath = FilesWithSourceCode[JobIndex];
+        Job->FileRelativePath = FilesWithSourceCode[JobIndex];
 #endif
         Job->Result = FALSE;
     }

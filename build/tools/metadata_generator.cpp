@@ -6,15 +6,17 @@
 #include <direct.h>
 #include <shlwapi.h>
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\assertions.h"
+#include "..\..\miscellaneous\base_types.h"
+#include "..\..\miscellaneous\basic_defines.h"
+#include "..\..\miscellaneous\assertions.h"
 
-#include "..\miscellaneous\strings.cpp"
+#include "..\..\miscellaneous\strings.cpp"
+
+// TODO: optimize string operations
 
 struct directory_node
 {
-    char DirectoryPath[1024];
+    char DirectoryRelativePath[1024];
     directory_node *NextDirectoryNode;
 };
 
@@ -24,14 +26,17 @@ struct file_node
     file_node *NextFileNode;
 };
 
-b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList, file_node **FoundFilesList)
+char RootDirectoryPath[1024];
+
+b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirectoriesList, file_node **FoundFilesList)
 {
     b32 DirectoryContainsSourceCode = FALSE;
     b32 Result = TRUE;
 
     char DirectoryWildcard[1024];
     ZeroMemory(DirectoryWildcard, ArrayLength(DirectoryWildcard));
-    StringCchCatA(DirectoryWildcard, ArrayLength(DirectoryWildcard), DirectoryPath);
+    StringCchCatA(DirectoryWildcard, ArrayLength(DirectoryWildcard), RootDirectoryPath);
+    StringCchCatA(DirectoryWildcard, ArrayLength(DirectoryWildcard), DirectoryRelativePath);
     StringCchCatA(DirectoryWildcard, ArrayLength(DirectoryWildcard), "\\*");
 
     WIN32_FIND_DATAA FindOperationData;
@@ -54,12 +59,12 @@ b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList,
                     continue;
                 }
 
-                char FoundDirectoryPath[1024];
-                ZeroMemory(FoundDirectoryPath, 1024);
-                StringCchCatA(FoundDirectoryPath, 1024, DirectoryPath);
-                StringCchCatA(FoundDirectoryPath, 1024, "\\");
-                StringCchCatA(FoundDirectoryPath, 1024, FindOperationData.cFileName);
-                Result = ProcessDirectory(FoundDirectoryPath, FoundDirectoriesList, FoundFilesList) && Result;
+                char FoundDirectoryRelativePath[1024];
+                ZeroMemory(FoundDirectoryRelativePath, 1024);
+                StringCchCatA(FoundDirectoryRelativePath, 1024, DirectoryRelativePath);
+                StringCchCatA(FoundDirectoryRelativePath, 1024, "\\");
+                StringCchCatA(FoundDirectoryRelativePath, 1024, FindOperationData.cFileName);
+                Result = ProcessDirectory(FoundDirectoryRelativePath, FoundDirectoriesList, FoundFilesList) && Result;
             }
             else
             {
@@ -71,14 +76,14 @@ b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList,
                         DirectoryContainsSourceCode = TRUE;
                         directory_node *NewDirectoryNode = (directory_node *)malloc(sizeof(directory_node));
                         *NewDirectoryNode = {};
-                        StringCchCatA(NewDirectoryNode->DirectoryPath, ArrayLength(NewDirectoryNode->DirectoryPath), DirectoryPath);
+                        StringCchCatA(NewDirectoryNode->DirectoryRelativePath, ArrayLength(NewDirectoryNode->DirectoryRelativePath), DirectoryRelativePath);
                         NewDirectoryNode->NextDirectoryNode = *FoundDirectoriesList;
                         *FoundDirectoriesList = NewDirectoryNode;
                     }
 
                     file_node *NewFileNode = (file_node *)malloc(sizeof(file_node));
                     *NewFileNode = {};
-                    StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), DirectoryPath);
+                    StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), DirectoryRelativePath);
                     StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), "\\");
                     StringCchCatA(NewFileNode->FilePath, ArrayLength(NewFileNode->FilePath), FindOperationData.cFileName);
                     NewFileNode->NextFileNode = *FoundFilesList;
@@ -111,12 +116,10 @@ b32 ProcessDirectory(char *DirectoryPath, directory_node **FoundDirectoriesList,
 
 int main(int argc, char **argv)
 {
-    // TODO: optimize string operations
     char OutputDirectoryPath[1024];
     ZeroMemory(OutputDirectoryPath, ArrayLength(OutputDirectoryPath));
     _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
 
-    char RootDirectoryPath[1024];
     ZeroMemory(RootDirectoryPath, ArrayLength(RootDirectoryPath));
     StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), OutputDirectoryPath);
     StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), "\\..");
@@ -124,12 +127,12 @@ int main(int argc, char **argv)
     char OutputFilePath[1024];
     ZeroMemory(OutputFilePath, ArrayLength(OutputFilePath));
     StringCchCatA(OutputFilePath, ArrayLength(OutputFilePath), RootDirectoryPath);
-    StringCchCatA(OutputFilePath, ArrayLength(OutputFilePath), "\\build\\metadata.cpp");
+    StringCchCatA(OutputFilePath, ArrayLength(OutputFilePath), "\\build\\tools\\metadata.generated.cpp");
 
     directory_node *FoundDirectoriesList = 0;
     file_node *FoundFilesList = 0;
 
-    ProcessDirectory(RootDirectoryPath, &FoundDirectoriesList, &FoundFilesList);
+    ProcessDirectory("", &FoundDirectoriesList, &FoundFilesList);
 
     u8 *BufferMemory = (u8 *)VirtualAlloc
     (
@@ -142,8 +145,6 @@ int main(int argc, char **argv)
 
     u8 *WritePointer = BufferMemory;
 
-    // ------------------------------------------------------------------------------
-
     char TemporaryString[1024];
     ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
     StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "char *DirectoriesWithSourceCode[] =\n");
@@ -155,7 +156,7 @@ int main(int argc, char **argv)
     {
         ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
         StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "    \"");
-        InjectEscapeSlashes(FoundDirectoriesList->DirectoryPath, TemporaryString + StringLength(TemporaryString));
+        InjectEscapeSlashes(FoundDirectoriesList->DirectoryRelativePath, TemporaryString + StringLength(TemporaryString));
         StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "\",\n");
 
         memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
@@ -167,8 +168,6 @@ int main(int argc, char **argv)
     StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "};\n\n");
     memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
     WritePointer += StringLength(TemporaryString);
-
-    // ------------------------------------------------------------------------------
 
     ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
     StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "char *FilesWithSourceCode[] =\n");
@@ -190,11 +189,9 @@ int main(int argc, char **argv)
     }
 
     ZeroMemory(TemporaryString, ArrayLength(TemporaryString));
-    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "};\n");
+    StringCchCatA(TemporaryString, ArrayLength(TemporaryString), "};");
     memcpy(WritePointer, TemporaryString, StringLength(TemporaryString));
     WritePointer += StringLength(TemporaryString);
-
-    // ------------------------------------------------------------------------------
 
     u64 OutputSize = WritePointer - BufferMemory;
     u8 *OutputFileMemory = (u8 *)VirtualAlloc

@@ -64,22 +64,16 @@ void RunCompilationTests()
     ConsoleResetColor();
 
     CompilationTest("build build");
-
     CompilationTest("build basic_app");
-
     CompilationTest("build imgui_demo opengl2");
     CompilationTest("build imgui_demo dx11");
-
     CompilationTest("build ray_tracer optimized 1_lane");
     CompilationTest("build ray_tracer optimized 4_lanes");
     CompilationTest("build ray_tracer non_optimized 1_lane");
     CompilationTest("build ray_tracer non_optimized 4_lanes");
-
     CompilationTest("build handmade_hero");
-
     CompilationTest("build directx_demo");
-
     CompilationTest("build lint");
-
+    CompilationTest("build metadata_generator");
     CompilationTest("build clean");
 }
