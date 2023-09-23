@@ -26,6 +26,7 @@ void DisplayHelp()
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
     printf("          build lint [job_per_directory]\n");
     printf("          build metadata_generator\n");
+    printf("          build x86_bootloader\n");
 }
 
 int main(int argc, char **argv)
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
         {
             "obj", "pdb", "log", "ilk", "sln", "bmp",
             "txt", "ini", "dll", "exp", "lib", "map", "hmi",
-            "cso", "lock", "exe"
+            "cso", "lock", "exe", "img"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
@@ -98,7 +99,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\build.temp.exe");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "test") == 0)
         {
@@ -114,7 +115,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\test.exe");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
@@ -130,7 +131,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\basic_app.exe");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)
         {
@@ -187,7 +188,7 @@ int main(int argc, char **argv)
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "imgui_demo") == 0)
         {
@@ -233,7 +234,7 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "handmade_hero") == 0)
         {
@@ -271,7 +272,7 @@ int main(int argc, char **argv)
             StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
 
             CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
             DeleteFileA(LockFilePath);
 
             ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
@@ -291,7 +292,7 @@ int main(int argc, char **argv)
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
 
-            CompilationSuccess = CompilationSuccess && InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompilationSuccess && CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "directx_demo") == 0)
         {
@@ -328,7 +329,7 @@ int main(int argc, char **argv)
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib winmm.lib d3d11.lib dxgi.lib d3dcompiler.lib ");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "lint") == 0)
         {
@@ -357,7 +358,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\lint.exe");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "metadata_generator") == 0)
         {
@@ -373,7 +374,19 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\metadata_generator.exe");
 
-            CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            CompilationSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+        }
+        else if (strcmp(argv[1], "x86_bootloader") == 0)
+        {
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
+
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\x86_bootloader\\boot.s");
+
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_bootloader.img");
+
+            CompilationSuccess = AssembleNASM(CompilerFlags, SourcesString, OutputBinaryPath);
         }
         else
         {

@@ -136,7 +136,7 @@ b32 CompileShader
     return TRUE;
 }
 
-b32 InvokeCompiler
+b32 CompileCPP
 (
     char *CompilerFlags,
     char *SourcesString,
@@ -189,6 +189,66 @@ b32 InvokeCompiler
 
         CloseHandle(CompilerProcessProcessInfo.hProcess);
         CloseHandle(CompilerProcessProcessInfo.hThread);
+
+        if (ProcessExitCode != 0)
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+b32 AssembleNASM
+(
+    char *AssemblerFlags,
+    char *SourcesString,
+    char *OutputBinaryPath
+)
+{
+    STARTUPINFO AssemblerProcessStartupInfo = {};
+    AssemblerProcessStartupInfo.cb = sizeof(AssemblerProcessStartupInfo);
+    PROCESS_INFORMATION AssemblerProcessProcessInfo = {};
+
+    char AssemblerCommand[1024];
+    ZeroMemory(AssemblerCommand, ArrayCount(AssemblerCommand));
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "nasm.exe ");
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), AssemblerFlags);
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " ");
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), SourcesString);
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " -o \"");
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), OutputBinaryPath);
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");
+
+    b32 CreateSucceeded = CreateProcess
+    (
+        NULL,
+        AssemblerCommand,
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        &AssemblerProcessStartupInfo,
+        &AssemblerProcessProcessInfo
+    );
+
+    if (CreateSucceeded == FALSE)
+    {
+        printf("ERROR: failed to create the compiler process, please debug the build system.\n");
+        fflush(stdout);
+        return FALSE;
+    }
+    else
+    {
+        WaitForSingleObject(AssemblerProcessProcessInfo.hProcess, INFINITE);
+
+        DWORD ProcessExitCode;
+        GetExitCodeProcess(AssemblerProcessProcessInfo.hProcess, &ProcessExitCode);
+
+        CloseHandle(AssemblerProcessProcessInfo.hProcess);
+        CloseHandle(AssemblerProcessProcessInfo.hThread);
 
         if (ProcessExitCode != 0)
         {
