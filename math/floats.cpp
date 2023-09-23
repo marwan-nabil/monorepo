@@ -83,6 +83,19 @@ Max(f32 A, f32 B)
 }
 
 inline f32
+Min(f32 A, f32 B)
+{
+    if (A < B)
+    {
+        return A;
+    }
+    else
+    {
+        return B;
+    }
+}
+
+inline f32
 AbsoluteValue(f32 A)
 {
 	f32 Result = (f32)fabs(A);

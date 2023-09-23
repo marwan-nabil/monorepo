@@ -72,7 +72,8 @@ void RunCompilationTests()
     CompilationTest("build ray_tracer non_optimized 1_lane");
     CompilationTest("build ray_tracer non_optimized 4_lanes");
     CompilationTest("build handmade_hero");
-    CompilationTest("build directx_demo");
+    CompilationTest("build directx_demo debug");
+    CompilationTest("build directx_demo release");
     CompilationTest("build lint");
     CompilationTest("build metadata_generator");
     CompilationTest("build clean");

@@ -10,6 +10,8 @@
 #include "..\miscellaneous\assertions.h"
 #include "..\miscellaneous\basic_defines.h"
 
+#include "build_helpers.cpp"
+
 void DisplayHelp()
 {
     printf("INFO: Available build targets:\n");
@@ -19,212 +21,11 @@ void DisplayHelp()
     printf("          build test\n");
     printf("          build basic_app\n");
     printf("          build handmade_hero\n");
-    printf("          build directx_demo\n");
+    printf("          build directx_demo [debug, release]\n");
     printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
     printf("          build lint [job_per_directory]\n");
     printf("          build metadata_generator\n");
-}
-
-u32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath)
-{
-    char FilesWildcard[MAX_PATH];
-    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
-    StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
-    StringCchCatA(FilesWildcard, MAX_PATH, "\\*.");
-    StringCchCatA(FilesWildcard, MAX_PATH, ExtensionToClean);
-
-    WIN32_FIND_DATAA FindOperationData;
-    HANDLE FindHandle = FindFirstFileA(FilesWildcard, &FindOperationData);
-
-    if (FindHandle == INVALID_HANDLE_VALUE)
-    {
-        DWORD LastError = GetLastError();
-        if (LastError != ERROR_FILE_NOT_FOUND)
-        {
-            printf("ERROR: FindFirstFileA() failed.\n");
-            return 1;
-        }
-    }
-    else
-    {
-        do
-        {
-            if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-            {
-                char FoundFilePath[512];
-                ZeroMemory(FoundFilePath, 512);
-                StringCchCatA(FoundFilePath, MAX_PATH, DirectoryPath);
-                StringCchCatA(FoundFilePath, MAX_PATH, "\\");
-                StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
-
-                b32 DeleteResult = DeleteFile(FoundFilePath);
-                if (DeleteResult == 0)
-                {
-                    DWORD LastError = GetLastError();
-
-                    LPVOID ErrorMessageFromSystem;
-                    FormatMessage
-                    (
-                        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                        NULL,
-                        LastError,
-                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                        (LPTSTR)&ErrorMessageFromSystem,
-                        0,
-                        NULL
-                    );
-
-                    printf
-                    (
-                        "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %lu == %s",
-                        FoundFilePath, LastError, (const char *)ErrorMessageFromSystem
-                    );
-
-                    LocalFree(ErrorMessageFromSystem);
-                }
-                else
-                {
-                    printf("INFO: Deleted file: %s\n", FoundFilePath);
-                }
-            }
-        } while (FindNextFileA(FindHandle, &FindOperationData) != 0);
-
-        DWORD LastErrorCode = GetLastError();
-        if (LastErrorCode != ERROR_NO_MORE_FILES)
-        {
-            printf("ERROR: cleanup process did not finish properly, please debug.\n");
-            printf("ERROR: last error code is %d\n", LastErrorCode);
-            printf("ERROR: extension with error is %s\n", ExtensionToClean);
-            return 1;
-        }
-    }
-
-    FindClose(FindHandle);
-
-    return 0;
-}
-
-b32 CompileShader
-(
-    char *CompilerFlags,
-    char *SourcesString,
-    char *OutputBinaryPath
-)
-{
-    STARTUPINFO CompilerProcessStartupInfo = {};
-    CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
-    PROCESS_INFORMATION CompilerProcessProcessInfo = {};
-
-    char CompilerCommand[1024];
-    ZeroMemory(CompilerCommand, ArrayCount(CompilerCommand));
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "fxc.exe ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), CompilerFlags);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo \"");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), OutputBinaryPath);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), SourcesString);
-
-    b32 CreateSucceeded = CreateProcess
-    (
-        NULL,
-        CompilerCommand,
-        NULL,
-        NULL,
-        FALSE,
-        0,
-        NULL,
-        NULL,
-        &CompilerProcessStartupInfo,
-        &CompilerProcessProcessInfo
-    );
-
-    if (CreateSucceeded == FALSE)
-    {
-        printf("ERROR: failed to create the compiler process, please debug the build system.\n");
-        fflush(stdout);
-        return FALSE;
-    }
-    else
-    {
-        WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
-
-        DWORD ProcessExitCode;
-        GetExitCodeProcess(CompilerProcessProcessInfo.hProcess, &ProcessExitCode);
-
-        CloseHandle(CompilerProcessProcessInfo.hProcess);
-        CloseHandle(CompilerProcessProcessInfo.hThread);
-
-        if (ProcessExitCode != 0)
-        {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
-}
-
-b32 InvokeCompiler
-(
-    char *CompilerFlags,
-    char *SourcesString,
-    char *OutputBinaryPath,
-    char *LinkerFlags
-)
-{
-    STARTUPINFO CompilerProcessStartupInfo = {};
-    CompilerProcessStartupInfo.cb = sizeof(CompilerProcessStartupInfo);
-    PROCESS_INFORMATION CompilerProcessProcessInfo = {};
-
-    char CompilerCommand[1024];
-    ZeroMemory(CompilerCommand, ArrayCount(CompilerCommand));
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "cl.exe ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), CompilerFlags);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), SourcesString);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fe:\"");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), OutputBinaryPath);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "/link ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), LinkerFlags);
-
-    b32 CreateSucceeded = CreateProcess
-    (
-        NULL,
-        CompilerCommand,
-        NULL,
-        NULL,
-        FALSE,
-        0,
-        NULL,
-        NULL,
-        &CompilerProcessStartupInfo,
-        &CompilerProcessProcessInfo
-    );
-
-    if (CreateSucceeded == FALSE)
-    {
-        printf("ERROR: failed to create the compiler process, please debug the build system.\n");
-        fflush(stdout);
-        return FALSE;
-    }
-    else
-    {
-        WaitForSingleObject(CompilerProcessProcessInfo.hProcess, INFINITE);
-
-        DWORD ProcessExitCode;
-        GetExitCodeProcess(CompilerProcessProcessInfo.hProcess, &ProcessExitCode);
-
-        CloseHandle(CompilerProcessProcessInfo.hProcess);
-        CloseHandle(CompilerProcessProcessInfo.hThread);
-
-        if (ProcessExitCode != 0)
-        {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
 }
 
 int main(int argc, char **argv)
@@ -322,7 +123,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\basic_app\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\basic_app\\main.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
 
@@ -379,7 +180,7 @@ int main(int argc, char **argv)
             }
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\ray_tracer\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\ray_tracer\\main.cpp");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer.exe");
@@ -408,7 +209,7 @@ int main(int argc, char **argv)
             if (strcmp(argv[2], "opengl2") == 0)
             {
                 StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\imgui_demo\\main_opengl2.cpp ");
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\imgui_demo\\main_opengl2.cpp ");
 
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
@@ -418,7 +219,7 @@ int main(int argc, char **argv)
             else if (strcmp(argv[2], "dx11") == 0)
             {
                 StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\imgui_demo\\main_dx11.cpp ");
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\imgui_demo\\main_dx11.cpp ");
 
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_dx11.exe");
@@ -447,7 +248,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/LD /Fmhandmade.map ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\handmade_hero\\game.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\handmade_hero\\game.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\handmade.dll");
@@ -482,7 +283,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Fmwin32_handmade.map ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\handmade_hero\\win32_platform.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\handmade_hero\\win32_platform.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\win32_platform.exe");
@@ -498,44 +299,36 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
 
+            if (argc < 3)
+            {
+                printf("ERROR: invalid number of arguments for build directx_demo.\n");
+                DisplayHelp();
+                return 1;
+            }
+            else if(strcmp(argv[2], "debug") == 0)
+            {
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo_debug.exe");
+            }
+            else if(strcmp(argv[2], "release") == 0)
+            {
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo.exe");
+            }
+            else
+            {
+                printf("ERROR: invalid argument \"%s\" for build directx_demo ...\n", argv[2]);
+                DisplayHelp();
+                return 1;
+            }
+
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\directx_demo\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\directx_demo\\main.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "d3d11.lib gdi32.lib user32.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo.exe");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib winmm.lib d3d11.lib dxgi.lib d3dcompiler.lib ");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-
-            // ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-            // ZeroMemory(SourcesString, ArrayCount(SourcesString));
-            // ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-
-            // StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T ps_4_0_level_9_1");
-
-            // StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            // StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\directx_demo\\CubePixelShader.hlsl");
-
-            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\CubePixelShader.cso");
-
-            // CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
-
-            // ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-            // ZeroMemory(SourcesString, ArrayCount(SourcesString));
-            // ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-
-            // StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T vs_4_0_level_9_1");
-
-            // StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            // StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\directx_demo\\CubeVertexShader.hlsl");
-
-            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\CubeVertexShader.cso");
-
-            // CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
         }
         else if (strcmp(argv[1], "lint") == 0)
         {
