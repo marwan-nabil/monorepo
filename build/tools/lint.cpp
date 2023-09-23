@@ -271,6 +271,11 @@ b32 LintDirectory(char *DirectoryRelativePath)
 
     Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard) && Result;
 
+    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
+    StringCchCatA(FilesWildcard, MAX_PATH, "\\*.s");
+
+    Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard) && Result;
+
     return Result;
 }
 

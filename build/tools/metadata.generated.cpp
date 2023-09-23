@@ -1,5 +1,6 @@
 char *DirectoriesWithSourceCode[] =
 {
+    "\\x86_kernel",
     "\\windows_apps\\ray_tracer",
     "\\windows_apps\\imgui_demo",
     "\\windows_apps\\handmade_hero",
@@ -19,6 +20,8 @@ char *DirectoriesWithSourceCode[] =
 
 char *FilesWithSourceCode[] =
 {
+    "\\x86_kernel\\kernel.s",
+    "\\x86_kernel\\bootloader.s",
     "\\windows_apps\\ray_tracer\\ray_tracer.h",
     "\\windows_apps\\ray_tracer\\main.cpp",
     "\\windows_apps\\imgui_demo\\win32_backend.h",
@@ -63,6 +66,10 @@ char *FilesWithSourceCode[] =
     "\\tests\\test.cpp",
     "\\tests\\compilation_tests.cpp",
     "\\miscellaneous\\strings.cpp",
+    "\\miscellaneous\\file_io.h",
+    "\\miscellaneous\\file_io.cpp",
+    "\\miscellaneous\\fat12.h",
+    "\\miscellaneous\\fat12.cpp",
     "\\miscellaneous\\console.cpp",
     "\\miscellaneous\\basic_defines.h",
     "\\miscellaneous\\base_types.h",
@@ -119,5 +126,6 @@ char *FilesWithSourceCode[] =
     "\\build\\tools\\metadata_generator.cpp",
     "\\build\\tools\\metadata.generated.cpp",
     "\\build\\tools\\lint.cpp",
+    "\\build\\build_helpers.cpp",
     "\\build\\build.cpp",
 };

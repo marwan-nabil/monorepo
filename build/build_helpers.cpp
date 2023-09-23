@@ -258,3 +258,55 @@ b32 AssembleNASM
 
     return TRUE;
 }
+
+b32 CreateEmptyFile(char *FilePath, u32 Size, u32 FillPattern)
+{
+    u8 *OutputFileMemory = (u8 *)VirtualAlloc
+    (
+        0,
+        Size,
+        MEM_RESERVE | MEM_COMMIT,
+        PAGE_READWRITE
+    );
+    memset(OutputFileMemory, FillPattern, Size);
+
+    HANDLE FileHandle = CreateFileA(FilePath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    if (!FileHandle)
+    {
+        return FALSE;
+    }
+
+    DWORD BytesWritten;
+    b32 Result = WriteFile(FileHandle, OutputFileMemory, (u32)Size, &BytesWritten, 0);
+    if (!Result)
+    {
+        return FALSE;
+    }
+
+    CloseHandle(FileHandle);
+
+    return TRUE;
+}
+
+b32 WriteBinaryFileOverAnother(char *SourceBinaryFilePath, u32 WriteOffset, char *DestinationBinaryFilePath)
+{
+    b32 Result = FALSE;
+
+    read_file_result SourceBinary = ReadFileIntoMemory(SourceBinaryFilePath);
+    read_file_result DestinationBinary = ReadFileIntoMemory(DestinationBinaryFilePath);
+
+    if (DestinationBinary.Size > SourceBinary.Size)
+    {
+        memcpy(DestinationBinary.FileMemory, SourceBinary.FileMemory, SourceBinary.Size);
+        Result = WriteFileFromMemory(DestinationBinaryFilePath, DestinationBinary.FileMemory, DestinationBinary.Size);
+    }
+    else
+    {
+        Result = WriteFileFromMemory(DestinationBinaryFilePath, SourceBinary.FileMemory, SourceBinary.Size);
+    }
+
+    FreeFileMemory(SourceBinary.FileMemory);
+    FreeFileMemory(DestinationBinary.FileMemory);
+
+    return Result;
+}
