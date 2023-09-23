@@ -29,7 +29,7 @@ void DisplayHelp()
 u32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath)
 {
     char FilesWildcard[MAX_PATH];
-    ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
+    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
     StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.");
     StringCchCatA(FilesWildcard, MAX_PATH, ExtensionToClean);
@@ -117,13 +117,13 @@ b32 CompileShader
     PROCESS_INFORMATION CompilerProcessProcessInfo = {};
 
     char CompilerCommand[1024];
-    ZeroMemory(CompilerCommand, ArrayLength(CompilerCommand));
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "fxc.exe ");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), CompilerFlags);
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /Fo \"");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), OutputBinaryPath);
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "\" ");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), SourcesString);
+    ZeroMemory(CompilerCommand, ArrayCount(CompilerCommand));
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "fxc.exe ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo \"");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), OutputBinaryPath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), SourcesString);
 
     b32 CreateSucceeded = CreateProcess
     (
@@ -177,16 +177,16 @@ b32 InvokeCompiler
     PROCESS_INFORMATION CompilerProcessProcessInfo = {};
 
     char CompilerCommand[1024];
-    ZeroMemory(CompilerCommand, ArrayLength(CompilerCommand));
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "cl.exe ");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), CompilerFlags);
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " ");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), SourcesString);
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), " /Fe:\"");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), OutputBinaryPath);
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "\" ");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), "/link ");
-    StringCchCatA(CompilerCommand, ArrayLength(CompilerCommand), LinkerFlags);
+    ZeroMemory(CompilerCommand, ArrayCount(CompilerCommand));
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "cl.exe ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), SourcesString);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fe:\"");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), OutputBinaryPath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "/link ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), LinkerFlags);
 
     b32 CreateSucceeded = CreateProcess
     (
@@ -230,13 +230,13 @@ b32 InvokeCompiler
 int main(int argc, char **argv)
 {
     char OutputDirectoryPath[1024];
-    ZeroMemory(OutputDirectoryPath, ArrayLength(OutputDirectoryPath));
+    ZeroMemory(OutputDirectoryPath, ArrayCount(OutputDirectoryPath));
     _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
 
     char RootDirectoryPath[1024];
-    ZeroMemory(RootDirectoryPath, ArrayLength(RootDirectoryPath));
-    StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), OutputDirectoryPath);
-    StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), "\\..");
+    ZeroMemory(RootDirectoryPath, ArrayCount(RootDirectoryPath));
+    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
+    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
 
     if (argc < 2)
     {
@@ -249,12 +249,12 @@ int main(int argc, char **argv)
     {
         const char *ExtensionsToClean[] =
         {
-            "obj", "pdb", "exe", "log", "ilk", "sln", "bmp",
+            "obj", "pdb", "log", "ilk", "sln", "bmp",
             "txt", "ini", "dll", "exp", "lib", "map", "hmi",
-            "cso", "lock"
+            "cso", "lock", "exe"
         };
 
-        for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayLength(ExtensionsToClean); ExtensionIndex++)
+        for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
         {
             u32 CompilationSuccess = CleanExtensionFromDirectory(ExtensionsToClean[ExtensionIndex], OutputDirectoryPath);
             if (CompilationSuccess)
@@ -272,62 +272,62 @@ int main(int argc, char **argv)
         b32 CompilationSuccess = FALSE;
 
         char CompilerFlags[1024];
-        ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
+        ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
 
         char LinkerFlags[1024];
-        ZeroMemory(LinkerFlags, ArrayLength(LinkerFlags));
+        ZeroMemory(LinkerFlags, ArrayCount(LinkerFlags));
 
         char SourcesString[1024];
-        ZeroMemory(SourcesString, ArrayLength(SourcesString));
+        ZeroMemory(SourcesString, ArrayCount(SourcesString));
 
         char OutputBinaryPath[1024];
-        ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
+        ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
 
         if (strcmp(argv[1], "build") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\build.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\build.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\build.temp.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\build.temp.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "test") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\tests\\test.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\tests\\test.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\test.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\test.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\basic_app\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\basic_app\\main.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\basic_app.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\basic_app.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
@@ -340,17 +340,17 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             if (strcmp(argv[2], "optimized") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/O2 ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/O2 ");
             }
             else if (strcmp(argv[2], "non_optimized") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Od ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Od ");
             }
             else
             {
@@ -361,15 +361,15 @@ int main(int argc, char **argv)
 
             if (strcmp(argv[3], "1_lane") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DSIMD_NUMBEROF_LANES=1 ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=1 ");
             }
             else if (strcmp(argv[3], "4_lanes") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DSIMD_NUMBEROF_LANES=4 ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=4 ");
             }
             else if (strcmp(argv[3], "8_lanes") == 0)
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DSIMD_NUMBEROF_LANES=8 ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=8 ");
             }
             else
             {
@@ -378,13 +378,13 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\ray_tracer\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\ray_tracer\\main.cpp");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\ray_tracer.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer.exe");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
@@ -397,33 +397,33 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\libraries\\imgui\\imgui*.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\libraries\\imgui\\imgui*.cpp ");
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
 
             if (strcmp(argv[2], "opengl2") == 0)
             {
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\imgui_demo\\main_opengl2.cpp ");
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\imgui_demo\\main_opengl2.cpp ");
 
-                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
 
-                StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "opengl32.lib ");
+                StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "opengl32.lib ");
             }
             else if (strcmp(argv[2], "dx11") == 0)
             {
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\imgui_demo\\main_dx11.cpp ");
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\imgui_demo\\main_dx11.cpp ");
 
-                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-                StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\imgui_demo_dx11.exe");
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_dx11.exe");
 
-                StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d11.lib d3dcompiler.lib ");
+                StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "d3d11.lib d3dcompiler.lib ");
             }
             else
             {
@@ -437,147 +437,148 @@ int main(int argc, char **argv)
         else if (strcmp(argv[1], "handmade_hero") == 0)
         {
             char SharedCompilerFlags[1024];
-            ZeroMemory(SharedCompilerFlags, ArrayLength(SharedCompilerFlags));
+            ZeroMemory(SharedCompilerFlags, ArrayCount(SharedCompilerFlags));
 
-            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
-            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
-            StringCchCatA(SharedCompilerFlags, ArrayLength(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
+            StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
+            StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
+            StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), SharedCompilerFlags);
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/LD /Fmhandmade.map ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), SharedCompilerFlags);
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/LD /Fmhandmade.map ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\game.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\handmade_hero\\game.cpp ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\handmade.dll");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\handmade.dll");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender ");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/PDB:handmade_");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/PDB:handmade_");
             char RandomString[5];
-            ZeroMemory(RandomString, ArrayLength(RandomString));
+            ZeroMemory(RandomString, ArrayCount(RandomString));
             u32 RandomNumber;
             rand_s(&RandomNumber);
             RandomNumber = (u32)((f32)RandomNumber / (f32)UINT_MAX * 9999.0f);
-            StringCchPrintfA(RandomString, ArrayLength(RandomString), "%d", RandomNumber);
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), RandomString);
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), ".pdb ");
+            StringCchPrintfA(RandomString, ArrayCount(RandomString), "%d", RandomNumber);
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), RandomString);
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), ".pdb ");
 
             char LockFilePath[MAX_PATH];
-            ZeroMemory(LockFilePath, ArrayLength(LockFilePath));
-            StringCchCatA(LockFilePath, ArrayLength(LockFilePath), "compilation.lock");
+            ZeroMemory(LockFilePath, ArrayCount(LockFilePath));
+            StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
 
             CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
             DeleteFileA(LockFilePath);
 
-            ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayLength(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
-            ZeroMemory(LinkerFlags, ArrayLength(LinkerFlags));
+            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
+            ZeroMemory(SourcesString, ArrayCount(SourcesString));
+            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
+            ZeroMemory(LinkerFlags, ArrayCount(LinkerFlags));
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), SharedCompilerFlags);
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/Fmwin32_handmade.map ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), SharedCompilerFlags);
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Fmwin32_handmade.map ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\handmade_hero\\win32_platform.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\handmade_hero\\win32_platform.cpp ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\win32_platform.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\win32_platform.exe");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
 
             CompilationSuccess = CompilationSuccess && InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "directx_demo") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- /Zi /MD ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- /Zi /MD ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx_demo\\*.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\directx_demo\\main.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "d3d11.lib gdi32.lib user32.lib ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "d3d11.lib gdi32.lib user32.lib ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\directx_tutorial.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
 
-            ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayLength(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
+            // ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
+            // ZeroMemory(SourcesString, ArrayCount(SourcesString));
+            // ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/T ps_4_0_level_9_1");
+            // StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T ps_4_0_level_9_1");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx_demo\\CubePixelShader.hlsl");
+            // StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            // StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\directx_demo\\CubePixelShader.hlsl");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\CubePixelShader.cso");
+            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\CubePixelShader.cso");
 
-            CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
+            // CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
 
-            ZeroMemory(CompilerFlags, ArrayLength(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayLength(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayLength(OutputBinaryPath));
+            // ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
+            // ZeroMemory(SourcesString, ArrayCount(SourcesString));
+            // ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
 
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/T vs_4_0_level_9_1");
+            // StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T vs_4_0_level_9_1");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\apps\\directx_demo\\CubeVertexShader.hlsl");
+            // StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            // StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\apps\\directx_demo\\CubeVertexShader.hlsl");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\CubeVertexShader.cso");
+            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            // StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\CubeVertexShader.cso");
 
-            CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
+            // CompilationSuccess = CompilationSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
         }
         else if (strcmp(argv[1], "lint") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
-            if(
+            if
+            (
                 (argc >= 3) &&
                 (strcmp(argv[2], "job_per_directory") == 0)
             )
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DJOB_PER_DIRECTORY ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DJOB_PER_DIRECTORY ");
             }
             else
             {
-                StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DJOB_PER_FILE ");
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DJOB_PER_FILE ");
             }
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\tools\\lint.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\tools\\lint.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\lint.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\lint.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "metadata_generator") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayLength(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayLength(SourcesString), "\\build\\tools\\metadata_generator.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\tools\\metadata_generator.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayLength(LinkerFlags), "/subsystem:console /incremental:no /opt:ref User32.lib Shlwapi.lib");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref User32.lib Shlwapi.lib");
 
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayLength(OutputBinaryPath), "\\metadata_generator.exe");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\metadata_generator.exe");
 
             CompilationSuccess = InvokeCompiler(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }

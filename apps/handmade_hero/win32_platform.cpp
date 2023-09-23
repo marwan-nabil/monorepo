@@ -684,7 +684,7 @@ Win32GetInputOrStateFileLocation
     _snprintf_s
     (
         Temp,
-        ArrayLength(Temp),
+        ArrayCount(Temp),
         "loop_edit_%d_%s.hmi",
         SlotIndex,
         IsInputStream ? "input" : "state"
@@ -696,7 +696,7 @@ static win32_input_buffer *
 Win32GetGameInputBuffer(win32_platform_state *PlatformState, u32 Index)
 {
     Assert(Index > 0);
-    Assert(Index < ArrayLength(PlatformState->GameInputBuffers));
+    Assert(Index < ArrayCount(PlatformState->GameInputBuffers));
 
     win32_input_buffer *GameInputBuffer = &PlatformState->GameInputBuffers[Index];
     return GameInputBuffer;
@@ -1112,7 +1112,7 @@ WinMain
             for
             (
                 i32 BufferIndex = 1;
-                BufferIndex < ArrayLength(Win32PlatformState.GameInputBuffers);
+                BufferIndex < ArrayCount(Win32PlatformState.GameInputBuffers);
                 BufferIndex++
             )
             {
@@ -1201,15 +1201,15 @@ WinMain
                     *NewKeyboardController = {};
 
                     DWORD MaxControllerCount = XUSER_MAX_COUNT;
-                    if (MaxControllerCount > (ArrayLength(NewTotalGameInput->ControllerStates) - 1))
+                    if (MaxControllerCount > (ArrayCount(NewTotalGameInput->ControllerStates) - 1))
                     {
-                        MaxControllerCount = (ArrayLength(NewTotalGameInput->ControllerStates) - 1);
+                        MaxControllerCount = (ArrayCount(NewTotalGameInput->ControllerStates) - 1);
                     }
 
                     for
                     (
                         int ButtonIndex = 0;
-                        ButtonIndex < ArrayLength(NewKeyboardController->Buttons);
+                        ButtonIndex < ArrayCount(NewKeyboardController->Buttons);
                         ButtonIndex++
                     )
                     {
@@ -1539,7 +1539,7 @@ WinMain
                             )
                         )
                         {
-                            Assert(DebugTimeMarkerIndex < ArrayLength(DebugTimeMarkers));
+                            Assert(DebugTimeMarkerIndex < ArrayCount(DebugTimeMarkers));
                             win32_debug_sound_time_marker *TimeMarker =
                                 &DebugTimeMarkers[DebugTimeMarkerIndex];
                             TimeMarker->FlipPlayCursor = FlipPlayCursor;
@@ -1547,7 +1547,7 @@ WinMain
                         }
 
                         DebugTimeMarkerIndex++;
-                        if (DebugTimeMarkerIndex == ArrayLength(DebugTimeMarkers))
+                        if (DebugTimeMarkerIndex == ArrayCount(DebugTimeMarkers))
                         {
                             DebugTimeMarkerIndex = 0;
                         }

@@ -52,7 +52,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     (
         (&GameInput->ControllerStates[0].Start - &GameInput->ControllerStates[0].Buttons[0])
         ==
-        (ArrayLength(GameInput->ControllerStates[0].Buttons) - 1)
+        (ArrayCount(GameInput->ControllerStates[0].Buttons) - 1)
     );
     Assert(sizeof(game_state) <= GameMemory->PermanentStorageSize);
 
@@ -180,7 +180,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             b32 CurrentDoorUpStairs = FALSE;
             b32 CurrentDoorDownStairs = FALSE;
 
-            Assert(RandomNumbersIndex < ArrayLength(RandomNumbersTable));
+            Assert(RandomNumbersIndex < ArrayCount(RandomNumbersTable));
             u32 RandomChoice = 0;
 
             if
@@ -198,7 +198,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                 RandomChoice = RandomNumbersTable[RandomNumbersIndex++] % 3;
             }
 
-            if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
+            if (RandomNumbersIndex == ArrayCount(RandomNumbersTable))
             {
                 RandomNumbersIndex = 0;
             }
@@ -361,7 +361,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
 #if 0
         // NOTE: Dummy filler low freq. entities
-        while (GameState->World->StorageEntityCount < (ArrayLength(GameState->World->StorageEntities) - 16))
+        while (GameState->World->StorageEntityCount < (ArrayCount(GameState->World->StorageEntities) - 16))
         {
             u32 Coordinate = 1024 + GameState->World->StorageEntityCount;
             AddWall(GameState, Coordinate, Coordinate, Coordinate);
@@ -379,13 +379,13 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         for (u32 FamiliarIndex = 0; FamiliarIndex < 1; FamiliarIndex++)
         {
             i32 FamiliarXOffset = (RandomNumbersTable[RandomNumbersIndex++] % 6) - 3;
-            if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
+            if (RandomNumbersIndex == ArrayCount(RandomNumbersTable))
             {
                 RandomNumbersIndex = 0;
             }
 
             i32 FamiliarYOffset = (RandomNumbersTable[RandomNumbersIndex++] % 4) - 2;
-            if (RandomNumbersIndex == ArrayLength(RandomNumbersTable))
+            if (RandomNumbersIndex == ArrayCount(RandomNumbersTable))
             {
                 RandomNumbersIndex = 0;
             }
@@ -399,7 +399,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
     world *World = GameState->World;
 
-    for (u32 ControllerIndex = 0; ControllerIndex < ArrayLength(GameInput->ControllerStates); ControllerIndex++)
+    for (u32 ControllerIndex = 0; ControllerIndex < ArrayCount(GameInput->ControllerStates); ControllerIndex++)
     {
         controller_state *ControllerInput = GetController(GameInput, ControllerIndex);
         controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControllerIndex;
@@ -517,7 +517,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             {
                 case ET_HERO:
                 {
-                    for (u32 ControlledHeroInputIndex = 0; ControlledHeroInputIndex < ArrayLength(GameState->ControllerToHeroInputMap); ControlledHeroInputIndex++)
+                    for (u32 ControlledHeroInputIndex = 0; ControlledHeroInputIndex < ArrayCount(GameState->ControllerToHeroInputMap); ControlledHeroInputIndex++)
                     {
                         controlled_hero_input *ControlledHeroInput = GameState->ControllerToHeroInputMap + ControlledHeroInputIndex;
                         if (ControlledHeroInput->HeroEntityStorageIndex == CurrentEntity->StorageIndex)

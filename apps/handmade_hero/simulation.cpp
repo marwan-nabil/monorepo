@@ -8,11 +8,11 @@ GetEntityHashtableEntry(simulation_region *SimulationRegion, u32 StorageIndex)
     for
     (
         u32 ProbingOffset = 0;
-        ProbingOffset < ArrayLength(SimulationRegion->EntityTable);
+        ProbingOffset < ArrayCount(SimulationRegion->EntityTable);
         ProbingOffset++
     )
     {
-        u32 HashTableIndex = (InitialHashTableIndex + ProbingOffset) & (ArrayLength(SimulationRegion->EntityTable) - 1);
+        u32 HashTableIndex = (InitialHashTableIndex + ProbingOffset) & (ArrayCount(SimulationRegion->EntityTable) - 1);
         entity_table_entry *HashtableEntry = SimulationRegion->EntityTable + HashTableIndex;
 
         if ((HashtableEntry->StorageIndex == 0) || (HashtableEntry->StorageIndex == StorageIndex))

@@ -261,12 +261,12 @@ b32 LintDirectoryWithWildcard(char *DirectoryRelativePath, char *FilesWildcard)
 b32 LintDirectory(char *DirectoryRelativePath)
 {
     char FilesWildcard[MAX_PATH];
-    ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
+    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.cpp");
 
     b32 Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard);
 
-    ZeroMemory(FilesWildcard, ArrayLength(FilesWildcard));
+    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.h");
 
     Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard) && Result;
@@ -319,12 +319,12 @@ WorkerThreadEntry(void *Parameter)
 int main(int argc, char **argv)
 {
     char OutputDirectoryPath[1024];
-    ZeroMemory(OutputDirectoryPath, ArrayLength(OutputDirectoryPath));
+    ZeroMemory(OutputDirectoryPath, ArrayCount(OutputDirectoryPath));
     _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
 
-    ZeroMemory(RootDirectoryPath, ArrayLength(RootDirectoryPath));
-    StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), OutputDirectoryPath);
-    StringCchCatA(RootDirectoryPath, ArrayLength(RootDirectoryPath), "\\..");
+    ZeroMemory(RootDirectoryPath, ArrayCount(RootDirectoryPath));
+    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
+    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
 
     b32 Result = TRUE;
 
@@ -332,10 +332,10 @@ int main(int argc, char **argv)
 
     lint_job_queue LintJobQueue;
 #if defined(JOB_PER_DIRECTORY)
-    LintJobQueue.JobCount = ArrayLength(DirectoriesWithSourceCode);
+    LintJobQueue.JobCount = ArrayCount(DirectoriesWithSourceCode);
 #endif
 #if defined(JOB_PER_FILE)
-    LintJobQueue.JobCount = ArrayLength(FilesWithSourceCode);
+    LintJobQueue.JobCount = ArrayCount(FilesWithSourceCode);
 #endif
     LintJobQueue.NextJobIndex = 0;
     LintJobQueue.TotalJobsDone = 0;

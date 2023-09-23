@@ -25,7 +25,7 @@ struct game_state
     entity_world_position CameraPosition;
     u32 StorageIndexOfEntityThatCameraFollows;
 
-    controlled_hero_input ControllerToHeroInputMap[ArrayLength(((game_input *)0)->ControllerStates)];
+    controlled_hero_input ControllerToHeroInputMap[ArrayCount(((game_input *)0)->ControllerStates)];
 
     entity_collision_rule *CollisionRulesTable[256];
     entity_collision_rule *FreeCollisionRulesListHead;

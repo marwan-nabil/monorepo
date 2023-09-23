@@ -69,8 +69,8 @@ GetChunk(world *World, memory_arena *MemoryArena, i32 ChunkX, i32 ChunkY, i32 Ch
 
     chunk *Result = 0;
 
-    u32 HashTableIndex = (u32)(19 * ChunkX + 7 * ChunkY + 3 * ChunkZ) & (u32)(ArrayLength(World->ChunksTable) - 1);
-    Assert(HashTableIndex < ArrayLength(World->ChunksTable));
+    u32 HashTableIndex = (u32)(19 * ChunkX + 7 * ChunkY + 3 * ChunkZ) & (u32)(ArrayCount(World->ChunksTable) - 1);
+    Assert(HashTableIndex < ArrayCount(World->ChunksTable));
 
     chunk *CurrentChunk = World->ChunksTable + HashTableIndex;
     while (CurrentChunk)
@@ -178,7 +178,7 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
     World->ChunkDiameterInMeters.Z = TileDepthInMeters;
     World->StorageEntitiesIndicesBlocksFreeListHead = 0;
 
-    for (u32 Index = 0; Index < ArrayLength(World->ChunksTable); Index++)
+    for (u32 Index = 0; Index < ArrayCount(World->ChunksTable); Index++)
     {
         World->ChunksTable[Index].ChunkX = CHUNK_POSITION_UNINITIALIZED_VALUE;
         World->ChunksTable[Index].FirstStorageEntitiesIndicesBlock.StorageEntityIndicesCount = 0;

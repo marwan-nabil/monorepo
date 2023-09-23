@@ -1,6 +1,6 @@
 #pragma once
 
-#define ArrayLength(Array) (sizeof(Array) / sizeof((Array)[0]))
+#define ArrayCount(Array) (sizeof(Array) / sizeof((Array)[0]))
 #define OffsetOf(DataType, Member) ((size_t)&(((DataType *)0)->Member))
 
 #define KiloBytes(Value) ((Value)*1024LL)

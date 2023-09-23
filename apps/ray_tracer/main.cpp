@@ -1,6 +1,5 @@
 #include <Windows.h>
 #include <intrin.h>
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +8,7 @@
 #include <time.h>
 
 #ifndef SIMD_NUMBEROF_LANES
-#define SIMD_NUMBEROF_LANES 4
+#   define SIMD_NUMBEROF_LANES 4
 #endif // SIMD_NUMBEROF_LANES
 
 #include "..\..\miscellaneous\assertions.h"
@@ -429,13 +428,13 @@ main(i32 argc, u8 **argv)
 
     world World = {};
     World.Materials = MaterialsArray;
-    World.MaterialsCount = ArrayLength(MaterialsArray);
+    World.MaterialsCount = ArrayCount(MaterialsArray);
 
     World.Planes = PlanesArray;
-    World.PlanesCount = ArrayLength(PlanesArray);
+    World.PlanesCount = ArrayCount(PlanesArray);
 
     World.Spheres = SpheresArray;
-    World.SpheresCount = ArrayLength(SpheresArray);
+    World.SpheresCount = ArrayCount(SpheresArray);
 
     World.CoordinateSet.X = V3(1, 0, 0);
     World.CoordinateSet.Y = V3(0, 1, 0);

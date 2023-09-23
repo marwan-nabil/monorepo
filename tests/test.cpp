@@ -18,14 +18,21 @@ int main(int argc, char **argv)
 {
     InitializeConsole();
 
-    if (strcmp(argv[1], "compilation") == 0)
+    if (argc < 2)
+    {
+        ConsolePrintColored("ERROR: No test target.\n", FOREGROUND_RED);
+        DisplayHelp();
+        return 1;
+    }
+    else if (strcmp(argv[1], "compilation") == 0)
     {
         RunCompilationTests();
     }
     else
     {
-        printf("ERROR: No test target.\n");
+        ConsolePrintColored("ERROR: invalid test target.\n", FOREGROUND_RED);
         DisplayHelp();
+        return 1;
     }
 
     ConsoleSwitchColor(FOREGROUND_GREEN);

@@ -153,7 +153,7 @@ PushRenderPeice
     v4 Color, f32 EntityJumpZCoefficient, v2 RectangleDimensions
 )
 {
-    Assert(PeiceGroup->Count < ArrayLength(PeiceGroup->Peices));
+    Assert(PeiceGroup->Count < ArrayCount(PeiceGroup->Peices));
 
     render_piece *NewRenderPiece = PeiceGroup->Peices + PeiceGroup->Count++;
     NewRenderPiece->Bitmap = Bitmap;

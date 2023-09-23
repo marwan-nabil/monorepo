@@ -68,7 +68,7 @@ CanEntitiesOverlap(game_state *GameState, entity *MovingEntity, entity *TestEnti
 static void
 InitializeEntityHitPoints(storage_entity *StorageEntity, u32 HitpointsCount)
 {
-    Assert(HitpointsCount < ArrayLength(StorageEntity->Entity.HitPoints));
+    Assert(HitpointsCount < ArrayCount(StorageEntity->Entity.HitPoints));
 
     StorageEntity->Entity.HitPointsMax = HitpointsCount;
 
@@ -217,7 +217,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
             Assert(NewLocationChunk);
             storage_entity_indices_block *FirstBlock = &NewLocationChunk->FirstStorageEntitiesIndicesBlock;
 
-            if (FirstBlock->StorageEntityIndicesCount == ArrayLength(FirstBlock->StorageEntityIndices))
+            if (FirstBlock->StorageEntityIndicesCount == ArrayCount(FirstBlock->StorageEntityIndices))
             {
                 storage_entity_indices_block *NewBlock;
                 if (World->StorageEntitiesIndicesBlocksFreeListHead)
@@ -236,7 +236,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
                 FirstBlock->StorageEntityIndicesCount = 0;
             }
 
-            Assert(FirstBlock->StorageEntityIndicesCount < ArrayLength(FirstBlock->StorageEntityIndices));
+            Assert(FirstBlock->StorageEntityIndicesCount < ArrayCount(FirstBlock->StorageEntityIndices));
             FirstBlock->StorageEntityIndices[FirstBlock->StorageEntityIndicesCount++] = StorageIndex;
         }
     }
@@ -295,7 +295,7 @@ GetStorageEntity(game_state *GameState, u32 StorageIndex)
 static add_storage_entity_result
 AddStorageEntity(game_state *GameState, entity_type Type, entity_world_position WorldPosition)
 {
-    Assert(GameState->World->StorageEntityCount < ArrayLength(GameState->World->StorageEntities));
+    Assert(GameState->World->StorageEntityCount < ArrayCount(GameState->World->StorageEntities));
 
     add_storage_entity_result Result;
 

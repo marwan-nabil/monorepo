@@ -38,7 +38,7 @@ AddEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 S
         SecondEntityStorageIndex = SwappingTemporaryStorageIndex;
     }
 
-    u32 HashValue = FirstEntityStorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
+    u32 HashValue = FirstEntityStorageIndex & (ArrayCount(GameState->CollisionRulesTable) - 1);
     for
     (
         entity_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashValue];
@@ -88,7 +88,7 @@ static void
 ClearAllEnrityCollisionRules(game_state *GameState, u32 StorageIndex)
 {
     // TODO: improve collision rule storage data structure to optimize for insertion and clearing
-    for (u32 HashValue = 0; HashValue < ArrayLength(GameState->CollisionRulesTable); HashValue++)
+    for (u32 HashValue = 0; HashValue < ArrayCount(GameState->CollisionRulesTable); HashValue++)
     {
         for
         (
@@ -130,7 +130,7 @@ CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
                 Result = TRUE;
             }
 
-            u32 HashTableIndex = A->StorageIndex & (ArrayLength(GameState->CollisionRulesTable) - 1);
+            u32 HashTableIndex = A->StorageIndex & (ArrayCount(GameState->CollisionRulesTable) - 1);
             for
             (
                 entity_collision_rule *CurrentRule = GameState->CollisionRulesTable[HashTableIndex];

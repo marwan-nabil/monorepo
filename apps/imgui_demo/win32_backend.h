@@ -1,10 +1,19 @@
 #pragma once
 
-struct win32_backend_data
+#define VK_KEYPAD_ENTER (VK_RETURN + 256)
+
+enum win32_mouse_area
+{
+    MA_NONE = 0,
+    MA_CLIENT_AREA = 1,
+    MA_NON_CLIENT_AREA = 2,
+};
+
+struct win32_backend_state
 {
     HWND Window;
     HWND MouseWindow;
-    i32 MouseTrackedArea; // 0: not tracked, 1: client are, 2: non-client area
+    win32_mouse_area MouseTrackedArea;
     i32 MouseButtonsDown;
     i64 Time;
     i64 TicksPerSecond;
@@ -34,9 +43,7 @@ struct win32_global_handles
     HMODULE NtDllModule;
 };
 
-typedef HRESULT (WINAPI *SetProcessDpiAwarenessFunctionType)(PROCESS_DPI_AWARENESS);
-typedef HRESULT (WINAPI *GetDpiForMonitorFunctionType)(HMONITOR, MONITOR_DPI_TYPE, u32 *, u32 *);
-typedef DPI_AWARENESS_CONTEXT (WINAPI *SetThreadDpiAwarenessContextFunctionType)(DPI_AWARENESS_CONTEXT);
-typedef u32 (WINAPI *RtlVerifyVersionInfoFunctionType)(OSVERSIONINFOEXW *, u32, ULONGLONG);
-
-#define VK_KEYPAD_ENTER (VK_RETURN + 256)
+typedef HRESULT (WINAPI *set_process_dpi_awareness)(PROCESS_DPI_AWARENESS);
+typedef HRESULT (WINAPI *get_dpi_for_monitror)(HMONITOR, MONITOR_DPI_TYPE, u32 *, u32 *);
+typedef DPI_AWARENESS_CONTEXT (WINAPI *set_thread_dpi_awareness)(DPI_AWARENESS_CONTEXT);
+typedef u32 (WINAPI *rtl_verify_version_info)(OSVERSIONINFOEXW *, u32, ULONGLONG);
