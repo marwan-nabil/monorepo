@@ -47,7 +47,7 @@ b32 WriteFileFromMemory(char *FilePath, void *DataToWrite, u32 DataSize)
 {
     b32 Result = FALSE;
 
-    HANDLE FileHandle = CreateFileA(FilePath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    HANDLE FileHandle = CreateFileA(FilePath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
     if (FileHandle != INVALID_HANDLE_VALUE)
     {
         DWORD BytesWritten;

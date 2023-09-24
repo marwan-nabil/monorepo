@@ -263,29 +263,12 @@ b32 CreateEmptyFile(char *FilePath, u32 Size, u32 FillPattern)
 {
     u8 *OutputFileMemory = (u8 *)VirtualAlloc
     (
-        0,
-        Size,
-        MEM_RESERVE | MEM_COMMIT,
-        PAGE_READWRITE
+        0, Size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
     );
     memset(OutputFileMemory, FillPattern, Size);
 
-    HANDLE FileHandle = CreateFileA(FilePath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-    if (!FileHandle)
-    {
-        return FALSE;
-    }
-
-    DWORD BytesWritten;
-    b32 Result = WriteFile(FileHandle, OutputFileMemory, (u32)Size, &BytesWritten, 0);
-    if (!Result)
-    {
-        return FALSE;
-    }
-
-    CloseHandle(FileHandle);
-
-    return TRUE;
+    b32 Result = WriteFileFromMemory(FilePath, OutputFileMemory, Size);
+    return Result;
 }
 
 b32 WriteBinaryFileOverAnother(char *SourceBinaryFilePath, u32 WriteOffset, char *DestinationBinaryFilePath)

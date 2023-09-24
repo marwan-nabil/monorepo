@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 #include <strsafe.h>
 #include <fileapi.h>
 #include <direct.h>
@@ -9,7 +10,10 @@
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\assertions.h"
 #include "..\..\miscellaneous\basic_defines.h"
+#include "..\..\miscellaneous\file_io.h"
 
+#include "..\..\math\scalar_conversions.cpp"
+#include "..\..\miscellaneous\file_io.cpp"
 #include "metadata.generated.cpp"
 
 #if !defined(JOB_PER_DIRECTORY) && !defined(JOB_PER_FILE)
@@ -58,51 +62,18 @@ b32 LintFile(char *FileRelativePath)
     StringCchCatA(FilePath, MAX_PATH, RootDirectoryPath);
     StringCchCatA(FilePath, MAX_PATH, FileRelativePath);
 
-    HANDLE FileHandle = CreateFile
-    (
-        FilePath,
-        GENERIC_READ,
-        FILE_SHARE_READ,
-        0,
-        OPEN_EXISTING,
-        0,
-        0
-    );
-
-    if (!FileHandle)
-    {
-        return FALSE;
-    }
-
-    LARGE_INTEGER FileSize;
-    GetFileSizeEx(FileHandle, &FileSize);
-
-    u8 *ReadFileMemory = (u8 *)VirtualAlloc
-    (
-        0,
-        FileSize.QuadPart,
-        MEM_RESERVE | MEM_COMMIT,
-        PAGE_READWRITE
-    );
+    read_file_result SourceFile = ReadFileIntoMemory(FilePath);
 
     u8 *BufferMemory = (u8 *)VirtualAlloc
     (
         0,
-        FileSize.QuadPart,
+        SourceFile.Size,
         MEM_RESERVE | MEM_COMMIT,
         PAGE_READWRITE
     );
-    memset(BufferMemory, 0, FileSize.QuadPart);
+    ZeroMemory(BufferMemory, SourceFile.Size);
 
-    DWORD BytesRead;
-    b32 Result = ReadFile(FileHandle, ReadFileMemory, (u32)FileSize.QuadPart, &BytesRead, 0);
-    if (!Result)
-    {
-        return FALSE;
-    }
-    CloseHandle(FileHandle);
-
-    u8 *ScanPointer = ReadFileMemory;
+    u8 *ScanPointer = (u8 *)SourceFile.FileMemory;
     u8 *WritePointer = BufferMemory;
 
     u8 *CopyStartPointer = ScanPointer;
@@ -179,6 +150,7 @@ b32 LintFile(char *FileRelativePath)
     }
 
     u64 OutputSize = WritePointer - BufferMemory;
+
     u8 *OutputFileMemory = (u8 *)VirtualAlloc
     (
         0,
@@ -186,23 +158,16 @@ b32 LintFile(char *FileRelativePath)
         MEM_RESERVE | MEM_COMMIT,
         PAGE_READWRITE
     );
-
     memcpy(OutputFileMemory, BufferMemory, OutputSize);
 
-    FileHandle = CreateFileA(FilePath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-    if (!FileHandle)
-    {
-        return FALSE;
-    }
-    DWORD BytesWritten;
-    Result = WriteFile(FileHandle, OutputFileMemory, (u32)OutputSize, &BytesWritten, 0);
+    b32 Result = WriteFileFromMemory(FilePath, OutputFileMemory, SafeTruncateUint64ToUint32(OutputSize));
     if (!Result)
     {
         return FALSE;
     }
-    CloseHandle(FileHandle);
 
-    VirtualFree(ReadFileMemory, 0, MEM_RELEASE);
+    FreeFileMemory(SourceFile.FileMemory);
+    VirtualFree(BufferMemory, 0, MEM_RELEASE);
     VirtualFree(OutputFileMemory, 0, MEM_RELEASE);
 
     return TRUE;

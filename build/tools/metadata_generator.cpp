@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 #include <strsafe.h>
 #include <fileapi.h>
 #include <direct.h>
@@ -9,7 +10,10 @@
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\basic_defines.h"
 #include "..\..\miscellaneous\assertions.h"
+#include "..\..\miscellaneous\file_io.h"
 
+#include "..\..\math\scalar_conversions.cpp"
+#include "..\..\miscellaneous\file_io.cpp"
 #include "..\..\miscellaneous\strings.cpp"
 
 // TODO: optimize string operations
@@ -196,28 +200,15 @@ int main(int argc, char **argv)
     u64 OutputSize = WritePointer - BufferMemory;
     u8 *OutputFileMemory = (u8 *)VirtualAlloc
     (
-        0,
-        OutputSize,
-        MEM_RESERVE | MEM_COMMIT,
-        PAGE_READWRITE
+        0, OutputSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
     );
-
     memcpy(OutputFileMemory, BufferMemory, OutputSize);
 
-    HANDLE FileHandle = CreateFileA
-    (
-        OutputFilePath,
-        GENERIC_WRITE,
-        0,
-        0,
-        CREATE_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        0
-    );
-
-    DWORD BytesWritten;
-    WriteFile(FileHandle, OutputFileMemory, (u32)OutputSize, &BytesWritten, 0);
-    CloseHandle(FileHandle);
+    b32 Result = WriteFileFromMemory(OutputFilePath, OutputFileMemory, SafeTruncateUint64ToUint32(OutputSize));
+    if (!Result)
+    {
+        return 1;
+    }
 
     VirtualFree(BufferMemory, 0, MEM_RELEASE);
     VirtualFree(OutputFileMemory, 0, MEM_RELEASE);

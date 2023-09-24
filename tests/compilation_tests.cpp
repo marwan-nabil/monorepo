@@ -77,5 +77,6 @@ void RunCompilationTests()
     CompilationTest("build lint");
     CompilationTest("build metadata_generator");
     CompilationTest("build x86_kernel");
+    CompilationTest("build fat12");
     CompilationTest("build clean");
 }

@@ -21,6 +21,8 @@ char *DirectoriesWithSourceCode[] =
 char *FilesWithSourceCode[] =
 {
     "\\x86_kernel\\kernel.s",
+    "\\x86_kernel\\fat12.h",
+    "\\x86_kernel\\fat12.cpp",
     "\\x86_kernel\\bootloader.s",
     "\\windows_apps\\ray_tracer\\ray_tracer.h",
     "\\windows_apps\\ray_tracer\\main.cpp",
@@ -68,8 +70,6 @@ char *FilesWithSourceCode[] =
     "\\miscellaneous\\strings.cpp",
     "\\miscellaneous\\file_io.h",
     "\\miscellaneous\\file_io.cpp",
-    "\\miscellaneous\\fat12.h",
-    "\\miscellaneous\\fat12.cpp",
     "\\miscellaneous\\console.cpp",
     "\\miscellaneous\\basic_defines.h",
     "\\miscellaneous\\base_types.h",

@@ -30,6 +30,7 @@ void DisplayHelp()
     printf("          build lint [job_per_directory]\n");
     printf("          build metadata_generator\n");
     printf("          build x86_kernel\n");
+    printf("          build fat12\n");
 }
 
 int main(int argc, char **argv)
@@ -425,6 +426,22 @@ int main(int argc, char **argv)
             StringCchCatA(DestinationBinaryFilePath, ArrayCount(DestinationBinaryFilePath), "\\floppy.img");
 
             BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, DestinationBinaryFilePath);
+        }
+        else if (strcmp(argv[1], "fat12") == 0)
+        {
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\x86_kernel\\fat12.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
+
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\fat12.exe");
+
+            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else
         {
