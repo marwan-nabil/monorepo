@@ -1,3 +1,15 @@
+#include <Windows.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <io.h>
+
+#include "..\miscellaneous\base_types.h"
+#include "..\miscellaneous\assertions.h"
+#include "..\miscellaneous\basic_defines.h"
+
+#include "..\miscellaneous\console.cpp"
+#include "..\miscellaneous\strings.cpp"
+
 void CompilationTest(char *TestCommand)
 {
     printf("\n");
@@ -54,8 +66,10 @@ void CompilationTest(char *TestCommand)
     ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
 }
 
-void RunCompilationTests()
+i32 main(i32 argc, char **argv)
 {
+    InitializeConsole();
+
     CompilationTest("build build");
     CompilationTest("build basic_app");
     CompilationTest("build imgui_demo opengl2");
@@ -69,5 +83,13 @@ void RunCompilationTests()
     CompilationTest("build directx_demo release");
     CompilationTest("build lint");
     CompilationTest("build x86_kernel");
+    CompilationTest("build fat12_tests");
     CompilationTest("build clean");
+
+    ConsoleSwitchColor(FOREGROUND_GREEN);
+    printf("\n==========================\n");
+    printf("INFO: all tests succeeded.\n");
+    printf("==========================\n");
+    fflush(stdout);
+    ConsoleResetColor();
 }

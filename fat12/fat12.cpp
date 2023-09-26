@@ -1,3 +1,5 @@
+// TODO: improve error handling
+
 inline u16 TranslateCluster(u16 LogicalCluster)
 {
     Assert(LogicalCluster >= 2);
@@ -5,7 +7,7 @@ inline u16 TranslateCluster(u16 LogicalCluster)
     return PhysicalCluster;
 }
 
-inline sector *GetPhysicalSector(fat12_disk *Disk, u16 LogicalCluster)
+inline sector *GetPhysicalCluster(fat12_disk *Disk, u16 LogicalCluster)
 {
     sector *Result = &Disk->Sectors[TranslateCluster(LogicalCluster)];
     return Result;
@@ -52,8 +54,8 @@ inline b32 IsFatEntryEndOfFile(u16 FatEntry)
 {
     if
     (
-        (FatEntry >= FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_START) &&
-        (FatEntry <= FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END)
+        (FatEntry >= FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_START) &&
+        (FatEntry <= FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END)
     )
     {
         return TRUE;
@@ -70,17 +72,16 @@ GetFirstEmptyLogicalClusterInFat(file_allocation_table *Fat)
     for (u16 LogicalCluster = 2; LogicalCluster < FAT12_ENTRIES_PER_FAT; LogicalCluster++)
     {
         u16 FatEntry = GetFatEntry(Fat, LogicalCluster);
-        if (FatEntry == FAT_ENTRY_FREE_CLUSTER)
+        if (FatEntry == FAT12_FAT_ENTRY_FREE_CLUSTER)
         {
             return LogicalCluster;
         }
     }
-
-    printf("ERROR: could not find a single empty logical cluster in the file allocation table.\n");
     return 0;
 }
 
-inline directory_entry *GetFirstFreeDirectoryEntryInSector(sector *Sector)
+inline directory_entry *
+GetFirstFreeDirectoryEntryInSector(sector *Sector)
 {
     for
     (
@@ -90,7 +91,7 @@ inline directory_entry *GetFirstFreeDirectoryEntryInSector(sector *Sector)
     )
     {
         directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
-        if (DirectoryEntry->FileName[0] == FILENAME_EMPTY_SLOT)
+        if (DirectoryEntry->FileName[0] == FAT12_FILENAME_EMPTY_SLOT)
         {
             return DirectoryEntry;
         }
@@ -99,7 +100,72 @@ inline directory_entry *GetFirstFreeDirectoryEntryInSector(sector *Sector)
     return NULL;
 }
 
-b32 AllocateSectors(fat12_disk *Disk, void *Memory, u32 Size, u16 *AllocatedAreaFirstCluster)
+inline void
+FreeFilePathSegmentList(file_path_node *RootNode)
+{
+    file_path_node *CurrentNode = RootNode;
+    file_path_node *ChildNode;
+
+    while (CurrentNode)
+    {
+        ChildNode = CurrentNode->ChildNode;
+        free(CurrentNode);
+        CurrentNode = ChildNode;
+    }
+}
+
+inline file_path_node *
+CreateFilePathSegmentList(char *FileFullPath)
+{
+    char LocalPathBuffer[FAT12_MAX_PATH];
+    ZeroMemory(LocalPathBuffer, ArrayCount(LocalPathBuffer));
+    StringCchCat(LocalPathBuffer, ArrayCount(LocalPathBuffer), FileFullPath);
+
+    u32 PathLength = StringLength(LocalPathBuffer);
+
+    file_path_node *CurrentFilePathNode = (file_path_node *)malloc(sizeof(file_path_node));
+    *CurrentFilePathNode = {};
+    file_path_node *LastFilePathNode = 0;
+
+    for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
+    {
+        if (LocalPathBuffer[CharIndex] == '\\')
+        {
+            char PathSegment[FAT12_MAX_PATH];
+            ZeroMemory(PathSegment, ArrayCount(PathSegment));
+            StringCchCat(PathSegment, FAT12_MAX_PATH, &LocalPathBuffer[CharIndex + 1]);
+            ZeroMemory(&LocalPathBuffer[CharIndex], StringLength(&LocalPathBuffer[CharIndex]));
+
+            if (!CurrentFilePathNode)
+            {
+                CurrentFilePathNode = (file_path_node *)malloc(sizeof(file_path_node));
+                *CurrentFilePathNode = {};
+            }
+
+            StringCchCat(CurrentFilePathNode->NodeName, FAT12_MAX_PATH, PathSegment);
+            CurrentFilePathNode->ChildNode = LastFilePathNode;
+
+            LastFilePathNode = CurrentFilePathNode;
+            CurrentFilePathNode = 0;
+        }
+    }
+
+    return LastFilePathNode;
+}
+
+// TODO: implement cluster getters by file path
+// u16 GetFirstLogicalClusterOfFile(fat12_disk *Disk, char *FullFilePath)
+// {
+//     file_path_node *CurrentNode = CreateFilePathSegmentsList(FullFilePath);
+
+//     while (CurrentNode)
+//     {
+//         GetDirectorySector(CurrentNode->NodeName);
+//         CurrentNode = CurrentNode->ChildNode;
+//     }
+// }
+
+u16 AllocateSectors(fat12_disk *Disk, void *Memory, u32 Size)
 {
     u16 FirstLogicalCluster = 0;
 
@@ -112,7 +178,7 @@ b32 AllocateSectors(fat12_disk *Disk, void *Memory, u32 Size, u16 *AllocatedArea
     while (ClustersNeeded)
     {
         u16 LogicalCluster = GetFirstEmptyLogicalClusterInFat(&Disk->Fat1);
-        SetFatEntry(&Disk->Fat1, LogicalCluster, FAT_ENTRY_RESERVED_CLUSTER);
+        SetFatEntry(&Disk->Fat1, LogicalCluster, FAT12_FAT_ENTRY_RESERVED_CLUSTER);
 
         if (PreviousLogicalCluster)
         {
@@ -152,47 +218,43 @@ b32 AllocateSectors(fat12_disk *Disk, void *Memory, u32 Size, u16 *AllocatedArea
 
         if (SizeLeft == 0)
         {
-            SetFatEntry(&Disk->Fat1, LogicalCluster, FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END);
+            SetFatEntry(&Disk->Fat1, LogicalCluster, FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END);
         }
     }
 
-    if (FirstLogicalCluster)
-    {
-        *AllocatedAreaFirstCluster = FirstLogicalCluster;
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
+    return FirstLogicalCluster;
 }
 
-b32 AddFileToDirectorySector(fat12_disk *Disk, sector *DirectorySector, ram_file File)
+u16 AddFileToDirectorySector
+(
+    fat12_disk *Disk, sector *DirectorySector, ram_file File
+)
 {
     directory_entry *DirectoryEntry =
         GetFirstFreeDirectoryEntryInSector(DirectorySector);
 
     if (!DirectoryEntry)
     {
-        return FALSE;
+        return 0;
     }
 
-    b32 AllocationSuccess = AllocateSectors(Disk, File.Memory, File.Size, &DirectoryEntry->FirstLogicalCluster);
-    if (AllocationSuccess)
+    u16 FirstLogicalCluster = AllocateSectors(Disk, File.Memory, File.Size);
+    if (FirstLogicalCluster)
     {
         memcpy(DirectoryEntry->FileName, File.Name, 8);
         memcpy(DirectoryEntry->FileExtension, File.Extension, 3);
         DirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_NORMAL;
         DirectoryEntry->FileSize = File.Size;
-        return TRUE;
+        DirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
     }
-    else
-    {
-        return FALSE;
-    }
+
+    return FirstLogicalCluster;
 }
 
-b32 AddDirectoryToDirectorySector(fat12_disk *Disk, sector *DirectorySector, const char *DirectoryName)
+u16 AddDirectoryToDirectorySector
+(
+    fat12_disk *Disk, sector *DirectorySector, const char *DirectoryName
+)
 {
     directory_entry *DirectoryEntry =
         GetFirstFreeDirectoryEntryInSector(DirectorySector);
@@ -202,32 +264,73 @@ b32 AddDirectoryToDirectorySector(fat12_disk *Disk, sector *DirectorySector, con
         return FALSE;
     }
 
-    b32 AllocationSuccess = AllocateSectors(Disk, 0, 512, &DirectoryEntry->FirstLogicalCluster);
-    if (AllocationSuccess)
+    u16 FirstLogicalCluster = AllocateSectors(Disk, 0, 512);
+    if (FirstLogicalCluster)
     {
-        memcpy(DirectoryEntry->FileName, DirectoryName, 8);
+        StringCchCat((char *)DirectoryEntry->FileName, 8, DirectoryName);
         memset(DirectoryEntry->FileExtension, 0, 3);
+
         DirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
         DirectoryEntry->FileSize = 0;
-        return TRUE;
+        DirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
     }
-    else
-    {
-        return FALSE;
-    }
+
+    return FirstLogicalCluster;
 }
 
-b32 AddFileToDirectory(fat12_disk *Disk, u16 LogicalCluster, ram_file File)
+u16 AddFileToDirectory
+(
+    fat12_disk *Disk, u16 DirectoryLogicalCluster, ram_file File
+)
 {
+    u16 FirstLogicalClusterForNewFile = 0;
+
+    u16 CurrentLogicalCluster = DirectoryLogicalCluster;
+    u16 CurrentFatEntry = GetFatEntry(&Disk->Fat1, CurrentLogicalCluster);
+
+    while (1)
+    {
+        sector *PhysicalSector = GetPhysicalCluster(Disk, CurrentLogicalCluster);
+        FirstLogicalClusterForNewFile = AddFileToDirectorySector(Disk, PhysicalSector, File);
+
+        if (FirstLogicalClusterForNewFile)
+        {
+            break;
+        }
+        else
+        {
+            if (IsFatEntryEndOfFile(CurrentFatEntry))
+            {
+                return 0;
+            }
+            else
+            {
+                CurrentLogicalCluster = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntry(&Disk->Fat1, CurrentLogicalCluster);
+            }
+        }
+    }
+
+    return FirstLogicalClusterForNewFile;
+}
+
+u16 AddDirectoryToDirectory
+(
+    fat12_disk *Disk, u16 LogicalCluster, const char *DirectoryName
+)
+{
+    u16 FirstLogicalClusterForNewDirectory = 0;
+
     u16 CurrentLogicalCluster = LogicalCluster;
     u16 CurrentFatEntry = GetFatEntry(&Disk->Fat1, CurrentLogicalCluster);
 
     while (1)
     {
-        sector *PhysicalSector = GetPhysicalSector(Disk, CurrentLogicalCluster);
-        b32 FileAdded = AddFileToDirectorySector(Disk, PhysicalSector, File);
+        sector *PhysicalSector = GetPhysicalCluster(Disk, CurrentLogicalCluster);
+        FirstLogicalClusterForNewDirectory =
+            AddDirectoryToDirectorySector(Disk, PhysicalSector, DirectoryName);
 
-        if (FileAdded)
+        if (FirstLogicalClusterForNewDirectory)
         {
             break;
         }
@@ -245,66 +348,44 @@ b32 AddFileToDirectory(fat12_disk *Disk, u16 LogicalCluster, ram_file File)
         }
     }
 
-    return TRUE;
+    return FirstLogicalClusterForNewDirectory;
 }
 
-b32 AddDirectoryToDirectory(fat12_disk *Disk, u16 LogicalCluster, const char *DirectoryName)
+u16 AddFileToRootDirectory(fat12_disk *Disk, ram_file File)
 {
-    u16 CurrentLogicalCluster = LogicalCluster;
-    u16 CurrentFatEntry = GetFatEntry(&Disk->Fat1, CurrentLogicalCluster);
+    u16 NewFileFirstLogicalCluster = 0;
 
-    while (1)
+    for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
     {
-        sector *PhysicalSector = GetPhysicalSector(Disk, CurrentLogicalCluster);
-        b32 FileAdded = AddDirectoryToDirectorySector(Disk, PhysicalSector, DirectoryName);
+        NewFileFirstLogicalCluster =
+            AddFileToDirectorySector(Disk, &Disk->RootDirectory.Sectors[SectorIndex], File);
 
-        if (FileAdded)
+        if (NewFileFirstLogicalCluster)
         {
             break;
         }
-        else
-        {
-            if (IsFatEntryEndOfFile(CurrentFatEntry))
-            {
-                return FALSE;
-            }
-            else
-            {
-                CurrentLogicalCluster = CurrentFatEntry;
-                CurrentFatEntry = GetFatEntry(&Disk->Fat1, CurrentLogicalCluster);
-            }
-        }
     }
 
-    return TRUE;
+    return NewFileFirstLogicalCluster;
 }
 
-b32 AddFileToRootDirectory(fat12_disk *Disk, ram_file File)
+u16 AddDirectoryToRootDirectory(fat12_disk *Disk, const char *DirectoryName)
 {
+    u16 NewDirectoryFirstLogicalCluster = 0;
+
     for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
     {
-        b32 FileAdded = AddFileToDirectorySector(Disk, &Disk->RootDirectory.Sectors[SectorIndex], File);
+        NewDirectoryFirstLogicalCluster =
+            AddDirectoryToDirectorySector
+            (
+                Disk, &Disk->RootDirectory.Sectors[SectorIndex], DirectoryName
+            );
 
-        if (FileAdded)
+        if (NewDirectoryFirstLogicalCluster)
         {
-            return TRUE;
+            break;
         }
     }
 
-    return FALSE;
-}
-
-b32 AddDirectoryToRootDirectory(fat12_disk *Disk, const char *DirectoryName)
-{
-    for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
-    {
-        b32 FileAdded = AddDirectoryToDirectorySector(Disk, &Disk->RootDirectory.Sectors[SectorIndex], DirectoryName);
-
-        if (FileAdded)
-        {
-            return TRUE;
-        }
-    }
-
-    return FALSE;
+    return NewDirectoryFirstLogicalCluster;
 }
