@@ -14,6 +14,7 @@
 #include "..\math\scalar_conversions.cpp"
 #include "..\miscellaneous\file_io.cpp"
 #include "build_helpers.cpp"
+#include "binary_helpers.cpp"
 
 void DisplayHelp()
 {
@@ -28,9 +29,7 @@ void DisplayHelp()
     printf("          build imgui_demo [opengl2, dx11]\n");
     printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
     printf("          build lint [job_per_directory]\n");
-    printf("          build metadata_generator\n");
     printf("          build x86_kernel\n");
-    printf("          build fat12\n");
 }
 
 int main(int argc, char **argv)
@@ -108,7 +107,7 @@ int main(int argc, char **argv)
         else if (strcmp(argv[1], "test") == 0)
         {
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
@@ -355,28 +354,12 @@ int main(int argc, char **argv)
             }
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\tools\\lint.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\lint.cpp");
 
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref Shlwapi.lib ");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\lint.exe");
-
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "metadata_generator") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\tools\\metadata_generator.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref User32.lib Shlwapi.lib");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\metadata_generator.exe");
 
             BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
@@ -426,22 +409,6 @@ int main(int argc, char **argv)
             StringCchCatA(DestinationBinaryFilePath, ArrayCount(DestinationBinaryFilePath), "\\floppy.img");
 
             BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, DestinationBinaryFilePath);
-        }
-        else if (strcmp(argv[1], "fat12") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\x86_kernel\\fat12.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\fat12.exe");
-
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else
         {

@@ -1,17 +1,30 @@
 #include <Windows.h>
 #include <stdint.h>
-#include <io.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <strsafe.h>
+#include <io.h>
 
 #include "..\miscellaneous\base_types.h"
+#include "..\miscellaneous\assertions.h"
+#include "..\miscellaneous\basic_defines.h"
+
+#include "..\fat12\fat12.h"
 
 #include "..\miscellaneous\console.cpp"
+#include "..\miscellaneous\strings.cpp"
+
 #include "compilation_tests.cpp"
+
+#include "..\fat12\fat12.cpp"
+#include "..\fat12\test.cpp"
 
 void DisplayHelp()
 {
     printf("INFO: Available test targets:\n");
     printf("          test compilation\n");
+    printf("          test fat12\n");
 }
 
 int main(int argc, char **argv)
@@ -27,6 +40,10 @@ int main(int argc, char **argv)
     else if (strcmp(argv[1], "compilation") == 0)
     {
         RunCompilationTests();
+    }
+    else if (strcmp(argv[1], "fat12") == 0)
+    {
+        TestFat12();
     }
     else
     {

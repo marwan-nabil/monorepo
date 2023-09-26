@@ -6,54 +6,108 @@
 #include <fileapi.h>
 #include <direct.h>
 #include <time.h>
+#include <shlwapi.h>
 
-#include "..\..\miscellaneous\base_types.h"
-#include "..\..\miscellaneous\assertions.h"
-#include "..\..\miscellaneous\basic_defines.h"
-#include "..\..\miscellaneous\file_io.h"
+#include "..\miscellaneous\base_types.h"
+#include "..\miscellaneous\assertions.h"
+#include "..\miscellaneous\basic_defines.h"
+#include "..\miscellaneous\file_io.h"
+#include "lint.h"
 
-#include "..\..\math\scalar_conversions.cpp"
-#include "..\..\miscellaneous\file_io.cpp"
-#include "metadata.generated.cpp"
+#include "..\math\scalar_conversions.cpp"
+#include "..\miscellaneous\file_io.cpp"
 
 #if !defined(JOB_PER_DIRECTORY) && !defined(JOB_PER_FILE)
 #   define JOB_PER_FILE
 #endif
 
-enum lint_job_type
-{
-    LJT_FILE_LIST,
-    LJT_DIRECTORY,
-    LJT_FILE
-};
-
-struct lint_job
-{
-    lint_job_type Type;
-
-    union
-    {
-        struct
-        {
-            u32 NumberOfFiles;
-            char **FileRelativePaths;
-        };
-        char *DirectoryRelativePath;
-        char *FileRelativePath;
-    };
-
-    b32 Result;
-};
-
-struct lint_job_queue
-{
-    u32 JobCount;
-    lint_job *Jobs;
-    volatile i64 NextJobIndex;
-    volatile i64 TotalJobsDone;
-};
-
 char RootDirectoryPath[1024];
+
+b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirectoriesList, file_node **FoundFilesList)
+{
+    b32 DirectoryContainsSourceCode = FALSE;
+    b32 Result = TRUE;
+
+    char DirectoryWildcard[1024];
+    ZeroMemory(DirectoryWildcard, ArrayCount(DirectoryWildcard));
+    StringCchCatA(DirectoryWildcard, ArrayCount(DirectoryWildcard), RootDirectoryPath);
+    StringCchCatA(DirectoryWildcard, ArrayCount(DirectoryWildcard), DirectoryRelativePath);
+    StringCchCatA(DirectoryWildcard, ArrayCount(DirectoryWildcard), "\\*");
+
+    WIN32_FIND_DATAA FindOperationData;
+    HANDLE FindHandle = FindFirstFileA(DirectoryWildcard, &FindOperationData);
+
+    if (FindHandle != INVALID_HANDLE_VALUE)
+    {
+        do
+        {
+            if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+            {
+                if
+                (
+                    (strcmp(FindOperationData.cFileName, ".") == 0) ||
+                    (strcmp(FindOperationData.cFileName, "..") == 0) ||
+                    (strcmp(FindOperationData.cFileName, ".git") == 0) ||
+                    (strcmp(FindOperationData.cFileName, ".vscode") == 0)
+                )
+                {
+                    continue;
+                }
+
+                char FoundDirectoryRelativePath[1024];
+                ZeroMemory(FoundDirectoryRelativePath, 1024);
+                StringCchCatA(FoundDirectoryRelativePath, 1024, DirectoryRelativePath);
+                StringCchCatA(FoundDirectoryRelativePath, 1024, "\\");
+                StringCchCatA(FoundDirectoryRelativePath, 1024, FindOperationData.cFileName);
+                Result = ProcessDirectory(FoundDirectoryRelativePath, FoundDirectoriesList, FoundFilesList) && Result;
+            }
+            else
+            {
+                char *Extension = PathFindExtensionA(FindOperationData.cFileName);
+                if ((strcmp(Extension, ".cpp") == 0) || (strcmp(Extension, ".h") == 0) || (strcmp(Extension, ".s") == 0))
+                {
+                    if (!DirectoryContainsSourceCode)
+                    {
+                        DirectoryContainsSourceCode = TRUE;
+                        directory_node *NewDirectoryNode = (directory_node *)malloc(sizeof(directory_node));
+                        *NewDirectoryNode = {};
+                        StringCchCatA(NewDirectoryNode->DirectoryRelativePath, ArrayCount(NewDirectoryNode->DirectoryRelativePath), DirectoryRelativePath);
+                        NewDirectoryNode->NextDirectoryNode = *FoundDirectoriesList;
+                        *FoundDirectoriesList = NewDirectoryNode;
+                    }
+
+                    file_node *NewFileNode = (file_node *)malloc(sizeof(file_node));
+                    *NewFileNode = {};
+                    StringCchCatA(NewFileNode->FileRelativePath, ArrayCount(NewFileNode->FileRelativePath), DirectoryRelativePath);
+                    StringCchCatA(NewFileNode->FileRelativePath, ArrayCount(NewFileNode->FileRelativePath), "\\");
+                    StringCchCatA(NewFileNode->FileRelativePath, ArrayCount(NewFileNode->FileRelativePath), FindOperationData.cFileName);
+                    NewFileNode->NextFileNode = *FoundFilesList;
+                    *FoundFilesList = NewFileNode;
+                }
+            }
+        } while (FindNextFileA(FindHandle, &FindOperationData) != 0);
+
+        DWORD LastErrorCode = GetLastError();
+        if (LastErrorCode != ERROR_NO_MORE_FILES)
+        {
+            printf("ERROR: enumerating directories failed.\n");
+            printf("ERROR: last error code is %d\n", LastErrorCode);
+            return FALSE;
+        }
+    }
+    else
+    {
+        DWORD LastError = GetLastError();
+        if (LastError != ERROR_FILE_NOT_FOUND)
+        {
+            printf("ERROR: FindFirstFileA() failed.\n");
+            return FALSE;
+        }
+    }
+
+    FindClose(FindHandle);
+    return TRUE;
+}
 
 b32 LintFile(char *FileRelativePath)
 {
@@ -296,16 +350,39 @@ int main(int argc, char **argv)
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
 
+    directory_node *FoundDirectoriesList = 0;
+    file_node *FoundFilesList = 0;
+
+    ProcessDirectory("", &FoundDirectoriesList, &FoundFilesList);
+
+    u32 DirectoryCount = 0;
+    directory_node *DirectoryListIterator = FoundDirectoriesList;
+    while (DirectoryListIterator)
+    {
+        DirectoryCount++;
+        DirectoryListIterator = DirectoryListIterator->NextDirectoryNode;
+    }
+
+    u32 FileCount = 0;
+    file_node *FileListIterator = FoundFilesList;
+    while (FileListIterator)
+    {
+        FileCount++;
+        FileListIterator = FileListIterator->NextFileNode;
+    }
+
+    // -----------------------------------------------------
+
     b32 Result = TRUE;
 
     clock_t StartTime = clock();
 
     lint_job_queue LintJobQueue;
 #if defined(JOB_PER_DIRECTORY)
-    LintJobQueue.JobCount = ArrayCount(DirectoriesWithSourceCode);
+    LintJobQueue.JobCount = DirectoryCount;
 #endif
 #if defined(JOB_PER_FILE)
-    LintJobQueue.JobCount = ArrayCount(FilesWithSourceCode);
+    LintJobQueue.JobCount = FileCount;
 #endif
     LintJobQueue.NextJobIndex = 0;
     LintJobQueue.TotalJobsDone = 0;
@@ -317,11 +394,13 @@ int main(int argc, char **argv)
         ZeroMemory(Job, sizeof(lint_job));
 #if defined(JOB_PER_DIRECTORY)
         Job->Type = LJT_DIRECTORY;
-        Job->DirectoryRelativePath = DirectoriesWithSourceCode[JobIndex];
+        Job->DirectoryRelativePath = FoundDirectoriesList->DirectoryRelativePath;
+        FoundDirectoriesList = FoundDirectoriesList->NextDirectoryNode;
 #endif
 #if defined(JOB_PER_FILE)
         Job->Type = LJT_FILE;
-        Job->FileRelativePath = FilesWithSourceCode[JobIndex];
+        Job->FileRelativePath = FoundFilesList->FileRelativePath;
+        FoundFilesList = FoundFilesList->NextFileNode;
 #endif
         Job->Result = FALSE;
     }

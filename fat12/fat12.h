@@ -19,7 +19,6 @@
 #define FAT_ENTRY_FREE_CLUSTER 0x0000
 #define FAT_ENTRY_RESERVED_CLUSTER 0x0FF6
 #define FAT_ENTRY_BAD_CLUSTER 0x0FF7
-
 #define FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_START 0x0FF8
 #define FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END 0x0FFF
 
@@ -109,9 +108,9 @@ union fat12_disk
 
 #pragma pack(pop)
 
-struct create_file_result
+struct ram_file
 {
-    char *Memory;
+    void *Memory;
     char *Name;
     char *Extension;
     u32 Size;

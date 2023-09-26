@@ -56,13 +56,6 @@ void CompilationTest(char *TestCommand)
 
 void RunCompilationTests()
 {
-    ConsoleSwitchColor(FOREGROUND_BLUE);
-    printf("\n============= Compilation Tests =============\n");
-    printf("These tests compile all available build targets to make sure\n");
-    printf("that refactoring doesn't break the build of any target.\n");
-    fflush(stdout);
-    ConsoleResetColor();
-
     CompilationTest("build build");
     CompilationTest("build basic_app");
     CompilationTest("build imgui_demo opengl2");
@@ -75,8 +68,6 @@ void RunCompilationTests()
     CompilationTest("build directx_demo debug");
     CompilationTest("build directx_demo release");
     CompilationTest("build lint");
-    CompilationTest("build metadata_generator");
     CompilationTest("build x86_kernel");
-    CompilationTest("build fat12");
     CompilationTest("build clean");
 }
