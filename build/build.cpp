@@ -296,6 +296,7 @@ int main(int argc, char **argv)
             }
             else if(strcmp(argv[2], "debug") == 0)
             {
+                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/D_DEBUG=1 ");
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo_debug.exe");
             }

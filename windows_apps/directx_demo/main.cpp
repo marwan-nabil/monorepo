@@ -12,14 +12,25 @@
 #include "../../miscellaneous/basic_defines.h"
 #include "../../miscellaneous/assertions.h"
 
-#include "../../math/floats.cpp"
-
 #include "directx_demo.h"
 
+#include "../../math/floats.cpp"
+
 window_data GlobalWindowData;
+d3d_state GlobalD3dState;
+
 vertex GlobalCubeVertices[8];
 u16 GlobalCubeVertexIndices[36];
-directx_state GlobalDirectxState;
+
+void Update(f32 TimeDelta)
+{
+
+}
+
+void Render()
+{
+
+}
 
 void
 InitializeGlobalState()
@@ -151,14 +162,167 @@ DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSyn
     return FoundRefreshRate;
 }
 
-void Update(f32 TimeDelta)
+i32
+InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
 {
+    Assert(GlobalWindowData.Handle);
 
-}
+    RECT ClientRectangle;
+    GetClientRect(GlobalWindowData.Handle, &ClientRectangle);
 
-void Render()
-{
+    u32 ClientAreaWidth = ClientRectangle.right - ClientRectangle.left;
+    u32 ClientAreaHeight = ClientRectangle.bottom - ClientRectangle.top;
 
+    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor;
+    ZeroMemory(&SwapChainDescriptor, sizeof(DXGI_SWAP_CHAIN_DESC));
+    SwapChainDescriptor.BufferCount = 1;
+    SwapChainDescriptor.BufferDesc.Width = ClientAreaWidth;
+    SwapChainDescriptor.BufferDesc.Height = ClientAreaHeight;
+    SwapChainDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    SwapChainDescriptor.BufferDesc.RefreshRate =
+        QueryRefreshRate(ClientAreaWidth, ClientAreaHeight, EnableVSync);
+    SwapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    SwapChainDescriptor.OutputWindow = GlobalWindowData.Handle;
+    SwapChainDescriptor.SampleDesc.Count = 1;
+    SwapChainDescriptor.SampleDesc.Quality = 0;
+    SwapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    SwapChainDescriptor.Windowed = TRUE;
+
+    u32 DeviceCreationFlags = 0;
+#if _DEBUG
+    DeviceCreationFlags = D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+    D3D_FEATURE_LEVEL FeatureLevelOptions[] =
+    {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+        D3D_FEATURE_LEVEL_9_3,
+        D3D_FEATURE_LEVEL_9_2,
+        D3D_FEATURE_LEVEL_9_1
+    };
+
+    D3D_FEATURE_LEVEL FeatureLevelPicked;
+
+    HRESULT Result = D3D11CreateDeviceAndSwapChain
+    (
+        NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, DeviceCreationFlags,
+        FeatureLevelOptions, ArrayCount(FeatureLevelOptions), D3D11_SDK_VERSION,
+        &SwapChainDescriptor, &GlobalD3dState.SwapChain,
+        &GlobalD3dState.Device, &FeatureLevelPicked,
+        &GlobalD3dState.DeviceContext
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    ID3D11Texture2D *BackBuffer;
+
+    Result = GlobalD3dState.SwapChain->GetBuffer
+    (
+        0, __uuidof(ID3D11Texture2D), (void **)&BackBuffer
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    Result = GlobalD3dState.Device->CreateRenderTargetView
+    (
+        BackBuffer, NULL, &GlobalD3dState.RenderTargetView
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    SafeReleaseComObject((IUnknown **)&BackBuffer);
+
+    D3D11_TEXTURE2D_DESC DepthStencilBufferDescriptor = {};
+    DepthStencilBufferDescriptor.ArraySize = 1;
+    DepthStencilBufferDescriptor.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    DepthStencilBufferDescriptor.CPUAccessFlags = 0;
+    DepthStencilBufferDescriptor.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    DepthStencilBufferDescriptor.Width = ClientAreaWidth;
+    DepthStencilBufferDescriptor.Height = ClientAreaHeight;
+    DepthStencilBufferDescriptor.MipLevels = 1;
+    DepthStencilBufferDescriptor.SampleDesc.Count = 1;
+    DepthStencilBufferDescriptor.SampleDesc.Quality = 0;
+    DepthStencilBufferDescriptor.Usage = D3D11_USAGE_DEFAULT;
+
+    Result = GlobalD3dState.Device->CreateTexture2D
+    (
+        &DepthStencilBufferDescriptor, NULL,
+        &GlobalD3dState.DepthStencilBuffer
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    Result = GlobalD3dState.Device->CreateDepthStencilView
+    (
+        GlobalD3dState.DepthStencilBuffer, NULL, &GlobalD3dState.DepthStencilView
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    D3D11_DEPTH_STENCIL_DESC DepthStencilDescriptor = {};
+    DepthStencilDescriptor.DepthEnable = TRUE;
+    DepthStencilDescriptor.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    DepthStencilDescriptor.DepthFunc = D3D11_COMPARISON_LESS;
+    DepthStencilDescriptor.StencilEnable = FALSE;
+
+    Result = GlobalD3dState.Device->CreateDepthStencilState
+    (
+        &DepthStencilDescriptor, &GlobalD3dState.DepthStencilState
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    D3D11_RASTERIZER_DESC RasterizerDescriptor = {};
+    RasterizerDescriptor.AntialiasedLineEnable = FALSE;
+    RasterizerDescriptor.CullMode = D3D11_CULL_BACK;
+    RasterizerDescriptor.DepthBias = 0;
+    RasterizerDescriptor.DepthBiasClamp = 0.0f;
+    RasterizerDescriptor.DepthClipEnable = TRUE;
+    RasterizerDescriptor.FillMode = D3D11_FILL_SOLID;
+    RasterizerDescriptor.FrontCounterClockwise = FALSE;
+    RasterizerDescriptor.MultisampleEnable = FALSE;
+    RasterizerDescriptor.ScissorEnable = FALSE;
+    RasterizerDescriptor.SlopeScaledDepthBias = 0.0f;
+
+    Result = GlobalD3dState.Device->CreateRasterizerState
+    (
+        &RasterizerDescriptor, &GlobalD3dState.RasterizerState
+    );
+
+    if (FAILED(Result))
+    {
+        return -1;
+    }
+
+    GlobalD3dState.ViewPort.Width = (f32)ClientAreaWidth;
+    GlobalD3dState.ViewPort.Height = (f32)ClientAreaHeight;
+    GlobalD3dState.ViewPort.TopLeftX = 0;
+    GlobalD3dState.ViewPort.TopLeftY = 0;
+    GlobalD3dState.ViewPort.MinDepth = 0;
+    GlobalD3dState.ViewPort.MaxDepth = 1.0f;
+
+    return 0;
 }
 
 LRESULT CALLBACK
@@ -189,32 +353,6 @@ MainWindowCallback(HWND Window, u32 Message, WPARAM WParam, LPARAM LParam)
     }
 
     return Result;
-}
-
-void
-InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
-{
-    Assert(GlobalWindowData.Handle);
-
-    RECT ClientRectangle;
-    GetClientRect(GlobalWindowData.Handle, &ClientRectangle);
-
-    u32 ClientAreaWidth = ClientRectangle.right - ClientRectangle.left;
-    u32 ClientAreaHeight = ClientRectangle.bottom - ClientRectangle.top;
-
-    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor;
-    ZeroMemory(&SwapChainDescriptor, sizeof(DXGI_SWAP_CHAIN_DESC));
-    SwapChainDescriptor.BufferCount = 1;
-    SwapChainDescriptor.BufferDesc.Width = ClientAreaWidth;
-    SwapChainDescriptor.BufferDesc.Height = ClientAreaHeight;
-    SwapChainDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    SwapChainDescriptor.BufferDesc.RefreshRate = QueryRefreshRate(ClientAreaWidth, ClientAreaHeight, EnableVSync);
-    SwapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    SwapChainDescriptor.OutputWindow = GlobalWindowData.Handle;
-    SwapChainDescriptor.SampleDesc.Count = 1;
-    SwapChainDescriptor.SampleDesc.Quality = 0;
-    SwapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    SwapChainDescriptor.Windowed = TRUE;
 }
 
 int CALLBACK WinMain
