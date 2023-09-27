@@ -14,5 +14,4 @@ cl^
     /link /subsystem:console /incremental:no /opt:ref user32.lib
 
 del build.obj
-
 cls

@@ -234,18 +234,18 @@ int main(int argc, char **argv)
             StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
 
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), SharedCompilerFlags);
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/LD /Fmhandmade.map ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/LD /Fmgame.map ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\handmade_hero\\game.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\handmade.dll");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\game.dll");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no ");
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender ");
 
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/PDB:handmade_");
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/PDB:game_");
             char RandomString[5];
             ZeroMemory(RandomString, ArrayCount(RandomString));
             u32 RandomNumber;
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
             ZeroMemory(LinkerFlags, ArrayCount(LinkerFlags));
 
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), SharedCompilerFlags);
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Fmwin32_handmade.map ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Fmwin32_platform.map ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\handmade_hero\\win32_platform.cpp ");
@@ -319,6 +319,34 @@ int main(int argc, char **argv)
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib winmm.lib d3d11.lib dxgi.lib d3dcompiler.lib ");
 
             BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+
+            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
+            ZeroMemory(SourcesString, ArrayCount(SourcesString));
+            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
+
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T vs_4_0 /Od /Zi /E SimpleVertexShader /Fh vertex_shader.h /Vn GlobalVertexShader");
+
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\directx_demo\\vertex_shader.hlsl");
+
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\vertex_shader.cso");
+
+            BuildSuccess = BuildSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
+
+            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
+            ZeroMemory(SourcesString, ArrayCount(SourcesString));
+            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
+
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T ps_4_0 /Od /Zi /E SimplePixelShader /Fh pixel_shader.h /Vn GlobalPixelShader");
+
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\directx_demo\\pixel_shader.hlsl");
+
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\pixel_shader.cso");
+
+            BuildSuccess = BuildSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
         }
         else if (strcmp(argv[1], "lint") == 0)
         {

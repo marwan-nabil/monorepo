@@ -1008,10 +1008,10 @@ WinMain
     Win32GetEXEFilePath(&Win32PlatformState);
 
     char GameCodeDLLPath[MAX_PATH];
-    Win32BuildFilePath(&Win32PlatformState, (char *)"handmade.dll", sizeof(GameCodeDLLPath), GameCodeDLLPath);
+    Win32BuildFilePath(&Win32PlatformState, (char *)"game.dll", sizeof(GameCodeDLLPath), GameCodeDLLPath);
 
     char TempDLLPath[MAX_PATH];
-    Win32BuildFilePath(&Win32PlatformState, (char *)"handmade_temp.dll", sizeof(TempDLLPath), TempDLLPath);
+    Win32BuildFilePath(&Win32PlatformState, (char *)"game_temp.dll", sizeof(TempDLLPath), TempDLLPath);
 
     char CompilationLockFilePath[MAX_PATH];
     Win32BuildFilePath(&Win32PlatformState, (char *)"compilation.lock", sizeof(CompilationLockFilePath), CompilationLockFilePath);

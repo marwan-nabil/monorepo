@@ -335,8 +335,7 @@ MainWindowCallback(HWND Window, u32 Message, WPARAM WParam, LPARAM LParam)
         case WM_PAINT:
         {
             PAINTSTRUCT PaintStruct;
-            HDC DC;
-            DC = BeginPaint(Window, &PaintStruct);
+            HDC DC = BeginPaint(Window, &PaintStruct);
             EndPaint(Window, &PaintStruct);
         } break;
 
