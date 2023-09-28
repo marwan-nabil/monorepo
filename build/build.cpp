@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         {
             "obj", "pdb", "log", "ilk", "sln", "bmp",
             "txt", "ini", "dll", "exp", "lib", "map", "hmi",
-            "cso", "lock", "exe", "img"
+            "cso", "lock", "exe", "img", "h"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\build.temp.exe");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "basic_app") == 0)
         {
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\basic_app.exe");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "ray_tracer") == 0)
         {
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "imgui_demo") == 0)
         {
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "handmade_hero") == 0)
         {
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
             StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
 
             CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
             DeleteFileA(LockFilePath);
 
             ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
 
-            BuildSuccess = BuildSuccess && CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = BuildSuccess && CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "directx_demo") == 0)
         {
@@ -318,7 +318,7 @@ int main(int argc, char **argv)
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib winmm.lib d3d11.lib dxgi.lib d3dcompiler.lib ");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
 
             ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
             ZeroMemory(SourcesString, ArrayCount(SourcesString));
@@ -375,7 +375,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\lint.exe");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "x86_kernel") == 0)
         {
@@ -387,7 +387,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_bootloader.img");
 
-            BuildSuccess = AssembleNASM(CompilerFlags, SourcesString, OutputBinaryPath);
+            BuildSuccess = CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
 
             ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
             ZeroMemory(SourcesString, ArrayCount(SourcesString));
@@ -401,7 +401,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_kernel.img");
 
-            BuildSuccess = BuildSuccess && AssembleNASM(CompilerFlags, SourcesString, OutputBinaryPath);
+            BuildSuccess = BuildSuccess && CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
 
             ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
@@ -438,7 +438,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\compilation_tests.exe");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else if (strcmp(argv[1], "fat12_tests") == 0)
         {
@@ -454,7 +454,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\fat12_tests.exe");
 
-            BuildSuccess = CompileCPP(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }
         else
         {

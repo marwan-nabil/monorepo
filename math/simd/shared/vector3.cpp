@@ -157,12 +157,6 @@ operator&(v3_lane Value, u32_lane Mask)
     return Result;
 }
 
-/******************************************/
-/*                gathers                 */
-/******************************************/
-#define GatherV3(BasePointer, Member, Indices) \
-    GatherV3Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
-
 inline v3_lane
 GatherV3Implementation(v3 *Base, u32 Stride, u32_lane Indices)
 {

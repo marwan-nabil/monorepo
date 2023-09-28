@@ -136,7 +136,7 @@ b32 CompileShader
     return TRUE;
 }
 
-b32 CompileCPP
+b32 CompileCpp
 (
     char *CompilerFlags,
     char *SourcesString,
@@ -199,7 +199,7 @@ b32 CompileCPP
     return TRUE;
 }
 
-b32 AssembleNASM
+b32 CompileAssembly
 (
     char *AssemblerFlags,
     char *SourcesString,

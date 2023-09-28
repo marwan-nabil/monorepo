@@ -2,5 +2,34 @@
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "files.exclude": {
         // "libraries/**": true
-    }
+    },
+    "C_Cpp.default.browse.path": [
+        "**/**"
+    ],
+    "C_Cpp.default.defines": [
+        // shared
+        "ENABLE_ASSERTIONS",
+        "_CRT_SECURE_NO_WARNINGS",
+        
+        // build
+        "_CRT_RAND_S",
+        
+        // ray_tracer
+        "SIMD_NUMBEROF_LANES=1",
+
+        // imgui_demo
+        "UNICODE",
+        "_UNICODE",
+
+        // handmade_hero
+        "HANDMADE_WIN32=1",
+        "HANDMADE_SLOW=1",
+        "HANDMADE_INTERNAL=1",
+        
+        // directx_demo
+        "_DEBUG=1",
+
+        // lint
+        "JOB_PER_FILE",
+    ],
 }

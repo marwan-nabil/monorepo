@@ -105,16 +105,10 @@ AbsoluteValue(f32 A)
 inline f32
 TranslateLinearTosRGB(f32 Linear)
 {
-	if (Linear < 0)
-	{
-		Linear = 0;
-	}
-	if (Linear > 1)
-	{
-		Linear = 1;
-	}
+	Linear = Clamp01(Linear);
 
 	f32 sRGB = Linear * 12.92f;
+
 	if (Linear > 0.0031308f)
 	{
 		sRGB = 1.055f * Power(Linear, 1.0f/2.4f) - 0.055f;

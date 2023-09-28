@@ -7,10 +7,6 @@
 #include <float.h>
 #include <time.h>
 
-#ifndef SIMD_NUMBEROF_LANES
-#   define SIMD_NUMBEROF_LANES 4
-#endif // SIMD_NUMBEROF_LANES
-
 #include "..\..\miscellaneous\assertions.h"
 #include "..\..\miscellaneous\base_types.h"
 #include "..\..\miscellaneous\basic_defines.h"
@@ -27,12 +23,12 @@
 #   include "..\..\math\simd\4_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
-#endif // SIMD_NUMBEROF_LANES
+#endif // SIMD_NUMBEROF_LANES == 1
 
 #if (SIMD_NUMBEROF_LANES != 1)
 #   include "..\..\math\simd\shared\random.h"
 #   include "..\..\math\simd\shared\math.h"
-#endif // SIMD_NUMBEROF_LANES
+#endif // SIMD_NUMBEROF_LANES != 1
 
 #include "ray_tracer.h"
 
@@ -46,7 +42,8 @@
 
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\..\math\simd\1_wide\conversions.cpp"
-#   include "..\..\math\simd\1_wide\scalars.cpp"
+#   include "..\..\math\simd\1_wide\integers.cpp"
+#   include "..\..\math\simd\1_wide\floats.cpp"
 #   include "..\..\math\simd\1_wide\vector3.cpp"
 #   include "..\..\math\simd\1_wide\random.cpp"
 #   include "..\..\math\simd\1_wide\assertions.cpp"
@@ -57,7 +54,7 @@
 #   include "..\..\math\simd\4_wide\floats.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
-#endif // SIMD_NUMBEROF_LANES
+#endif // SIMD_NUMBEROF_LANES == 1
 
 #if (SIMD_NUMBEROF_LANES != 1)
 #   include "..\..\math\simd\shared\conversions.cpp"
@@ -65,10 +62,10 @@
 #   include "..\..\math\simd\shared\floats.cpp"
 #   include "..\..\math\simd\shared\vector3.cpp"
 #   include "..\..\math\simd\shared\random.cpp"
-#endif // SIMD_NUMBEROF_LANES
+#endif // SIMD_NUMBEROF_LANES != 1
 
 inline void
-WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, const char *FileName)
+WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, char *FileName)
 {
     u32 OutputPixelSize = WidthInPixels * HeightInPixels * sizeof(u32);
 
@@ -178,7 +175,10 @@ RenderPixel
 
                 if (!MaskIsAllZeroes(DenominatorMask))
                 {
-                    f32_lane CurrentHitDistance = (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) / Denominator;
+                    f32_lane CurrentHitDistance =
+                        (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) / 
+                        Denominator;
+
                     u32_lane CurrentHitDistanceMask =
                         (CurrentHitDistance < MinimumHitDistanceFound) &
                         (CurrentHitDistance > HitDistanceLowerLimit);
@@ -235,25 +235,21 @@ RenderPixel
                 }
             }
 
-#if (SIMD_NUMBEROF_LANES == 1)
-            material *HitMaterial = &World->Materials[HitMaterialIndex];
-            f32_lane HitMaterialSpecularity = HitMaterial->Specularity;
-            v3_lane HitMaterialReflectionColor = HitMaterial->ReflectionColor;
-            v3_lane HitMaterialEmmissionColor = HitMaterial->EmmissionColor;
-#elif (SIMD_NUMBEROF_LANES == 4)
-            f32_lane HitMaterialSpecularity =
-                LaneMask & GatherF32(World->Materials, Specularity, HitMaterialIndex);
+            f32_lane HitMaterialSpecularity = StaticCastU32LaneToF32Lane
+            (
+                LaneMask &
+                StaticCastF32LaneToU32Lane(GatherF32(World->Materials, Specularity, HitMaterialIndex))
+            );
 
             v3_lane HitMaterialReflectionColor =
                 LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
 
             v3_lane HitMaterialEmmissionColor =
                 LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
-#endif // SIMD_NUMBEROF_LANES
 
             RayBatchColor += HadamardProduct(RayBatchColorAttenuation, HitMaterialEmmissionColor);
 
-            LaneMask = LaneMask & (HitMaterialIndex != U32LaneFromU32(0));
+            LaneMask = LaneMask & MaskFromBoolean(HitMaterialIndex != U32LaneFromU32(0));
 
             f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
 
@@ -306,18 +302,18 @@ RenderTile(work_queue *WorkQueue)
 
     for (u32 PixelY = WorkOrder->StartPixelY; PixelY < WorkOrder->EndPixelY; PixelY++)
     {
-        f32 PixelBeginY = 2.0f * ((f32)PixelY / (f32)Image->HeightInPixels) - 1.0f;
-
-        u32 *PixelWritePointer = GetPixelPointer(Image, WorkOrder->StartPixelX, PixelY);
+        f32 FilmPixelY = 2.0f * ((f32)PixelY / (f32)Image->HeightInPixels) - 1.0f;
 
         for (u32 PixelX = WorkOrder->StartPixelX; PixelX < WorkOrder->EndPixelX; PixelX++)
         {
-            f32 PixelBeginX = 2.0f * ((f32)PixelX / (f32)Image->WidthInPixels) - 1.0f;
+            f32 FilmPixelX = 2.0f * ((f32)PixelX / (f32)Image->WidthInPixels) - 1.0f;
+
+            u32 *PixelWritePointer = GetPixelPointer(Image, PixelX, PixelY);
 
             v3 PixelCenterOnFilm =
                 Film->Center +
-                (PixelBeginX * Film->HalfWidth + Film->HalfPixelWidth) * CameraX +
-                (PixelBeginY * Film->HalfHeight + Film->HalfPixelHeight) * CameraY;
+                (FilmPixelX * Film->HalfWidth + Film->HalfPixelWidth) * CameraX +
+                (FilmPixelY * Film->HalfHeight + Film->HalfPixelHeight) * CameraY;
 
             v3 PixelColor = RenderPixel
             (
@@ -356,38 +352,8 @@ WorkerThreadEntry(void *Parameter)
 }
 
 i32
-main(i32 argc, u8 **argv)
+main(i32 argc, char **argv)
 {
-#if 0
-    printf("Testing...\n");
-
-    v3_lane Vector0 = V3LaneFromV3
-    (
-        V3(5000, 5000, 5000),
-        V3(5000, 5000, 5000),
-        V3(5000, 5000, 5000),
-        V3(5000, 5000, 5000)
-    );
-
-    u32_lane Mask = U32LaneFromU32(0xFFFFFFFF, 0xFFFFFFFF, 0, 0);
-
-    v3_lane Vector1 = Mask & Vector0;
-
-    printf("Vecor1.X[0] = %f\n", F32FromF32Lane(Vector1.X, 0));
-    printf("Vecor1.X[1] = %f\n", F32FromF32Lane(Vector1.X, 1));
-    printf("Vecor1.X[2] = %f\n", F32FromF32Lane(Vector1.X, 2));
-    printf("Vecor1.X[3] = %f\n", F32FromF32Lane(Vector1.X, 3));
-
-    printf("Vecor1.Y[0] = %f\n", F32FromF32Lane(Vector1.Y, 0));
-    printf("Vecor1.Y[1] = %f\n", F32FromF32Lane(Vector1.Y, 1));
-    printf("Vecor1.Y[2] = %f\n", F32FromF32Lane(Vector1.Y, 2));
-    printf("Vecor1.Y[3] = %f\n", F32FromF32Lane(Vector1.Y, 3));
-
-    printf("Vecor1.Z[0] = %f\n", F32FromF32Lane(Vector1.Z, 0));
-    printf("Vecor1.Z[1] = %f\n", F32FromF32Lane(Vector1.Z, 1));
-    printf("Vecor1.Z[2] = %f\n", F32FromF32Lane(Vector1.Z, 2));
-    printf("Vecor1.Z[3] = %f\n", F32FromF32Lane(Vector1.Z, 3));
-#else
     printf("RayCasting...");
 
     image_u32 OutputImage = CreateImage(1280, 720);
@@ -472,20 +438,24 @@ main(i32 argc, u8 **argv)
     RenderingParameters.HitDistanceLowerLimit = 0.001f;
     RenderingParameters.ToleranceToZero = 0.0001f;
 
-    RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
-    // RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
+    // RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
+    RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX =
-        (OutputImage.WidthInPixels + RenderingParameters.TileWidthInPixels - 1) / RenderingParameters.TileWidthInPixels;
+        (OutputImage.WidthInPixels + RenderingParameters.TileWidthInPixels - 1) /
+        RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountY =
-        (OutputImage.HeightInPixels + RenderingParameters.TileHeightInPixels - 1) / RenderingParameters.TileHeightInPixels;
+        (OutputImage.HeightInPixels + RenderingParameters.TileHeightInPixels - 1) /
+        RenderingParameters.TileHeightInPixels;
 
-    RenderingParameters.TotalTileCount = RenderingParameters.TileCountX * RenderingParameters.TileCountY;
+    RenderingParameters.TotalTileCount =
+        RenderingParameters.TileCountX * RenderingParameters.TileCountY;
 
     work_queue WorkQueue = {};
-    WorkQueue.WorkOrders = (work_order *)malloc(RenderingParameters.TotalTileCount * sizeof(work_order));
+    WorkQueue.WorkOrders = (work_order *)
+        malloc(RenderingParameters.TotalTileCount * sizeof(work_order));
 
     for (u32 TileY = 0; TileY < RenderingParameters.TileCountY; TileY++)
     {
@@ -518,7 +488,7 @@ main(i32 argc, u8 **argv)
             );
 #else
             WorkOrder->Entropy.State = TileX * 52350329 + TileY * 793083851 + 63274279;
-#endif // SIMD_NUMBEROF_LANES
+#endif // SIMD_NUMBEROF_LANES != 1
         }
     }
 
@@ -544,7 +514,7 @@ main(i32 argc, u8 **argv)
 
     clock_t TotalTimeElapsed = clock() - StartTime;
 
-    WriteBitmapImage(OutputImage.Pixels, OutputImage.WidthInPixels, OutputImage.HeightInPixels, (const char *)argv[1]);
+    WriteBitmapImage(OutputImage.Pixels, OutputImage.WidthInPixels, OutputImage.HeightInPixels, argv[1]);
 
     printf("\nRayCasting time: %ld ms\n", TotalTimeElapsed);
     printf("Core Count: %d\n", RenderingParameters.CoreCount);
@@ -563,7 +533,8 @@ main(i32 argc, u8 **argv)
     (
         "Using %d %dx%d tiles, %.2f KBytes/tile\n",
         RenderingParameters.TotalTileCount,
-        RenderingParameters.TileWidthInPixels, RenderingParameters.TileHeightInPixels,
+        RenderingParameters.TileWidthInPixels,
+        RenderingParameters.TileHeightInPixels,
         KBytesPerTile
     );
     printf("Bounces Computed: %lld\n", WorkQueue.TotalRayBouncesComputed);
@@ -572,6 +543,6 @@ main(i32 argc, u8 **argv)
         "performance metric: %f ns/bounce\n",
         (f64)TotalTimeElapsed / (f64)WorkQueue.TotalRayBouncesComputed * 1000000.0f
     );
-#endif
+
     return 0;
 }

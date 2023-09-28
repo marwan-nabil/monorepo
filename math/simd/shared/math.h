@@ -54,3 +54,9 @@ union v4_lane
 	};
 	f32_lane E[4];
 };
+
+#define GatherF32(BasePointer, Member, Indices) \
+    GatherF32Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
+
+#define GatherV3(BasePointer, Member, Indices) \
+    GatherV3Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)

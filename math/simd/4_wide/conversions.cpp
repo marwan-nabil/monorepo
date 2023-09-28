@@ -22,7 +22,6 @@ F32LaneFromU32(u32 Value)
     return Result;
 }
 
-// NOTE: unsigned or signed?
 inline f32_lane
 F32LaneFromU32Lane(u32_lane Value)
 {
@@ -117,4 +116,11 @@ U32FromU32Lane(u32_lane Value, u32 Index)
         } break;
     }
     return Result;
+}
+
+inline u32_lane
+MaskFromBoolean(u32_lane Value)
+{
+    // TODO: implement properly
+    return Value;
 }

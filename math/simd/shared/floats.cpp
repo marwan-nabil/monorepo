@@ -178,12 +178,6 @@ operator&(f32_lane Value, u32_lane Mask)
 }
 
 /******************************************/
-/*                gathers                 */
-/******************************************/
-#define GatherF32(BasePointer, Member, Indices) \
-    GatherF32Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
-
-/******************************************/
 /*             other operations           */
 /******************************************/
 inline f32_lane
