@@ -6,19 +6,20 @@
 #include <intrin.h>
 #include <stdio.h>
 
-#include "../../miscellaneous/base_types.h"
-#include "../../miscellaneous/assertions.h"
-#include "../../miscellaneous/basic_defines.h"
+#include "..\..\platform\base_types.h"
+#include "..\..\platform\assertions.h"
+#include "..\..\platform\basic_defines.h"
 
-#include "../../math/vector2.h"
-#include "../../math/vector3.h"
-#include "../../math/vector4.h"
+#include "..\..\math\vector2.h"
+#include "..\..\math\vector3.h"
+#include "..\..\math\vector4.h"
 
 #include "game_interface.h"
 #include "win32_platform.h"
 
-#include "../../math/scalar_conversions.cpp"
-#include "../../miscellaneous/strings.cpp"
+#include "..\..\math\scalar_conversions.cpp"
+#include "..\..\platform\strings\strings.cpp"
+
 #include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};

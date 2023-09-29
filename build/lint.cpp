@@ -9,17 +9,17 @@
 #include <time.h>
 #include <shlwapi.h>
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\assertions.h"
-#include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\files_and_folders.h"
+#include "..\platform\base_types.h"
+#include "..\platform\assertions.h"
+#include "..\platform\basic_defines.h"
+#include "..\platform\files_and_folders\files_and_folders.h"
 
 #include "lint.h"
 
 #include "..\math\scalar_conversions.cpp"
 
-#include "..\miscellaneous\console.cpp"
-#include "..\miscellaneous\files_and_folders.cpp"
+#include "..\platform\console\console.cpp"
+#include "..\platform\files_and_folders\files_and_folders.cpp"
 
 char RootDirectoryPath[1024];
 

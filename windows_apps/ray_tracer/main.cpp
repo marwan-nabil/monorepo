@@ -7,9 +7,9 @@
 #include <float.h>
 #include <time.h>
 
-#include "..\..\miscellaneous\assertions.h"
-#include "..\..\miscellaneous\base_types.h"
-#include "..\..\miscellaneous\basic_defines.h"
+#include "..\..\platform\assertions.h"
+#include "..\..\platform\base_types.h"
+#include "..\..\platform\basic_defines.h"
 
 #include "..\..\math\constants.h"
 #include "..\..\math\random.h"

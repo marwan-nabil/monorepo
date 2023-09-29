@@ -7,16 +7,16 @@
 #include <direct.h>
 #include <io.h>
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\assertions.h"
-#include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\files_and_folders.h"
+#include "..\platform\base_types.h"
+#include "..\platform\assertions.h"
+#include "..\platform\basic_defines.h"
+#include "..\platform\files_and_folders\files_and_folders.h"
 
 #include "..\math\scalar_conversions.cpp"
 
-#include "..\miscellaneous\console.cpp"
-#include "..\miscellaneous\files_and_folders.cpp"
-#include "..\miscellaneous\processes.cpp"
+#include "..\platform\console\console.cpp"
+#include "..\platform\files_and_folders\files_and_folders.cpp"
+#include "..\platform\processes_and_threads\processes.cpp"
 
 #include "build_helpers.cpp"
 
@@ -140,6 +140,8 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+
             if (strcmp(argv[2], "optimized") == 0)
             {
                 StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/O2 ");
@@ -160,14 +162,17 @@ int main(int argc, char **argv)
             if (strcmp(argv[3], "1_lane") == 0)
             {
                 StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=1 ");
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer_1.exe");
             }
             else if (strcmp(argv[3], "4_lanes") == 0)
             {
                 StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=4 ");
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer_4.exe");
             }
             else if (strcmp(argv[3], "8_lanes") == 0)
             {
                 StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=8 ");
+                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer_8.exe");
             }
             else
             {
@@ -181,8 +186,6 @@ int main(int argc, char **argv)
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
             StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\ray_tracer\\main.cpp");
 
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer.exe");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
 
@@ -198,7 +201,7 @@ int main(int argc, char **argv)
             }
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\libraries\\imgui\\imgui*.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\third_party\\imgui\\imgui*.cpp ");
 
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
@@ -396,7 +399,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\x86_kernel\\bootloader.s");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\low_level\\x86_kernel\\bootloader.s");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_bootloader.img");
@@ -410,7 +413,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\x86_kernel\\kernel.s");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\low_level\\x86_kernel\\kernel.s");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_kernel.img");
@@ -461,7 +464,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\fat12\\test.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\low_level\\fat12\\test.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
 

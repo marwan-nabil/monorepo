@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <io.h>
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\assertions.h"
-#include "..\miscellaneous\basic_defines.h"
+#include "..\platform\base_types.h"
+#include "..\platform\assertions.h"
+#include "..\platform\basic_defines.h"
 
-#include "..\miscellaneous\console.cpp"
-#include "..\miscellaneous\strings.cpp"
-#include "..\miscellaneous\processes.cpp"
+#include "..\platform\console\console.cpp"
+#include "..\platform\strings\strings.cpp"
+#include "..\platform\processes_and_threads\processes.cpp"
 
 void CompilationTest(char *TestCommand)
 {

@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "..\..\miscellaneous\base_types.h"
-#include "..\..\miscellaneous\assertions.h"
-#include "..\..\miscellaneous\basic_defines.h"
+#include "..\..\platform\base_types.h"
+#include "..\..\platform\assertions.h"
+#include "..\..\platform\basic_defines.h"
 
 #include "..\..\math\vector2.h"
 #include "..\..\math\vector3.h"
@@ -12,7 +12,6 @@
 #include "..\..\math\rectangle2.h"
 
 #include "software_rendering.h"
-
 #include "internal_types.h"
 
 #include "..\..\math\scalar_conversions.cpp"
@@ -24,7 +23,6 @@
 #include "..\..\math\rectangle2.cpp"
 
 #include "software_rendering.cpp"
-
 #include "state_update.cpp"
 #include "rendering.cpp"
 

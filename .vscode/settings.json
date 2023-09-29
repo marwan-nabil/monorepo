@@ -1,7 +1,7 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "files.exclude": {
-        // "libraries/**": true
+        "third_party/**": true
     },
     "C_Cpp.default.browse.path": [
         "**/**"

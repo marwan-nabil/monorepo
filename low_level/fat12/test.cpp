@@ -5,15 +5,15 @@
 #include <math.h>
 #include <strsafe.h>
 
-#include "..\miscellaneous\base_types.h"
-#include "..\miscellaneous\assertions.h"
-#include "..\miscellaneous\basic_defines.h"
+#include "..\..\platform\base_types.h"
+#include "..\..\platform\assertions.h"
+#include "..\..\platform\basic_defines.h"
 
 #include "fat12.h"
 #include "fat12_utils.h"
 
-#include "..\miscellaneous\console.cpp"
-#include "..\miscellaneous\strings.cpp"
+#include "..\..\platform\console\console.cpp"
+#include "..\..\platform\strings\strings.cpp"
 
 #include "fat12.cpp"
 #include "fat12_utils.cpp"

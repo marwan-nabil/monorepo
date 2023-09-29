@@ -8,11 +8,11 @@
 #include <stdio.h>
 #include <shellscalingapi.h>
 
-#include "..\..\miscellaneous\base_types.h"
-#include "..\..\miscellaneous\basic_defines.h"
-#include "..\..\miscellaneous\assertions.h"
+#include "..\..\platform\base_types.h"
+#include "..\..\platform\basic_defines.h"
+#include "..\..\platform\assertions.h"
 
-#include "..\..\libraries\imgui\imgui.h"
+#include "..\..\third_party\imgui\imgui.h"
 
 #include "win32_backend.h"
 #include "dx11_backend.h"
