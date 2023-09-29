@@ -9,6 +9,7 @@
 
 #include "..\miscellaneous\console.cpp"
 #include "..\miscellaneous\strings.cpp"
+#include "..\miscellaneous\processes.cpp"
 
 void CompilationTest(char *TestCommand)
 {
@@ -19,51 +20,16 @@ void CompilationTest(char *TestCommand)
     printf("\n");
     fflush(stdout);
 
-    PROCESS_INFORMATION TestProcessProcessInfo = {};
-
-    STARTUPINFO TestProcessStartupInfo = {};
-    TestProcessStartupInfo.cb = sizeof(TestProcessStartupInfo);
-    TestProcessStartupInfo.dwFlags = STARTF_USESTDHANDLES;
-    TestProcessStartupInfo.hStdOutput = (HANDLE)_get_osfhandle(_fileno(stdout));
-    TestProcessStartupInfo.hStdError = (HANDLE)_get_osfhandle(_fileno(stdout));
-
-    b32 CreateSucceeded = CreateProcess
-    (
-        NULL,
-        TestCommand,
-        NULL,
-        NULL,
-        TRUE,
-        0,
-        NULL,
-        NULL,
-        &TestProcessStartupInfo,
-        &TestProcessProcessInfo
-    );
-
-    if (CreateSucceeded == FALSE)
+    b32 Result = CreateProcessAndWait(TestCommand);
+    if (Result)
     {
-        ConsolePrintColored("ERROR: failed to create a test process, please debug the test system.\n", FOREGROUND_RED);
-        exit(1);
+        ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
     }
     else
     {
-        WaitForSingleObject(TestProcessProcessInfo.hProcess, INFINITE);
-
-        DWORD ProcessExitCode;
-        GetExitCodeProcess(TestProcessProcessInfo.hProcess, &ProcessExitCode);
-
-        CloseHandle(TestProcessProcessInfo.hProcess);
-        CloseHandle(TestProcessProcessInfo.hThread);
-
-        if (ProcessExitCode != 0)
-        {
-            ConsolePrintColored("ERROR: test failed.\n", FOREGROUND_RED);
-            exit(1);
-        }
+        ConsolePrintColored("ERROR: test failed.\n", FOREGROUND_RED);
+        exit(1);
     }
-
-    ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
 }
 
 i32 main(i32 argc, char **argv)
@@ -86,10 +52,11 @@ i32 main(i32 argc, char **argv)
     CompilationTest("build fat12_tests");
     CompilationTest("build clean");
 
-    ConsoleSwitchColor(FOREGROUND_GREEN);
-    printf("\n==========================\n");
-    printf("INFO: all tests succeeded.\n");
-    printf("==========================\n");
-    fflush(stdout);
-    ConsoleResetColor();
+    ConsolePrintColored
+    (
+        "\n==========================\n"
+        "INFO: all tests succeeded.\n"
+        "==========================\n",
+        FOREGROUND_GREEN
+    );
 }

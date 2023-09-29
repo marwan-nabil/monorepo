@@ -5,16 +5,20 @@
 #include <strsafe.h>
 #include <stdio.h>
 #include <direct.h>
+#include <io.h>
 
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\assertions.h"
 #include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\file_io.h"
+#include "..\miscellaneous\files_and_folders.h"
 
 #include "..\math\scalar_conversions.cpp"
-#include "..\miscellaneous\file_io.cpp"
+
+#include "..\miscellaneous\console.cpp"
+#include "..\miscellaneous\files_and_folders.cpp"
+#include "..\miscellaneous\processes.cpp"
+
 #include "build_helpers.cpp"
-#include "binary_helpers.cpp"
 
 void DisplayHelp()
 {
@@ -44,9 +48,11 @@ int main(int argc, char **argv)
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
 
+    InitializeConsole();
+
     if (argc < 2)
     {
-        printf("ERROR: No build target.\n");
+        ConsolePrintColored("ERROR: No build target.\n", FOREGROUND_RED);
         DisplayHelp();
         return 1;
     }
@@ -55,15 +61,15 @@ int main(int argc, char **argv)
     {
         const char *ExtensionsToClean[] =
         {
-            "obj", "pdb", "log", "ilk", "sln", "bmp",
-            "txt", "ini", "dll", "exp", "lib", "map", "hmi",
-            "cso", "lock", "exe", "img", "h"
+            "obj", "pdb", "log", "ilk", "sln", "bmp", "txt",
+            "ini", "dll", "exp", "lib", "map", "hmi", "cso",
+            "lock", "exe", "img", "h"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
         {
             u32 BuildSuccess = CleanExtensionFromDirectory(ExtensionsToClean[ExtensionIndex], OutputDirectoryPath);
-            if (BuildSuccess)
+            if (!BuildSuccess)
             {
                 return 2;
             }
@@ -125,7 +131,7 @@ int main(int argc, char **argv)
         {
             if (argc < 4)
             {
-                printf("ERROR: invalid number of arguments for build ray_tracer ...\n");
+                ConsolePrintColored("ERROR: invalid number of arguments for build ray_tracer ...\n", FOREGROUND_RED);
                 DisplayHelp();
                 return 1;
             }
@@ -144,7 +150,9 @@ int main(int argc, char **argv)
             }
             else
             {
+                ConsoleSwitchColor(FOREGROUND_RED);
                 printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[2]);
+                ConsoleResetColor();
                 DisplayHelp();
                 return 1;
             }
@@ -163,7 +171,9 @@ int main(int argc, char **argv)
             }
             else
             {
+                ConsoleSwitchColor(FOREGROUND_RED);
                 printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[3]);
+                ConsoleResetColor();
                 DisplayHelp();
                 return 1;
             }
@@ -182,7 +192,7 @@ int main(int argc, char **argv)
         {
             if (argc < 3)
             {
-                printf("ERROR: invalid number of arguments for build imgui_demo ...\n");
+                ConsolePrintColored("ERROR: invalid number of arguments for build imgui_demo ...\n", FOREGROUND_RED);
                 DisplayHelp();
                 return 1;
             }
@@ -217,7 +227,9 @@ int main(int argc, char **argv)
             }
             else
             {
+                ConsoleSwitchColor(FOREGROUND_RED);
                 printf("ERROR: invalid argument \"%s\" for build imgui_demo ...\n", argv[2]);
+                ConsoleResetColor();
                 DisplayHelp();
                 return 1;
             }
@@ -290,7 +302,7 @@ int main(int argc, char **argv)
 
             if (argc < 3)
             {
-                printf("ERROR: invalid number of arguments for build directx_demo.\n");
+                ConsolePrintColored("ERROR: invalid number of arguments for build directx_demo.\n", FOREGROUND_RED);
                 DisplayHelp();
                 return 1;
             }
@@ -307,7 +319,9 @@ int main(int argc, char **argv)
             }
             else
             {
+                ConsoleSwitchColor(FOREGROUND_RED);
                 printf("ERROR: invalid argument \"%s\" for build directx_demo ...\n", argv[2]);
+                ConsoleResetColor();
                 DisplayHelp();
                 return 1;
             }
@@ -458,7 +472,9 @@ int main(int argc, char **argv)
         }
         else
         {
+            ConsoleSwitchColor(FOREGROUND_RED);
             printf("ERROR: invalid build target \"%s\".\n", argv[1]);
+            ConsoleResetColor();
             DisplayHelp();
             return 1;
         }

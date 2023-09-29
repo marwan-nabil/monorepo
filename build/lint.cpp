@@ -5,21 +5,21 @@
 #include <strsafe.h>
 #include <fileapi.h>
 #include <direct.h>
+#include <io.h>
 #include <time.h>
 #include <shlwapi.h>
 
 #include "..\miscellaneous\base_types.h"
 #include "..\miscellaneous\assertions.h"
 #include "..\miscellaneous\basic_defines.h"
-#include "..\miscellaneous\file_io.h"
+#include "..\miscellaneous\files_and_folders.h"
+
 #include "lint.h"
 
 #include "..\math\scalar_conversions.cpp"
-#include "..\miscellaneous\file_io.cpp"
 
-#if !defined(JOB_PER_DIRECTORY) && !defined(JOB_PER_FILE)
-#   define JOB_PER_FILE
-#endif
+#include "..\miscellaneous\console.cpp"
+#include "..\miscellaneous\files_and_folders.cpp"
 
 char RootDirectoryPath[1024];
 
