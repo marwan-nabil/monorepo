@@ -27,18 +27,6 @@ V3LaneFromV3(v3 Value)
     return Result;
 }
 
-inline v3_lane
-V3LaneFromV3(v3 A, v3 B, v3 C, v3 D)
-{
-    v3_lane Result =
-    {
-        F32LaneFromF32(A.X, B.X, C.X, D.X),
-        F32LaneFromF32(A.Y, B.Y, C.Y, D.Y),
-        F32LaneFromF32(A.Z, B.Z, C.Z, D.Z)
-    };
-    return Result;
-}
-
 inline v3
 V3FromV3Lane(v3_lane Value, u32 Index)
 {
@@ -66,52 +54,3 @@ V4LaneFromV4(v4 Value)
     };
     return Result;
 }
-
-/******************************************/
-/*                  u32                   */
-/******************************************/
-// ----------------------------------------
-// NOTE: implement these for u32_lane & f32_lane usig intrinsics
-#if 0
-inline i32
-RoundF32ToI32(f32 Real)
-{
-    i32 Result = (i32)roundf(Real);
-    return Result;
-}
-
-inline u32
-RoundF32ToU32(f32 Real)
-{
-    u32 Result = (u32)roundf(Real);
-    return Result;
-}
-
-inline i32
-FloorF32ToI32(f32 Real)
-{
-    i32 Result = (i32)floorf(Real);
-    return Result;
-}
-
-inline i32
-CeilingF32ToI32(f32 Real)
-{
-    i32 Result = (i32)ceilf(Real);
-    return Result;
-}
-
-inline i32
-TruncateF32ToI32(f32 Real)
-{
-    i32 Result = (i32)(Real);
-    return Result;
-}
-
-inline u32
-TruncateF32ToU32(f32 Real)
-{
-    u32 Result = (u32)(Real);
-    return Result;
-}
-#endif

@@ -121,6 +121,10 @@ U32FromU32Lane(u32_lane Value, u32 Index)
 inline u32_lane
 MaskFromBoolean(u32_lane Value)
 {
-    // TODO: implement properly
-    return Value;
+    u32_lane Result = _mm_xor_si128
+    (
+        _mm_cmpeq_epi32(Value, U32LaneFromU32(0)),
+        _mm_set1_epi32(0xFFFFFFFF)
+    );
+    return Result;
 }

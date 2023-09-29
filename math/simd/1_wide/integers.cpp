@@ -1,36 +1,148 @@
-inline void
-ConditionalAssign(u32_lane *Destination, u32_lane Source, u32_lane Mask)
+/******************************************/
+/*          arithmetic operations         */
+/******************************************/
+inline u32_lane
+operator+(u32_lane A, u32_lane B)
 {
-    Mask = Mask? 0xFFFFFFFF : 0;
-    *Destination = (~Mask & *Destination) | (Mask & Source);
+    u32_lane Result;
+    Result.m32i_i32[0] = A.m32i_i32[0] + B.m32i_i32[0];
+    return Result;
 }
 
-inline void
-ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
+inline u32_lane
+operator-(u32_lane A, u32_lane B)
 {
-    ConditionalAssign((u32 *)Destination, *(u32 *)&Source, Mask);
+    u32_lane Result;
+    Result.m32i_i32[0] = A.m32i_i32[0] - B.m32i_i32[0];
+    return Result;
 }
 
-inline u32
-HorizontalAdd(u32_lane WideValue)
+/******************************************/
+/*             bitwise operations         */
+/******************************************/
+inline u32_lane
+operator&(u32_lane A, u32_lane B)
 {
-    u32 NarrowValue = WideValue;
-    return NarrowValue;
+    u32_lane Result;
+    Result.m32i_i32[0] = A.m32i_i32[0] & B.m32i_i32[0];
+    return Result;
 }
 
-inline f32
-HorizontalAdd(f32_lane WideValue)
+inline u32_lane
+AndNot(u32_lane A, u32_lane B)
 {
-    f32 NarrowValue = WideValue;
-    return NarrowValue;
+    // (~A) & B
+    u32_lane Result;
+    Result.m32i_i32[0] = (~A.m32i_i32[0]) & B.m32i_i32[0];
+    return Result;
 }
 
+inline u32_lane
+operator|(u32_lane A, u32_lane B)
+{
+    u32_lane Result;
+    Result.m32i_i32[0] = A.m32i_i32[0] | B.m32i_i32[0];
+    return Result;
+}
+
+inline u32_lane
+operator^(u32_lane A, u32_lane B)
+{
+    u32_lane Result;
+    Result.m32i_i32[0] = A.m32i_i32[0] ^ B.m32i_i32[0];
+    return Result;
+}
+
+inline u32_lane
+operator~(u32_lane A)
+{
+    u32_lane Result;
+    Result.m32i_i32[0] = ~A.m32i_i32[0];
+    return Result;
+}
+
+inline u32_lane
+operator<<(u32_lane Value, u32 Shift)
+{
+    u32_lane Result;
+    Result.m32i_i32[0] = Value.m32i_i32[0] << Shift;
+    return Result;
+}
+
+inline u32_lane
+operator>>(u32_lane Value, u32 Shift)
+{
+    u32_lane Result;
+    Result.m32i_i32[0] = Value.m32i_i32[0] >> Shift;
+    return Result;
+}
+
+/******************************************/
+/*           comparison operations        */
+/******************************************/
+inline u32_lane
+operator<(u32_lane A, u32_lane B)
+{
+    u32_lane Result;
+    if (A.m32i_i32[0] < B.m32i_i32[0])
+    {
+        Result.m32i_i32[0] = 0xFFFFFFFF;
+    }
+    else
+    {
+        Result.m32i_i32[0] = 0;
+    }
+    return Result;
+}
+
+inline u32_lane
+operator>(u32_lane A, u32_lane B)
+{
+    u32_lane Result;
+    if (A.m32i_i32[0] > B.m32i_i32[0])
+    {
+        Result.m32i_i32[0] = 0xFFFFFFFF;
+    }
+    else
+    {
+        Result.m32i_i32[0] = 0;
+    }
+    return Result;
+}
+
+inline u32_lane
+operator==(u32_lane A, u32_lane B)
+{
+    u32_lane Result;
+    if (A.m32i_i32[0] == B.m32i_i32[0])
+    {
+        Result.m32i_i32[0] = 0xFFFFFFFF;
+    }
+    else
+    {
+        Result.m32i_i32[0] = 0;
+    }
+    return Result;
+}
+
+/******************************************/
+/*             other operations           */
+/******************************************/
 inline b32
 MaskIsAllZeroes(u32_lane Mask)
 {
-    if (Mask)
+    if (Mask.m32i_i32[0] == 0)
+    {
+        return TRUE;
+    }
+    else
     {
         return FALSE;
     }
-    return TRUE;
+}
+
+inline u64
+HorizontalAdd(u32_lane WideValue)
+{
+    return (u64)WideValue.m32i_i32[0];
 }

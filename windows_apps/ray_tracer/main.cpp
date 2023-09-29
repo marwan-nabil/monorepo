@@ -25,10 +25,8 @@
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
 
-#if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\..\math\simd\shared\random.h"
-#   include "..\..\math\simd\shared\math.h"
-#endif // SIMD_NUMBEROF_LANES != 1
+#include "..\..\math\simd\shared\math.h"
+#include "..\..\math\simd\shared\random.h"
 
 #include "ray_tracer.h"
 
@@ -44,25 +42,22 @@
 #   include "..\..\math\simd\1_wide\conversions.cpp"
 #   include "..\..\math\simd\1_wide\integers.cpp"
 #   include "..\..\math\simd\1_wide\floats.cpp"
-#   include "..\..\math\simd\1_wide\vector3.cpp"
-#   include "..\..\math\simd\1_wide\random.cpp"
 #   include "..\..\math\simd\1_wide\assertions.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\..\math\simd\4_wide\conversions.cpp"
-#   include "..\..\math\simd\4_wide\assertions.cpp"
 #   include "..\..\math\simd\4_wide\integers.cpp"
 #   include "..\..\math\simd\4_wide\floats.cpp"
+#   include "..\..\math\simd\4_wide\assertions.cpp"
+#   include "..\..\math\simd\4_wide\vector3.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
 
-#if (SIMD_NUMBEROF_LANES != 1)
-#   include "..\..\math\simd\shared\conversions.cpp"
-#   include "..\..\math\simd\shared\integers.cpp"
-#   include "..\..\math\simd\shared\floats.cpp"
-#   include "..\..\math\simd\shared\vector3.cpp"
-#   include "..\..\math\simd\shared\random.cpp"
-#endif // SIMD_NUMBEROF_LANES != 1
+#include "..\..\math\simd\shared\conversions.cpp"
+#include "..\..\math\simd\shared\integers.cpp"
+#include "..\..\math\simd\shared\floats.cpp"
+#include "..\..\math\simd\shared\vector3.cpp"
+#include "..\..\math\simd\shared\random.cpp"
 
 inline void
 WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, char *FileName)
@@ -176,7 +171,7 @@ RenderPixel
                 if (!MaskIsAllZeroes(DenominatorMask))
                 {
                     f32_lane CurrentHitDistance =
-                        (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) / 
+                        (-PlaneDistance - InnerProduct(PlaneNormal, BounceOrigin)) /
                         Denominator;
 
                     u32_lane CurrentHitDistanceMask =
@@ -433,13 +428,12 @@ main(i32 argc, char **argv)
     SYSTEM_INFO SystemInfo;
     GetSystemInfo(&SystemInfo);
     RenderingParameters.CoreCount = (u8)SystemInfo.dwNumberOfProcessors;
-    // RenderingParameters.CoreCount = 1;
 
     RenderingParameters.HitDistanceLowerLimit = 0.001f;
     RenderingParameters.ToleranceToZero = 0.0001f;
 
-    // RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
-    RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
+    RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
+    // RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX =
@@ -478,7 +472,9 @@ main(i32 argc, char **argv)
             WorkOrder->EndPixelX = EndPixelX;
             WorkOrder->EndPixelY = EndPixelY;
 
-#if (SIMD_NUMBEROF_LANES != 1)
+#if (SIMD_NUMBEROF_LANES == 1)
+            WorkOrder->Entropy.State = U32LaneFromU32(TileX * 52350329 + TileY * 793083851 + 63274279);
+#elif (SIMD_NUMBEROF_LANES == 4)
             WorkOrder->Entropy.State = U32LaneFromU32
             (
                 TileX * 32542345 + TileY * 881712265 + 93073411,
@@ -487,7 +483,6 @@ main(i32 argc, char **argv)
                 TileX * 39846279 + TileY * 505147656 + 12932640
             );
 #else
-            WorkOrder->Entropy.State = TileX * 52350329 + TileY * 793083851 + 63274279;
 #endif // SIMD_NUMBEROF_LANES != 1
         }
     }

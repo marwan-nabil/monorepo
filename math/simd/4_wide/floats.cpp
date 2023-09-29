@@ -173,19 +173,6 @@ Power(f32_lane A, f32 Exponent)
 }
 
 inline f32_lane
-Power(f32 A, f32_lane Exponent)
-{
-    f32_lane Result = F32LaneFromF32
-    (
-        Power(A, F32FromF32Lane(Exponent, 3)),
-        Power(A, F32FromF32Lane(Exponent, 2)),
-        Power(A, F32FromF32Lane(Exponent, 1)),
-        Power(A, F32FromF32Lane(Exponent, 0))
-    );
-    return Result;
-}
-
-inline f32_lane
 Power(f32_lane A, f32_lane Exponent)
 {
     f32_lane Result = F32LaneFromF32

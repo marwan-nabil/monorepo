@@ -4,31 +4,37 @@
 inline f32_lane
 F32LaneFromF32(f32 Value)
 {
-    return Value;
+    f32_lane Result;
+    Result.m32_f32[0] = Value;
+    return Result;
 }
 
 inline f32_lane
 F32LaneFromU32(u32 Value)
 {
-    return (f32_lane)Value;
+    return F32LaneFromF32((f32)Value);
 }
 
 inline f32_lane
 F32LaneFromU32Lane(u32_lane Value)
 {
-    return (f32_lane)Value;
+    f32_lane Result;
+    Result.m32_f32[0] = (f32)Value.m32i_i32[0];
+    return Result;
 }
 
 inline f32_lane
 StaticCastU32LaneToF32Lane(u32_lane Value)
 {
-    return *(f32_lane *)&Value;
+    f32_lane Result;
+    Result.m32_f32[0] = *(f32 *)&Value.m32i_i32[0];
+    return Result;
 }
 
 inline f32
 F32FromF32Lane(f32_lane Value, u32 Index)
 {
-    return (f32)Value;
+    return Value.m32_f32[0];
 }
 
 /******************************************/
@@ -37,43 +43,36 @@ F32FromF32Lane(f32_lane Value, u32 Index)
 inline u32_lane
 U32LaneFromU32(u32 Value)
 {
-    return Value;
-}
-
-inline u32
-U32FromU32Lane(u32_lane Value, u32 Index)
-{
-    return Value;
+    u32_lane Result;
+    Result.m32i_i32[0] = Value;
+    return Result;
 }
 
 inline u32_lane
 StaticCastF32LaneToU32Lane(f32_lane Value)
 {
-    return *(u32_lane *)&Value;
+    u32_lane Result;
+    Result.m32i_i32[0] = *(u32 *)&Value.m32_f32[0];
+    return Result;
 }
 
+inline u32
+U32FromU32Lane(u32_lane Value, u32 Index)
+{
+    return Value.m32i_i32[0];
+}
 
 inline u32_lane
 MaskFromBoolean(u32_lane Value)
 {
-    if (Value)
+    u32_lane Result;
+    if (Value.m32i_i32[0])
     {
-        return 0xFFFFFFFF;
+        Result.m32i_i32[0] = 0xFFFFFFFF;
     }
     else
     {
-        return 0;
+        Result.m32i_i32[0] = 0;
     }
-}
-
-inline v3_lane
-V3LaneFromV3(v3 Value)
-{
-    v3_lane Result =
-    {
-        F32LaneFromF32(Value.X),
-        F32LaneFromF32(Value.Y),
-        F32LaneFromF32(Value.Z)
-    };
     return Result;
 }

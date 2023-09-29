@@ -46,3 +46,17 @@ SafeTruncateUint64ToUint32(u64 Value)
     Assert(Value <= 0xFFFFFFFF);
     return (u32)Value;
 }
+
+inline u32
+StaticCastF32ToU32(f32 Value)
+{
+    u32 Result = *(u32 *)&Value;
+    return Result;
+}
+
+inline f32
+StaticCastU32ToF32(u32 Value)
+{
+    f32 Result = *(f32 *)&Value;
+    return Result;
+}
