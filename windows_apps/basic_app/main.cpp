@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include "..\..\platform\base_types.h"
-#include "..\..\platform\assertions.h"
 #include "..\..\platform\basic_defines.h"
 
 #include "..\..\math\vector2.h"

@@ -40,7 +40,20 @@ CreateFilePathSegmentList(char *FileFullPath)
                 *CurrentFilePathNode = {};
             }
 
-            StringCchCat(CurrentFilePathNode->NodeName, FAT12_MAX_PATH, PathSegment);
+            char LocalFileName[8];
+            ZeroMemory(LocalFileName, 8);
+            char LocalFileExtension[3];
+            ZeroMemory(LocalFileName, 3);
+
+            // NOTE: stopped implemetation here
+            // GetFileNameAndExtensionFromString
+            // (
+            //     PathSegment, ArrayCount(PathSegment),
+            //     LocalFileName, 8, LocalFileExtension, 3
+            // );
+
+            StringCchCat(CurrentFilePathNode->NodeFileName, 8, LocalFileName);
+            StringCchCat(CurrentFilePathNode->NodeFileExtension, 3, LocalFileExtension);
             CurrentFilePathNode->ChildNode = LastFilePathNode;
 
             LastFilePathNode = CurrentFilePathNode;
@@ -51,15 +64,16 @@ CreateFilePathSegmentList(char *FileFullPath)
     return LastFilePathNode;
 }
 
-// TODO: implement cluster getters by file path
-// u16 GetFirstLogicalClusterOfFile(fat12_disk *Disk, char *FullFilePath)
+// u16 GetDirectoryEntryOfFileByPath(fat12_disk *Disk, char *FullFilePath)
 // {
-//     file_path_node *CurrentNode = CreateFilePathSegmentsList(FullFilePath);
+//     file_path_node *CurrentNode = CreateFilePathSegmentList(FullFilePath);
+
+//     GetDirectorySector(CurrentNode->NodeName);
+//     CurrentNode = CurrentNode->ChildNode;
+
 
 //     while (CurrentNode)
 //     {
-//         GetDirectorySector(CurrentNode->NodeName);
-//         CurrentNode = CurrentNode->ChildNode;
 //     }
 // }
 

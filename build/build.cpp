@@ -8,15 +8,15 @@
 #include <io.h>
 
 #include "..\platform\base_types.h"
-#include "..\platform\assertions.h"
 #include "..\platform\basic_defines.h"
-#include "..\platform\files_and_folders\files_and_folders.h"
+#include "..\platform\file_system\files.h"
 
 #include "..\math\scalar_conversions.cpp"
 
 #include "..\platform\console\console.cpp"
-#include "..\platform\files_and_folders\files_and_folders.cpp"
-#include "..\platform\processes_and_threads\processes.cpp"
+#include "..\platform\file_system\files.cpp"
+#include "..\platform\file_system\folders.cpp"
+#include "..\platform\processes\processes.cpp"
 
 #include "build_helpers.cpp"
 

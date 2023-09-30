@@ -10,16 +10,15 @@
 #include <shlwapi.h>
 
 #include "..\platform\base_types.h"
-#include "..\platform\assertions.h"
 #include "..\platform\basic_defines.h"
-#include "..\platform\files_and_folders\files_and_folders.h"
+#include "..\platform\file_system\files.h"
 
 #include "lint.h"
 
 #include "..\math\scalar_conversions.cpp"
 
 #include "..\platform\console\console.cpp"
-#include "..\platform\files_and_folders\files_and_folders.cpp"
+#include "..\platform\file_system\files.cpp"
 
 char RootDirectoryPath[1024];
 

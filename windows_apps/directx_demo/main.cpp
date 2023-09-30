@@ -10,7 +10,6 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
-#include "..\..\platform\assertions.h"
 
 #include "directx_demo.h"
 

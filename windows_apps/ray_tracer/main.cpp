@@ -7,7 +7,6 @@
 #include <float.h>
 #include <time.h>
 
-#include "..\..\platform\assertions.h"
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
 

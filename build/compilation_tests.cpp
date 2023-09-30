@@ -4,12 +4,11 @@
 #include <io.h>
 
 #include "..\platform\base_types.h"
-#include "..\platform\assertions.h"
 #include "..\platform\basic_defines.h"
 
 #include "..\platform\console\console.cpp"
 #include "..\platform\strings\strings.cpp"
-#include "..\platform\processes_and_threads\processes.cpp"
+#include "..\platform\processes\processes.cpp"
 
 void CompilationTest(char *TestCommand)
 {
