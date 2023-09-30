@@ -33,8 +33,16 @@ ram_file CreateDummyFile(char *Name, char *Extension, u32 Size, u32 FillPattern)
     Result.Memory = (char *)malloc(Size);
     memset(Result.Memory, FillPattern, Size);
 
-    StringCchCat(Result.Name, 8, Name);
-    StringCchCat(Result.Extension, 3, Extension);
+    char LocalName[9];
+    char LocalExtension[4];
+    ZeroMemory(LocalName, 8);
+    ZeroMemory(LocalName, 3);
+
+    StringCchCat(LocalName, 9, Name);
+    StringCchCat(LocalExtension, 4, Extension);
+
+    memcpy(Result.Name, LocalName, 8);
+    memcpy(Result.Extension, LocalExtension, 3);
 
     return Result;
 }
@@ -72,6 +80,8 @@ i32 main(i32 argc, char **argv)
     ListDirectory(Disk, Folder1Cluster);
 
     CreateFilePathSegmentList("\\aaaa\\bbbb\\cccc\\ddddd");
+
+    directory_entry *File3DirectoryEntry = GetDirectoryEntryOfFileByPath(Disk, "\\folder1\\File3.txt");
 
     free(Disk);
     free(File1.Memory);

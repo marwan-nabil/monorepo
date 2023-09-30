@@ -459,7 +459,7 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[1], "fat12_tests") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 

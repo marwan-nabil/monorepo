@@ -261,11 +261,6 @@ WinMain
                         SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
                     } while (SecondsElapsedForFrame < TargetSecondsPerFrame);
                 }
-                else
-                {
-                    // NOTE: frame missed
-                    // TODO: log frame miss on screen
-                }
             }
         }
     }

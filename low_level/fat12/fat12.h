@@ -111,7 +111,7 @@ union fat12_disk
 
 struct file_path_node
 {
-    char NodeFileName[8];
-    char NodeFileExtension[3];
+    char FileName[8];
+    char FileExtension[3];
     file_path_node *ChildNode;
 };

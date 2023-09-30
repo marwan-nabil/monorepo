@@ -125,7 +125,6 @@ DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
     }
     else if (AbsoluteValue(XDiff) > AbsoluteValue(YDiff))
     {
-        // TODO: SIMD here
         f32 Slope = (f32)YDiff / (f32)XDiff;
         for (i32 X = MinX; X <= MaxX; X++)
         {

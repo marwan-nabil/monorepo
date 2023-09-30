@@ -43,17 +43,15 @@ CreateFilePathSegmentList(char *FileFullPath)
             char LocalFileName[8];
             ZeroMemory(LocalFileName, 8);
             char LocalFileExtension[3];
-            ZeroMemory(LocalFileName, 3);
+            ZeroMemory(LocalFileExtension, 3);
 
-            // NOTE: stopped implemetation here
-            // GetFileNameAndExtensionFromString
-            // (
-            //     PathSegment, ArrayCount(PathSegment),
-            //     LocalFileName, 8, LocalFileExtension, 3
-            // );
+            GetFileNameAndExtensionFromString
+            (
+                PathSegment, LocalFileName, 8, LocalFileExtension, 3
+            );
 
-            StringCchCat(CurrentFilePathNode->NodeFileName, 8, LocalFileName);
-            StringCchCat(CurrentFilePathNode->NodeFileExtension, 3, LocalFileExtension);
+            memcpy(CurrentFilePathNode->FileName, LocalFileName, 8);
+            memcpy(CurrentFilePathNode->FileExtension, LocalFileExtension, 3);
             CurrentFilePathNode->ChildNode = LastFilePathNode;
 
             LastFilePathNode = CurrentFilePathNode;
@@ -64,18 +62,41 @@ CreateFilePathSegmentList(char *FileFullPath)
     return LastFilePathNode;
 }
 
-// u16 GetDirectoryEntryOfFileByPath(fat12_disk *Disk, char *FullFilePath)
-// {
-//     file_path_node *CurrentNode = CreateFilePathSegmentList(FullFilePath);
+inline directory_entry *
+GetDirectoryEntryOfFileByPath(fat12_disk *Disk, char *FullFilePath)
+{
+    file_path_node *CurrentNode = CreateFilePathSegmentList(FullFilePath);
+    directory_entry *CurrentEntry =
+        GetDirectoryEntryOfFileInRootDirectory(Disk, CurrentNode->FileName, CurrentNode->FileExtension);
 
-//     GetDirectorySector(CurrentNode->NodeName);
-//     CurrentNode = CurrentNode->ChildNode;
+    if (CurrentEntry && !CurrentNode->ChildNode)
+    {
+        return CurrentEntry;
+    }
 
+    CurrentNode = CurrentNode->ChildNode;
 
-//     while (CurrentNode)
-//     {
-//     }
-// }
+    while (CurrentNode)
+    {
+        CurrentEntry =
+            GetDirectoryEntryOfFileInDirectory
+            (
+                Disk,
+                CurrentEntry->FirstLogicalCluster,
+                CurrentNode->FileName,
+                CurrentNode->FileExtension
+            );
+
+        if (CurrentEntry && !CurrentNode->ChildNode)
+        {
+            return CurrentEntry;
+        }
+
+        CurrentNode = CurrentNode->ChildNode;
+    }
+
+    return NULL;
+}
 
 void ListDirectorySector(sector *Sector)
 {

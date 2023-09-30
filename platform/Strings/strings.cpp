@@ -84,26 +84,67 @@ GetLastCharacterIndex(char *String, u32 StringLength, char Character)
     return UINT32_MAX;
 }
 
-// inline void
-// GetFileNameAndExtensionFromString
-// (
-//     char *SourceString, u32 SourceStringSize,
-//     char *FileName, u32 FileNameSize,
-//     char *FileExtension, u32 FileExtensionSize
-// )
-// {
-//     u32 SourceStringLength = StringLength(SourceString);
-//     u32 DotIndex = GetLastCharacterIndex(SourceString, SourceStringLength);
+inline void
+GetFileNameAndExtensionFromString
+(
+    char *SourceString,
+    char *FileName, u32 FileNameSize,
+    char *FileExtension, u32 FileExtensionSize
+)
+{
+    u32 SourceStringLength = StringLength(SourceString);
+    u32 DotIndex = GetLastCharacterIndex(SourceString, SourceStringLength, '.');
 
-//     for (u32 CharacterIndex = 0; CharacterIndex < DotIndex; )
-//     {
-//     }
+    u32 ReadIndex = 0;
+    u32 WriteIndex = 0;
 
-//     memcpy(FileName, SourceString, DotIndex);
-//     memcpy(FileExtension, SourceString[DotIndex + 1], );
+    while
+    (
+        (ReadIndex < DotIndex) &&
+        (ReadIndex < SourceStringLength) &&
+        (WriteIndex < FileNameSize)
+    )
+    {
+        FileName[WriteIndex++] = SourceString[ReadIndex++];
+    }
 
-//     while (*SourceString)
-//     {
+    if (ReadIndex == DotIndex)
+    {
+        WriteIndex = 0;
+        ReadIndex++;
 
-//     }
-// }
+        while
+        (
+            (ReadIndex < SourceStringLength) &&
+            (WriteIndex < FileExtensionSize)
+        )
+        {
+            FileExtension[WriteIndex++] = SourceString[ReadIndex++];
+        }
+    }
+    else if (ReadIndex == SourceStringLength)
+    {
+        return;
+    }
+    else if (WriteIndex == FileNameSize)
+    {
+        if (DotIndex == UINT32_MAX)
+        {
+            ZeroMemory(FileExtension, FileExtensionSize);
+        }
+        else
+        {
+            WriteIndex = 0;
+            ReadIndex = DotIndex + 1;
+
+            while
+            (
+                (ReadIndex < SourceStringLength) &&
+                (WriteIndex < FileExtensionSize)
+            )
+            {
+                FileExtension[WriteIndex++] = SourceString[ReadIndex++];
+            }
+        }
+    }
+}

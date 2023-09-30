@@ -432,7 +432,6 @@ main(i32 argc, char **argv)
     RenderingParameters.ToleranceToZero = 0.0001f;
 
     RenderingParameters.TileWidthInPixels = OutputImage.WidthInPixels / RenderingParameters.CoreCount;
-    // RenderingParameters.TileWidthInPixels = 64; // TODO: optimize tile size
     RenderingParameters.TileHeightInPixels = RenderingParameters.TileWidthInPixels;
 
     RenderingParameters.TileCountX =
@@ -486,7 +485,7 @@ main(i32 argc, char **argv)
         }
     }
 
-    // TODO: memory fence here
+    MemoryBarrier();
 
     clock_t StartTime = clock();
 
