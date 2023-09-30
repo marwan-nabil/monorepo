@@ -10,13 +10,35 @@
 #include "..\..\platform\basic_defines.h"
 
 #include "fat12.h"
-#include "fat12_utils.h"
 
 #include "..\..\platform\console\console.cpp"
 #include "..\..\platform\strings\strings.cpp"
 
-#include "fat12.cpp"
-#include "fat12_utils.cpp"
+#include "fat12_get.cpp"
+#include "fat12_set.cpp"
+#include "fat12_access_layer.cpp"
+
+struct ram_file
+{
+    void *Memory;
+    char Name[8];
+    char Extension[3];
+    u32 Size;
+};
+
+ram_file CreateDummyFile(char *Name, char *Extension, u32 Size, u32 FillPattern)
+{
+    ram_file Result = {};
+
+    Result.Size = Size;
+    Result.Memory = (char *)malloc(Size);
+    memset(Result.Memory, FillPattern, Size);
+
+    StringCchCat(Result.Name, 8, Name);
+    StringCchCat(Result.Extension, 3, Extension);
+
+    return Result;
+}
 
 i32 main(i32 argc, char **argv)
 {
@@ -38,14 +60,14 @@ i32 main(i32 argc, char **argv)
     ram_file File5 = CreateDummyFile("File5", "txt", 400, 0xFFFFFFFF);
     ram_file File6 = CreateDummyFile("File6", "txt", 8000, 0xFFFFFFFF);
 
-    u16 File1Cluster = AddFileToRootDirectory(Disk, File1);
-    u16 File2Cluster = AddFileToRootDirectory(Disk, File2);
+    u16 File1Cluster = AddFileToRootDirectory(Disk, File1.Memory, File1.Size, File1.Name, File1.Extension);
+    u16 File2Cluster = AddFileToRootDirectory(Disk, File2.Memory, File2.Size, File2.Name, File2.Extension);
 
     u16 Folder1Cluster = AddDirectoryToRootDirectory(Disk, "folder1");
 
     ListRootDirectory(Disk);
 
-    u16 File3Cluster = AddFileToDirectory(Disk, Folder1Cluster, File3);
+    u16 File3Cluster = AddFileToDirectory(Disk, Folder1Cluster, File3.Memory, File3.Size, File3.Name, File3.Extension);
     u16 SubDir0Cluster = AddDirectoryToDirectory(Disk, Folder1Cluster, "SubDir0");
 
     ListDirectory(Disk, Folder1Cluster);
