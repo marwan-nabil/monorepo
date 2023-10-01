@@ -24,7 +24,7 @@ b32 CreateProcessAndWait(char *CommandLine)
 
     if (CreateSucceeded == FALSE)
     {
-        ConsolePrintColored("ERROR: failed to create a sub-process, please debug.\n", FOREGROUND_RED);
+        ConsolePrintColored("ERROR: failed to create a sub-process.\n", FOREGROUND_RED);
         return FALSE;
     }
     else
@@ -39,7 +39,6 @@ b32 CreateProcessAndWait(char *CommandLine)
 
         if (ProcessExitCode != 0)
         {
-            ConsolePrintColored("ERROR: sub-process terminated with non zero error code.\n", FOREGROUND_RED);
             return FALSE;
         }
     }

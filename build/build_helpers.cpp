@@ -15,6 +15,11 @@ b32 CompileShader
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), SourcesString);
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
+    if (!Result)
+    {
+        ConsolePrintColored("ERROR: shader compilation failed.\n", FOREGROUND_RED);
+    }
+
     return Result;
 }
 
@@ -39,6 +44,11 @@ b32 CompileCpp
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), LinkerFlags);
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
+    if (!Result)
+    {
+        ConsolePrintColored("ERROR: compilation failed.\n", FOREGROUND_RED);
+    }
+
     return Result;
 }
 
@@ -60,6 +70,11 @@ b32 CompileAssembly
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");
 
     b32 Result = CreateProcessAndWait(AssemblerCommand);
+    if (!Result)
+    {
+        ConsolePrintColored("ERROR: Assembly failed.\n", FOREGROUND_RED);
+    }
+
     return Result;
 }
 

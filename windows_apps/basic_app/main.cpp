@@ -4,13 +4,13 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
+#include "..\..\platform\rasterizer\rasterizer.h"
 
 #include "..\..\math\vector2.h"
 #include "..\..\math\vector3.h"
 #include "..\..\math\vector4.h"
 #include "..\..\math\rectangle2.h"
 
-#include "software_rendering.h"
 #include "internal_types.h"
 
 #include "..\..\math\scalar_conversions.cpp"
@@ -21,7 +21,9 @@
 #include "..\..\math\vector4.cpp"
 #include "..\..\math\rectangle2.cpp"
 
-#include "software_rendering.cpp"
+#include "..\..\platform\rasterizer\rasterizer.cpp"
+#include "..\..\platform\windows\windows.cpp"
+
 #include "state_update.cpp"
 #include "rendering.cpp"
 
@@ -111,7 +113,10 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
             (
                 Window,
                 DeviceContext,
-                WindowPrivateData->LocalRenderingBuffer
+                WindowPrivateData->LocalRenderingBuffer->Memory,
+                WindowPrivateData->LocalRenderingBuffer->Width,
+                WindowPrivateData->LocalRenderingBuffer->Height,
+                &WindowPrivateData->LocalRenderingBuffer->Bitmapinfo
             );
             EndPaint(Window, &Paint);
         } break;
@@ -244,7 +249,13 @@ WinMain
                 RenderSimulation(&LocalRenderingBuffer, &GlobalSimulationState);
 
                 HDC DeviceContext = GetDC(Window);
-                DisplayRenderBufferInWindow(Window, DeviceContext, &LocalRenderingBuffer);
+                DisplayRenderBufferInWindow
+                (
+                    Window, DeviceContext,
+                    LocalRenderingBuffer.Memory,
+                    LocalRenderingBuffer.Width, LocalRenderingBuffer.Height,
+                    &LocalRenderingBuffer.Bitmapinfo
+                );
                 ReleaseDC(Window, DeviceContext);
 
                 f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
