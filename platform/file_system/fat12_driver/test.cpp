@@ -5,13 +5,13 @@
 #include <math.h>
 #include <strsafe.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
+#include "..\..\base_types.h"
+#include "..\..\basic_defines.h"
 
 #include "fat12.h"
 
-#include "..\..\platform\console\console.cpp"
-#include "..\..\platform\strings\strings.cpp"
+#include "..\..\console\console.cpp"
+#include "..\..\strings\strings.cpp"
 
 #include "fat12_get.cpp"
 #include "fat12_set.cpp"

@@ -118,7 +118,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\basic_app\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\basic_app\\main.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
 
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
             }
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\ray_tracer\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\ray_tracer\\main.cpp");
 
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
@@ -211,7 +211,7 @@ int main(int argc, char **argv)
             if (strcmp(argv[2], "opengl2") == 0)
             {
                 StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\imgui_demo\\main_opengl2.cpp ");
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\imgui_demo\\main_opengl2.cpp ");
 
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
@@ -221,7 +221,7 @@ int main(int argc, char **argv)
             else if (strcmp(argv[2], "dx11") == 0)
             {
                 StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\imgui_demo\\main_dx11.cpp ");
+                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\imgui_demo\\main_dx11.cpp ");
 
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
                 StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_dx11.exe");
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/LD /Fmgame.map ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\handmade_hero\\game.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\handmade_hero\\game.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\game.dll");
@@ -287,7 +287,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Fmwin32_platform.map ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\handmade_hero\\win32_platform.cpp ");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\handmade_hero\\win32_platform.cpp ");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\win32_platform.exe");
@@ -330,7 +330,7 @@ int main(int argc, char **argv)
             }
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\directx_demo\\main.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\directx_demo\\main.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib winmm.lib d3d11.lib dxgi.lib d3dcompiler.lib ");
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T vs_4_0 /Od /Zi /E SimpleVertexShader /Fh vertex_shader.h /Vn GlobalVertexShader");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\directx_demo\\vertex_shader.hlsl");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\directx_demo\\vertex_shader.hlsl");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\vertex_shader.cso");
@@ -358,7 +358,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T ps_4_0 /Od /Zi /E SimplePixelShader /Fh pixel_shader.h /Vn GlobalPixelShader");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\windows_apps\\directx_demo\\pixel_shader.hlsl");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\directx_demo\\pixel_shader.hlsl");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\pixel_shader.cso");
@@ -399,7 +399,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\low_level\\x86_kernel\\bootloader.s");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\bootloader.s");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_bootloader.img");
@@ -413,7 +413,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\low_level\\x86_kernel\\kernel.s");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\kernel.s");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_kernel.img");
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\low_level\\fat12\\test.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\platform\\file_system\\fat12_driver\\test.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
 

@@ -4,8 +4,8 @@ bits 16
 %define CRLF 0x0D, 0x0A
 
 ; jump instruction, 3 bytes
-entry:
-    jmp short start
+Entry:
+    jmp short Start
     nop
 
 ; OEM name, 8 bytes
@@ -41,7 +41,7 @@ DriveNumber:
     db 0xFF
 
 ; boot sector code & data, 479 bytes
-start:
+Start:
     ; initialize segment registers
     mov ax, 0
     mov ds, ax
@@ -52,33 +52,33 @@ start:
     mov sp, 0x8000
 
     ; print a message
-    mov si, hello_world_message
-    call puts
+    mov si, HelloWorldMessage
+    call PutString
 
-halt:
-    jmp halt
+Halt:
+    jmp Halt
 
 ; prints a string
-puts:
+PutString:
     push si
     push ax
     mov ah, 0x0E
     mov bh, 0
-.loop_0:
+.Loop0:
     ; load signed byte from [ds:si] into al, also increments si
     lodsb
     ; test if al is 0
     or al, al
-    jz .done
+    jz .Done
     ; print the character
     int 0x10
-    jmp .loop_0
-.done:
+    jmp .Loop0
+.Done:
     pop ax
     pop si
     ret
 
-hello_world_message:
+HelloWorldMessage:
     db "Hello, world!", CRLF, 0
 
 ; pad with 0 until you reach address 0x7DFE

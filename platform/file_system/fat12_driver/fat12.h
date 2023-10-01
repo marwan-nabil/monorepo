@@ -27,15 +27,9 @@
 
 struct boot_sector
 {
-    // -----------------------
-    // boot sector header
-    // -----------------------
     u8 JumpInstructionSpace[3];
     u8 OEMName[8];
 
-    // -----------------------
-    // BIOS parameter block
-    // -----------------------
     u16 BytesPerSector;
     u8 SectorsPerCluster;
     u16 NumberOfReserevedSectors;
@@ -48,9 +42,6 @@ struct boot_sector
     u16 NumberOfHeads;
     u16 HiddenSectors;
 
-    // -----------------------
-    // rest of boot sector
-    // -----------------------
     u8 DriveNumber;
     u8 BootSectorCode[479];
     u16 BootSectorSignature;
