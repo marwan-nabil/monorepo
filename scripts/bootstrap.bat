@@ -1,6 +1,6 @@
 @echo off
 
-.\build.exe build optimized
+.\build.exe build
 
 move /Y build.temp.exe build.exe
 del build.obj

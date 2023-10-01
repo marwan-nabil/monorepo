@@ -61,3 +61,47 @@ b32 WriteFileFromMemory(char *FilePath, void *DataToWrite, u32 DataSize)
 
     return Result;
 }
+
+b32 CreateEmptyFile(char *FilePath, u32 Size, u32 FillPattern)
+{
+    u8 *OutputFileMemory = (u8 *)VirtualAlloc
+    (
+        0, Size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
+    );
+    memset(OutputFileMemory, FillPattern, Size);
+
+    b32 Result = WriteFileFromMemory(FilePath, OutputFileMemory, Size);
+    return Result;
+}
+
+b32 WriteBinaryFileOverAnother(char *SourceBinaryFilePath, u32 WriteOffset, char *DestinationBinaryFilePath)
+{
+    b32 Result = FALSE;
+
+    read_file_result SourceBinary = ReadFileIntoMemory(SourceBinaryFilePath);
+    read_file_result DestinationBinary = ReadFileIntoMemory(DestinationBinaryFilePath);
+
+    if (DestinationBinary.Size > (WriteOffset + SourceBinary.Size))
+    {
+        memcpy((u8 *)DestinationBinary.FileMemory + WriteOffset, SourceBinary.FileMemory, SourceBinary.Size);
+        Result = WriteFileFromMemory(DestinationBinaryFilePath, DestinationBinary.FileMemory, DestinationBinary.Size);
+    }
+    else
+    {
+        u32 NewFileSize = WriteOffset + SourceBinary.Size;
+        void *NewFileMemory = malloc(NewFileSize);
+        ZeroMemory(NewFileMemory, NewFileSize);
+
+        memcpy(NewFileMemory, DestinationBinary.FileMemory, WriteOffset);
+        memcpy((u8 *)NewFileMemory + WriteOffset, SourceBinary.FileMemory, SourceBinary.Size);
+
+        Result = WriteFileFromMemory(DestinationBinaryFilePath, NewFileMemory, NewFileSize);
+
+        free(NewFileMemory);
+    }
+
+    FreeFileMemory(SourceBinary.FileMemory);
+    FreeFileMemory(DestinationBinary.FileMemory);
+
+    return Result;
+}

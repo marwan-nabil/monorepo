@@ -11,12 +11,19 @@
 #include "..\platform\basic_defines.h"
 #include "..\platform\file_system\files.h"
 
+#include "..\drivers\fat12\fat12.h"
+
 #include "..\math\scalar_conversions.cpp"
 
+#include "..\platform\strings\strings.cpp"
 #include "..\platform\console\console.cpp"
 #include "..\platform\file_system\files.cpp"
 #include "..\platform\file_system\folders.cpp"
 #include "..\platform\processes\processes.cpp"
+
+#include "..\drivers\fat12\fat12_get.cpp"
+#include "..\drivers\fat12\fat12_set.cpp"
+#include "..\drivers\fat12\fat12_access_layer.cpp"
 
 #include "build_helpers.cpp"
 
@@ -97,7 +104,7 @@ int main(int argc, char **argv)
 
         if (strcmp(argv[1], "build") == 0)
         {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /Oi /FC /Od /GR- /EHa- ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ");
 
@@ -424,9 +431,7 @@ int main(int argc, char **argv)
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\floppy.img");
 
-            BuildSuccess = BuildSuccess && CreateEmptyFile(OutputBinaryPath, 512 * 2880, 0);
-
-            // mkfs.fat -F 12 -n "NBOS" floppy.img
+            BuildSuccess = BuildSuccess && CreateFat12DiskFile(OutputBinaryPath);
 
             char SourceBinaryFilePath[1024];
             char DestinationBinaryFilePath[1024];
@@ -440,6 +445,20 @@ int main(int argc, char **argv)
             StringCchCatA(DestinationBinaryFilePath, ArrayCount(DestinationBinaryFilePath), "\\floppy.img");
 
             BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, DestinationBinaryFilePath);
+
+            ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
+            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
+            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\x86_kernel.img");
+
+            read_file_result KernelImageFile = ReadFileIntoMemory(SourceBinaryFilePath);
+            read_file_result FloppyImageFile = ReadFileIntoMemory(DestinationBinaryFilePath);
+            fat12_disk *FatDisk = (fat12_disk *)FloppyImageFile.FileMemory;
+
+            AddFileToRootDirectory(FatDisk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
+            WriteFileFromMemory(DestinationBinaryFilePath, FloppyImageFile.FileMemory, FloppyImageFile.Size);
+
+            FreeFileMemory(FloppyImageFile.FileMemory);
+            FreeFileMemory(KernelImageFile.FileMemory);
         }
         else if (strcmp(argv[1], "compilation_tests") == 0)
         {
@@ -464,7 +483,7 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\platform\\file_system\\fat12_driver\\test.cpp");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\drivers\\fat12\\test.cpp");
 
             StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
 

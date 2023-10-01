@@ -1,1 +1,2 @@
-; to be written
+Halt:
+    jmp Halt
