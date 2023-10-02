@@ -11,6 +11,7 @@
 #include "..\platform\basic_defines.h"
 #include "..\platform\file_system\files.h"
 #include "..\drivers\fat12\fat12.h"
+#include "build.h"
 
 #include "..\math\scalar_conversions.cpp"
 #include "..\platform\strings\strings.cpp"
@@ -22,36 +23,89 @@
 #include "..\drivers\fat12\fat12_set.cpp"
 #include "..\drivers\fat12\fat12_access_layer.cpp"
 #include "build_helpers.cpp"
-// #include "build_targets.cpp"
+#include "build_targets.cpp"
 
-void DisplayHelp()
+target_mapping BuildTargetMappings[] =
 {
-    printf("INFO: Available build targets:\n");
-    printf("          build help\n");
-    printf("          build clean\n");
-    printf("          build build\n");
-    printf("          build basic_app\n");
-    printf("          build handmade_hero\n");
-    printf("          build directx_demo [debug, release]\n");
-    printf("          build imgui_demo [opengl2, dx11]\n");
-    printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
-    printf("          build lint [job_per_directory]\n");
-    printf("          build x86_kernel\n");
-    printf("          build compilation_tests\n");
-    printf("          build fat12_tests\n");
-    printf("          build x86_kernel_tests\n");
-}
+    {
+        "build",
+        &BuildBuild,
+        "\\build\\build.cpp"
+    },
+    {
+        "basic_app",
+        &BuildBasicApp,
+        "\\projects\\basic_app\\build.cpp"
+    },
+    {
+        "ray_tracer",
+        &BuildRayTracer,
+        "\\projects\\ray_tracer\\build.cpp"
+    },
+    {
+        "imgui_demo",
+        &BuildImguiDemo,
+        "\\projects\\imgui_demo\\build.cpp"
+    },
+    {
+        "handmade_hero",
+        &BuildHandmadeHero,
+        "\\projects\\handmade_hero\\build.cpp"
+    },
+    {
+        "directx_demo",
+        &BuildDirectxDemo,
+        "\\projects\\directx_demo\\build.cpp"
+    },
+    {
+        "lint",
+        &BuildLint,
+        "\\build\\lint\\build.cpp"
+    },
+    {
+        "x86_kernel",
+        &BuildX86Kernel,
+        "\\projects\\x86_kernel\\build.cpp"
+    },
+    {
+        "compilation_tests",
+        &BuildCompilationTests,
+        "\\build\\compilation_tests\\build.cpp"
+    },
+    {
+        "fat12_tests",
+        &BuildFat12Tests,
+        "\\drivers\\fat12\\build.cpp"
+    },
+    {
+        "x86_kernel_tests",
+        &BuildX86KernelTests,
+        "\\projects\\x86_kernel\\tests\\build.cpp"
+    },
+};
 
 int main(int argc, char **argv)
 {
-    char OutputDirectoryPath[1024];
-    ZeroMemory(OutputDirectoryPath, ArrayCount(OutputDirectoryPath));
-    _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
+    u32 BuildSuccess = FALSE;
+    build_context BuildContext = {};
 
-    char RootDirectoryPath[1024];
-    ZeroMemory(RootDirectoryPath, ArrayCount(RootDirectoryPath));
-    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
-    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
+    _getcwd(BuildContext.OutputDirectoryPath, sizeof(BuildContext.OutputDirectoryPath));
+
+    StringCchCatA
+    (
+        BuildContext.RootDirectoryPath,
+        ArrayCount(BuildContext.RootDirectoryPath),
+        BuildContext.OutputDirectoryPath
+    );
+    StringCchCatA
+    (
+        BuildContext.RootDirectoryPath,
+        ArrayCount(BuildContext.RootDirectoryPath),
+        "\\.."
+    );
+
+    BuildContext.argc = argc;
+    BuildContext.argv = argv;
 
     InitializeConsole();
 
@@ -73,445 +127,46 @@ int main(int argc, char **argv)
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
         {
-            u32 BuildSuccess = CleanExtensionFromDirectory(ExtensionsToClean[ExtensionIndex], OutputDirectoryPath);
-            if (!BuildSuccess)
-            {
-                return 2;
-            }
+            BuildSuccess = CleanExtensionFromDirectory
+            (
+                ExtensionsToClean[ExtensionIndex],
+                BuildContext.OutputDirectoryPath
+            );
         }
     }
     else if (strcmp(argv[1], "help") == 0)
     {
         DisplayHelp();
+        BuildSuccess = TRUE;
     }
     else
     {
-        b32 BuildSuccess = FALSE;
-
-        char CompilerFlags[1024];
-        ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-
-        char LinkerFlags[1024];
-        ZeroMemory(LinkerFlags, ArrayCount(LinkerFlags));
-
-        char SourcesString[1024];
-        ZeroMemory(SourcesString, ArrayCount(SourcesString));
-
-        char OutputBinaryPath[1024];
-        ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-
-        if (strcmp(argv[1], "build") == 0)
+        u32 TargetIndex = 0;
+        for (; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
         {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /Oi /FC /Od /GR- /EHa- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\build.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\build.temp.exe");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+            if (strcmp(argv[1], BuildTargetMappings[TargetIndex].TargetName) == 0)
+            {
+                BuildSuccess = BuildTargetMappings[TargetIndex].BuildFunction(&BuildContext);
+                break;
+            }
         }
-        else if (strcmp(argv[1], "basic_app") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
 
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\basic_app\\main.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\basic_app.exe");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "ray_tracer") == 0)
-        {
-            if (argc < 4)
-            {
-                ConsolePrintColored("ERROR: invalid number of arguments for build ray_tracer ...\n", FOREGROUND_RED);
-                DisplayHelp();
-                return 1;
-            }
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-
-            if (strcmp(argv[2], "optimized") == 0)
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/O2 ");
-            }
-            else if (strcmp(argv[2], "non_optimized") == 0)
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Od ");
-            }
-            else
-            {
-                ConsoleSwitchColor(FOREGROUND_RED);
-                printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[2]);
-                ConsoleResetColor();
-                DisplayHelp();
-                return 1;
-            }
-
-            if (strcmp(argv[3], "1_lane") == 0)
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=1 ");
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer_1.exe");
-            }
-            else if (strcmp(argv[3], "4_lanes") == 0)
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=4 ");
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer_4.exe");
-            }
-            else if (strcmp(argv[3], "8_lanes") == 0)
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DSIMD_NUMBEROF_LANES=8 ");
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\ray_tracer_8.exe");
-            }
-            else
-            {
-                ConsoleSwitchColor(FOREGROUND_RED);
-                printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", argv[3]);
-                ConsoleResetColor();
-                DisplayHelp();
-                return 1;
-            }
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\ray_tracer\\main.cpp");
-
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib ");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "imgui_demo") == 0)
-        {
-            if (argc < 3)
-            {
-                ConsolePrintColored("ERROR: invalid number of arguments for build imgui_demo ...\n", FOREGROUND_RED);
-                DisplayHelp();
-                return 1;
-            }
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\third_party\\imgui\\imgui*.cpp ");
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Zi /MD /utf-8 /DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib Gdi32.lib dwmapi.lib ");
-
-            if (strcmp(argv[2], "opengl2") == 0)
-            {
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\imgui_demo\\main_opengl2.cpp ");
-
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_opengl2.exe");
-
-                StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "opengl32.lib ");
-            }
-            else if (strcmp(argv[2], "dx11") == 0)
-            {
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-                StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\imgui_demo\\main_dx11.cpp ");
-
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\imgui_demo_dx11.exe");
-
-                StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "d3d11.lib d3dcompiler.lib ");
-            }
-            else
-            {
-                ConsoleSwitchColor(FOREGROUND_RED);
-                printf("ERROR: invalid argument \"%s\" for build imgui_demo ...\n", argv[2]);
-                ConsoleResetColor();
-                DisplayHelp();
-                return 1;
-            }
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "handmade_hero") == 0)
-        {
-            char SharedCompilerFlags[1024];
-            ZeroMemory(SharedCompilerFlags, ArrayCount(SharedCompilerFlags));
-
-            StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
-            StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
-            StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), SharedCompilerFlags);
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/LD /Fmgame.map ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\handmade_hero\\game.cpp ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\game.dll");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no ");
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender ");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/PDB:game_");
-            char RandomString[5];
-            ZeroMemory(RandomString, ArrayCount(RandomString));
-            u32 RandomNumber;
-            rand_s(&RandomNumber);
-            RandomNumber = (u32)((f32)RandomNumber / (f32)UINT_MAX * 9999.0f);
-            StringCchPrintfA(RandomString, ArrayCount(RandomString), "%d", RandomNumber);
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), RandomString);
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), ".pdb ");
-
-            char LockFilePath[MAX_PATH];
-            ZeroMemory(LockFilePath, ArrayCount(LockFilePath));
-            StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
-
-            CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-            DeleteFileA(LockFilePath);
-
-            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayCount(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-            ZeroMemory(LinkerFlags, ArrayCount(LinkerFlags));
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), SharedCompilerFlags);
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/Fmwin32_platform.map ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\handmade_hero\\win32_platform.cpp ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\win32_platform.exe");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/incremental:no /subsystem:windows /opt:ref ");
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib gdi32.lib winmm.lib ");
-
-            BuildSuccess = BuildSuccess && CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "directx_demo") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /FC /Oi /GR- /EHa- /Zi /MD ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-
-            if (argc < 3)
-            {
-                ConsolePrintColored("ERROR: invalid number of arguments for build directx_demo.\n", FOREGROUND_RED);
-                DisplayHelp();
-                return 1;
-            }
-            else if(strcmp(argv[2], "debug") == 0)
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/D_DEBUG=1 ");
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo_debug.exe");
-            }
-            else if(strcmp(argv[2], "release") == 0)
-            {
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-                StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\directx_demo.exe");
-            }
-            else
-            {
-                ConsoleSwitchColor(FOREGROUND_RED);
-                printf("ERROR: invalid argument \"%s\" for build directx_demo ...\n", argv[2]);
-                ConsoleResetColor();
-                DisplayHelp();
-                return 1;
-            }
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\directx_demo\\main.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:windows /incremental:no /opt:ref ");
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "user32.lib winmm.lib d3d11.lib dxgi.lib d3dcompiler.lib ");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-
-            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayCount(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T vs_4_0 /Od /Zi /E SimpleVertexShader /Fh vertex_shader.h /Vn GlobalVertexShader");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\directx_demo\\vertex_shader.hlsl");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\vertex_shader.cso");
-
-            BuildSuccess = BuildSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
-
-            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayCount(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/T ps_4_0 /Od /Zi /E SimplePixelShader /Fh pixel_shader.h /Vn GlobalPixelShader");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\directx_demo\\pixel_shader.hlsl");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\pixel_shader.cso");
-
-            BuildSuccess = BuildSuccess && CompileShader(CompilerFlags, SourcesString, OutputBinaryPath);
-        }
-        else if (strcmp(argv[1], "lint") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            if
-            (
-                (argc >= 3) &&
-                (strcmp(argv[2], "job_per_directory") == 0)
-            )
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DJOB_PER_DIRECTORY ");
-            }
-            else
-            {
-                StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DJOB_PER_FILE ");
-            }
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\lint.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref Shlwapi.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\lint.exe");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "x86_kernel") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\boot_sector.s");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\boot_sector.img");
-
-            BuildSuccess = CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
-
-            ZeroMemory(CompilerFlags, ArrayCount(CompilerFlags));
-            ZeroMemory(SourcesString, ArrayCount(SourcesString));
-            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\kernel.s");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_kernel.img");
-
-            BuildSuccess = BuildSuccess && CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
-
-            fat12_disk *Fat12Disk = Fat12CreateRamDisk();
-
-            char SourceBinaryFilePath[1024];
-            ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\x86_kernel.img");
-            read_file_result KernelImageFile = ReadFileIntoMemory(SourceBinaryFilePath);
-
-            AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
-
-            FreeFileMemory(KernelImageFile.FileMemory);
-
-            ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\floppy.img");
-
-            WriteFileFromMemory(OutputBinaryPath, Fat12Disk, sizeof(fat12_disk));
-            FreeFileMemory(Fat12Disk);
-
-            ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\boot_sector.img");
-
-            BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, OutputBinaryPath);
-        }
-        else if (strcmp(argv[1], "compilation_tests") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\build\\compilation_tests.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\compilation_tests.exe");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "fat12_tests") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\drivers\\fat12\\test.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\fat12_tests.exe");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else if (strcmp(argv[1], "x86_kernel_tests") == 0)
-        {
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
-            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
-
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\test.cpp");
-
-            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
-
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_kernel_tests.exe");
-
-            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
-        }
-        else
+        if (TargetIndex == ArrayCount(BuildTargetMappings))
         {
             ConsoleSwitchColor(FOREGROUND_RED);
             printf("ERROR: invalid build target \"%s\".\n", argv[1]);
             ConsoleResetColor();
             DisplayHelp();
-            return 1;
-        }
-
-        if (!BuildSuccess)
-        {
-            return 1;
+            BuildSuccess = FALSE;
         }
     }
 
-    return 0;
+    if (BuildSuccess)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
