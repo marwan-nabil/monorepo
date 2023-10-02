@@ -81,6 +81,11 @@ b32 WriteBinaryFileOverAnother(char *SourceBinaryFilePath, u32 WriteOffset, char
     read_file_result SourceBinary = ReadFileIntoMemory(SourceBinaryFilePath);
     read_file_result DestinationBinary = ReadFileIntoMemory(DestinationBinaryFilePath);
 
+    if (!SourceBinary.FileMemory || !DestinationBinary.FileMemory)
+    {
+        return FALSE;
+    }
+
     if (DestinationBinary.Size > (WriteOffset + SourceBinary.Size))
     {
         memcpy((u8 *)DestinationBinary.FileMemory + WriteOffset, SourceBinary.FileMemory, SourceBinary.Size);
@@ -89,7 +94,7 @@ b32 WriteBinaryFileOverAnother(char *SourceBinaryFilePath, u32 WriteOffset, char
     else
     {
         u32 NewFileSize = WriteOffset + SourceBinary.Size;
-        void *NewFileMemory = malloc(NewFileSize);
+        void *NewFileMemory = VirtualAlloc(0, NewFileSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
         ZeroMemory(NewFileMemory, NewFileSize);
 
         memcpy(NewFileMemory, DestinationBinary.FileMemory, WriteOffset);

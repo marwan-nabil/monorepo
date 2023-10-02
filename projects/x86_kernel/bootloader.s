@@ -14,31 +14,32 @@ OEMName:
 
 ; BIOS parameter block, 19 bytes
 BytesPerSector:
-    dw 0xFFFF
+    dw 0x0200
 SectorsPerCluster:
-    db 0xFF
+    db 0x01
 NumberOfReserevedSectors:
-    dw 0xFFFF
+    dw 0x0021
 NumberOfFATs:
-    db 0xFF
+    db 0x02
 RootDirectoryEntries:
-    dw 0xFFFF
+    dw 0x00E0
 TotalSectors:
-    dw 0xFFFF
+    dw 0x0B40
 MediaDescriptor:
-    db 0xFF
+    ; TODO: know what's this and fill it correctly
+    db 0x00
 SectorsPerFAT:
-    dw 0xFFFF
+    dw 0x0009
 SectorsPerTrack:
-    dw 0xFFFF
+    dw 0x0000
 NumberOfHeads:
-    dw 0xFFFF
+    dw 0x0001
 HiddenSectors:
-    dw 0xFFFF
+    dw 0x0000
 
 ; extra data, 1 byte
 DriveNumber:
-    db 0xFF
+    db 0x01
 
 ; boot sector code & data, 479 bytes
 Start:

@@ -77,18 +77,3 @@ b32 CompileAssembly
 
     return Result;
 }
-
-b32 CreateFat12DiskFile(char *FilePath)
-{
-    u32 DiskSize = 512 * 2880;
-    u8 *OutputFileMemory = (u8 *)VirtualAlloc
-    (
-        0, DiskSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
-    );
-    memset(OutputFileMemory, 0, DiskSize);
-
-    b32 Result = WriteFileFromMemory(FilePath, OutputFileMemory, DiskSize);
-    VirtualFree(OutputFileMemory, 0, MEM_RELEASE);
-
-    return Result;
-}

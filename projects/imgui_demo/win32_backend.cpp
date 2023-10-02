@@ -26,110 +26,6 @@ static b32 Win32_LoadNecessaryDlls()
     return TRUE;
 }
 
-static b32 Win32_IsWindowsVersionGreaterOrEqual
-(
-    u16 MajorVersion,
-    u16 MinorVersion,
-    u16 PatchVersion
-)
-{
-    rtl_verify_version_info RtlVerifyVersionInfoFunction = NULL;
-
-    if (Win32GlobalHandles.NtDllModule)
-    {
-        RtlVerifyVersionInfoFunction = (rtl_verify_version_info)GetProcAddress
-        (
-            Win32GlobalHandles.NtDllModule,
-            "RtlVerifyVersionInfo"
-        );
-    }
-
-    if (RtlVerifyVersionInfoFunction == NULL)
-    {
-        return FALSE;
-    }
-
-    RTL_OSVERSIONINFOEXW VersionInfo = {};
-    VersionInfo.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOEXW);
-    VersionInfo.dwMajorVersion = MajorVersion;
-    VersionInfo.dwMinorVersion = MinorVersion;
-
-    u64 ConditionMask = 0;
-
-    VER_SET_CONDITION(ConditionMask, VER_MAJORVERSION, VER_GREATER_EQUAL);
-    VER_SET_CONDITION(ConditionMask, VER_MINORVERSION, VER_GREATER_EQUAL);
-
-    u32 Result = RtlVerifyVersionInfoFunction(&VersionInfo, VER_MAJORVERSION | VER_MINORVERSION, ConditionMask);
-    if (Result == 0)
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
-}
-
-static b32 Win32_ConfigureDpiAwareness()
-{
-    if (Win32_IsWindowsVersionGreaterOrEqual(HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10
-    {
-        set_thread_dpi_awareness SetThreadDpiAwarenessContextFunction =
-            (set_thread_dpi_awareness)
-            GetProcAddress
-            (
-                Win32GlobalHandles.User32DllModule,
-                "SetThreadDpiAwarenessContext"
-            );
-
-        if (SetThreadDpiAwarenessContextFunction)
-        {
-            SetThreadDpiAwarenessContextFunction(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-            return TRUE;
-        }
-    }
-
-    if (SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
-    {
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
-static f32 Win32_GetDpiScaleForMonitor(void *Monitor)
-{
-    u32 DpiX = 96;
-    u32 DpiY = 96;
-
-    if (Win32_IsWindowsVersionGreaterOrEqual(HIBYTE(0x0603), LOBYTE(0x0603), 0)) // _WIN32_WINNT_WINBLUE
-    {
-        get_dpi_for_monitror GetDpiForMonitorFunction = NULL;
-
-        if (Win32GlobalHandles.ShcoreDllModule)
-        {
-            GetDpiForMonitorFunction =
-                (get_dpi_for_monitror)
-                GetProcAddress(Win32GlobalHandles.ShcoreDllModule, "GetDpiForMonitor");
-        }
-
-        if (GetDpiForMonitorFunction)
-        {
-            GetDpiForMonitorFunction((HMONITOR)Monitor, MDT_EFFECTIVE_DPI, &DpiX, &DpiY);
-            Assert(DpiX == DpiY);
-            return DpiX / 96.0f;
-        }
-    }
-
-    HDC DeviceContext = GetDC(NULL);
-    DpiX = GetDeviceCaps(DeviceContext, LOGPIXELSX);
-    DpiY = GetDeviceCaps(DeviceContext, LOGPIXELSY);
-    Assert(DpiX == DpiY);
-    ReleaseDC(NULL, DeviceContext);
-
-    return DpiX / 96.0f;
-}
-
 static void Win32_ShutdownPlatformInterface()
 {
     UnregisterClass(L"ImGui Platform", GetModuleHandle(NULL));
@@ -139,7 +35,7 @@ static void Win32_ShutdownPlatformInterface()
 static f32 Win32_GetDpiScaleForHwnd(void *Window)
 {
     HMONITOR Monitor = MonitorFromWindow((HWND)Window, MONITOR_DEFAULTTONEAREST);
-    return Win32_GetDpiScaleForMonitor(Monitor);
+    return GetDpiScaleForMonitor(Win32GlobalHandles.NtDllModule, Win32GlobalHandles.ShcoreDllModule, Monitor);
 }
 
 static void Win32_Shutdown()
@@ -356,7 +252,7 @@ static i32 CALLBACK Win32_UpdateMonitorsEnumFunction(HMONITOR Monitor, HDC, LPRE
     ImGuiMonitor.MainSize = ImVec2((f32)(MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left), (f32)(MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top));
     ImGuiMonitor.WorkPos = ImVec2((f32)MonitorInfo.rcWork.left, (f32)MonitorInfo.rcWork.top);
     ImGuiMonitor.WorkSize = ImVec2((f32)(MonitorInfo.rcWork.right - MonitorInfo.rcWork.left), (f32)(MonitorInfo.rcWork.bottom - MonitorInfo.rcWork.top));
-    ImGuiMonitor.DpiScale = Win32_GetDpiScaleForMonitor(Monitor);
+    ImGuiMonitor.DpiScale = GetDpiScaleForMonitor(Win32GlobalHandles.NtDllModule, Win32GlobalHandles.ShcoreDllModule, Monitor);
     ImGuiMonitor.PlatformHandle = (void *)Monitor;
 
     ImGuiPlatformIO *ImGuiIo = &ImGui::GetPlatformIO();
@@ -899,7 +795,7 @@ LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPA
 
 void Win32_EnableAlphaCompositing(void *Window)
 {
-    if (!Win32_IsWindowsVersionGreaterOrEqual(HIBYTE(0x0600), LOBYTE(0x0600), 0)) // _WIN32_WINNT_VISTA
+    if (!IsWindowsVersionGreaterOrEqual(Win32GlobalHandles.NtDllModule, HIBYTE(0x0600), LOBYTE(0x0600), 0)) // _WIN32_WINNT_VISTA
     {
         return;
     }
@@ -915,7 +811,7 @@ void Win32_EnableAlphaCompositing(void *Window)
     if
     (
         // _WIN32_WINNT_WIN8
-        Win32_IsWindowsVersionGreaterOrEqual(HIBYTE(0x0602), LOBYTE(0x0602), 0) ||
+        IsWindowsVersionGreaterOrEqual(Win32GlobalHandles.NtDllModule, HIBYTE(0x0602), LOBYTE(0x0602), 0) ||
         (SUCCEEDED(DwmGetColorizationColor(&Color, &Opaque)) && !Opaque)
     )
     {

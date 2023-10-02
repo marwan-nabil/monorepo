@@ -1,3 +1,7 @@
+// TODO:
+//      - make linting smarter by not having to touch all the files every time
+//      - only lint files that were modified since last lint time
+//      - this requires that we save the last lint time in a metadata .json file
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>

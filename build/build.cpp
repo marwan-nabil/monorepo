@@ -427,38 +427,30 @@ int main(int argc, char **argv)
 
             BuildSuccess = BuildSuccess && CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
 
+            fat12_disk *Fat12Disk = CreateFat12Disk();
+
+            char SourceBinaryFilePath[1024];
+            ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
+            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
+            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\x86_kernel.img");
+            read_file_result KernelImageFile = ReadFileIntoMemory(SourceBinaryFilePath);
+
+            AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
+
+            FreeFileMemory(KernelImageFile.FileMemory);
+
             ZeroMemory(OutputBinaryPath, ArrayCount(OutputBinaryPath));
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\floppy.img");
 
-            BuildSuccess = BuildSuccess && CreateFat12DiskFile(OutputBinaryPath);
+            WriteFileFromMemory(OutputBinaryPath, Fat12Disk, sizeof(fat12_disk));
+            FreeFileMemory(Fat12Disk);
 
-            char SourceBinaryFilePath[1024];
-            char DestinationBinaryFilePath[1024];
             ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
-            ZeroMemory(DestinationBinaryFilePath, ArrayCount(DestinationBinaryFilePath));
-
             StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
             StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\x86_bootloader.img");
 
-            StringCchCatA(DestinationBinaryFilePath, ArrayCount(DestinationBinaryFilePath), OutputDirectoryPath);
-            StringCchCatA(DestinationBinaryFilePath, ArrayCount(DestinationBinaryFilePath), "\\floppy.img");
-
-            BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, DestinationBinaryFilePath);
-
-            ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\x86_kernel.img");
-
-            read_file_result KernelImageFile = ReadFileIntoMemory(SourceBinaryFilePath);
-            read_file_result FloppyImageFile = ReadFileIntoMemory(DestinationBinaryFilePath);
-            fat12_disk *FatDisk = (fat12_disk *)FloppyImageFile.FileMemory;
-
-            AddFileToRootDirectory(FatDisk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
-            WriteFileFromMemory(DestinationBinaryFilePath, FloppyImageFile.FileMemory, FloppyImageFile.Size);
-
-            FreeFileMemory(FloppyImageFile.FileMemory);
-            FreeFileMemory(KernelImageFile.FileMemory);
+            BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, OutputBinaryPath);
         }
         else if (strcmp(argv[1], "compilation_tests") == 0)
         {

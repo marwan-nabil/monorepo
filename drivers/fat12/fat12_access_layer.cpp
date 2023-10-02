@@ -176,3 +176,13 @@ void ListRootDirectory(fat12_disk *Disk)
         ListDirectorySector(Sector);
     }
 }
+
+fat12_disk *CreateFat12Disk()
+{
+    fat12_disk *Disk = (fat12_disk *)VirtualAlloc
+    (
+        0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
+    );
+    memset(Disk, 0, sizeof(fat12_disk));
+    return Disk;
+}

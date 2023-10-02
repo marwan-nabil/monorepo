@@ -23,29 +23,13 @@
 
 #include "..\..\platform\rasterizer\rasterizer.cpp"
 #include "..\..\platform\windows\windows.cpp"
+#include "..\..\platform\timing\timing.cpp"
 
 #include "state_update.cpp"
 #include "rendering.cpp"
 
 user_input GlobalUserInput;
 simulation_state GlobalSimulationState;
-
-inline LARGE_INTEGER
-GetWindowsTimerValue()
-{
-    LARGE_INTEGER Result;
-    QueryPerformanceCounter(&Result);
-    return Result;
-}
-
-inline f32
-GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End, i64 ProfileCounterFrequency)
-{
-    f32 SecondsElapsed =
-        (f32)(End.QuadPart - Start.QuadPart) /
-        (f32)ProfileCounterFrequency;
-    return SecondsElapsed;
-}
 
 inline void
 ProcessWindowsMessage(MSG Message, user_input *UserInput)
@@ -181,9 +165,7 @@ WinMain
     f32 RendererRefreshHz = 60.0f;
     f32 TargetSecondsPerFrame = 1.0f / RendererRefreshHz;
 
-    LARGE_INTEGER ProfileCounterFrequency;
-    QueryPerformanceFrequency(&ProfileCounterFrequency);
-    i64 WindowsTimerFrequency = ProfileCounterFrequency.QuadPart;
+    i64 WindowsTimerFrequency = GetWindowsTimerFrequency();
 
     WNDCLASSA MainWindowClass = {};
     MainWindowClass.style = CS_VREDRAW | CS_HREDRAW;

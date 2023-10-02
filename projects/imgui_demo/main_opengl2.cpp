@@ -9,11 +9,16 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
+#include "..\..\platform\system\version.h"
+#include "..\..\platform\windows\dpi.h"
 
 #include "..\..\third_party\imgui\imgui.h"
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"
+
+#include "..\..\platform\system\version.cpp"
+#include "..\..\platform\windows\dpi.cpp"
 
 #include "opengl2_backend.cpp"
 #include "win32_backend.cpp"
@@ -123,7 +128,7 @@ i32 main(i32 argc, char **argv)
         return 1;
     }
 
-    Result = Win32_ConfigureDpiAwareness();
+    Result = ConfigureDpiAwareness(Win32GlobalHandles.NtDllModule, Win32GlobalHandles.User32DllModule);
     if (!Result)
     {
         printf("ERROR: Dpi Awareness could not be configured.\n");
