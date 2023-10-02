@@ -177,7 +177,7 @@ void ListRootDirectory(fat12_disk *Disk)
     }
 }
 
-fat12_disk *CreateFat12Disk()
+fat12_disk *Fat12CreateRamDisk()
 {
     fat12_disk *Disk = (fat12_disk *)VirtualAlloc
     (

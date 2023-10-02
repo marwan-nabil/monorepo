@@ -40,10 +40,17 @@ struct boot_sector
     u16 SectorsPerFAT;
     u16 SectorsPerTrack;
     u16 NumberOfHeads;
-    u16 HiddenSectors;
+    u32 HiddenSectors;
+    u32 LargeSectors;
 
     u8 DriveNumber;
-    u8 BootSectorCode[479];
+    u8 Reserved;
+    u8 Signature;
+    u32 VolumeId;
+    u8 VolumeLabel[11];
+    u8 SystemId[8];
+
+    u8 BootSectorCode[448];
     u16 BootSectorSignature;
 };
 

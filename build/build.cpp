@@ -10,22 +10,19 @@
 #include "..\platform\base_types.h"
 #include "..\platform\basic_defines.h"
 #include "..\platform\file_system\files.h"
-
 #include "..\drivers\fat12\fat12.h"
 
 #include "..\math\scalar_conversions.cpp"
-
 #include "..\platform\strings\strings.cpp"
 #include "..\platform\console\console.cpp"
 #include "..\platform\file_system\files.cpp"
 #include "..\platform\file_system\folders.cpp"
 #include "..\platform\processes\processes.cpp"
-
 #include "..\drivers\fat12\fat12_get.cpp"
 #include "..\drivers\fat12\fat12_set.cpp"
 #include "..\drivers\fat12\fat12_access_layer.cpp"
-
 #include "build_helpers.cpp"
+// #include "build_targets.cpp"
 
 void DisplayHelp()
 {
@@ -42,6 +39,7 @@ void DisplayHelp()
     printf("          build x86_kernel\n");
     printf("          build compilation_tests\n");
     printf("          build fat12_tests\n");
+    printf("          build x86_kernel_tests\n");
 }
 
 int main(int argc, char **argv)
@@ -68,9 +66,9 @@ int main(int argc, char **argv)
     {
         const char *ExtensionsToClean[] =
         {
-            "obj", "pdb", "log", "ilk", "sln", "bmp", "txt",
-            "ini", "dll", "exp", "lib", "map", "hmi", "cso",
-            "lock", "exe", "img", "h"
+            "obj", "pdb", "log", "ilk", "sln", "bmp", "txt", "ini",
+            "dll", "exp", "lib", "map", "hmi", "cso", "lock", "exe",
+            "img", "h"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
@@ -406,10 +404,10 @@ int main(int argc, char **argv)
             StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "-f bin ");
 
             StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
-            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\bootloader.s");
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\boot_sector.s");
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
-            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_bootloader.img");
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\boot_sector.img");
 
             BuildSuccess = CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
 
@@ -427,7 +425,7 @@ int main(int argc, char **argv)
 
             BuildSuccess = BuildSuccess && CompileAssembly(CompilerFlags, SourcesString, OutputBinaryPath);
 
-            fat12_disk *Fat12Disk = CreateFat12Disk();
+            fat12_disk *Fat12Disk = Fat12CreateRamDisk();
 
             char SourceBinaryFilePath[1024];
             ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
@@ -448,7 +446,7 @@ int main(int argc, char **argv)
 
             ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
             StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), OutputDirectoryPath);
-            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\x86_bootloader.img");
+            StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\boot_sector.img");
 
             BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, OutputBinaryPath);
         }
@@ -481,6 +479,22 @@ int main(int argc, char **argv)
 
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
             StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\fat12_tests.exe");
+
+            BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
+        }
+        else if (strcmp(argv[1], "x86_kernel_tests") == 0)
+        {
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/nologo /Z7 /FC /Od /GR- /EHa- /MTd /fp:fast /fp:except- ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127 ");
+            StringCchCatA(CompilerFlags, ArrayCount(CompilerFlags), "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS ");
+
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), RootDirectoryPath);
+            StringCchCatA(SourcesString, ArrayCount(SourcesString), "\\projects\\x86_kernel\\test.cpp");
+
+            StringCchCatA(LinkerFlags, ArrayCount(LinkerFlags), "/subsystem:console /incremental:no /opt:ref user32.lib ");
+
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), OutputDirectoryPath);
+            StringCchCatA(OutputBinaryPath, ArrayCount(OutputBinaryPath), "\\x86_kernel_tests.exe");
 
             BuildSuccess = CompileCpp(CompilerFlags, SourcesString, OutputBinaryPath, LinkerFlags);
         }

@@ -18,7 +18,7 @@ BytesPerSector:
 SectorsPerCluster:
     db 0x01
 NumberOfReserevedSectors:
-    dw 0x0021
+    dw 0x0001
 NumberOfFATs:
     db 0x02
 RootDirectoryEntries:
@@ -26,22 +26,32 @@ RootDirectoryEntries:
 TotalSectors:
     dw 0x0B40
 MediaDescriptor:
-    ; TODO: know what's this and fill it correctly
-    db 0x00
+    db 0xF0
 SectorsPerFAT:
     dw 0x0009
 SectorsPerTrack:
-    dw 0x0000
+    dw 0x0012
 NumberOfHeads:
-    dw 0x0001
+    dw 0x0002
 HiddenSectors:
-    dw 0x0000
+    dd 0x00000000
+LargeSectors:
+    dd 0x00000000
 
-; extra data, 1 byte
+; extended data, 26 bytes
 DriveNumber:
-    db 0x01
+    db 0x00
+    db 0 ; reserved
+Signature:
+    db 0x29
+VolumeId:
+    dd 0x78563412
+VolumeLabel:
+    db 'SYSTEM     '
+SystemId:
+    db 'FAT12   '
 
-; boot sector code & data, 479 bytes
+; boot sector code & data, 448 bytes
 Start:
     ; initialize segment registers
     mov ax, 0

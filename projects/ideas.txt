@@ -1,4 +1,6 @@
-<h1>Ideas for embedded applications</h1>
+-----------------------------------
+==> Ideas for embedded applications
+-----------------------------------
 
 - a device or app that allows you to navigate inside a large supermarket
     - using a mobile app, offer accurate navigation inside a building
