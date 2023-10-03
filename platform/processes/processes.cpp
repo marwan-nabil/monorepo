@@ -1,12 +1,12 @@
-b32 CreateProcessAndWait(char *CommandLine)
+b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput)
 {
     PROCESS_INFORMATION ProcessInfo = {};
 
     STARTUPINFO StartupInfo = {};
     StartupInfo.cb = sizeof(StartupInfo);
     StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-    StartupInfo.hStdOutput = (HANDLE)_get_osfhandle(_fileno(stdout));
-    StartupInfo.hStdError = (HANDLE)_get_osfhandle(_fileno(stdout));
+    StartupInfo.hStdOutput = ProcessOutput;
+    StartupInfo.hStdError = ProcessOutput;
 
     b32 CreateSucceeded = CreateProcess
     (
@@ -66,4 +66,9 @@ b32 CreateProcessAndWait(char *CommandLine)
     }
 
     return TRUE;
+}
+
+b32 CreateProcessAndWait(char *CommandLine)
+{
+    return CreateProcessAndWait(CommandLine, (HANDLE)_get_osfhandle(_fileno(stdout)));
 }

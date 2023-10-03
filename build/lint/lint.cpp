@@ -372,8 +372,6 @@ int main(int argc, char **argv)
         FileListIterator = FileListIterator->NextFileNode;
     }
 
-    // -----------------------------------------------------
-
     b32 Result = TRUE;
 
     clock_t StartTime = clock();

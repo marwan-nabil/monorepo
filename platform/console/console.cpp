@@ -1,3 +1,4 @@
+// TODO: make multithreaded
 HANDLE ConsoleHandle;
 WORD OriginalConsoleAttributes;
 
