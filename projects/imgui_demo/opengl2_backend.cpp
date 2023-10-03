@@ -191,7 +191,7 @@ static void OpenGl2_RenderDrawData(ImDrawData *DrawData)
     }
 
     // Backup GL state
-    GLint LastTexture; 
+    GLint LastTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &LastTexture);
     GLint LastPolygonMode[2];
     glGetIntegerv(GL_POLYGON_MODE, LastPolygonMode);

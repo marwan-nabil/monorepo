@@ -1,16 +1,16 @@
-inline void AddCompilerFlags(build_context *BuildContext, const char *Flags)
+void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 {
     StringCchCatA(BuildContext->CompilerFlags, ArrayCount(BuildContext->CompilerFlags), Flags);
     StringCchCatA(BuildContext->CompilerFlags, ArrayCount(BuildContext->CompilerFlags), " ");
 }
 
-inline void AddLinkerFlags(build_context *BuildContext, const char *Flags)
+void AddLinkerFlags(build_context *BuildContext, const char *Flags)
 {
     StringCchCatA(BuildContext->LinkerFlags, ArrayCount(BuildContext->LinkerFlags), Flags);
     StringCchCatA(BuildContext->LinkerFlags, ArrayCount(BuildContext->LinkerFlags), " ");
 }
 
-inline void AddSourceFile(build_context *BuildContext, const char *SourceFile)
+void AddSourceFile(build_context *BuildContext, const char *SourceFile)
 {
     StringCchCatA
     (
@@ -22,7 +22,7 @@ inline void AddSourceFile(build_context *BuildContext, const char *SourceFile)
     StringCchCatA(BuildContext->SourcesString, ArrayCount(BuildContext->SourcesString), " ");
 }
 
-inline void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryName)
+void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryName)
 {
     StringCchCatA
     (
@@ -38,7 +38,7 @@ inline void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBi
     );
 }
 
-inline void ClearBuildContext(build_context *BuildContext)
+void ClearBuildContext(build_context *BuildContext)
 {
     ZeroMemory(BuildContext->CompilerFlags, ArrayCount(BuildContext->CompilerFlags));
     ZeroMemory(BuildContext->LinkerFlags, ArrayCount(BuildContext->LinkerFlags));
@@ -51,7 +51,6 @@ void DisplayHelp()
     printf("INFO: Available build targets:\n");
     printf("          build help\n");
     printf("          build clean\n");
-    printf("          build build\n");
     printf("          build basic_app\n");
     printf("          build handmade_hero\n");
     printf("          build directx_demo [debug, release]\n");

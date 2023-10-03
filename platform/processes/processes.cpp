@@ -24,7 +24,29 @@ b32 CreateProcessAndWait(char *CommandLine)
 
     if (CreateSucceeded == FALSE)
     {
-        ConsolePrintColored("ERROR: failed to create a sub-process.\n", FOREGROUND_RED);
+        DWORD LastError = GetLastError();
+        LPVOID ErrorMessageFromSystem;
+        FormatMessage
+        (
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            LastError,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&ErrorMessageFromSystem,
+            0,
+            NULL
+        );
+
+        ConsoleSwitchColor(FOREGROUND_RED);
+        printf
+        (
+            "ERROR: failed to create a sub-process, system error code: %lu == %s",
+            LastError, (const char *)ErrorMessageFromSystem
+        );
+        fflush(stdout);
+        ConsoleResetColor();
+
+        LocalFree(ErrorMessageFromSystem);
         return FALSE;
     }
     else

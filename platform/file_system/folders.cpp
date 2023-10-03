@@ -34,7 +34,6 @@ b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
                 if (DeleteResult == 0)
                 {
                     DWORD LastError = GetLastError();
-
                     LPVOID ErrorMessageFromSystem;
                     FormatMessage
                     (

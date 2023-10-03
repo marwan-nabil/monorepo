@@ -23,65 +23,29 @@
 #include "..\drivers\fat12\fat12_set.cpp"
 #include "..\drivers\fat12\fat12_access_layer.cpp"
 #include "build_helpers.cpp"
-#include "build_targets.cpp"
+
+#include "lint\build.cpp"
+#include "compilation_tests\build.cpp"
+#include "..\drivers\fat12\build.cpp"
+#include "..\projects\basic_app\build.cpp"
+#include "..\projects\directx_demo\build.cpp"
+#include "..\projects\handmade_hero\build.cpp"
+#include "..\projects\imgui_demo\build.cpp"
+#include "..\projects\ray_tracer\build.cpp"
+#include "..\projects\x86_kernel\build.cpp"
 
 target_mapping BuildTargetMappings[] =
 {
-    {
-        "build",
-        &BuildBuild,
-        "\\build\\build.cpp"
-    },
-    {
-        "basic_app",
-        &BuildBasicApp,
-        "\\projects\\basic_app\\build.cpp"
-    },
-    {
-        "ray_tracer",
-        &BuildRayTracer,
-        "\\projects\\ray_tracer\\build.cpp"
-    },
-    {
-        "imgui_demo",
-        &BuildImguiDemo,
-        "\\projects\\imgui_demo\\build.cpp"
-    },
-    {
-        "handmade_hero",
-        &BuildHandmadeHero,
-        "\\projects\\handmade_hero\\build.cpp"
-    },
-    {
-        "directx_demo",
-        &BuildDirectxDemo,
-        "\\projects\\directx_demo\\build.cpp"
-    },
-    {
-        "lint",
-        &BuildLint,
-        "\\build\\lint\\build.cpp"
-    },
-    {
-        "x86_kernel",
-        &BuildX86Kernel,
-        "\\projects\\x86_kernel\\build.cpp"
-    },
-    {
-        "compilation_tests",
-        &BuildCompilationTests,
-        "\\build\\compilation_tests\\build.cpp"
-    },
-    {
-        "fat12_tests",
-        &BuildFat12Tests,
-        "\\drivers\\fat12\\build.cpp"
-    },
-    {
-        "x86_kernel_tests",
-        &BuildX86KernelTests,
-        "\\projects\\x86_kernel\\tests\\build.cpp"
-    },
+    {"lint", &BuildLint},
+    {"compilation_tests", &BuildCompilationTests},
+    {"fat12_tests", &BuildFat12Tests},
+    {"basic_app", &BuildBasicApp},
+    {"directx_demo", &BuildDirectxDemo},
+    {"handmade_hero", &BuildHandmadeHero},
+    {"imgui_demo", &BuildImguiDemo},
+    {"ray_tracer", &BuildRayTracer},
+    {"x86_kernel", &BuildX86Kernel},
+    {"x86_kernel_tests", &BuildX86KernelTests},
 };
 
 int main(int argc, char **argv)

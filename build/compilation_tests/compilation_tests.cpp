@@ -16,12 +16,12 @@
 #include <stdio.h>
 #include <io.h>
 
-#include "..\platform\base_types.h"
-#include "..\platform\basic_defines.h"
+#include "..\..\platform\base_types.h"
+#include "..\..\platform\basic_defines.h"
 
-#include "..\platform\console\console.cpp"
-#include "..\platform\strings\strings.cpp"
-#include "..\platform\processes\processes.cpp"
+#include "..\..\platform\console\console.cpp"
+#include "..\..\platform\strings\strings.cpp"
+#include "..\..\platform\processes\processes.cpp"
 
 void CompilationTest(char *TestCommand)
 {
@@ -48,7 +48,6 @@ i32 main(i32 argc, char **argv)
 {
     InitializeConsole();
 
-    CompilationTest("build build");
     CompilationTest("build basic_app");
     CompilationTest("build imgui_demo opengl2");
     CompilationTest("build imgui_demo dx11");

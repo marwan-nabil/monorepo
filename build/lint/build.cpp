@@ -1,19 +1,6 @@
-#include <Windows.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <math.h>
-#include <strsafe.h>
-#include <stdio.h>
-#include <direct.h>
-#include <io.h>
-
-#include "..\platform\base_types.h"
-#include "..\platform\basic_defines.h"
-#include "build.h"
-
 b32 BuildLint(build_context *BuildContext)
 {
-    AddSourceFile(BuildContext, "\\build\\lint.cpp");
+    AddSourceFile(BuildContext, "\\build\\lint\\lint.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
