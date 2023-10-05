@@ -85,8 +85,7 @@ void CleanupD3dDevice()
 
 b32 CreateDeviceD3D(HWND Window)
 {
-    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor;
-    ZeroMemory(&SwapChainDescriptor, sizeof(SwapChainDescriptor));
+    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor = {};
     SwapChainDescriptor.BufferCount = 2;
     SwapChainDescriptor.BufferDesc.Width = 0;
     SwapChainDescriptor.BufferDesc.Height = 0;

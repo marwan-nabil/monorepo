@@ -40,10 +40,10 @@ void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryNam
 
 void ClearBuildContext(build_context *BuildContext)
 {
-    ZeroMemory(BuildContext->CompilerFlags, ArrayCount(BuildContext->CompilerFlags));
-    ZeroMemory(BuildContext->LinkerFlags, ArrayCount(BuildContext->LinkerFlags));
-    ZeroMemory(BuildContext->OutputBinaryPath, ArrayCount(BuildContext->OutputBinaryPath));
-    ZeroMemory(BuildContext->SourcesString, ArrayCount(BuildContext->SourcesString));
+    *BuildContext->CompilerFlags = {};
+    *BuildContext->LinkerFlags = {};
+    *BuildContext->OutputBinaryPath = {};
+    *BuildContext->SourcesString = {};
 }
 
 void DisplayHelp()
@@ -66,7 +66,7 @@ void DisplayHelp()
 b32 CompileShader(build_context *BuildContext)
 {
     char CompilerCommand[1024];
-    ZeroMemory(CompilerCommand, ArrayCount(CompilerCommand));
+    *CompilerCommand = {};
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "fxc.exe ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilerFlags);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo \"");
@@ -86,7 +86,7 @@ b32 CompileShader(build_context *BuildContext)
 b32 CompileCpp(build_context *BuildContext)
 {
     char CompilerCommand[1024];
-    ZeroMemory(CompilerCommand, ArrayCount(CompilerCommand));
+    *CompilerCommand = {};
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "cl.exe ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilerFlags);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
@@ -109,7 +109,7 @@ b32 CompileCpp(build_context *BuildContext)
 b32 CompileAssembly(build_context *BuildContext)
 {
     char AssemblerCommand[1024];
-    ZeroMemory(AssemblerCommand, ArrayCount(AssemblerCommand));
+    *AssemblerCommand = {};
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "nasm.exe ");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilerFlags);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " ");

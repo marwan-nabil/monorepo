@@ -149,7 +149,7 @@ u16 AddDirectoryToDirectory
     if (FirstLogicalCluster)
     {
         StringCchCat((char *)FreeDirectoryEntry->FileName, 8, DirectoryName);
-        memset(FreeDirectoryEntry->FileExtension, 0, 3);
+        *FreeDirectoryEntry->FileExtension = {};
 
         FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
         FreeDirectoryEntry->FileSize = 0;
@@ -174,7 +174,7 @@ u16 AddDirectoryToRootDirectory
     if (FirstLogicalCluster)
     {
         StringCchCat((char *)FreeDirectoryEntry->FileName, 8, DirectoryName);
-        memset(FreeDirectoryEntry->FileExtension, 0, 3);
+        *FreeDirectoryEntry->FileExtension = {};
 
         FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
         FreeDirectoryEntry->FileSize = 0;

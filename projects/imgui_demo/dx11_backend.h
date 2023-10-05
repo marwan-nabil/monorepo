@@ -21,7 +21,8 @@ struct dx11_backend_data
 
     dx11_backend_data()
     {
-        memset((void*)this, 0, sizeof(*this));
+        *this = {};
+        // memset((void*)this, 0, sizeof(*this));
         VertexBufferSize = 5000;
         IndexBufferSize = 10000;
     }

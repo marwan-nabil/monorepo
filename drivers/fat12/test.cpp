@@ -33,10 +33,8 @@ ram_file CreateDummyFile(char *Name, char *Extension, u32 Size, u32 FillPattern)
     Result.Memory = (char *)malloc(Size);
     memset(Result.Memory, FillPattern, Size);
 
-    char LocalName[9];
-    char LocalExtension[4];
-    ZeroMemory(LocalName, 8);
-    ZeroMemory(LocalName, 3);
+    char LocalName[9] = {};
+    char LocalExtension[4] = {};
 
     StringCchCat(LocalName, 9, Name);
     StringCchCat(LocalExtension, 4, Extension);

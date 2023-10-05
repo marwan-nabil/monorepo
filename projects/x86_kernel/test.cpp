@@ -20,12 +20,10 @@
 
 i32 main(i32 argc, char **argv)
 {
-    char OutputDirectoryPath[1024];
-    ZeroMemory(OutputDirectoryPath, ArrayCount(OutputDirectoryPath));
+    char OutputDirectoryPath[1024] = {};
     _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
 
-    char BinaryFilePath[1024];
-    ZeroMemory(BinaryFilePath, ArrayCount(BinaryFilePath));
+    char BinaryFilePath[1024] = {};
     StringCchCatA(BinaryFilePath, ArrayCount(BinaryFilePath), OutputDirectoryPath);
     StringCchCatA(BinaryFilePath, ArrayCount(BinaryFilePath), "\\floppy.img");
 

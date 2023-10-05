@@ -2,8 +2,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 {
     AddSourceFile(BuildContext, "\\projects\\handmade_hero\\game.cpp");
 
-    char SharedCompilerFlags[1024];
-    ZeroMemory(SharedCompilerFlags, ArrayCount(SharedCompilerFlags));
+    char SharedCompilerFlags[1024] = {};
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
@@ -14,12 +13,10 @@ b32 BuildHandmadeHero(build_context *BuildContext)
     AddLinkerFlags(BuildContext, "/incremental:no");
     AddLinkerFlags(BuildContext, "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender");
 
-    char PdbLinkerFlag[1024];
-    ZeroMemory(PdbLinkerFlag, ArrayCount(PdbLinkerFlag));
+    char PdbLinkerFlag[1024] = {};
     StringCchCatA(PdbLinkerFlag, ArrayCount(PdbLinkerFlag), "/PDB:game_");
 
-    char RandomString[5];
-    ZeroMemory(RandomString, ArrayCount(RandomString));
+    char RandomString[5] = {};
     u32 RandomNumber;
     rand_s(&RandomNumber);
     RandomNumber = (u32)((f32)RandomNumber / (f32)UINT_MAX * 9999.0f);
@@ -32,8 +29,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\game.dll");
 
-    char LockFilePath[MAX_PATH];
-    ZeroMemory(LockFilePath, ArrayCount(LockFilePath));
+    char LockFilePath[MAX_PATH] = {};
     StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
 
     CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);

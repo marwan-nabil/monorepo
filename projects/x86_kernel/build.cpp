@@ -29,8 +29,7 @@ b32 BuildX86Kernel(build_context *BuildContext)
     WriteFileFromMemory(BuildContext->OutputBinaryPath, Fat12Disk, sizeof(fat12_disk));
     FreeFileMemory(Fat12Disk);
 
-    char SourceBinaryFilePath[1024];
-    ZeroMemory(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath));
+    char SourceBinaryFilePath[1024] = {};
     StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), BuildContext->OutputDirectoryPath);
     StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\boot_sector.img");
 

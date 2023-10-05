@@ -1,7 +1,6 @@
 b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath)
 {
-    char FilesWildcard[MAX_PATH];
-    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
+    char FilesWildcard[MAX_PATH] = {};
     StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.");
     StringCchCatA(FilesWildcard, MAX_PATH, ExtensionToClean);
@@ -24,8 +23,7 @@ b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
         {
             if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
             {
-                char FoundFilePath[512];
-                ZeroMemory(FoundFilePath, 512);
+                char FoundFilePath[512] = {};
                 StringCchCatA(FoundFilePath, MAX_PATH, DirectoryPath);
                 StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                 StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);

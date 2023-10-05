@@ -15,8 +15,7 @@ FreeFilePathSegmentList(file_path_node *RootNode)
 inline file_path_node *
 CreateFilePathSegmentList(char *FileFullPath)
 {
-    char LocalPathBuffer[FAT12_MAX_PATH];
-    ZeroMemory(LocalPathBuffer, ArrayCount(LocalPathBuffer));
+    char LocalPathBuffer[FAT12_MAX_PATH] = {};
     StringCchCat(LocalPathBuffer, ArrayCount(LocalPathBuffer), FileFullPath);
 
     u32 PathLength = StringLength(LocalPathBuffer);
@@ -29,8 +28,7 @@ CreateFilePathSegmentList(char *FileFullPath)
     {
         if (LocalPathBuffer[CharIndex] == '\\')
         {
-            char PathSegment[FAT12_MAX_PATH];
-            ZeroMemory(PathSegment, ArrayCount(PathSegment));
+            char PathSegment[FAT12_MAX_PATH] = {};
             StringCchCat(PathSegment, FAT12_MAX_PATH, &LocalPathBuffer[CharIndex + 1]);
             ZeroMemory(&LocalPathBuffer[CharIndex], StringLength(&LocalPathBuffer[CharIndex]));
 
@@ -40,10 +38,8 @@ CreateFilePathSegmentList(char *FileFullPath)
                 *CurrentFilePathNode = {};
             }
 
-            char LocalFileName[8];
-            ZeroMemory(LocalFileName, 8);
-            char LocalFileExtension[3];
-            ZeroMemory(LocalFileExtension, 3);
+            char LocalFileName[8] = {};
+            char LocalFileExtension[3] = {};
 
             GetFileNameAndExtensionFromString
             (
@@ -183,6 +179,7 @@ fat12_disk *Fat12CreateRamDisk()
     (
         0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
     );
+    // TODO_LATER: investigate why *Disk = {}; causes a stack overflow
     memset(Disk, 0, sizeof(fat12_disk));
     return Disk;
 }

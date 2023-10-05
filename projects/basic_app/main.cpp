@@ -5,12 +5,10 @@
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
 #include "..\..\platform\rasterizer\rasterizer.h"
-
 #include "..\..\math\vector2.h"
 #include "..\..\math\vector3.h"
 #include "..\..\math\vector4.h"
 #include "..\..\math\rectangle2.h"
-
 #include "internal_types.h"
 
 #include "..\..\math\scalar_conversions.cpp"
@@ -20,11 +18,9 @@
 #include "..\..\math\vector3.cpp"
 #include "..\..\math\vector4.cpp"
 #include "..\..\math\rectangle2.cpp"
-
 #include "..\..\platform\rasterizer\rasterizer.cpp"
 #include "..\..\platform\windows\windows.cpp"
 #include "..\..\platform\timing\timing.cpp"
-
 #include "state_update.cpp"
 #include "rendering.cpp"
 

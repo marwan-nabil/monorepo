@@ -172,7 +172,7 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
     u32 ClientAreaWidth = ClientRectangle.right - ClientRectangle.left;
     u32 ClientAreaHeight = ClientRectangle.bottom - ClientRectangle.top;
 
-    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor;
+    DXGI_SWAP_CHAIN_DESC SwapChainDescriptor = {};
     ZeroMemory(&SwapChainDescriptor, sizeof(DXGI_SWAP_CHAIN_DESC));
     SwapChainDescriptor.BufferCount = 1;
     SwapChainDescriptor.BufferDesc.Width = ClientAreaWidth;

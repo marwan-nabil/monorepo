@@ -1,4 +1,4 @@
-// TODO:
+// TODO_LATER:
 //      - make linting smarter by not having to touch all the files every time
 //      - only lint files that were modified since last lint time
 //      - this requires that we save the last lint time in a metadata .json file
@@ -29,8 +29,7 @@ b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirector
     b32 DirectoryContainsSourceCode = FALSE;
     b32 Result = TRUE;
 
-    char DirectoryWildcard[1024];
-    ZeroMemory(DirectoryWildcard, ArrayCount(DirectoryWildcard));
+    char DirectoryWildcard[1024] = {};
     StringCchCatA(DirectoryWildcard, ArrayCount(DirectoryWildcard), RootDirectoryPath);
     StringCchCatA(DirectoryWildcard, ArrayCount(DirectoryWildcard), DirectoryRelativePath);
     StringCchCatA(DirectoryWildcard, ArrayCount(DirectoryWildcard), "\\*");
@@ -55,8 +54,7 @@ b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirector
                     continue;
                 }
 
-                char FoundDirectoryRelativePath[1024];
-                ZeroMemory(FoundDirectoryRelativePath, 1024);
+                char FoundDirectoryRelativePath[1024] = {};
                 StringCchCatA(FoundDirectoryRelativePath, 1024, DirectoryRelativePath);
                 StringCchCatA(FoundDirectoryRelativePath, 1024, "\\");
                 StringCchCatA(FoundDirectoryRelativePath, 1024, FindOperationData.cFileName);
@@ -112,8 +110,7 @@ b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirector
 
 b32 LintFile(char *FileRelativePath)
 {
-    char FilePath[MAX_PATH];
-    ZeroMemory(FilePath, MAX_PATH);
+    char FilePath[MAX_PATH] = {};
     StringCchCatA(FilePath, MAX_PATH, RootDirectoryPath);
     StringCchCatA(FilePath, MAX_PATH, FileRelativePath);
 
@@ -230,8 +227,7 @@ b32 LintFile(char *FileRelativePath)
 
 b32 LintDirectoryWithWildcard(char *DirectoryRelativePath, char *FilesWildcard)
 {
-    char SearchPattern[1024];
-    ZeroMemory(SearchPattern, 1024);
+    char SearchPattern[1024] = {};
     StringCchCatA(SearchPattern, 1024, RootDirectoryPath);
     StringCchCatA(SearchPattern, 1024, DirectoryRelativePath);
     StringCchCatA(SearchPattern, 1024, FilesWildcard);
@@ -245,8 +241,7 @@ b32 LintDirectoryWithWildcard(char *DirectoryRelativePath, char *FilesWildcard)
         {
             if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
             {
-                char FoundFilePath[MAX_PATH];
-                ZeroMemory(FoundFilePath, MAX_PATH);
+                char FoundFilePath[MAX_PATH] = {};
                 StringCchCatA(FoundFilePath, MAX_PATH, DirectoryRelativePath);
                 StringCchCatA(FoundFilePath, MAX_PATH, "\\");
                 StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
@@ -280,18 +275,17 @@ b32 LintDirectoryWithWildcard(char *DirectoryRelativePath, char *FilesWildcard)
 
 b32 LintDirectory(char *DirectoryRelativePath)
 {
-    char FilesWildcard[MAX_PATH];
-    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
+    char FilesWildcard[MAX_PATH] = {};
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.cpp");
 
     b32 Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard);
 
-    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
+    *FilesWildcard = {};
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.h");
 
     Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard) && Result;
 
-    ZeroMemory(FilesWildcard, ArrayCount(FilesWildcard));
+    *FilesWildcard = {};
     StringCchCatA(FilesWildcard, MAX_PATH, "\\*.s");
 
     Result = LintDirectoryWithWildcard(DirectoryRelativePath, FilesWildcard) && Result;
@@ -343,11 +337,10 @@ WorkerThreadEntry(void *Parameter)
 
 int main(int argc, char **argv)
 {
-    char OutputDirectoryPath[1024];
-    ZeroMemory(OutputDirectoryPath, ArrayCount(OutputDirectoryPath));
+    char OutputDirectoryPath[1024] = {};
     _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
 
-    ZeroMemory(RootDirectoryPath, ArrayCount(RootDirectoryPath));
+    *RootDirectoryPath = {};
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
 

@@ -1,9 +1,9 @@
-// TODO:
+// TODO_LATER:
 // - a report of passed/failed tests is presented at the end
 // - failed tests have extra error information provided
 // - run the build in a separate directory for each thread/test job
 //   so that no conflicts happen during the build due to file locking
-// TODO:
+// TODO_LATER:
 // - build dependency graph of #include'ed files in compile targets
 // - store the test results permanently, with info about dependencies
 // - check on the last modification before running a test for a target
@@ -69,8 +69,7 @@ void ProcessJob(test_job *Job)
     Job->TestResult = CreateProcessAndWait(Job->TestCommand, PipeInput);
     CloseHandle(PipeInput);
 
-    char PipeOutputBuffer[1024];
-    ZeroMemory(PipeOutputBuffer, 1024);
+    char PipeOutputBuffer[1024] = {};
     DWORD BytesRead;
     ReadFile(PipeOutput, PipeOutputBuffer, 1024, &BytesRead, NULL);
     StringCchCat(Job->TestOutputBuffer, Job->TestOutputBufferSize, PipeOutputBuffer);

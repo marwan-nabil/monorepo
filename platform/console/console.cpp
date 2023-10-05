@@ -1,4 +1,4 @@
-// TODO: make multithreaded
+// TODO_LATER: make multithreaded
 HANDLE ConsoleHandle;
 WORD OriginalConsoleAttributes;
 

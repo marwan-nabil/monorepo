@@ -94,8 +94,7 @@ static void Dx11_SetupRenderState(ImDrawData *DrawData, ID3D11DeviceContext *D3d
 {
     dx11_backend_data *BackendData = Dx11_GetBackendData();
 
-    D3D11_VIEWPORT D3dViewPort;
-    ZeroMemory(&D3dViewPort, sizeof(D3D11_VIEWPORT));
+    D3D11_VIEWPORT D3dViewPort = {};
     D3dViewPort.Width = DrawData->DisplaySize.x;
     D3dViewPort.Height = DrawData->DisplaySize.y;
     D3dViewPort.MinDepth = 0.0f;
@@ -152,8 +151,7 @@ void Dx11_RenderDrawData(ImDrawData *DrawData)
         }
         BackendData->VertexBufferSize = DrawData->TotalVtxCount + 5000;
 
-        D3D11_BUFFER_DESC BufferDescriptor;
-        ZeroMemory(&BufferDescriptor, sizeof(D3D11_BUFFER_DESC));
+        D3D11_BUFFER_DESC BufferDescriptor = {};
         BufferDescriptor.Usage = D3D11_USAGE_DYNAMIC;
         BufferDescriptor.ByteWidth = BackendData->VertexBufferSize * sizeof(ImDrawVert);
         BufferDescriptor.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -178,8 +176,7 @@ void Dx11_RenderDrawData(ImDrawData *DrawData)
         }
         BackendData->IndexBufferSize = DrawData->TotalIdxCount + 10000;
 
-        D3D11_BUFFER_DESC BufferDescriptor;
-        ZeroMemory(&BufferDescriptor, sizeof(D3D11_BUFFER_DESC));
+        D3D11_BUFFER_DESC BufferDescriptor = {};
         BufferDescriptor.Usage = D3D11_USAGE_DYNAMIC;
         BufferDescriptor.ByteWidth = BackendData->IndexBufferSize * sizeof(ImDrawIdx);
         BufferDescriptor.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -369,8 +366,7 @@ static void Dx11_CreateFontsTexture()
     ImGuiIoInterface->Fonts->GetTexDataAsRGBA32(&Pixels, &Width, &Height);
 
     // Upload texture to graphics system
-    D3D11_TEXTURE2D_DESC TextureDescriptor;
-    ZeroMemory(&TextureDescriptor, sizeof(TextureDescriptor));
+    D3D11_TEXTURE2D_DESC TextureDescriptor = {};
     TextureDescriptor.Width = Width;
     TextureDescriptor.Height = Height;
     TextureDescriptor.MipLevels = 1;
@@ -390,8 +386,7 @@ static void Dx11_CreateFontsTexture()
     BackendData->D3dDevice->CreateTexture2D(&TextureDescriptor, &SubResource, &Texture);
     Assert(Texture != NULL);
 
-    D3D11_SHADER_RESOURCE_VIEW_DESC ShaderResourceViewDescriptor;
-    ZeroMemory(&ShaderResourceViewDescriptor, sizeof(ShaderResourceViewDescriptor));
+    D3D11_SHADER_RESOURCE_VIEW_DESC ShaderResourceViewDescriptor = {};
     ShaderResourceViewDescriptor.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     ShaderResourceViewDescriptor.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     ShaderResourceViewDescriptor.Texture2D.MipLevels = TextureDescriptor.MipLevels;
@@ -405,8 +400,7 @@ static void Dx11_CreateFontsTexture()
 
     // Create texture sampler
     // (Bilinear sampling is required by default. Set 'ImGuiIoInterface->Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = FALSE' to allow point/nearest sampling)
-    D3D11_SAMPLER_DESC SamplerDescriptor;
-    ZeroMemory(&SamplerDescriptor, sizeof(SamplerDescriptor));
+    D3D11_SAMPLER_DESC SamplerDescriptor = {};
     SamplerDescriptor.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     SamplerDescriptor.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
     SamplerDescriptor.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -602,8 +596,7 @@ b32 Dx11_CreateDeviceObjects()
     // -------------------------
     // Create the blending setup
     // -------------------------
-    D3D11_BLEND_DESC BlendDescriptor;
-    ZeroMemory(&BlendDescriptor, sizeof(BlendDescriptor));
+    D3D11_BLEND_DESC BlendDescriptor = {};
     BlendDescriptor.AlphaToCoverageEnable = FALSE;
     BlendDescriptor.RenderTarget[0].BlendEnable = TRUE;
     BlendDescriptor.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
@@ -618,8 +611,7 @@ b32 Dx11_CreateDeviceObjects()
     // ---------------------------
     // Create the rasterizer state
     // ---------------------------
-    D3D11_RASTERIZER_DESC RasterizerDescriptor;
-    ZeroMemory(&RasterizerDescriptor, sizeof(RasterizerDescriptor));
+    D3D11_RASTERIZER_DESC RasterizerDescriptor = {};
     RasterizerDescriptor.FillMode = D3D11_FILL_SOLID;
     RasterizerDescriptor.CullMode = D3D11_CULL_NONE;
     RasterizerDescriptor.ScissorEnable = TRUE;
@@ -627,8 +619,7 @@ b32 Dx11_CreateDeviceObjects()
     BackendData->D3dDevice->CreateRasterizerState(&RasterizerDescriptor, &BackendData->RasterizerState);
 
     // Create depth-stencil State
-    D3D11_DEPTH_STENCIL_DESC DepthStencilDescriptor;
-    ZeroMemory(&DepthStencilDescriptor, sizeof(DepthStencilDescriptor));
+    D3D11_DEPTH_STENCIL_DESC DepthStencilDescriptor = {};
     DepthStencilDescriptor.DepthEnable = FALSE;
     DepthStencilDescriptor.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
     DepthStencilDescriptor.DepthFunc = D3D11_COMPARISON_ALWAYS;
