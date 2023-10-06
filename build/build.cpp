@@ -27,7 +27,7 @@
 #include "lint\build.cpp"
 #include "compilation_tests\build.cpp"
 #include "..\drivers\fat12\build.cpp"
-#include "..\projects\basic_app\build.cpp"
+#include "..\projects\simulator\build.cpp"
 #include "..\projects\directx_demo\build.cpp"
 #include "..\projects\handmade_hero\build.cpp"
 #include "..\projects\imgui_demo\build.cpp"
@@ -39,7 +39,7 @@ target_mapping BuildTargetMappings[] =
     {"lint", &BuildLint},
     {"compilation_tests", &BuildCompilationTests},
     {"fat12_tests", &BuildFat12Tests},
-    {"basic_app", &BuildBasicApp},
+    {"simulator", &BuildBasicApp},
     {"directx_demo", &BuildDirectxDemo},
     {"handmade_hero", &BuildHandmadeHero},
     {"imgui_demo", &BuildImguiDemo},

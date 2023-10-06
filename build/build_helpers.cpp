@@ -51,7 +51,7 @@ void DisplayHelp()
     printf("INFO: Available build targets:\n");
     printf("          build help\n");
     printf("          build clean\n");
-    printf("          build basic_app\n");
+    printf("          build simulator\n");
     printf("          build handmade_hero\n");
     printf("          build directx_demo [debug, release]\n");
     printf("          build imgui_demo [opengl2, dx11]\n");

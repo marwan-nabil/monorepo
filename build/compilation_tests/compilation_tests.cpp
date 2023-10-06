@@ -35,7 +35,7 @@ i32 main(i32 argc, char **argv)
 {
     InitializeConsole();
 
-    CompilationTest("build basic_app");
+    CompilationTest("build simulator");
     CompilationTest("build imgui_demo opengl2");
     CompilationTest("build imgui_demo dx11");
     CompilationTest("build ray_tracer optimized 1_lane");

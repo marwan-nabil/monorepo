@@ -1,3 +1,31 @@
+#if 0
+// TODO_LATER: do a generic implementation
+static void
+ResizeRenderingBuffer(rendering_buffer *Buffer, i32 NewWidthInPixels, i32 NewHeightInPixels)
+{
+    Buffer->WidthInPixels = NewWidthInPixels;
+    Buffer->HeightInPixels = NewHeightInPixels;
+    Buffer->BytesPerPixel = 4;
+    Buffer->BytesPerRow = Buffer->WidthInPixels * Buffer->BytesPerPixel;
+
+    Buffer->BitmapInfo.bmiHeader.biSize = sizeof(Buffer->BitmapInfo.bmiHeader);
+    Buffer->BitmapInfo.bmiHeader.biWidth = Buffer->WidthInPixels;
+    Buffer->BitmapInfo.bmiHeader.biHeight = -Buffer->HeightInPixels;
+    Buffer->BitmapInfo.bmiHeader.biPlanes = 1;
+    Buffer->BitmapInfo.bmiHeader.biBitCount = 32;
+    Buffer->BitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+    if (Buffer->PixelsMemory)
+    {
+        VirtualFree(Buffer->PixelsMemory, 0, MEM_RELEASE);
+    }
+
+    i32 BitmapMemorySize = Buffer->WidthInPixels * Buffer->HeightInPixels * Buffer->BytesPerPixel;
+    Buffer->PixelsMemory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    // TODO_LATER: clear bitmap memory to black
+}
+#endif
+
 void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Color)
 {
     i32 MinX = RoundF32ToI32(MinCorner.X);

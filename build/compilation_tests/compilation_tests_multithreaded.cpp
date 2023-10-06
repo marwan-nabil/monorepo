@@ -40,7 +40,7 @@ struct test_job_queue
 
 char *TestCommands[] =
 {
-    "build basic_app",
+    "build simulator",
     "build imgui_demo opengl2",
     "build imgui_demo dx11",
     "build ray_tracer optimized 1_lane",

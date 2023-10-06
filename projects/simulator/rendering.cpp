@@ -44,20 +44,8 @@ RenderKeypad(rendering_buffer *Buffer, simulation_state *SimulationState)
 void
 RenderSimulation(rendering_buffer *Buffer, simulation_state *SimulationState)
 {
-    // background
     v4 RectColor = V4(1.0f, 0.992f, 0.608f, 1.0f);
     DrawRectangle(Buffer, V2(0, 0), V2((f32)Buffer->Width, (f32)Buffer->Height), RectColor);
 
-    // keypad
     RenderKeypad(Buffer, SimulationState);
-
-    rectangle2 GraphRect;
-    GraphRect.MinPoint = V2(300, 300);
-    GraphRect.MaxPoint = V2(1000, 1000);
-
-    DrawGraph
-    (
-        Buffer, SimulationState->DataValues, SimulationState->DataColors,
-        SimulationState->DataPointCount, 1000, GraphRect
-    );
 }

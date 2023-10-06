@@ -41,3 +41,59 @@ void DisplayRenderBufferInWindow
         );
     }
 }
+
+#if 0
+// TODO_LATER: finish a generic implmentation
+static v2
+GetWindowDimensions(HWND Window)
+{
+    v2 Result;
+
+    RECT ClientRect;
+    GetClientRect(Window, &ClientRect);
+
+    Result.X = (f32)(ClientRect.right - ClientRect.left);
+    Result.Y = (f32)(ClientRect.bottom - ClientRect.top);
+
+    return Result;
+}
+
+static void
+Win32ToggleFullScreen(HWND Window, win32_platform_state *PlatformState)
+{
+    u32 CurrentWindowStyle = GetWindowLong(Window, GWL_STYLE);
+
+    if (CurrentWindowStyle & WS_OVERLAPPEDWINDOW)
+    {
+        HMONITOR Monitor = MonitorFromWindow(Window, MONITOR_DEFAULTTOPRIMARY);
+        MONITORINFO MonitorInfo = {sizeof(MonitorInfo)};
+        b32 GetMonitorInfoResult = GetMonitorInfo(Monitor, &MonitorInfo);
+
+        b32 GetWindowPlacementResult =
+            GetWindowPlacement(Window, &PlatformState->PreviousWindowPlacement);
+
+        if (GetWindowPlacementResult && GetMonitorInfoResult)
+        {
+            SetWindowLong(Window, GWL_STYLE, CurrentWindowStyle & ~WS_OVERLAPPEDWINDOW);
+            SetWindowPos
+            (
+                Window, HWND_TOP,
+                MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+                MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left,
+                MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
+                SWP_NOOWNERZORDER | SWP_FRAMECHANGED
+            );
+        }
+    }
+    else
+    {
+        SetWindowLong(Window, GWL_STYLE, CurrentWindowStyle | WS_OVERLAPPEDWINDOW);
+        SetWindowPlacement(Window, &PlatformState->PreviousWindowPlacement);
+        SetWindowPos
+        (
+            Window, 0, 0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED
+        );
+    }
+}
+#endif

@@ -8,17 +8,14 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
-
 #include "..\..\math\vector2.h"
 #include "..\..\math\vector3.h"
 #include "..\..\math\vector4.h"
-
 #include "game_interface.h"
 #include "win32_platform.h"
 
 #include "..\..\math\scalar_conversions.cpp"
 #include "..\..\platform\strings\strings.cpp"
-
 #include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};
@@ -294,7 +291,7 @@ Win32ResizePixelBuffer(win32_pixel_buffer *PixelBuffer, i32 NewWidthInPixels, i3
 
     i32 BitmapMemorySize = PixelBuffer->WidthInPixels * PixelBuffer->HeightInPixels * PixelBuffer->BytesPerPixel;
     PixelBuffer->PixelsMemory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    // TODO: clear bitmap memory to black
+    // TODO_LATER: clear bitmap memory to black
 }
 
 static void
@@ -302,7 +299,7 @@ Win32DisplayBufferInWindow(HDC DeviceContext, win32_window_dimensions WindowDime
 {
     if ((WindowDimensions.WidthInPixels >= 1280) && (WindowDimensions.HeightInPixels >= 800))
     {
-        // TODO: center when in full screen mode
+        // TODO_LATER: center when in full screen mode
         i32 DestinationWidth = (i32)(PixelBuffer->WidthInPixels * 1.3);
         i32 DestinationHeight = (i32)(PixelBuffer->HeightInPixels * 1.3);
 
@@ -390,7 +387,7 @@ Win32FillGlobalSoundBuffer
         )
     )
     {
-        // TODO: assert that the returned region sizes are valid (multiples of 4 bytes)
+        // TODO_LATER: assert that the returned region sizes are valid (multiples of 4 bytes)
         i16 *SourceHalfSample = GameSoundBuffer->OutputSamples;
         i16 *DestinationHalfSample = (i16 *)BufferRegion1;
         u32 Region1SampleCount = BufferRegion1Size / SoundBufferConfiguration->BytesPerSample;
@@ -1489,7 +1486,7 @@ WinMain
                             }
                             else
                             {
-                                // TODO: log that a sleep() sleeped too much
+                                // TODO_LATER: log that a sleep() sleeped too much
                             }
                         }
 #if 0

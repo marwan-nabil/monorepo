@@ -9,6 +9,9 @@
 #include "..\..\math\vector3.h"
 #include "..\..\math\vector4.h"
 #include "..\..\math\rectangle2.h"
+#include "electrical.h"
+#include "logic_gates.h"
+#include "simulation.h"
 #include "internal_types.h"
 
 #include "..\..\math\scalar_conversions.cpp"
@@ -21,14 +24,20 @@
 #include "..\..\platform\rasterizer\rasterizer.cpp"
 #include "..\..\platform\windows\windows.cpp"
 #include "..\..\platform\timing\timing.cpp"
-#include "state_update.cpp"
+#include "logic_gates.cpp"
+#include "simulation.cpp"
 #include "rendering.cpp"
 
-user_input GlobalUserInput;
-simulation_state GlobalSimulationState;
+inline void ProcessButton(button_state *Button, b32 IsDown)
+{
+    if (Button->IsDown != IsDown)
+    {
+        Button->IsDown = IsDown;
+        ++Button->TransitionCount;
+    }
+}
 
-inline void
-ProcessWindowsMessage(MSG Message, user_input *UserInput)
+void ProcessUserInputMessage(MSG Message, user_input *UserInput)
 {
     u32 VirtualKeyCode = (u32)Message.wParam;
     b8 KeyWasDown = (Message.lParam & (1 << 30)) != 0;
@@ -39,27 +48,23 @@ ProcessWindowsMessage(MSG Message, user_input *UserInput)
     {
         if (VirtualKeyCode == VK_UP)
         {
-            UserInput->Up = KeyIsDown;
+            ProcessButton(&UserInput->Up, KeyIsDown);
         }
         else if (VirtualKeyCode == VK_LEFT)
         {
-            UserInput->Left = KeyIsDown;
+            ProcessButton(&UserInput->Left, KeyIsDown);
         }
         else if (VirtualKeyCode == VK_DOWN)
         {
-            UserInput->Down = KeyIsDown;
+            ProcessButton(&UserInput->Down, KeyIsDown);
         }
         else if (VirtualKeyCode == VK_RIGHT)
         {
-            UserInput->Right = KeyIsDown;
-        }
-        else if ((VirtualKeyCode >= '0') && (VirtualKeyCode <= '9'))
-        {
-            UserInput->Number = VirtualKeyCode;
+            ProcessButton(&UserInput->Right, KeyIsDown);
         }
         else if (VirtualKeyCode == VK_SHIFT)
         {
-            UserInput->Shift = KeyIsDown;
+            ProcessButton(&UserInput->Shift, KeyIsDown);
         }
     }
 
@@ -113,7 +118,8 @@ MainWindowCallback(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
         case WM_QUIT:
         case WM_CLOSE:
         {
-            window_private_data *WindowPrivateData = (window_private_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
+            window_private_data *WindowPrivateData =
+                (window_private_data *)GetWindowLongPtr(Window, GWLP_USERDATA);
             *WindowPrivateData->RunningState = FALSE;
         } break;
 
@@ -153,7 +159,9 @@ WinMain
     LocalRenderingBuffer.Memory = VirtualAlloc
     (
         0,
-        LocalRenderingBuffer.Width * LocalRenderingBuffer.Height * LocalRenderingBuffer.BytesPerPixel,
+        LocalRenderingBuffer.Width *
+        LocalRenderingBuffer.Height *
+        LocalRenderingBuffer.BytesPerPixel,
         MEM_COMMIT | MEM_RESERVE,
         PAGE_READWRITE
     );
@@ -170,87 +178,107 @@ WinMain
     MainWindowClass.lpszClassName = "MainWindowClass";
     MainWindowClass.hCursor = LoadCursor(0, IDC_ARROW);
 
-    if (RegisterClassA(&MainWindowClass))
+    if (!RegisterClassA(&MainWindowClass))
     {
-        window_private_data WindowPrivateData = {};
-        WindowPrivateData.LocalRenderingBuffer = &LocalRenderingBuffer;
-        WindowPrivateData.RunningState = &RunningState;
+        return -1;
+    }
 
-        HWND Window = CreateWindowExA
-        (
-            0,
-            MainWindowClass.lpszClassName,
-            "simulator",
-            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-            CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-            0,
-            0,
-            Instance,
-            &WindowPrivateData
-        );
+    window_private_data WindowPrivateData = {};
+    WindowPrivateData.LocalRenderingBuffer = &LocalRenderingBuffer;
+    WindowPrivateData.RunningState = &RunningState;
 
-        if (Window)
+    HWND Window = CreateWindowExA
+    (
+        0,
+        MainWindowClass.lpszClassName,
+        "simulator",
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        0,
+        0,
+        Instance,
+        &WindowPrivateData
+    );
+
+    if (Window)
+    {
+        simulation_state SimulationState = {};
+        InitializeSimulationState(&SimulationState);
+
+        user_input UserInputBuffers[2] = {};
+        user_input *NewUserInput = &UserInputBuffers[0];
+        user_input *OldUserInput = &UserInputBuffers[1];
+
+        RunningState = TRUE;
+        while (RunningState)
         {
-            InitializeSimulationState(&GlobalSimulationState);
+            LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
 
-            RunningState = TRUE;
-            while (RunningState)
+            *NewUserInput = {};
+            for (u32 ButtonIndex = 0; ButtonIndex < ArrayCount(NewUserInput->Buttons); ButtonIndex++)
             {
-                LARGE_INTEGER FrameStartTime = GetWindowsTimerValue();
+                NewUserInput->Buttons[ButtonIndex].IsDown = OldUserInput->Buttons[ButtonIndex].IsDown;
+            }
 
-                MSG Message;
-                while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
+            MSG Message;
+            while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
+            {
+                switch (Message.message)
                 {
-                    switch (Message.message)
+                    case WM_SYSKEYDOWN:
+                    case WM_SYSKEYUP:
+                    case WM_KEYDOWN:
+                    case WM_KEYUP:
                     {
-                        case WM_SYSKEYDOWN:
-                        case WM_SYSKEYUP:
-                        case WM_KEYDOWN:
-                        case WM_KEYUP:
-                        {
-                            ProcessWindowsMessage(Message, &GlobalUserInput);
-                            if (GlobalUserInput.ExitSignal)
-                            {
-                                *WindowPrivateData.RunningState = FALSE;
-                            }
-                        } break;
+                        ProcessUserInputMessage(Message, NewUserInput);
+                    } break;
 
-                        default:
-                        {
-                            TranslateMessage(&Message);
-                            DispatchMessage(&Message);
-                        } break;
-                    }
+                    default:
+                    {
+                        TranslateMessage(&Message);
+                        DispatchMessage(&Message);
+                    } break;
+                }
+            }
+
+            if (NewUserInput->ExitSignal)
+            {
+                RunningState = FALSE;
+            }
+
+            UpdateSimulation(TargetSecondsPerFrame, NewUserInput, &SimulationState);
+            RenderSimulation(&LocalRenderingBuffer, &SimulationState);
+
+            HDC DeviceContext = GetDC(Window);
+            DisplayRenderBufferInWindow
+            (
+                Window, DeviceContext,
+                LocalRenderingBuffer.Memory,
+                LocalRenderingBuffer.Width, LocalRenderingBuffer.Height,
+                &LocalRenderingBuffer.Bitmapinfo
+            );
+            ReleaseDC(Window, DeviceContext);
+
+            user_input *TemporaryUserInput = NewUserInput;
+            NewUserInput = OldUserInput;
+            OldUserInput = TemporaryUserInput;
+
+            f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
+            if (SecondsElapsedForFrame < TargetSecondsPerFrame)
+            {
+                DWORD TimeToSleepInMilliSeconds = (DWORD)(1000.0f * (TargetSecondsPerFrame - SecondsElapsedForFrame));
+                if (TimeToSleepInMilliSeconds > 0)
+                {
+                    Sleep(TimeToSleepInMilliSeconds);
                 }
 
-                UpdateSimulation(TargetSecondsPerFrame, &GlobalUserInput, &GlobalSimulationState);
-                RenderSimulation(&LocalRenderingBuffer, &GlobalSimulationState);
-
-                HDC DeviceContext = GetDC(Window);
-                DisplayRenderBufferInWindow
-                (
-                    Window, DeviceContext,
-                    LocalRenderingBuffer.Memory,
-                    LocalRenderingBuffer.Width, LocalRenderingBuffer.Height,
-                    &LocalRenderingBuffer.Bitmapinfo
-                );
-                ReleaseDC(Window, DeviceContext);
-
-                f32 SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
-                if (SecondsElapsedForFrame < TargetSecondsPerFrame)
+                do
                 {
-                    DWORD TimeToSleepInMilliSeconds = (DWORD)(1000.0f * (TargetSecondsPerFrame - SecondsElapsedForFrame));
-                    if (TimeToSleepInMilliSeconds > 0)
-                    {
-                        Sleep(TimeToSleepInMilliSeconds);
-                    }
-
-                    do
-                    {
-                        SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
-                    } while (SecondsElapsedForFrame < TargetSecondsPerFrame);
-                }
+                    SecondsElapsedForFrame = GetSecondsElapsed(FrameStartTime, GetWindowsTimerValue(), WindowsTimerFrequency);
+                } while (SecondsElapsedForFrame < TargetSecondsPerFrame);
             }
         }
     }
+
+    return 0;
 }
