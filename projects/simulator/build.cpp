@@ -1,4 +1,4 @@
-b32 BuildBasicApp(build_context *BuildContext)
+b32 BuildSimulator(build_context *BuildContext)
 {
     AddSourceFile(BuildContext, "\\projects\\simulator\\main.cpp");
 

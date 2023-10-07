@@ -39,7 +39,7 @@ target_mapping BuildTargetMappings[] =
     {"lint", &BuildLint},
     {"compilation_tests", &BuildCompilationTests},
     {"fat12_tests", &BuildFat12Tests},
-    {"simulator", &BuildBasicApp},
+    {"simulator", &BuildSimulator},
     {"directx_demo", &BuildDirectxDemo},
     {"handmade_hero", &BuildHandmadeHero},
     {"imgui_demo", &BuildImguiDemo},

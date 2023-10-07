@@ -55,7 +55,7 @@ void DisplayHelp()
     printf("          build handmade_hero\n");
     printf("          build directx_demo [debug, release]\n");
     printf("          build imgui_demo [opengl2, dx11]\n");
-    printf("          build ray_tracer [optimized, non_optimized] [1_lane, 4_lanes, 8_lanes]\n");
+    printf("          build ray_tracer [1_lane, 4_lanes, 8_lanes]\n");
     printf("          build lint [job_per_directory]\n");
     printf("          build x86_kernel\n");
     printf("          build compilation_tests\n");

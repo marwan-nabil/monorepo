@@ -117,11 +117,11 @@ GetPixelPointer(image_u32 *Image, u32 X, u32 Y)
 inline v3
 RenderPixel
 (
-    work_order *WorkOrder, v3 PixelCenterOnFilm, u64 *BouncesComputedPerTile
+    work_order *WorkOrder, v3 PixelCenterOnFilm,
+    u64 *BouncesComputedPerTile, u64 *LoopsComputedPerTile
 )
 {
     v3 PixelColor = {};
-    u64 BouncesComputedPerPixel = 0;
 
     world *World = WorkOrder->World;
     v3_lane CameraX = V3LaneFromV3(World->Camera.CoordinateSet.X);
@@ -154,6 +154,7 @@ RenderPixel
             v3_lane NextBounceNormal = {};
 
             BouncesComputedPerRayBatch += U32LaneFromU32(1) & LaneMask;
+            *LoopsComputedPerTile += SIMD_NUMBEROF_LANES;
 
             f32_lane MinimumHitDistanceFound = F32LaneFromF32(FLT_MAX);
             u32_lane HitMaterialIndex = U32LaneFromU32(0);
@@ -199,7 +200,7 @@ RenderPixel
                 f32_lane B = 2.0f * InnerProduct(BounceDirection, SphereRelativeRayOrigin);
                 f32_lane C = InnerProduct(SphereRelativeRayOrigin, SphereRelativeRayOrigin) - Square(SphereRadius);
 
-                f32_lane RootTerm = SquareRoot(B * B - 4 * A * C);
+                f32_lane RootTerm = SquareRoot((B * B) - (4 * A * C));
                 u32_lane RootTermMask = RootTerm > ToleranceToZero;
 
                 f32_lane QuadraticDenominator = 2 * A;
@@ -224,7 +225,12 @@ RenderPixel
 
                         ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitMask);
                         ConditionalAssign(&HitMaterialIndex, SphereMaterialIndex, HitMask);
-                        ConditionalAssign(&NextBounceNormal, Normalize(BounceOrigin + MinimumHitDistanceFound * BounceDirection - SpherePosition), HitDistanceMask);
+                        ConditionalAssign
+                        (
+                            &NextBounceNormal,
+                            Normalize(BounceOrigin + (MinimumHitDistanceFound * BounceDirection) - SpherePosition),
+                            HitMask
+                        );
                     }
                 }
             }
@@ -251,11 +257,21 @@ RenderPixel
 
             BounceOrigin += MinimumHitDistanceFound * BounceDirection;
 
-            v3_lane PureBounceDirection =
-                Normalize(BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal);
+            v3_lane PureBounceDirection = Normalize
+            (
+                BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal
+            );
 
-            v3_lane RandomBounceDirection =
-                Normalize(NextBounceNormal + V3Lane(RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries), RandomBilateralLane(RandomSeries)));
+            v3_lane RandomBounceDirection = Normalize
+            (
+                NextBounceNormal +
+                V3Lane
+                (
+                    RandomBilateralLane(RandomSeries),
+                    RandomBilateralLane(RandomSeries),
+                    RandomBilateralLane(RandomSeries)
+                )
+            );
 
             BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
 
@@ -266,11 +282,10 @@ RenderPixel
         }
 
         PixelColor += HorizontalAdd(RayBatchColor) / (f32)RAYS_PER_PIXEL;
-        BouncesComputedPerPixel += HorizontalAdd(BouncesComputedPerRayBatch);
+        *BouncesComputedPerTile += HorizontalAdd(BouncesComputedPerRayBatch);
     }
 
-    *BouncesComputedPerTile += BouncesComputedPerPixel;
-    WorkOrder->Entropy = *RandomSeries;
+    // WorkOrder->Entropy = *RandomSeries;
     return PixelColor;
 }
 
@@ -293,6 +308,7 @@ RenderTile(work_queue *WorkQueue)
     v3 CameraY = World->Camera.CoordinateSet.Y;
 
     u64 BouncesComputedPerTile = 0;
+    u64 LoopsComputedPerTile = 0;
 
     for (u32 PixelY = WorkOrder->StartPixelY; PixelY < WorkOrder->EndPixelY; PixelY++)
     {
@@ -311,7 +327,7 @@ RenderTile(work_queue *WorkQueue)
 
             v3 PixelColor = RenderPixel
             (
-                WorkOrder, PixelCenterOnFilm, &BouncesComputedPerTile
+                WorkOrder, PixelCenterOnFilm, &BouncesComputedPerTile, &LoopsComputedPerTile
             );
 
             v4 BitmapColorRGBA =
@@ -334,6 +350,7 @@ RenderTile(work_queue *WorkQueue)
 
     InterlockedExchangeAdd64(&WorkQueue->TotalTilesDone, 1);
     InterlockedExchangeAdd64(&WorkQueue->TotalRayBouncesComputed, BouncesComputedPerTile);
+    InterlockedExchangeAdd64(&WorkQueue->TotalLoopsComputed, LoopsComputedPerTile);
     return TRUE;
 }
 
@@ -530,7 +547,10 @@ main(i32 argc, char **argv)
         RenderingParameters.TileHeightInPixels,
         KBytesPerTile
     );
+    printf("Bounce loops performed: %lld\n", WorkQueue.TotalLoopsComputed);
     printf("Bounces Computed: %lld\n", WorkQueue.TotalRayBouncesComputed);
+    u64 WastedBounces = WorkQueue.TotalLoopsComputed - WorkQueue.TotalRayBouncesComputed;
+    printf("wasted SIMD capacity: %lld bounces == %.02f%%\n", WastedBounces, 100.0f * (f32)WastedBounces / (f32)WorkQueue.TotalLoopsComputed);
     printf
     (
         "performance metric: %f ns/bounce\n",

@@ -12,7 +12,7 @@ XORShift32Lane(random_series_lane *Series)
 inline f32_lane
 RandomUnilateralLane(random_series_lane *Series)
 {
-    f32_lane Result = F32LaneFromU32Lane(XORShift32Lane(Series)) / F32LaneFromU32(UINT32_MAX);
+    f32_lane Result = F32LaneFromU32Lane(XORShift32Lane(Series) >> 1) / (f32)(UINT32_MAX >> 1);
     return Result;
 }
 

@@ -15,7 +15,7 @@
         "_CRT_RAND_S",
         
         // ray_tracer
-        "SIMD_NUMBEROF_LANES=1",
+        "SIMD_NUMBEROF_LANES=4",
 
         // imgui_demo
         "UNICODE",

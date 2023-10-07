@@ -38,10 +38,10 @@ i32 main(i32 argc, char **argv)
     CompilationTest("build simulator");
     CompilationTest("build imgui_demo opengl2");
     CompilationTest("build imgui_demo dx11");
-    CompilationTest("build ray_tracer optimized 1_lane");
-    CompilationTest("build ray_tracer optimized 4_lanes");
-    CompilationTest("build ray_tracer non_optimized 1_lane");
-    CompilationTest("build ray_tracer non_optimized 4_lanes");
+    CompilationTest("build ray_tracer 1_lane");
+    CompilationTest("build ray_tracer 4_lanes");
+    CompilationTest("build ray_tracer 1_lane");
+    CompilationTest("build ray_tracer 4_lanes");
     CompilationTest("build handmade_hero");
     CompilationTest("build directx_demo debug");
     CompilationTest("build directx_demo release");
