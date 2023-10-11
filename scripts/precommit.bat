@@ -3,3 +3,4 @@
 call bootstrap
 build lint && lint
 build compilation_tests && compilation_tests
+build clean

@@ -5,4 +5,4 @@
 **/*.ini
 **/.vs
 output/**
-/data/**/*.bmp
+/data/**

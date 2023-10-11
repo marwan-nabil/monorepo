@@ -33,11 +33,18 @@ struct image_u32
     u32 *Pixels;
 };
 
+struct brdf_table
+{
+    u32 SampleCount[3];
+    f32 *Samples;
+};
+
 struct material
 {
     f32 Specularity;
     v3 ReflectionColor;
     v3 EmmissionColor;
+    brdf_table BrdfTable;
 };
 
 struct plane

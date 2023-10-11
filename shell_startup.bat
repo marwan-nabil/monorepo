@@ -5,5 +5,5 @@ call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 
 if not exist output; mkdir output
 cd output
-
+call bootstrap
 cls

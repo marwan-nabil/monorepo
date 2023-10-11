@@ -1,14 +1,18 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "files.exclude": {
+    
+    "files.exclude":
+    {
         "third_party/**": true,
 
         // math/simd
-        // "math/simd/1_wide/": true,
-        // "math/simd/4_wide/": true,
+        "math/simd/1_wide/": true,
+        "math/simd/4_wide/": true,
         // "math/simd/8_wide/": true,
     },
-    "C_Cpp.default.defines": [
+    
+    "C_Cpp.default.defines":
+    [
         // shared
         "ENABLE_ASSERTIONS",
         "_CRT_SECURE_NO_WARNINGS",

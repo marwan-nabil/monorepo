@@ -113,18 +113,32 @@ MaskIsAllZeroes(u32_lane Mask)
     return Result;
 }
 
-inline u64
+// TODO: decide which version of HorizontalAdd to use
+
+// inline u64
+// HorizontalAdd(u32_lane WideValue)
+// {
+//     u32 *ElementPointer = (u32 *)&WideValue;
+//     u32 NarrowValue =
+//         (u64)ElementPointer[0] +
+//         (u64)ElementPointer[1] +
+//         (u64)ElementPointer[2] +
+//         (u64)ElementPointer[3] +
+//         (u64)ElementPointer[4] +
+//         (u64)ElementPointer[5] +
+//         (u64)ElementPointer[6] +
+//         (u64)ElementPointer[7];
+//     return NarrowValue;
+// }
+
+inline u32
 HorizontalAdd(u32_lane WideValue)
 {
-    u32 *ElementPointer = (u32 *)&WideValue;
-    u32 NarrowValue =
-        (u64)ElementPointer[0] +
-        (u64)ElementPointer[1] +
-        (u64)ElementPointer[2] +
-        (u64)ElementPointer[3] +
-        (u64)ElementPointer[4] +
-        (u64)ElementPointer[5] +
-        (u64)ElementPointer[6] +
-        (u64)ElementPointer[7];
+    WideValue = _mm256_hadd_epi32
+    (
+        _mm256_hadd_epi32(WideValue, _mm256_set1_epi32(0)),
+        _mm256_set1_epi32(0)
+    );
+    u32 NarrowValue = _mm256_extract_epi32(WideValue, 0) + _mm256_extract_epi32(WideValue, 4);
     return NarrowValue;
 }

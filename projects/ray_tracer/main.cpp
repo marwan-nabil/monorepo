@@ -66,6 +66,8 @@
 #include "..\..\math\simd\shared\vector3.cpp"
 #include "..\..\math\simd\shared\random.cpp"
 
+#include "brdf.cpp"
+
 inline void
 WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, char *FileName)
 {
@@ -154,14 +156,13 @@ RenderPixel
         v3_lane BounceOrigin = CameraPosition;
         v3_lane BounceDirection = Normalize(RayBatchPositionOnFilm - BounceOrigin);
 
-        u32_lane BouncesComputedPerRayBatch = U32LaneFromU32(0);
         u32_lane LaneMask = U32LaneFromU32(0xFFFFFFFF);
 
         for (u32 BounceIndex = 0; BounceIndex < BOUNCES_PER_RAY; BounceIndex++)
         {
             v3_lane NextBounceNormal = {};
 
-            BouncesComputedPerRayBatch += U32LaneFromU32(1) & LaneMask;
+            *BouncesComputedPerTile += HorizontalAdd(U32LaneFromU32(1) & LaneMask);
             *LoopsComputedPerTile += SIMD_NUMBEROF_LANES;
 
             f32_lane MinimumHitDistanceFound = F32LaneFromF32(FLT_MAX);
@@ -254,7 +255,6 @@ RenderPixel
             RayBatchColor += HadamardProduct(RayBatchColorAttenuation, HitMaterialEmmissionColor);
             LaneMask = LaneMask & MaskFromBoolean(HitMaterialIndex != U32LaneFromU32(0));
 
-
             if (MaskIsAllZeroes(LaneMask))
             {
                 break;
@@ -270,6 +270,7 @@ RenderPixel
                 (
                     BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal
                 );
+
                 v3_lane RandomBounceDirection = Normalize
                 (
                     NextBounceNormal +
@@ -280,15 +281,14 @@ RenderPixel
                         RandomBilateralLane(RandomSeries)
                     )
                 );
+
                 BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
             }
         }
 
         PixelColor += HorizontalAdd(RayBatchColor) / (f32)RAYS_PER_PIXEL;
-        *BouncesComputedPerTile += HorizontalAdd(BouncesComputedPerRayBatch);
     }
 
-    // WorkOrder->Entropy = *RandomSeries;
     return PixelColor;
 }
 
