@@ -178,16 +178,6 @@ operator^=(u32_lane &A, u32 B)
 }
 
 /******************************************/
-/*           comparison operations        */
-/******************************************/
-inline u32_lane
-operator!=(u32_lane A, u32_lane B)
-{
-    u32_lane Result = ~(A == B);
-    return Result;
-}
-
-/******************************************/
 /*             other operations           */
 /******************************************/
 inline void

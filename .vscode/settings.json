@@ -1,11 +1,13 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "files.exclude": {
-        "third_party/**": true
+        "third_party/**": true,
+
+        // math/simd
+        // "math/simd/1_wide/": true,
+        // "math/simd/4_wide/": true,
+        // "math/simd/8_wide/": true,
     },
-    "C_Cpp.default.browse.path": [
-        "**/**"
-    ],
     "C_Cpp.default.defines": [
         // shared
         "ENABLE_ASSERTIONS",
@@ -15,7 +17,7 @@
         "_CRT_RAND_S",
         
         // ray_tracer
-        "SIMD_NUMBEROF_LANES=4",
+        "SIMD_NUMBEROF_LANES=8",
 
         // imgui_demo
         "UNICODE",

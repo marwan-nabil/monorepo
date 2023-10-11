@@ -189,10 +189,7 @@ Square(f32_lane A)
 inline void
 ConditionalAssign(f32_lane *Destination, f32_lane Source, u32_lane Mask)
 {
-    // ConditionalAssign((u32_lane *)Destination, *(u32_lane *)&Source, Mask);
-    *Destination =
-        (AndNot(StaticCastU32LaneToF32Lane(Mask), *Destination)) |
-        (StaticCastU32LaneToF32Lane(Mask) & Source);
+    ConditionalAssign((u32_lane *)Destination, *(u32_lane *)&Source, Mask);
 }
 
 inline f32_lane

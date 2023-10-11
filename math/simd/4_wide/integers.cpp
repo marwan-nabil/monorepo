@@ -92,6 +92,17 @@ operator==(u32_lane A, u32_lane B)
     return Result;
 }
 
+inline u32_lane
+operator!=(u32_lane A, u32_lane B)
+{
+    u32_lane Result = _mm_xor_epi32
+    (
+        _mm_cmpeq_epi32(A, B),
+        _mm_set1_epi32(0xFFFFFFFF)
+    );
+    return Result;
+}
+
 /******************************************/
 /*             other operations           */
 /******************************************/

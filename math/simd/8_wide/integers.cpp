@@ -4,16 +4,14 @@
 inline u32_lane
 operator+(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = A.m32i_i32[0] + B.m32i_i32[0];
+    u32_lane Result = _mm256_add_epi32(A, B);
     return Result;
 }
 
 inline u32_lane
 operator-(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = A.m32i_i32[0] - B.m32i_i32[0];
+    u32_lane Result = _mm256_sub_epi32(A, B);
     return Result;
 }
 
@@ -23,8 +21,7 @@ operator-(u32_lane A, u32_lane B)
 inline u32_lane
 operator&(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = A.m32i_i32[0] & B.m32i_i32[0];
+    u32_lane Result = _mm256_and_si256(A, B);
     return Result;
 }
 
@@ -32,48 +29,42 @@ inline u32_lane
 AndNot(u32_lane A, u32_lane B)
 {
     // (~A) & B
-    u32_lane Result;
-    Result.m32i_i32[0] = (~A.m32i_i32[0]) & B.m32i_i32[0];
+    u32_lane Result = _mm256_andnot_si256(A, B);
     return Result;
 }
 
 inline u32_lane
 operator|(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = A.m32i_i32[0] | B.m32i_i32[0];
+    u32_lane Result = _mm256_or_si256(A, B);
     return Result;
 }
 
 inline u32_lane
 operator^(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = A.m32i_i32[0] ^ B.m32i_i32[0];
+    u32_lane Result = _mm256_xor_si256(A, B);
     return Result;
 }
 
 inline u32_lane
 operator~(u32_lane A)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = ~A.m32i_i32[0];
+    u32_lane Result = _mm256_xor_si256(A, _mm256_set1_epi32(0xFFFFFFFF));
     return Result;
 }
 
 inline u32_lane
 operator<<(u32_lane Value, u32 Shift)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = Value.m32i_i32[0] << Shift;
+    u32_lane Result = _mm256_slli_epi32(Value, Shift);
     return Result;
 }
 
 inline u32_lane
 operator>>(u32_lane Value, u32 Shift)
 {
-    u32_lane Result;
-    Result.m32i_i32[0] = Value.m32i_i32[0] >> Shift;
+    u32_lane Result = _mm256_srli_epi32(Value, Shift);
     return Result;
 }
 
@@ -83,60 +74,32 @@ operator>>(u32_lane Value, u32 Shift)
 inline u32_lane
 operator<(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    if (A.m32i_i32[0] < B.m32i_i32[0])
-    {
-        Result.m32i_i32[0] = 0xFFFFFFFF;
-    }
-    else
-    {
-        Result.m32i_i32[0] = 0;
-    }
+    u32_lane Result = _mm256_cmpgt_epi32(B, A);
     return Result;
 }
 
 inline u32_lane
 operator>(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    if (A.m32i_i32[0] > B.m32i_i32[0])
-    {
-        Result.m32i_i32[0] = 0xFFFFFFFF;
-    }
-    else
-    {
-        Result.m32i_i32[0] = 0;
-    }
+    u32_lane Result = _mm256_cmpgt_epi32(A, B);
     return Result;
 }
 
 inline u32_lane
 operator==(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    if (A.m32i_i32[0] == B.m32i_i32[0])
-    {
-        Result.m32i_i32[0] = 0xFFFFFFFF;
-    }
-    else
-    {
-        Result.m32i_i32[0] = 0;
-    }
+    u32_lane Result = _mm256_cmpeq_epi32(A, B);
     return Result;
 }
 
 inline u32_lane
 operator!=(u32_lane A, u32_lane B)
 {
-    u32_lane Result;
-    if (A.m32i_i32[0] == B.m32i_i32[0])
-    {
-        Result.m32i_i32[0] = 0;
-    }
-    else
-    {
-        Result.m32i_i32[0] = 0xFFFFFFFF;
-    }
+    u32_lane Result = _mm256_xor_si256
+    (
+        _mm256_cmpeq_epi32(A, B),
+        _mm256_set1_epi32(0xFFFFFFFF)
+    );
     return Result;
 }
 
@@ -146,18 +109,22 @@ operator!=(u32_lane A, u32_lane B)
 inline b32
 MaskIsAllZeroes(u32_lane Mask)
 {
-    if (Mask.m32i_i32[0] == 0)
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
+    b32 Result = (_mm256_movemask_epi8(Mask) == 0);
+    return Result;
 }
 
 inline u64
 HorizontalAdd(u32_lane WideValue)
 {
-    return (u64)WideValue.m32i_i32[0];
+    u32 *ElementPointer = (u32 *)&WideValue;
+    u32 NarrowValue =
+        (u64)ElementPointer[0] +
+        (u64)ElementPointer[1] +
+        (u64)ElementPointer[2] +
+        (u64)ElementPointer[3] +
+        (u64)ElementPointer[4] +
+        (u64)ElementPointer[5] +
+        (u64)ElementPointer[6] +
+        (u64)ElementPointer[7];
+    return NarrowValue;
 }

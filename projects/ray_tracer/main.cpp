@@ -20,6 +20,8 @@
 #   include "..\..\math\simd\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
 #   include "..\..\math\simd\4_wide\math.h"
+#elif (SIMD_NUMBEROF_LANES == 8)
+#   include "..\..\math\simd\8_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
@@ -48,6 +50,12 @@
 #   include "..\..\math\simd\4_wide\floats.cpp"
 #   include "..\..\math\simd\4_wide\assertions.cpp"
 #   include "..\..\math\simd\4_wide\vector3.cpp"
+#elif (SIMD_NUMBEROF_LANES == 8)
+#   include "..\..\math\simd\8_wide\conversions.cpp"
+#   include "..\..\math\simd\8_wide\integers.cpp"
+#   include "..\..\math\simd\8_wide\floats.cpp"
+#   include "..\..\math\simd\8_wide\assertions.cpp"
+#   include "..\..\math\simd\8_wide\vector3.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
@@ -193,7 +201,6 @@ RenderPixel
                 sphere *CurrentSphere = &World->Spheres[SphereIndex];
                 v3_lane SpherePosition = V3LaneFromV3(CurrentSphere->Position);
                 f32_lane SphereRadius = F32LaneFromF32(CurrentSphere->Radius);
-                u32_lane SphereMaterialIndex = U32LaneFromU32(CurrentSphere->MaterialIndex);
                 v3_lane SphereRelativeRayOrigin = BounceOrigin - SpherePosition;
 
                 f32_lane A = InnerProduct(BounceDirection, BounceDirection);
@@ -203,10 +210,9 @@ RenderPixel
                 f32_lane RootTerm = SquareRoot((B * B) - (4 * A * C));
                 u32_lane RootTermMask = RootTerm > ToleranceToZero;
 
-                f32_lane QuadraticDenominator = 2 * A;
-
                 if (!MaskIsAllZeroes(RootTermMask))
                 {
+                    f32_lane QuadraticDenominator = 2 * A;
                     f32_lane PositiveSolution = (-B + RootTerm) / QuadraticDenominator;
                     f32_lane NegativeSolution = (-B - RootTerm) / QuadraticDenominator;
 
@@ -224,7 +230,7 @@ RenderPixel
                         u32_lane HitMask = RootTermMask & HitDistanceMask;
 
                         ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitMask);
-                        ConditionalAssign(&HitMaterialIndex, SphereMaterialIndex, HitMask);
+                        ConditionalAssign(&HitMaterialIndex, U32LaneFromU32(CurrentSphere->MaterialIndex), HitMask);
                         ConditionalAssign
                         (
                             &NextBounceNormal,
@@ -240,44 +246,41 @@ RenderPixel
                 LaneMask &
                 StaticCastF32LaneToU32Lane(GatherF32(World->Materials, Specularity, HitMaterialIndex))
             );
-
             v3_lane HitMaterialReflectionColor =
                 LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
-
             v3_lane HitMaterialEmmissionColor =
                 LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
 
             RayBatchColor += HadamardProduct(RayBatchColorAttenuation, HitMaterialEmmissionColor);
-
             LaneMask = LaneMask & MaskFromBoolean(HitMaterialIndex != U32LaneFromU32(0));
 
-            f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
-
-            RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
-
-            BounceOrigin += MinimumHitDistanceFound * BounceDirection;
-
-            v3_lane PureBounceDirection = Normalize
-            (
-                BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal
-            );
-
-            v3_lane RandomBounceDirection = Normalize
-            (
-                NextBounceNormal +
-                V3Lane
-                (
-                    RandomBilateralLane(RandomSeries),
-                    RandomBilateralLane(RandomSeries),
-                    RandomBilateralLane(RandomSeries)
-                )
-            );
-
-            BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
 
             if (MaskIsAllZeroes(LaneMask))
             {
                 break;
+            }
+            else
+            {
+                f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
+                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
+
+                BounceOrigin += MinimumHitDistanceFound * BounceDirection;
+
+                v3_lane PureBounceDirection = Normalize
+                (
+                    BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal
+                );
+                v3_lane RandomBounceDirection = Normalize
+                (
+                    NextBounceNormal +
+                    V3Lane
+                    (
+                        RandomBilateralLane(RandomSeries),
+                        RandomBilateralLane(RandomSeries),
+                        RandomBilateralLane(RandomSeries)
+                    )
+                );
+                BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
             }
         }
 
@@ -497,6 +500,18 @@ main(i32 argc, char **argv)
                 TileX * 52350329 + TileY * 793083851 + 63274279,
                 TileX * 39846279 + TileY * 505147656 + 12932640
             );
+#elif (SIMD_NUMBEROF_LANES == 8)
+            WorkOrder->Entropy.State = U32LaneFromU32
+            (
+                TileX * 32542345 + TileY * 881712265 + 93073411,
+                TileX * 98698641 + TileY * 640200962 + 24681141,
+                TileX * 52350329 + TileY * 793083851 + 63274279,
+                TileX * 39846279 + TileY * 505147656 + 12932640,
+                TileX * 23523623 + TileY * 907324654 + 29875642,
+                TileX * 98732198 + TileY * 235267674 + 46541234,
+                TileX * 22362367 + TileY * 876238957 + 49872463,
+                TileX * 32968422 + TileY * 986851235 + 21335002
+            );
 #else
 #endif // SIMD_NUMBEROF_LANES != 1
         }
@@ -528,6 +543,7 @@ main(i32 argc, char **argv)
 
     printf("\nRayCasting time: %ld ms\n", TotalTimeElapsed);
     printf("Core Count: %d\n", RenderingParameters.CoreCount);
+    printf("SIMD width used: %d\n", SIMD_NUMBEROF_LANES);
     printf("Rays Per Pixel: %d\n", RAYS_PER_PIXEL);
     printf("Bounces Per Ray: %d\n", BOUNCES_PER_RAY);
 

@@ -27,18 +27,6 @@ V3LaneFromV3(v3 Value)
     return Result;
 }
 
-inline v3
-V3FromV3Lane(v3_lane Value, u32 Index)
-{
-    v3 Result =
-    {
-        F32FromF32Lane(Value.X, Index),
-        F32FromF32Lane(Value.Y, Index),
-        F32FromF32Lane(Value.Z, Index)
-    };
-    return Result;
-}
-
 /******************************************/
 /*                  v4_lane               */
 /******************************************/
