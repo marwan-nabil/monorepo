@@ -31,12 +31,6 @@ StaticCastU32LaneToF32Lane(u32_lane Value)
     return Result;
 }
 
-inline f32
-F32FromF32Lane(f32_lane Value, u32 Index)
-{
-    return Value.m32_f32[0];
-}
-
 /******************************************/
 /*                  integers              */
 /******************************************/
@@ -54,12 +48,6 @@ StaticCastF32LaneToU32Lane(f32_lane Value)
     u32_lane Result;
     Result.m32i_i32[0] = *(u32 *)&Value.m32_f32[0];
     return Result;
-}
-
-inline u32
-U32FromU32Lane(u32_lane Value, u32 Index)
-{
-    return Value.m32i_i32[0];
 }
 
 inline u32_lane

@@ -6,8 +6,8 @@
         "third_party/**": true,
 
         // math/simd
-        "math/simd/1_wide/": true,
-        "math/simd/4_wide/": true,
+        // "math/simd/1_wide/": true,
+        // "math/simd/4_wide/": true,
         // "math/simd/8_wide/": true,
     },
     

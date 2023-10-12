@@ -35,6 +35,7 @@
 #include "..\..\math\scalar_conversions.cpp"
 #include "..\..\math\integers.cpp"
 #include "..\..\math\floats.cpp"
+#include "..\..\math\transcendentals.cpp"
 #include "..\..\math\vector2.cpp"
 #include "..\..\math\vector3.cpp"
 #include "..\..\math\vector4.cpp"
@@ -66,7 +67,9 @@
 #include "..\..\math\simd\shared\vector3.cpp"
 #include "..\..\math\simd\shared\random.cpp"
 
-#include "brdf.cpp"
+#if MATERIALS_HAVE_BRDF_TABLE
+#   include "brdf.cpp"
+#endif
 
 inline void
 WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, char *FileName)
@@ -160,7 +163,9 @@ RenderPixel
 
         for (u32 BounceIndex = 0; BounceIndex < BOUNCES_PER_RAY; BounceIndex++)
         {
-            v3_lane NextBounceNormal = {};
+            v3_lane BounceNormal = {};
+            v3_lane BounceTangent = {};
+            v3_lane BounceBiTangent = {};
 
             *BouncesComputedPerTile += HorizontalAdd(U32LaneFromU32(1) & LaneMask);
             *LoopsComputedPerTile += SIMD_NUMBEROF_LANES;
@@ -172,6 +177,8 @@ RenderPixel
             {
                 plane *CurrentPlane = &World->Planes[PlaneIndex];
                 v3_lane PlaneNormal = V3LaneFromV3(CurrentPlane->Normal);
+                v3_lane PlaneTangent = V3LaneFromV3(CurrentPlane->Tangent);
+                v3_lane PlaneBiTangent = V3LaneFromV3(CurrentPlane->BiTangent);
                 f32_lane PlaneDistance = F32LaneFromF32(CurrentPlane->Distance);
 
                 f32_lane Denominator = InnerProduct(PlaneNormal, BounceDirection);
@@ -192,7 +199,9 @@ RenderPixel
                     {
                         ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitMask);
                         ConditionalAssign(&HitMaterialIndex, U32LaneFromU32(CurrentPlane->MaterialIndex), HitMask);
-                        ConditionalAssign(&NextBounceNormal, PlaneNormal, HitMask);
+                        ConditionalAssign(&BounceNormal, PlaneNormal, HitMask);
+                        ConditionalAssign(&BounceTangent, PlaneTangent, HitMask);
+                        ConditionalAssign(&BounceBiTangent, PlaneBiTangent, HitMask);
                     }
                 }
             }
@@ -234,10 +243,16 @@ RenderPixel
                         ConditionalAssign(&HitMaterialIndex, U32LaneFromU32(CurrentSphere->MaterialIndex), HitMask);
                         ConditionalAssign
                         (
-                            &NextBounceNormal,
+                            &BounceNormal,
                             Normalize(BounceOrigin + (MinimumHitDistanceFound * BounceDirection) - SpherePosition),
                             HitMask
                         );
+
+                        v3_lane SphereTangent = Normalize(CrossProduct(V3LaneFromV3(V3(0, 0, 1)), BounceNormal));
+                        v3_lane SphereBiTangent = Normalize(CrossProduct(BounceNormal, SphereTangent));
+
+                        ConditionalAssign(&BounceTangent, SphereTangent, HitMask);
+                        ConditionalAssign(&BounceBiTangent, SphereBiTangent, HitMask);
                     }
                 }
             }
@@ -247,12 +262,15 @@ RenderPixel
                 LaneMask &
                 StaticCastF32LaneToU32Lane(GatherF32(World->Materials, Specularity, HitMaterialIndex))
             );
+
             v3_lane HitMaterialReflectionColor =
                 LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
+
             v3_lane HitMaterialEmmissionColor =
                 LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
 
             RayBatchColor += HadamardProduct(RayBatchColorAttenuation, HitMaterialEmmissionColor);
+
             LaneMask = LaneMask & MaskFromBoolean(HitMaterialIndex != U32LaneFromU32(0));
 
             if (MaskIsAllZeroes(LaneMask))
@@ -261,19 +279,18 @@ RenderPixel
             }
             else
             {
-                f32_lane CosineAttenuationFactor = Max(InnerProduct(-BounceDirection, NextBounceNormal), F32LaneFromF32(0));
-                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
-
                 BounceOrigin += MinimumHitDistanceFound * BounceDirection;
+
+                v3_lane PreviousBounceDirection = BounceDirection;
 
                 v3_lane PureBounceDirection = Normalize
                 (
-                    BounceDirection - 2 * InnerProduct(BounceDirection, NextBounceNormal) * NextBounceNormal
+                    BounceDirection - 2 * InnerProduct(BounceDirection, BounceNormal) * BounceNormal
                 );
 
                 v3_lane RandomBounceDirection = Normalize
                 (
-                    NextBounceNormal +
+                    BounceNormal +
                     V3Lane
                     (
                         RandomBilateralLane(RandomSeries),
@@ -283,6 +300,19 @@ RenderPixel
                 );
 
                 BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
+
+#if MATERIALS_HAVE_BRDF_TABLE
+                v3_lane BrdfReflectionColor = BrdfTableLookup
+                (
+                    World->Materials, HitMaterialIndex,
+                    BounceTangent, BounceBiTangent, BounceNormal,
+                    -PreviousBounceDirection, BounceDirection
+                );
+                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, BrdfReflectionColor);
+#else
+                f32_lane CosineAttenuationFactor = Max(InnerProduct(-PreviousBounceDirection, BounceNormal), F32LaneFromF32(0));
+                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
+#endif
             }
         }
 
@@ -384,10 +414,25 @@ main(i32 argc, char **argv)
     MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
     MaterialsArray[6].Specularity = 1;
 
-    plane PlanesArray[1] = {};
+#if MATERIALS_HAVE_BRDF_TABLE
+    LoadNullBrdf(&MaterialsArray[0].BrdfTable);
+    LoadMerlBrdfFile("..\\data\\ray_tracer\\gray-plastic.binary", &MaterialsArray[1].BrdfTable);
+    LoadMerlBrdfFile("..\\data\\ray_tracer\\chrome.binary", &MaterialsArray[2].BrdfTable);
+    LoadNullBrdf(&MaterialsArray[3].BrdfTable);
+    LoadNullBrdf(&MaterialsArray[4].BrdfTable);
+    LoadNullBrdf(&MaterialsArray[5].BrdfTable);
+    LoadNullBrdf(&MaterialsArray[6].BrdfTable);
+#endif // MATERIALS_HAVE_BRDF_TABLE
+
+    plane PlanesArray[2] = {};
     PlanesArray[0].MaterialIndex = 1;
     PlanesArray[0].Normal = V3(0, 0, 1);
+    PlanesArray[0].Tangent = V3(1, 0, 0);
+    PlanesArray[0].BiTangent = V3(0, 1, 0);
     PlanesArray[0].Distance = 0;
+    PlanesArray[1].MaterialIndex = 1;
+    PlanesArray[1].Normal = V3(1, 0, 0);
+    PlanesArray[1].Distance = 2;
 
     sphere SpheresArray[5] = {};
     SpheresArray[0].MaterialIndex = 2;

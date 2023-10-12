@@ -35,7 +35,6 @@ union v3_lane
 	f32_lane E[3];
 };
 
-
 union v4_lane
 {
 	struct
@@ -55,8 +54,18 @@ union v4_lane
 	f32_lane E[4];
 };
 
+struct coordinate_set_lane
+{
+    v3_lane X;
+    v3_lane Y;
+    v3_lane Z;
+};
+
 #define GatherF32(BasePointer, Member, Indices) \
     GatherF32Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
 
 #define GatherV3(BasePointer, Member, Indices) \
     GatherV3Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
+
+inline f32 F32FromF32Lane(f32_lane Value, u32 Index);
+inline u32 U32FromU32Lane(u32_lane Value, u32 Index);

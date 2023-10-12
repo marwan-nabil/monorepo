@@ -15,3 +15,9 @@ Atan2(f32 Y, f32 X)
 {
     return (f32)atan2(Y, X);
 }
+
+inline f32
+Acos(f32 Arc)
+{
+    return (f32)acos(Arc);
+}
