@@ -1,5 +1,3 @@
-// TODO_LATER: make multithreaded
-
 inline void
 InitializeConsole(console_context *ConsoleContext)
 {

@@ -33,7 +33,7 @@ b32 BuildX86Kernel(build_context *BuildContext)
     StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), BuildContext->OutputDirectoryPath);
     StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\boot_sector.img");
 
-    BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(SourceBinaryFilePath, 0, BuildContext->OutputBinaryPath);
+    BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(BuildContext->OutputBinaryPath, SourceBinaryFilePath, 0);
     return BuildSuccess;
 }
 

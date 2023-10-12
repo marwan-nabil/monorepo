@@ -74,7 +74,7 @@ b32 CreateEmptyFile(char *FilePath, u32 Size, u32 FillPattern)
     return Result;
 }
 
-b32 WriteBinaryFileOverAnother(char *SourceBinaryFilePath, u32 WriteOffset, char *DestinationBinaryFilePath)
+b32 WriteBinaryFileOverAnother(char *DestinationBinaryFilePath, char *SourceBinaryFilePath, u32 WriteOffset)
 {
     b32 Result = FALSE;
 
