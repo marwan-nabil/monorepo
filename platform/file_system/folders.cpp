@@ -1,4 +1,4 @@
-b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath)
+b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath, console_context *ConsoleContext)
 {
     char FilesWildcard[MAX_PATH] = {};
     StringCchCatA(FilesWildcard, MAX_PATH, DirectoryPath);
@@ -13,7 +13,7 @@ b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
         DWORD LastError = GetLastError();
         if (LastError != ERROR_FILE_NOT_FOUND)
         {
-            ConsolePrintColored("ERROR: FindFirstFileA() failed.\n", FOREGROUND_RED);
+            ConsolePrintColored("ERROR: FindFirstFileA() failed.\n", ConsoleContext, FOREGROUND_RED);
             return FALSE;
         }
     }
@@ -44,14 +44,14 @@ b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
                         NULL
                     );
 
-                    ConsoleSwitchColor(FOREGROUND_BLUE);
+                    ConsoleSwitchColor(ConsoleContext, FOREGROUND_BLUE);
                     printf
                     (
                         "WARNING: Cannot delete the file %s. System error code for DeleteFile(): %lu == %s",
                         FoundFilePath, LastError, (const char *)ErrorMessageFromSystem
                     );
                     fflush(stdout);
-                    ConsoleResetColor();
+                    ConsoleResetColor(ConsoleContext);
 
                     LocalFree(ErrorMessageFromSystem);
                 }
@@ -65,12 +65,12 @@ b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
         DWORD LastErrorCode = GetLastError();
         if (LastErrorCode != ERROR_NO_MORE_FILES)
         {
-            ConsoleSwitchColor(FOREGROUND_RED);
+            ConsoleSwitchColor(ConsoleContext, FOREGROUND_RED);
             printf("ERROR: cleanup process did not finish properly, please debug.\n");
             printf("ERROR: last error code is %d\n", LastErrorCode);
             printf("ERROR: extension with error is %s\n", ExtensionToClean);
             fflush(stdout);
-            ConsoleResetColor();
+            ConsoleResetColor(ConsoleContext);
             return FALSE;
         }
     }

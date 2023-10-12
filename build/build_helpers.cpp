@@ -74,10 +74,10 @@ b32 CompileShader(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->SourcesString);
 
-    b32 Result = CreateProcessAndWait(CompilerCommand);
+    b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->ConsoleContext);
     if (!Result)
     {
-        ConsolePrintColored("ERROR: shader compilation failed.\n", FOREGROUND_RED);
+        ConsolePrintColored("ERROR: shader compilation failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
     }
 
     return Result;
@@ -97,10 +97,10 @@ b32 CompileCpp(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "/link ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkerFlags);
 
-    b32 Result = CreateProcessAndWait(CompilerCommand);
+    b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->ConsoleContext);
     if (!Result)
     {
-        ConsolePrintColored("ERROR: compilation failed.\n", FOREGROUND_RED);
+        ConsolePrintColored("ERROR: compilation failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
     }
 
     return Result;
@@ -118,10 +118,10 @@ b32 CompileAssembly(build_context *BuildContext)
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->OutputBinaryPath);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");
 
-    b32 Result = CreateProcessAndWait(AssemblerCommand);
+    b32 Result = CreateProcessAndWait(AssemblerCommand, BuildContext->ConsoleContext);
     if (!Result)
     {
-        ConsolePrintColored("ERROR: Assembly failed.\n", FOREGROUND_RED);
+        ConsolePrintColored("ERROR: Assembly failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
     }
 
     return Result;

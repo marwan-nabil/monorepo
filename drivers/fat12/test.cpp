@@ -7,6 +7,7 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
+#include "..\..\platform\console\console.h"
 
 #include "fat12.h"
 

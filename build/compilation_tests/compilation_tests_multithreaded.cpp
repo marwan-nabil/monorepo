@@ -17,6 +17,7 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
+#include "..\..\platform\console\console.h"
 
 #include "..\..\platform\console\console.cpp"
 #include "..\..\platform\strings\strings.cpp"
@@ -38,6 +39,8 @@ struct test_job_queue
     volatile i64 TotalJobsDone;
 };
 
+console_context GlobalConsoleContext;
+
 char *TestCommands[] =
 {
     "build simulator",
@@ -50,6 +53,7 @@ char *TestCommands[] =
     "build directx_demo debug",
     "build directx_demo release",
     "build lint",
+    "build fetch_data",
     "build x86_kernel",
     "build fat12_tests",
     "build x86_kernel_tests",
@@ -65,7 +69,7 @@ void ProcessJob(test_job *Job)
     CreatePipe(&PipeOutput, &PipeInput, &ChildProcessOutputPipeSecturityAttributes, 0);
     SetHandleInformation(PipeOutput, HANDLE_FLAG_INHERIT, 0);
 
-    Job->TestResult = CreateProcessAndWait(Job->TestCommand, PipeInput);
+    Job->TestResult = CreateProcessAndWait(Job->TestCommand, PipeInput, &GlobalConsoleContext);
     CloseHandle(PipeInput);
 
     char PipeOutputBuffer[1024] = {};
@@ -132,7 +136,7 @@ i32 main(i32 argc, char **argv)
 
     b32 AllTestsSucceeded = TRUE;
 
-    InitializeConsole();
+    InitializeConsole(&GlobalConsoleContext);
 
     for (u32 JobIndex = 0; JobIndex < JobQueue.JobCount; JobIndex++)
     {
@@ -140,10 +144,10 @@ i32 main(i32 argc, char **argv)
 
         printf("\n");
         fflush(stdout);
-        ConsoleSwitchColor(BACKGROUND_BLUE);
+        ConsoleSwitchColor(&GlobalConsoleContext, BACKGROUND_BLUE);
         printf("> %s", Job->TestCommand);
         fflush(stdout);
-        ConsoleResetColor();
+        ConsoleResetColor(&GlobalConsoleContext);
         printf("\n");
         fflush(stdout);
 
@@ -151,11 +155,11 @@ i32 main(i32 argc, char **argv)
 
         if (Job->TestResult)
         {
-            ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
+            ConsolePrintColored("INFO: test succeeded.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
         }
         else
         {
-            ConsolePrintColored("ERROR: test failed.\n", FOREGROUND_RED);
+            ConsolePrintColored("ERROR: test failed.\n", &GlobalConsoleContext, FOREGROUND_RED);
             AllTestsSucceeded = FALSE;
         }
     }
@@ -167,6 +171,7 @@ i32 main(i32 argc, char **argv)
             "\n==========================\n"
             "INFO: all tests succeeded.\n"
             "==========================\n",
+            &GlobalConsoleContext,
             FOREGROUND_GREEN
         );
     }

@@ -2,7 +2,7 @@ b32 BuildImguiDemo(build_context *BuildContext)
 {
     if (BuildContext->argc < 3)
     {
-        ConsolePrintColored("ERROR: invalid number of arguments for build imgui_demo ...\n", FOREGROUND_RED);
+        ConsolePrintColored("ERROR: invalid number of arguments for build imgui_demo ...\n", BuildContext->ConsoleContext, FOREGROUND_RED);
         DisplayHelp();
         return FALSE;
     }
@@ -29,9 +29,9 @@ b32 BuildImguiDemo(build_context *BuildContext)
     }
     else
     {
-        ConsoleSwitchColor(FOREGROUND_RED);
+        ConsoleSwitchColor(BuildContext->ConsoleContext, FOREGROUND_RED);
         printf("ERROR: invalid argument \"%s\" for build imgui_demo ...\n", BuildContext->argv[2]);
-        ConsoleResetColor();
+        ConsoleResetColor(BuildContext->ConsoleContext);
         DisplayHelp();
         return FALSE;
     }

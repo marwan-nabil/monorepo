@@ -9,6 +9,7 @@
 
 #include "..\platform\base_types.h"
 #include "..\platform\basic_defines.h"
+#include "..\platform\console\console.h"
 #include "..\platform\file_system\files.h"
 #include "..\drivers\fat12\fat12.h"
 #include "build.h"
@@ -25,6 +26,7 @@
 #include "build_helpers.cpp"
 
 #include "lint\build.cpp"
+#include "fetch_data\build.cpp"
 #include "compilation_tests\build.cpp"
 #include "..\drivers\fat12\build.cpp"
 #include "..\projects\simulator\build.cpp"
@@ -34,9 +36,12 @@
 #include "..\projects\ray_tracer\build.cpp"
 #include "..\projects\x86_kernel\build.cpp"
 
+console_context GlobalConsoleContext;
+
 target_mapping BuildTargetMappings[] =
 {
     {"lint", &BuildLint},
+    {"fetch_data", &BuildFetchData},
     {"compilation_tests", &BuildCompilationTests},
     {"fat12_tests", &BuildFat12Tests},
     {"simulator", &BuildSimulator},
@@ -71,11 +76,11 @@ int main(int argc, char **argv)
     BuildContext.argc = argc;
     BuildContext.argv = argv;
 
-    InitializeConsole();
+    InitializeConsole(&GlobalConsoleContext);
 
     if (argc < 2)
     {
-        ConsolePrintColored("ERROR: No build target.\n", FOREGROUND_RED);
+        ConsolePrintColored("ERROR: No build target.\n", &GlobalConsoleContext, FOREGROUND_RED);
         DisplayHelp();
         return 1;
     }
@@ -94,7 +99,8 @@ int main(int argc, char **argv)
             BuildSuccess = CleanExtensionFromDirectory
             (
                 ExtensionsToClean[ExtensionIndex],
-                BuildContext.OutputDirectoryPath
+                BuildContext.OutputDirectoryPath,
+                &GlobalConsoleContext
             );
         }
     }
@@ -105,8 +111,8 @@ int main(int argc, char **argv)
     }
     else
     {
-        u32 TargetIndex = 0;
-        for (; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
+        u32 TargetIndex;
+        for (TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
         {
             if (strcmp(argv[1], BuildTargetMappings[TargetIndex].TargetName) == 0)
             {
@@ -117,9 +123,9 @@ int main(int argc, char **argv)
 
         if (TargetIndex == ArrayCount(BuildTargetMappings))
         {
-            ConsoleSwitchColor(FOREGROUND_RED);
+            ConsoleSwitchColor(&GlobalConsoleContext, FOREGROUND_RED);
             printf("ERROR: invalid build target \"%s\".\n", argv[1]);
-            ConsoleResetColor();
+            ConsoleResetColor(&GlobalConsoleContext);
             DisplayHelp();
             BuildSuccess = FALSE;
         }

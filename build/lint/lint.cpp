@@ -15,6 +15,7 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
+#include "..\..\platform\console\console.h"
 #include "..\..\platform\file_system\files.h"
 #include "lint.h"
 

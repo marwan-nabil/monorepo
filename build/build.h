@@ -5,6 +5,8 @@ struct build_context
     i32 argc;
     char **argv;
 
+    console_context *ConsoleContext;
+
     char OutputDirectoryPath[1024];
     char RootDirectoryPath[1024];
 

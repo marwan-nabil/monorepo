@@ -1,4 +1,4 @@
-b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput)
+b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput, console_context *ConsoleContext)
 {
     PROCESS_INFORMATION ProcessInfo = {};
 
@@ -37,14 +37,14 @@ b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput)
             NULL
         );
 
-        ConsoleSwitchColor(FOREGROUND_RED);
+        ConsoleSwitchColor(ConsoleContext, FOREGROUND_RED);
         printf
         (
             "ERROR: failed to create a sub-process, system error code: %lu == %s",
             LastError, (const char *)ErrorMessageFromSystem
         );
         fflush(stdout);
-        ConsoleResetColor();
+        ConsoleResetColor(ConsoleContext);
 
         LocalFree(ErrorMessageFromSystem);
         return FALSE;
@@ -68,7 +68,7 @@ b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput)
     return TRUE;
 }
 
-b32 CreateProcessAndWait(char *CommandLine)
+b32 CreateProcessAndWait(char *CommandLine, console_context *ConsoleContext)
 {
-    return CreateProcessAndWait(CommandLine, (HANDLE)_get_osfhandle(_fileno(stdout)));
+    return CreateProcessAndWait(CommandLine, (HANDLE)_get_osfhandle(_fileno(stdout)), ConsoleContext);
 }

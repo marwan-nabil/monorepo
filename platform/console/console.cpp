@@ -1,33 +1,31 @@
 // TODO_LATER: make multithreaded
-HANDLE ConsoleHandle;
-WORD OriginalConsoleAttributes;
 
 inline void
-InitializeConsole()
+InitializeConsole(console_context *ConsoleContext)
 {
-    ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    ConsoleContext->ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
-    GetConsoleScreenBufferInfo(ConsoleHandle, &ConsoleInfo);
-    OriginalConsoleAttributes = ConsoleInfo.wAttributes;
+    GetConsoleScreenBufferInfo(ConsoleContext->ConsoleHandle, &ConsoleInfo);
+    ConsoleContext->OriginalConsoleAttributes = ConsoleInfo.wAttributes;
 }
 
 inline void
-ConsoleSwitchColor(WORD Color)
+ConsoleSwitchColor(console_context *ConsoleContext, WORD Color)
 {
-    SetConsoleTextAttribute(ConsoleHandle, Color);
+    SetConsoleTextAttribute(ConsoleContext->ConsoleHandle, Color);
 }
 
 inline void
-ConsoleResetColor()
+ConsoleResetColor(console_context *ConsoleContext)
 {
-    SetConsoleTextAttribute(ConsoleHandle, OriginalConsoleAttributes);
+    SetConsoleTextAttribute(ConsoleContext->ConsoleHandle, ConsoleContext->OriginalConsoleAttributes);
 }
 
 inline void
-ConsolePrintColored(const char *String, WORD Color)
+ConsolePrintColored(const char *String, console_context *ConsoleContext, WORD Color)
 {
-    ConsoleSwitchColor(Color);
+    ConsoleSwitchColor(ConsoleContext, Color);
     printf(String);
     fflush(stdout);
-    ConsoleResetColor();
+    ConsoleResetColor(ConsoleContext);
 }
