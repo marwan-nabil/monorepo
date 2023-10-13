@@ -29,6 +29,11 @@
 #include "..\..\math\simd\shared\math.h"
 #include "..\..\math\simd\shared\random.h"
 
+#define MATERIALS_HAVE_BRDF_TABLE 0
+
+#if MATERIALS_HAVE_BRDF_TABLE
+#   include "brdf.h"
+#endif
 #include "ray_tracer.h"
 
 #include "..\..\math\random.cpp"
@@ -257,15 +262,6 @@ RenderPixel
                 }
             }
 
-            f32_lane HitMaterialSpecularity = StaticCastU32LaneToF32Lane
-            (
-                LaneMask &
-                StaticCastF32LaneToU32Lane(GatherF32(World->Materials, Specularity, HitMaterialIndex))
-            );
-
-            v3_lane HitMaterialReflectionColor =
-                LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
-
             v3_lane HitMaterialEmmissionColor =
                 LaneMask & GatherV3(World->Materials, EmmissionColor, HitMaterialIndex);
 
@@ -299,17 +295,26 @@ RenderPixel
                     )
                 );
 
+                f32_lane HitMaterialSpecularity = StaticCastU32LaneToF32Lane
+                (
+                    LaneMask &
+                    StaticCastF32LaneToU32Lane(GatherF32(World->Materials, Specularity, HitMaterialIndex))
+                );
+
                 BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
 
 #if MATERIALS_HAVE_BRDF_TABLE
-                v3_lane BrdfReflectionColor = BrdfTableLookup
+                v3_lane HitMaterialReflectionColor = BrdfTableLookup
                 (
                     World->Materials, HitMaterialIndex,
                     BounceTangent, BounceBiTangent, BounceNormal,
                     -PreviousBounceDirection, BounceDirection
                 );
-                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, BrdfReflectionColor);
+                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, HitMaterialReflectionColor);
 #else
+                v3_lane HitMaterialReflectionColor =
+                    LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
+
                 f32_lane CosineAttenuationFactor = Max(InnerProduct(-PreviousBounceDirection, BounceNormal), F32LaneFromF32(0));
                 RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
 #endif
@@ -400,56 +405,69 @@ main(i32 argc, char **argv)
 {
     printf("RayCasting...");
 
+#if 0
+    brdf_table Table;
+    LoadBrdfTableFromFile("..\\data\\ray_tracer\\gray-plastic.binary", &Table);
+
+    v3 Normal = V3(0, 0, 1);
+    v3 Tangent = V3(1, 0, 0);
+    v3 Incoming = Normalize(V3(0, 1, 1));
+    v3 Outgoing = Normalize(V3(0, -1, 1));
+
+    v3 Color = BrdfTableLookup(&Table, Normal, Tangent, Incoming, Outgoing);
+#endif
+
     image_u32 OutputImage = CreateImage(1280, 720);
 
     material MaterialsArray[7] = {};
     MaterialsArray[0].EmmissionColor = V3(0.3, 0.4, 0.5);
-    MaterialsArray[1].ReflectionColor = V3(0.5, 0.5, 0.5);
-    MaterialsArray[2].ReflectionColor = V3(0.7, 0.5, 0.3);
     MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
-    MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
     MaterialsArray[4].Specularity = 0.7;
-    MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
     MaterialsArray[5].Specularity = 0.85;
-    MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
     MaterialsArray[6].Specularity = 1;
 
 #if MATERIALS_HAVE_BRDF_TABLE
-    LoadNullBrdf(&MaterialsArray[0].BrdfTable);
-    LoadMerlBrdfFile("..\\data\\ray_tracer\\gray-plastic.binary", &MaterialsArray[1].BrdfTable);
-    LoadMerlBrdfFile("..\\data\\ray_tracer\\chrome.binary", &MaterialsArray[2].BrdfTable);
-    LoadNullBrdf(&MaterialsArray[3].BrdfTable);
-    LoadNullBrdf(&MaterialsArray[4].BrdfTable);
-    LoadNullBrdf(&MaterialsArray[5].BrdfTable);
-    LoadNullBrdf(&MaterialsArray[6].BrdfTable);
+    LoadBrdfTableFromFile("..\\data\\ray_tracer\\red-fabric.binary", &MaterialsArray[0].BrdfTable);
+    LoadBrdfTableFromFile("..\\data\\ray_tracer\\gray-plastic.binary", &MaterialsArray[1].BrdfTable);
+    LoadBrdfTableFromFile("..\\data\\ray_tracer\\chrome.binary", &MaterialsArray[2].BrdfTable);
+    LoadNullBrdfTable(&MaterialsArray[3].BrdfTable);
+    LoadNullBrdfTable(&MaterialsArray[4].BrdfTable);
+    LoadNullBrdfTable(&MaterialsArray[5].BrdfTable);
+    LoadNullBrdfTable(&MaterialsArray[6].BrdfTable);
+#else
+    MaterialsArray[1].ReflectionColor = V3(0.5, 0.5, 0.5);
+    MaterialsArray[2].ReflectionColor = V3(0.7, 0.5, 0.3);
+    MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
+    MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
+    MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
 #endif // MATERIALS_HAVE_BRDF_TABLE
 
-    plane PlanesArray[2] = {};
+    plane PlanesArray[1] = {};
     PlanesArray[0].MaterialIndex = 1;
     PlanesArray[0].Normal = V3(0, 0, 1);
     PlanesArray[0].Tangent = V3(1, 0, 0);
     PlanesArray[0].BiTangent = V3(0, 1, 0);
     PlanesArray[0].Distance = 0;
-    PlanesArray[1].MaterialIndex = 1;
-    PlanesArray[1].Normal = V3(1, 0, 0);
-    PlanesArray[1].Distance = 2;
+    // PlanesArray[1].MaterialIndex = 1;
+    // PlanesArray[1].Normal = V3(1, 0, 0);
+    // PlanesArray[1].Distance = 2;
 
-    sphere SpheresArray[5] = {};
+    sphere SpheresArray[1] = {};
     SpheresArray[0].MaterialIndex = 2;
     SpheresArray[0].Position = V3(0, 0, 0);
     SpheresArray[0].Radius = 1;
-    SpheresArray[1].MaterialIndex = 3;
-    SpheresArray[1].Position = V3(3, -2, 0);
-    SpheresArray[1].Radius = 1;
-    SpheresArray[2].MaterialIndex = 4;
-    SpheresArray[2].Position = V3(-2, -1, 2);
-    SpheresArray[2].Radius = 1;
-    SpheresArray[3].MaterialIndex = 5;
-    SpheresArray[3].Position = V3(1, -1, 3);
-    SpheresArray[3].Radius = 1;
-    SpheresArray[4].MaterialIndex = 6;
-    SpheresArray[4].Position = V3(-2, 3, 0);
-    SpheresArray[4].Radius = 2;
+    // SpheresArray[1].MaterialIndex = 3;
+    // SpheresArray[1].Position = V3(3, -2, 0);
+    // SpheresArray[1].Radius = 1;
+    // SpheresArray[2].MaterialIndex = 4;
+    // SpheresArray[2].Position = V3(-2, -1, 2);
+    // SpheresArray[2].Radius = 1;
+    // SpheresArray[3].MaterialIndex = 5;
+    // SpheresArray[3].Position = V3(1, -1, 3);
+    // SpheresArray[3].Radius = 1;
+    // SpheresArray[4].MaterialIndex = 6;
+    // SpheresArray[4].Position = V3(-2, 3, 0);
+    // SpheresArray[4].Radius = 2;
 
     world World = {};
     World.Materials = MaterialsArray;

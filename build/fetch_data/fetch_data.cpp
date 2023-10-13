@@ -41,7 +41,7 @@ data_chunk *GetRequestChunks(HINTERNET RequestHandle, u32 *TotalDownloadSize)
         DWORD DownloadedDataSize = 0;
         WinHttpReadData(RequestHandle, CurrentChunk->ChunkMemory, AvailableDataSize, &DownloadedDataSize);
         *TotalDownloadSize += DownloadedDataSize;
-            
+
         if (PreviousChunk)
         {
             PreviousChunk->NextChunk = CurrentChunk;
@@ -86,7 +86,7 @@ i32 main(i32 argc, char **argv)
         WINHTTP_FLAG_SECURE
     );
 
-    wchar_t *HeadersString = 
+    wchar_t *HeadersString =
         L"Referer: https://www.google.com/\n"
         L"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36\n";
 
@@ -114,12 +114,10 @@ i32 main(i32 argc, char **argv)
 
     while (CurrentChunk)
     {
-        // OVERLAPPED OverlappedStructure = {};
-        // OverlappedStructure.Offset = 0xFFFFFFFF;
-
         DWORD BytesWritten;
         WriteFile(FileHandle, CurrentChunk->ChunkMemory, CurrentChunk->ChunkSize, &BytesWritten, 0);
 
+        free(CurrentChunk->ChunkMemory);
         CurrentChunk = CurrentChunk->NextChunk;
     }
 

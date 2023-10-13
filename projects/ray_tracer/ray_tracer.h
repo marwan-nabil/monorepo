@@ -3,7 +3,6 @@
 #define BOUNCES_PER_RAY 8
 #define RAYS_PER_PIXEL 256
 #define RAY_BATCHES_PER_PIXEL (RAYS_PER_PIXEL / SIMD_NUMBEROF_LANES)
-#define MATERIALS_HAVE_BRDF_TABLE 0
 
 #pragma pack(push, 1)
 struct bitmap_header
@@ -34,23 +33,15 @@ struct image_u32
     u32 *Pixels;
 };
 
-#if MATERIALS_HAVE_BRDF_TABLE
-struct brdf_table
-{
-    u32 TotalSampleCount;
-    u32 SampleCount[3];
-    v3 *Samples;
-};
-#endif // MATERIALS_HAVE_BRDF_TABLE
-
 struct material
 {
     f32 Specularity;
-    v3 ReflectionColor;
     v3 EmmissionColor;
 
 #if MATERIALS_HAVE_BRDF_TABLE
     brdf_table BrdfTable;
+#else
+    v3 ReflectionColor;
 #endif // MATERIALS_HAVE_BRDF_TABLE
 };
 

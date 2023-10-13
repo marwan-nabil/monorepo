@@ -11,6 +11,13 @@ SquareRoot(f32 A)
     return Result;
 }
 
+inline f64
+SquareRoot(f64 A)
+{
+    f64 Result = sqrt(A);
+    return Result;
+}
+
 inline f32
 Power(f32 Base, f32 Exponent)
 {
