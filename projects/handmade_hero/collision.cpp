@@ -87,7 +87,7 @@ RemoveEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u3
 static void
 ClearAllEnrityCollisionRules(game_state *GameState, u32 StorageIndex)
 {
-    // TODO_LATER: improve collision rule storage data structure to optimize for insertion and clearing
+    // TODO: improve collision rule storage data structure to optimize for insertion and clearing
     for (u32 HashValue = 0; HashValue < ArrayCount(GameState->CollisionRulesTable); HashValue++)
     {
         for

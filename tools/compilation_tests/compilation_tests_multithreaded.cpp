@@ -1,9 +1,9 @@
-// TODO_LATER:
+// TODO:
 // - a report of passed/failed tests is presented at the end
 // - failed tests have extra error information provided
 // - run the build in a separate directory for each thread/test job
 //   so that no conflicts happen during the build due to file locking
-// TODO_LATER:
+// TODO:
 // - build dependency graph of #include'ed files in compile targets
 // - store the test results permanently, with info about dependencies
 // - check on the last modification before running a test for a target

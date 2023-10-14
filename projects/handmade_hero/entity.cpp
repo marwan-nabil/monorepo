@@ -319,7 +319,7 @@ AddGoundBasedStorageEntity
     entity_collision_mesh_group *EntityCollisionMeshGroup
 )
 {
-    // TODO_LATER: fix buggy Z handling here?
+    // TODO: fix buggy Z handling here?
     add_storage_entity_result Result = AddStorageEntity(GameState, Type, GroundPoint);
     Result.StorageEntity->Entity.CollisionMeshGroup = EntityCollisionMeshGroup;
     return Result;
@@ -420,7 +420,7 @@ AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
         V3(0, 0, 0)
     );
 
-    // NOTE(marwan): this is the correct thing
+    // NOTE: this is the correct thing
     //entity_world_position StairsGroundPosition = GetWorldPositionFromTilePosition
     //(
     //    GameState->World, AbsTileX, AbsTileY, AbsTileZ,
@@ -496,7 +496,7 @@ MoveEntity
         Acceleration.Z += -9.8f;
     }
 
-    // TODO_LATER: improve velocity and postition update accuracy
+    // TODO: improve velocity and postition update accuracy
     MovingEntity->Velocity = Acceleration * TimeDelta + MovingEntity->Velocity;
     Assert(Length(MovingEntity->Velocity) < SimulationRegion->MaxEntityVelocity);
 
@@ -533,7 +533,7 @@ MoveEntity
 
             if (!IsEntityFlagSet(MovingEntity, EF_NON_SPATIAL))
             {
-                // TODO_LATER: reduce the number of tested against entities in the sim region
+                // TODO: reduce the number of tested against entities in the sim region
                 //               using spatial partition
                 entity *TestEntity = SimulationRegion->Entities;
                 for
@@ -739,7 +739,7 @@ MoveEntity
         MovingEntity->MovementDistanceLimit = RemainingMovementDistance;
     }
 
-    // TODO_LATER: change to using the Acceleration vector instead
+    // TODO: change to using the Acceleration vector instead
     if ((MovingEntity->Velocity.X == 0) && (MovingEntity->Velocity.Y == 0))
     {
     }

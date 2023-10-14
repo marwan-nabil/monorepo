@@ -179,7 +179,7 @@ fat12_disk *Fat12CreateRamDisk()
     (
         0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
     );
-    // TODO_LATER: investigate why *Disk = {}; causes a stack overflow
+    // TODO: investigate why *Disk = {}; causes a stack overflow
     memset(Disk, 0, sizeof(fat12_disk));
     return Disk;
 }

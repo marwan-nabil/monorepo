@@ -31,6 +31,7 @@ StringLength(char *String)
     return Count;
 }
 
+
 inline void
 InjectEscapeSlashes(char *SourceString, char *DestinationString, u32 DestinationSize)
 {
