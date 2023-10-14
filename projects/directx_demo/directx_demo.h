@@ -1,6 +1,6 @@
 #pragma once
 
-struct window_data
+struct application_data
 {
     u32 Width;
     u32 Height;
@@ -15,7 +15,6 @@ enum constant_buffer_type
     CBT_APPLICATION,
     CBT_FRAME,
     CBT_OBJECT,
-
     CBT_COUNT,
 };
 
@@ -45,4 +44,11 @@ struct vertex
 {
     DirectX::XMFLOAT3 Position;
     DirectX::XMFLOAT3 Color;
+};
+
+struct scene_data
+{
+    vertex CubeVertices[8];
+    u16 CubeVertexIndices[36];
+    f32 CubeRotationAngle;
 };

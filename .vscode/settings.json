@@ -33,7 +33,6 @@
         "HANDMADE_INTERNAL=1",
         
         // directx_demo
-        "_DEBUG=1",
 
         // lint
         "JOB_PER_FILE",

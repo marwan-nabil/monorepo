@@ -10,35 +10,238 @@
 
 #include "platform\base_types.h"
 #include "platform\basic_defines.h"
-
 #include "directx_demo.h"
 
 #include "math\floats.cpp"
 
-window_data GlobalWindowData;
+application_data GlobalApplicationData;
 d3d_state GlobalD3dState;
+scene_data GlobalSceneData;
 
-vertex GlobalCubeVertices[8];
-u16 GlobalCubeVertexIndices[36];
-
-void Update(f32 TimeDelta)
+inline void SafeReleaseComObject(IUnknown **Object)
 {
-
+    if (*Object != NULL)
+    {
+        (*Object)->Release();
+        *Object = NULL;
+    }
 }
 
-void Render()
+static void Update(f32 TimeDelta)
 {
+    DirectX::XMVECTOR EyePosition = DirectX::XMVectorSet(0, 0, -10, 1);
+    DirectX::XMVECTOR FocusPoint = DirectX::XMVectorSet(0, 0, 0, 1);
+    DirectX::XMVECTOR UpDirection = DirectX::XMVectorSet(0, 1, 0, 0);
 
+    GlobalD3dState.ViewMatrix = DirectX::XMMatrixLookAtLH(EyePosition, FocusPoint, UpDirection);
+    GlobalD3dState.DeviceContext->UpdateSubresource
+    (
+        GlobalD3dState.ConstantBuffers[CBT_FRAME],
+        0,
+        NULL,
+        &GlobalD3dState.ViewMatrix,
+        0,
+        0
+    );
+
+    DirectX::XMVECTOR RotationAxis = DirectX::XMVectorSet(0, 1, 1, 0);
+    GlobalSceneData.CubeRotationAngle += 90.0f * TimeDelta;
+
+    GlobalD3dState.WorldMatrix = DirectX::XMMatrixRotationAxis
+    (
+        RotationAxis,
+        DirectX::XMConvertToRadians(GlobalSceneData.CubeRotationAngle)
+    );
+
+    GlobalD3dState.DeviceContext->UpdateSubresource
+    (
+        GlobalD3dState.ConstantBuffers[CBT_OBJECT],
+        0,
+        NULL,
+        &GlobalD3dState.WorldMatrix,
+        0,
+        0
+    );
 }
 
-void
+static void ClearViews(const FLOAT ClearColor[4], FLOAT ClearDepth, UINT8 ClearStencil)
+{
+    GlobalD3dState.DeviceContext->ClearRenderTargetView(GlobalD3dState.RenderTargetView, ClearColor);
+    GlobalD3dState.DeviceContext->ClearDepthStencilView
+    (
+        GlobalD3dState.DepthStencilView,
+        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+        ClearDepth,
+        ClearStencil
+    );
+}
+
+static void Present()
+{
+    if (GlobalApplicationData.EnableVSync)
+    {
+        GlobalD3dState.SwapChain->Present(1, 0);
+    }
+    else
+    {
+        GlobalD3dState.SwapChain->Present(0, 0);
+    }
+}
+
+static void Render()
+{
+    Assert(GlobalD3dState.Device);
+    Assert(GlobalD3dState.DeviceContext);
+
+    ClearViews(DirectX::Colors::CornflowerBlue, 1.0f, 0);
+
+    u32 VertexStride = sizeof(vertex);
+    u32 Offset = 0;
+
+    GlobalD3dState.DeviceContext->IASetVertexBuffers(0, 1, &GlobalD3dState.VertexBuffer, &VertexStride, &Offset);
+    GlobalD3dState.DeviceContext->IASetInputLayout(GlobalD3dState.InputLayout);
+    GlobalD3dState.DeviceContext->IASetIndexBuffer(GlobalD3dState.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    GlobalD3dState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // g_d3dDeviceContext->VSSetShader( g_d3dVertexShader, nullptr, 0 );
+    // g_d3dDeviceContext->VSSetConstantBuffers(0, 3, g_d3dConstantBuffers );
+}
+
+static void LoadDemoContent()
+{
+    Assert(GlobalD3dState.Device);
+
+    D3D11_BUFFER_DESC VertexBufferDescriptor = {};
+    VertexBufferDescriptor.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    VertexBufferDescriptor.ByteWidth = sizeof(vertex) * ArrayCount(GlobalSceneData.CubeVertices);
+    VertexBufferDescriptor.CPUAccessFlags = 0;
+    VertexBufferDescriptor.Usage = D3D11_USAGE_DEFAULT;
+
+    D3D11_SUBRESOURCE_DATA SubResourceData = {};
+    SubResourceData.pSysMem = (void *)GlobalSceneData.CubeVertices;
+
+    HRESULT Result = GlobalD3dState.Device->CreateBuffer
+    (
+        &VertexBufferDescriptor,
+        &SubResourceData,
+        &GlobalD3dState.VertexBuffer
+    );
+
+    D3D11_BUFFER_DESC IndexBufferDescriptor = {};
+    IndexBufferDescriptor.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    IndexBufferDescriptor.ByteWidth = sizeof(u16) * ArrayCount(GlobalSceneData.CubeVertexIndices);
+    IndexBufferDescriptor.CPUAccessFlags = 0;
+    IndexBufferDescriptor.Usage = D3D11_USAGE_DEFAULT;
+    SubResourceData.pSysMem = (void *)GlobalSceneData.CubeVertexIndices;
+
+    Result = GlobalD3dState.Device->CreateBuffer
+    (
+        &IndexBufferDescriptor,
+        &SubResourceData,
+        &GlobalD3dState.IndexBuffer
+    );
+
+    D3D11_BUFFER_DESC ConstantBufferDescriptor = {};
+    ConstantBufferDescriptor.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    ConstantBufferDescriptor.ByteWidth = sizeof(DirectX::XMMATRIX);
+    ConstantBufferDescriptor.CPUAccessFlags = 0;
+    ConstantBufferDescriptor.Usage = D3D11_USAGE_DEFAULT;
+
+    Result = GlobalD3dState.Device->CreateBuffer
+    (
+        &ConstantBufferDescriptor,
+        NULL,
+        &GlobalD3dState.ConstantBuffers[CBT_APPLICATION]
+    );
+
+    Result = GlobalD3dState.Device->CreateBuffer
+    (
+        &ConstantBufferDescriptor,
+        NULL,
+        &GlobalD3dState.ConstantBuffers[CBT_FRAME]
+    );
+
+    Result = GlobalD3dState.Device->CreateBuffer
+    (
+        &ConstantBufferDescriptor,
+        NULL,
+        &GlobalD3dState.ConstantBuffers[CBT_OBJECT]
+    );
+
+    ID3DBlob *VertexShaderBlob;
+    Result = D3DReadFileToBlob(L"vertex_shader.cso", &VertexShaderBlob);
+    Result = GlobalD3dState.Device->CreateVertexShader
+    (
+        VertexShaderBlob->GetBufferPointer(),
+        VertexShaderBlob->GetBufferSize(),
+        NULL,
+        &GlobalD3dState.VertexShader
+    );
+
+    ID3DBlob *PixelShaderBlob;
+    Result = D3DReadFileToBlob(L"pixel_shader.cso", &PixelShaderBlob);
+
+    Result = GlobalD3dState.Device->CreatePixelShader
+    (
+        PixelShaderBlob->GetBufferPointer(),
+        PixelShaderBlob->GetBufferSize(),
+        NULL,
+        &GlobalD3dState.PixelShader
+    );
+
+    D3D11_INPUT_ELEMENT_DESC InputLayoutDescriptors[] =
+    {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OffsetOf(vertex, Position), D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OffsetOf(vertex, Color), D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    Result = GlobalD3dState.Device->CreateInputLayout
+    (
+        InputLayoutDescriptors,
+        ArrayCount(InputLayoutDescriptors),
+        VertexShaderBlob->GetBufferPointer(),
+        VertexShaderBlob->GetBufferSize(),
+        &GlobalD3dState.InputLayout
+    );
+
+    SafeReleaseComObject((IUnknown **)&VertexShaderBlob);
+    SafeReleaseComObject((IUnknown **)&PixelShaderBlob);
+
+
+
+    RECT ClientRect;
+    GetClientRect(GlobalApplicationData.Handle, &ClientRect);
+
+    f32 ClientWidth = (f32)(ClientRect.right - ClientRect.left);
+    f32 ClientHeight = (f32)(ClientRect.bottom - ClientRect.top);
+
+    GlobalD3dState.ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH
+    (
+        DirectX::XMConvertToRadians(45.0f),
+        ClientWidth / ClientHeight,
+        0.1f,
+        100.0f
+    );
+
+    GlobalD3dState.DeviceContext->UpdateSubresource
+    (
+        GlobalD3dState.ConstantBuffers[CBT_APPLICATION],
+        0,
+        NULL,
+        &GlobalD3dState.ProjectionMatrix,
+        0,
+        0
+    );
+}
+
+static void
 InitializeGlobalState()
 {
-    GlobalWindowData.Width = 1280;
-    GlobalWindowData.Height = 720;
-    GlobalWindowData.Name = "DirectXDemoWindow";
-    GlobalWindowData.ClassName = "directx_demo_window_class";
-    GlobalWindowData.EnableVSync = TRUE;
+    GlobalApplicationData.Width = 1280;
+    GlobalApplicationData.Height = 720;
+    GlobalApplicationData.Name = "DirectXDemoWindow";
+    GlobalApplicationData.ClassName = "directx_demo_window_class";
+    GlobalApplicationData.EnableVSync = TRUE;
 
     vertex CubeVertices[8] =
     {
@@ -51,7 +254,7 @@ InitializeGlobalState()
         {DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f)},
         {DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 1.0f)}
     };
-    memcpy(GlobalCubeVertices, CubeVertices, sizeof(CubeVertices));
+    memcpy(GlobalSceneData.CubeVertices, CubeVertices, sizeof(CubeVertices));
 
     u16 CubeVertexIndices[36] =
     {
@@ -68,16 +271,7 @@ InitializeGlobalState()
         4, 0, 3,
         4, 3, 7
     };
-    memcpy(GlobalCubeVertexIndices, CubeVertexIndices, sizeof(CubeVertexIndices));
-}
-
-inline void SafeReleaseComObject(IUnknown **Object)
-{
-    if (*Object != NULL)
-    {
-        (*Object)->Release();
-        *Object = NULL;
-    }
+    memcpy(GlobalSceneData.CubeVertexIndices, CubeVertexIndices, sizeof(CubeVertexIndices));
 }
 
 DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSync)
@@ -92,25 +286,8 @@ DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSyn
         DXGI_MODE_DESC *DxgiDisplayModes;
 
         HRESULT Result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&DxgiFactory);
-        if (FAILED(Result))
-        {
-            printf("ERROR: cannot create IDXGIFactory.\n");
-            return FoundRefreshRate;
-        }
-
         Result = DxgiFactory->EnumAdapters(0, &DxgiAdapter);
-        if (FAILED(Result))
-        {
-            printf("ERROR: cannot enumerate IDXGIAdapters.\n");
-            return FoundRefreshRate;
-        }
-
         Result = DxgiAdapter->EnumOutputs(0, &DxgiAdapterOutput);
-        if (FAILED(Result))
-        {
-            printf("ERROR: cannot enumerate IDXGIAdapters.\n");
-            return FoundRefreshRate;
-        }
 
         u32 NumberOfDisplayModes;
         Result = DxgiAdapterOutput->GetDisplayModeList
@@ -121,13 +298,9 @@ DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSyn
             NULL
         );
 
-        if (FAILED(Result))
-        {
-            printf("ERROR: cannot get the number of display modes for an adapter output.\n");
-            return FoundRefreshRate;
-        }
-
-        DxgiDisplayModes = (DXGI_MODE_DESC *)malloc(sizeof(DXGI_MODE_DESC) * NumberOfDisplayModes);
+        DxgiDisplayModes =
+            (DXGI_MODE_DESC *)
+            malloc(sizeof(DXGI_MODE_DESC) * NumberOfDisplayModes);
         Assert(DxgiDisplayModes);
 
         Result = DxgiAdapterOutput->GetDisplayModeList
@@ -138,15 +311,13 @@ DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSyn
             DxgiDisplayModes
         );
 
-        if (FAILED(Result))
-        {
-            printf("ERROR: cannot get the display modes for an adapter output.\n");
-            return FoundRefreshRate;
-        }
-
         for (u32 Index = 0; Index < NumberOfDisplayModes; Index++)
         {
-            if ((DxgiDisplayModes[Index].Width == ScreenWidth) && (DxgiDisplayModes[Index].Height == ScreenHeight))
+            if
+            (
+                (DxgiDisplayModes[Index].Width == ScreenWidth) &&
+                (DxgiDisplayModes[Index].Height == ScreenHeight)
+            )
             {
                 FoundRefreshRate = DxgiDisplayModes[Index].RefreshRate;
             }
@@ -161,13 +332,13 @@ DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSyn
     return FoundRefreshRate;
 }
 
-i32
+static void
 InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
 {
-    Assert(GlobalWindowData.Handle);
+    Assert(GlobalApplicationData.Handle);
 
     RECT ClientRectangle;
-    GetClientRect(GlobalWindowData.Handle, &ClientRectangle);
+    GetClientRect(GlobalApplicationData.Handle, &ClientRectangle);
 
     u32 ClientAreaWidth = ClientRectangle.right - ClientRectangle.left;
     u32 ClientAreaHeight = ClientRectangle.bottom - ClientRectangle.top;
@@ -181,16 +352,13 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
     SwapChainDescriptor.BufferDesc.RefreshRate =
         QueryRefreshRate(ClientAreaWidth, ClientAreaHeight, EnableVSync);
     SwapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    SwapChainDescriptor.OutputWindow = GlobalWindowData.Handle;
+    SwapChainDescriptor.OutputWindow = GlobalApplicationData.Handle;
     SwapChainDescriptor.SampleDesc.Count = 1;
     SwapChainDescriptor.SampleDesc.Quality = 0;
     SwapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     SwapChainDescriptor.Windowed = TRUE;
 
-    u32 DeviceCreationFlags = 0;
-#if _DEBUG
-    DeviceCreationFlags = D3D11_CREATE_DEVICE_DEBUG;
-#endif
+    u32 DeviceCreationFlags = D3D11_CREATE_DEVICE_DEBUG;
 
     D3D_FEATURE_LEVEL FeatureLevelOptions[] =
     {
@@ -214,32 +382,16 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
         &GlobalD3dState.DeviceContext
     );
 
-    if (FAILED(Result))
-    {
-        return -1;
-    }
-
     ID3D11Texture2D *BackBuffer;
-
     Result = GlobalD3dState.SwapChain->GetBuffer
     (
         0, __uuidof(ID3D11Texture2D), (void **)&BackBuffer
     );
 
-    if (FAILED(Result))
-    {
-        return -1;
-    }
-
     Result = GlobalD3dState.Device->CreateRenderTargetView
     (
         BackBuffer, NULL, &GlobalD3dState.RenderTargetView
     );
-
-    if (FAILED(Result))
-    {
-        return -1;
-    }
 
     SafeReleaseComObject((IUnknown **)&BackBuffer);
 
@@ -261,20 +413,10 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
         &GlobalD3dState.DepthStencilBuffer
     );
 
-    if (FAILED(Result))
-    {
-        return -1;
-    }
-
     Result = GlobalD3dState.Device->CreateDepthStencilView
     (
         GlobalD3dState.DepthStencilBuffer, NULL, &GlobalD3dState.DepthStencilView
     );
-
-    if (FAILED(Result))
-    {
-        return -1;
-    }
 
     D3D11_DEPTH_STENCIL_DESC DepthStencilDescriptor = {};
     DepthStencilDescriptor.DepthEnable = TRUE;
@@ -286,11 +428,6 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
     (
         &DepthStencilDescriptor, &GlobalD3dState.DepthStencilState
     );
-
-    if (FAILED(Result))
-    {
-        return -1;
-    }
 
     D3D11_RASTERIZER_DESC RasterizerDescriptor = {};
     RasterizerDescriptor.AntialiasedLineEnable = FALSE;
@@ -309,19 +446,12 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
         &RasterizerDescriptor, &GlobalD3dState.RasterizerState
     );
 
-    if (FAILED(Result))
-    {
-        return -1;
-    }
-
     GlobalD3dState.ViewPort.Width = (f32)ClientAreaWidth;
     GlobalD3dState.ViewPort.Height = (f32)ClientAreaHeight;
     GlobalD3dState.ViewPort.TopLeftX = 0;
     GlobalD3dState.ViewPort.TopLeftY = 0;
     GlobalD3dState.ViewPort.MinDepth = 0;
     GlobalD3dState.ViewPort.MaxDepth = 1.0f;
-
-    return 0;
 }
 
 LRESULT CALLBACK
@@ -371,25 +501,21 @@ int CALLBACK WinMain
     WindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     WindowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     WindowClass.lpszMenuName = NULL;
-    WindowClass.lpszClassName = GlobalWindowData.ClassName;
+    WindowClass.lpszClassName = GlobalApplicationData.ClassName;
 
-    if (!RegisterClassEx(&WindowClass))
-    {
-        printf("ERROR: cannot register the main window class.\n");
-        return -1;
-    }
+    RegisterClassEx(&WindowClass);
 
     RECT WindowRectangle;
     WindowRectangle.left = 0;
     WindowRectangle.top = 0;
-    WindowRectangle.right = GlobalWindowData.Width;
-    WindowRectangle.bottom = GlobalWindowData.Height;
+    WindowRectangle.right = GlobalApplicationData.Width;
+    WindowRectangle.bottom = GlobalApplicationData.Height;
     AdjustWindowRect(&WindowRectangle, WS_OVERLAPPEDWINDOW, FALSE);
 
-    GlobalWindowData.Handle = CreateWindowA
+    GlobalApplicationData.Handle = CreateWindowA
     (
-        GlobalWindowData.ClassName,
-        GlobalWindowData.Name,
+        GlobalApplicationData.ClassName,
+        GlobalApplicationData.Name,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -398,16 +524,12 @@ int CALLBACK WinMain
         NULL, NULL, hInstance, NULL
     );
 
-    if (!GlobalWindowData.Handle)
-    {
-        printf("ERROR: cannot create the main window.\n");
-        return -1;
-    }
+    InitializeD3dState(hInstance, GlobalApplicationData.EnableVSync);
 
-    InitializeD3dState(hInstance, GlobalWindowData.EnableVSync);
+    ShowWindow(GlobalApplicationData.Handle, nCmdShow);
+    UpdateWindow(GlobalApplicationData.Handle);
 
-    ShowWindow(GlobalWindowData.Handle, nCmdShow);
-    UpdateWindow(GlobalWindowData.Handle);
+    LoadDemoContent();
 
     MSG Message = {};
 
@@ -432,6 +554,8 @@ int CALLBACK WinMain
 
             Update(TimeDelta);
             Render();
+
+            // TODO: sleep the rest of the frame time to lock the frame rate
         }
     }
 
