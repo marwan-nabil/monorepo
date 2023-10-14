@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <stdio.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
+#include "platform\base_types.h"
+#include "platform\basic_defines.h"
 #include "disk.h"
 
 #include "disk.cpp"

@@ -3,7 +3,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
     AddSourceFile(BuildContext, "\\projects\\handmade_hero\\game.cpp");
 
     char SharedCompilerFlags[1024] = {};
-    StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
+    StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /I.. /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
 

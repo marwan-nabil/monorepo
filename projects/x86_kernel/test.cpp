@@ -6,17 +6,17 @@
 #include <math.h>
 #include <strsafe.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
-#include "..\..\platform\file_system\files.h"
-#include "..\..\drivers\fat12\fat12.h"
+#include "platform\base_types.h"
+#include "platform\basic_defines.h"
+#include "platform\file_system\files.h"
+#include "drivers\fat12\fat12.h"
 
-#include "..\..\math\scalar_conversions.cpp"
-#include "..\..\platform\strings\strings.cpp"
-#include "..\..\platform\file_system\files.cpp"
-#include "..\..\drivers\fat12\fat12_get.cpp"
-#include "..\..\drivers\fat12\fat12_set.cpp"
-#include "..\..\drivers\fat12\fat12_access_layer.cpp"
+#include "math\scalar_conversions.cpp"
+#include "platform\strings\strings.cpp"
+#include "platform\file_system\files.cpp"
+#include "drivers\fat12\fat12_get.cpp"
+#include "drivers\fat12\fat12_set.cpp"
+#include "drivers\fat12\fat12_access_layer.cpp"
 
 i32 main(i32 argc, char **argv)
 {

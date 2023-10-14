@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <io.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
-#include "..\..\platform\Strings\strings.cpp"
+#include "platform\base_types.h"
+#include "platform\basic_defines.h"
+#include "platform\Strings\strings.cpp"
 
 struct data_chunk
 {

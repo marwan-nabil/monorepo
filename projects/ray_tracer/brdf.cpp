@@ -1,5 +1,5 @@
 inline void
-LoadBrdfDataForMaterial(char *FileName, material *Material)
+LoadReflectionDataForMaterial(char *FileName, material *Material)
 {
     read_file_result TableFile = ReadFileIntoMemory(FileName);
     FreeFileMemory(TableFile.FileMemory);
@@ -27,6 +27,7 @@ GetMaterialReflectionColor
 
     if (!MaskIsAllZeroes(MaterialBrdfTableMask))
     {
+        // TODO: BRDF table lookup
     }
 
     if (!MaskIsAllZeroes(~MaterialBrdfTableMask))

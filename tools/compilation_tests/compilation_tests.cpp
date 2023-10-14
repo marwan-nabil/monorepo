@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <io.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
-#include "..\..\platform\console\console.h"
+#include "platform\base_types.h"
+#include "platform\basic_defines.h"
+#include "platform\console\console.h"
 
-#include "..\..\platform\console\console.cpp"
-#include "..\..\platform\strings\strings.cpp"
-#include "..\..\platform\processes\processes.cpp"
+#include "platform\console\console.cpp"
+#include "platform\strings\strings.cpp"
+#include "platform\processes\processes.cpp"
 
 console_context GlobalConsoleContext;
 

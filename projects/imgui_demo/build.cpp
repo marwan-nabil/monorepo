@@ -9,7 +9,7 @@ b32 BuildImguiDemo(build_context *BuildContext)
 
     AddSourceFile(BuildContext, "\\third_party\\imgui\\imgui*.cpp");
 
-    AddCompilerFlags(BuildContext, "/nologo /Zi /MD /utf-8");
+    AddCompilerFlags(BuildContext, "/nologo /I.. /Zi /MD /utf-8");
     AddCompilerFlags(BuildContext, "/DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
 

@@ -8,12 +8,12 @@
 #include <directxcolors.h>
 #include <dxgi.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
+#include "platform\base_types.h"
+#include "platform\basic_defines.h"
 
 #include "directx_demo.h"
 
-#include "..\..\math\floats.cpp"
+#include "math\floats.cpp"
 
 window_data GlobalWindowData;
 d3d_state GlobalD3dState;

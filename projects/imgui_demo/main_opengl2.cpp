@@ -7,18 +7,18 @@
 #include <stdio.h>
 #include <shellscalingapi.h>
 
-#include "..\..\platform\base_types.h"
-#include "..\..\platform\basic_defines.h"
-#include "..\..\platform\system\version.h"
-#include "..\..\platform\windows\dpi.h"
+#include "platform\base_types.h"
+#include "platform\basic_defines.h"
+#include "platform\system\version.h"
+#include "platform\windows\dpi.h"
 
-#include "..\..\third_party\imgui\imgui.h"
+#include "third_party\imgui\imgui.h"
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"
 
-#include "..\..\platform\system\version.cpp"
-#include "..\..\platform\windows\dpi.cpp"
+#include "platform\system\version.cpp"
+#include "platform\windows\dpi.cpp"
 
 #include "opengl2_backend.cpp"
 #include "win32_backend.cpp"
