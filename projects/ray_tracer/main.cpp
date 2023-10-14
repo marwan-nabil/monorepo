@@ -9,6 +9,7 @@
 
 #include "..\..\platform\base_types.h"
 #include "..\..\platform\basic_defines.h"
+#include "..\..\platform\file_system\files.h"
 
 #include "..\..\math\constants.h"
 #include "..\..\math\random.h"
@@ -29,11 +30,7 @@
 #include "..\..\math\simd\shared\math.h"
 #include "..\..\math\simd\shared\random.h"
 
-#define MATERIALS_HAVE_BRDF_TABLE 0
-
-#if MATERIALS_HAVE_BRDF_TABLE
-#   include "brdf.h"
-#endif
+#include "brdf.h"
 #include "ray_tracer.h"
 
 #include "..\..\math\random.cpp"
@@ -44,6 +41,8 @@
 #include "..\..\math\vector2.cpp"
 #include "..\..\math\vector3.cpp"
 #include "..\..\math\vector4.cpp"
+
+#include "..\..\platform\file_system\files.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
 #   include "..\..\math\simd\1_wide\conversions.cpp"
@@ -72,9 +71,7 @@
 #include "..\..\math\simd\shared\vector3.cpp"
 #include "..\..\math\simd\shared\random.cpp"
 
-#if MATERIALS_HAVE_BRDF_TABLE
-#   include "brdf.cpp"
-#endif
+#include "brdf.cpp"
 
 inline void
 WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, char *FileName)
@@ -182,8 +179,6 @@ RenderPixel
             {
                 plane *CurrentPlane = &World->Planes[PlaneIndex];
                 v3_lane PlaneNormal = V3LaneFromV3(CurrentPlane->Normal);
-                v3_lane PlaneTangent = V3LaneFromV3(CurrentPlane->Tangent);
-                v3_lane PlaneBiTangent = V3LaneFromV3(CurrentPlane->BiTangent);
                 f32_lane PlaneDistance = F32LaneFromF32(CurrentPlane->Distance);
 
                 f32_lane Denominator = InnerProduct(PlaneNormal, BounceDirection);
@@ -205,8 +200,8 @@ RenderPixel
                         ConditionalAssign(&MinimumHitDistanceFound, CurrentHitDistance, HitMask);
                         ConditionalAssign(&HitMaterialIndex, U32LaneFromU32(CurrentPlane->MaterialIndex), HitMask);
                         ConditionalAssign(&BounceNormal, PlaneNormal, HitMask);
-                        ConditionalAssign(&BounceTangent, PlaneTangent, HitMask);
-                        ConditionalAssign(&BounceBiTangent, PlaneBiTangent, HitMask);
+                        ConditionalAssign(&BounceTangent, V3LaneFromV3(CurrentPlane->Tangent), HitMask);
+                        ConditionalAssign(&BounceBiTangent, V3LaneFromV3(CurrentPlane->BiTangent), HitMask);
                     }
                 }
             }
@@ -255,7 +250,6 @@ RenderPixel
 
                         v3_lane SphereTangent = Normalize(CrossProduct(V3LaneFromV3(V3(0, 0, 1)), BounceNormal));
                         v3_lane SphereBiTangent = Normalize(CrossProduct(BounceNormal, SphereTangent));
-
                         ConditionalAssign(&BounceTangent, SphereTangent, HitMask);
                         ConditionalAssign(&BounceBiTangent, SphereBiTangent, HitMask);
                     }
@@ -303,21 +297,13 @@ RenderPixel
 
                 BounceDirection = Normalize(Lerp(RandomBounceDirection, PureBounceDirection, HitMaterialSpecularity));
 
-#if MATERIALS_HAVE_BRDF_TABLE
-                v3_lane HitMaterialReflectionColor = BrdfTableLookup
+                v3_lane HitMaterialReflectionColor = GetMaterialReflectionColor
                 (
-                    World->Materials, HitMaterialIndex,
+                    World->Materials, HitMaterialIndex, LaneMask,
                     BounceTangent, BounceBiTangent, BounceNormal,
                     -PreviousBounceDirection, BounceDirection
                 );
                 RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, HitMaterialReflectionColor);
-#else
-                v3_lane HitMaterialReflectionColor =
-                    LaneMask & GatherV3(World->Materials, ReflectionColor, HitMaterialIndex);
-
-                f32_lane CosineAttenuationFactor = Max(InnerProduct(-PreviousBounceDirection, BounceNormal), F32LaneFromF32(0));
-                RayBatchColorAttenuation = HadamardProduct(RayBatchColorAttenuation, CosineAttenuationFactor * HitMaterialReflectionColor);
-#endif
             }
         }
 
@@ -405,66 +391,59 @@ main(i32 argc, char **argv)
 {
     printf("RayCasting...");
 
-#if 0
-    brdf_table Table;
-    LoadBrdfTableFromFile("..\\data\\ray_tracer\\gray-plastic.binary", &Table);
-
-    v3 Normal = V3(0, 0, 1);
-    v3 Tangent = V3(1, 0, 0);
-    v3 Incoming = Normalize(V3(0, 1, 1));
-    v3 Outgoing = Normalize(V3(0, -1, 1));
-
-    v3 Color = BrdfTableLookup(&Table, Normal, Tangent, Incoming, Outgoing);
-#endif
-
     image_u32 OutputImage = CreateImage(1280, 720);
 
-    material MaterialsArray[7] = {};
-    MaterialsArray[0].EmmissionColor = V3(0.3, 0.4, 0.5);
-    MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
-    MaterialsArray[4].Specularity = 0.7;
-    MaterialsArray[5].Specularity = 0.85;
-    MaterialsArray[6].Specularity = 1;
+    material MaterialsArray[3] = {};
 
-#if MATERIALS_HAVE_BRDF_TABLE
-    LoadBrdfTableFromFile("..\\data\\ray_tracer\\red-fabric.binary", &MaterialsArray[0].BrdfTable);
-    LoadBrdfTableFromFile("..\\data\\ray_tracer\\gray-plastic.binary", &MaterialsArray[1].BrdfTable);
-    LoadBrdfTableFromFile("..\\data\\ray_tracer\\chrome.binary", &MaterialsArray[2].BrdfTable);
-    LoadNullBrdfTable(&MaterialsArray[3].BrdfTable);
-    LoadNullBrdfTable(&MaterialsArray[4].BrdfTable);
-    LoadNullBrdfTable(&MaterialsArray[5].BrdfTable);
-    LoadNullBrdfTable(&MaterialsArray[6].BrdfTable);
-#else
+    MaterialsArray[0].EmmissionColor = V3(0.3, 0.4, 0.5);
+
     MaterialsArray[1].ReflectionColor = V3(0.5, 0.5, 0.5);
+    LoadBrdfDataForMaterial("..\\data\\ray_tracer\\cayman.astm", &MaterialsArray[1]);
+
     MaterialsArray[2].ReflectionColor = V3(0.7, 0.5, 0.3);
-    MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
-    MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
-    MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
-#endif // MATERIALS_HAVE_BRDF_TABLE
+    LoadBrdfDataForMaterial("..\\data\\ray_tracer\\garnet_red.astm", &MaterialsArray[2]);
+
+    // MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
+
+    // MaterialsArray[4].Specularity = 0.7;
+    // MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
+
+    // MaterialsArray[5].Specularity = 0.85;
+    // MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
+
+    // MaterialsArray[6].Specularity = 1;
+    // MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
 
     plane PlanesArray[1] = {};
+
     PlanesArray[0].MaterialIndex = 1;
     PlanesArray[0].Normal = V3(0, 0, 1);
     PlanesArray[0].Tangent = V3(1, 0, 0);
     PlanesArray[0].BiTangent = V3(0, 1, 0);
     PlanesArray[0].Distance = 0;
+
     // PlanesArray[1].MaterialIndex = 1;
     // PlanesArray[1].Normal = V3(1, 0, 0);
     // PlanesArray[1].Distance = 2;
 
     sphere SpheresArray[1] = {};
+
     SpheresArray[0].MaterialIndex = 2;
     SpheresArray[0].Position = V3(0, 0, 0);
     SpheresArray[0].Radius = 1;
+
     // SpheresArray[1].MaterialIndex = 3;
     // SpheresArray[1].Position = V3(3, -2, 0);
     // SpheresArray[1].Radius = 1;
+
     // SpheresArray[2].MaterialIndex = 4;
     // SpheresArray[2].Position = V3(-2, -1, 2);
     // SpheresArray[2].Radius = 1;
+
     // SpheresArray[3].MaterialIndex = 5;
     // SpheresArray[3].Position = V3(1, -1, 3);
     // SpheresArray[3].Radius = 1;
+
     // SpheresArray[4].MaterialIndex = 6;
     // SpheresArray[4].Position = V3(-2, 3, 0);
     // SpheresArray[4].Radius = 2;

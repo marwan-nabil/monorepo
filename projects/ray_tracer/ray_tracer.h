@@ -35,14 +35,10 @@ struct image_u32
 
 struct material
 {
-    f32 Specularity;
     v3 EmmissionColor;
-
-#if MATERIALS_HAVE_BRDF_TABLE
-    brdf_table BrdfTable;
-#else
     v3 ReflectionColor;
-#endif // MATERIALS_HAVE_BRDF_TABLE
+    brdf_table *BrdfTable;
+    f32 Specularity;
 };
 
 struct plane
