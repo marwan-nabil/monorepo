@@ -2,7 +2,7 @@ b32 BuildDirectxDemo(build_context *BuildContext)
 {
     AddSourceFile(BuildContext, "\\projects\\directx_demo\\main.cpp");
 
-    AddCompilerFlags(BuildContext, "/nologo /I.. /FC /Oi /GR- /EHa- /Zi /MD");
+    AddCompilerFlags(BuildContext, "/nologo /I.. /FC /Oi /O2 /GR- /EHa- /Zi /MD");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
 

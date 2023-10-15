@@ -36,7 +36,7 @@ static void Update(f32 TimeDelta)
     GlobalD3dState.ViewMatrix = DirectX::XMMatrixLookAtLH(EyePosition, FocusPoint, UpDirection);
     GlobalD3dState.DeviceContext->UpdateSubresource
     (
-        GlobalD3dState.ConstantBuffers[CBT_FRAME],
+        GlobalD3dState.ConstantBuffers[CBT_VIEW_MATRIX],
         0,
         NULL,
         &GlobalD3dState.ViewMatrix,
@@ -46,7 +46,6 @@ static void Update(f32 TimeDelta)
 
     DirectX::XMVECTOR RotationAxis = DirectX::XMVectorSet(0, 1, 1, 0);
     GlobalSceneData.CubeRotationAngle += 90.0f * TimeDelta;
-
     GlobalD3dState.WorldMatrix = DirectX::XMMatrixRotationAxis
     (
         RotationAxis,
@@ -55,7 +54,7 @@ static void Update(f32 TimeDelta)
 
     GlobalD3dState.DeviceContext->UpdateSubresource
     (
-        GlobalD3dState.ConstantBuffers[CBT_OBJECT],
+        GlobalD3dState.ConstantBuffers[CBT_WORLD_MATRIX],
         0,
         NULL,
         &GlobalD3dState.WorldMatrix,
@@ -64,20 +63,48 @@ static void Update(f32 TimeDelta)
     );
 }
 
-static void ClearViews(const FLOAT ClearColor[4], FLOAT ClearDepth, UINT8 ClearStencil)
+static void Render()
 {
-    GlobalD3dState.DeviceContext->ClearRenderTargetView(GlobalD3dState.RenderTargetView, ClearColor);
-    GlobalD3dState.DeviceContext->ClearDepthStencilView
+    Assert(GlobalD3dState.Device);
+    Assert(GlobalD3dState.DeviceContext);
+
+    ID3D11DeviceContext *DC = GlobalD3dState.DeviceContext;
+
+    DC->ClearRenderTargetView
+    (
+        GlobalD3dState.RenderTargetView,
+        DirectX::Colors::CornflowerBlue
+    );
+
+    DC->ClearDepthStencilView
     (
         GlobalD3dState.DepthStencilView,
         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-        ClearDepth,
-        ClearStencil
+        1.0F,
+        0
     );
-}
 
-static void Present()
-{
+    u32 VertexStride = sizeof(vertex);
+    u32 Offset = 0;
+
+    DC->IASetVertexBuffers(0, 1, &GlobalD3dState.VertexBuffer, &VertexStride, &Offset);
+    DC->IASetInputLayout(GlobalD3dState.InputLayout);
+    DC->IASetIndexBuffer(GlobalD3dState.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    DC->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    DC->VSSetShader(GlobalD3dState.VertexShader, NULL, 0);
+    DC->VSSetConstantBuffers(0, 3, GlobalD3dState.ConstantBuffers);
+
+    DC->RSSetState(GlobalD3dState.RasterizerState);
+    DC->RSSetViewports(1, &GlobalD3dState.ViewPort);
+
+    DC->PSSetShader(GlobalD3dState.PixelShader, NULL, 0);
+
+    DC->OMSetRenderTargets(1, &GlobalD3dState.RenderTargetView, GlobalD3dState.DepthStencilView);
+    DC->OMSetDepthStencilState(GlobalD3dState.DepthStencilState, 1);
+
+    DC->DrawIndexed(ArrayCount(GlobalSceneData.CubeVertexIndices), 0, 0);
+
     if (GlobalApplicationData.EnableVSync)
     {
         GlobalD3dState.SwapChain->Present(1, 0);
@@ -88,23 +115,17 @@ static void Present()
     }
 }
 
-static void Render()
+void UnloadDemoContent()
 {
-    Assert(GlobalD3dState.Device);
-    Assert(GlobalD3dState.DeviceContext);
-
-    ClearViews(DirectX::Colors::CornflowerBlue, 1.0f, 0);
-
-    u32 VertexStride = sizeof(vertex);
-    u32 Offset = 0;
-
-    GlobalD3dState.DeviceContext->IASetVertexBuffers(0, 1, &GlobalD3dState.VertexBuffer, &VertexStride, &Offset);
-    GlobalD3dState.DeviceContext->IASetInputLayout(GlobalD3dState.InputLayout);
-    GlobalD3dState.DeviceContext->IASetIndexBuffer(GlobalD3dState.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    GlobalD3dState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // g_d3dDeviceContext->VSSetShader( g_d3dVertexShader, nullptr, 0 );
-    // g_d3dDeviceContext->VSSetConstantBuffers(0, 3, g_d3dConstantBuffers );
+    d3d_state *D3D = &GlobalD3dState;
+    SafeReleaseComObject((IUnknown **)&D3D->ConstantBuffers[CBT_PROJECTION_MATRIX]);
+    SafeReleaseComObject((IUnknown **)&D3D->ConstantBuffers[CBT_VIEW_MATRIX]);
+    SafeReleaseComObject((IUnknown **)&D3D->ConstantBuffers[CBT_WORLD_MATRIX]);
+    SafeReleaseComObject((IUnknown **)&D3D->IndexBuffer);
+    SafeReleaseComObject((IUnknown **)&D3D->VertexBuffer);
+    SafeReleaseComObject((IUnknown **)&D3D->InputLayout);
+    SafeReleaseComObject((IUnknown **)&D3D->VertexShader);
+    SafeReleaseComObject((IUnknown **)&D3D->PixelShader);
 }
 
 static void LoadDemoContent()
@@ -132,6 +153,7 @@ static void LoadDemoContent()
     IndexBufferDescriptor.ByteWidth = sizeof(u16) * ArrayCount(GlobalSceneData.CubeVertexIndices);
     IndexBufferDescriptor.CPUAccessFlags = 0;
     IndexBufferDescriptor.Usage = D3D11_USAGE_DEFAULT;
+
     SubResourceData.pSysMem = (void *)GlobalSceneData.CubeVertexIndices;
 
     Result = GlobalD3dState.Device->CreateBuffer
@@ -151,21 +173,21 @@ static void LoadDemoContent()
     (
         &ConstantBufferDescriptor,
         NULL,
-        &GlobalD3dState.ConstantBuffers[CBT_APPLICATION]
+        &GlobalD3dState.ConstantBuffers[CBT_PROJECTION_MATRIX]
     );
 
     Result = GlobalD3dState.Device->CreateBuffer
     (
         &ConstantBufferDescriptor,
         NULL,
-        &GlobalD3dState.ConstantBuffers[CBT_FRAME]
+        &GlobalD3dState.ConstantBuffers[CBT_VIEW_MATRIX]
     );
 
     Result = GlobalD3dState.Device->CreateBuffer
     (
         &ConstantBufferDescriptor,
         NULL,
-        &GlobalD3dState.ConstantBuffers[CBT_OBJECT]
+        &GlobalD3dState.ConstantBuffers[CBT_WORLD_MATRIX]
     );
 
     ID3DBlob *VertexShaderBlob;
@@ -180,7 +202,6 @@ static void LoadDemoContent()
 
     ID3DBlob *PixelShaderBlob;
     Result = D3DReadFileToBlob(L"pixel_shader.cso", &PixelShaderBlob);
-
     Result = GlobalD3dState.Device->CreatePixelShader
     (
         PixelShaderBlob->GetBufferPointer(),
@@ -189,11 +210,22 @@ static void LoadDemoContent()
         &GlobalD3dState.PixelShader
     );
 
-    D3D11_INPUT_ELEMENT_DESC InputLayoutDescriptors[] =
-    {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OffsetOf(vertex, Position), D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OffsetOf(vertex, Color), D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
+    D3D11_INPUT_ELEMENT_DESC InputLayoutDescriptors[2] = {};
+    InputLayoutDescriptors[0].SemanticName = "POSITION";
+    InputLayoutDescriptors[0].SemanticIndex = 0;
+    InputLayoutDescriptors[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    InputLayoutDescriptors[0].InputSlot = 0;
+    InputLayoutDescriptors[0].AlignedByteOffset = OffsetOf(vertex, Position);
+    InputLayoutDescriptors[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    InputLayoutDescriptors[0].InstanceDataStepRate = 0;
+
+    InputLayoutDescriptors[1].SemanticName = "COLOR";
+    InputLayoutDescriptors[1].SemanticIndex = 0;
+    InputLayoutDescriptors[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    InputLayoutDescriptors[1].InputSlot = 0;
+    InputLayoutDescriptors[1].AlignedByteOffset = OffsetOf(vertex, Color);
+    InputLayoutDescriptors[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    InputLayoutDescriptors[1].InstanceDataStepRate = 0;
 
     Result = GlobalD3dState.Device->CreateInputLayout
     (
@@ -206,8 +238,6 @@ static void LoadDemoContent()
 
     SafeReleaseComObject((IUnknown **)&VertexShaderBlob);
     SafeReleaseComObject((IUnknown **)&PixelShaderBlob);
-
-
 
     RECT ClientRect;
     GetClientRect(GlobalApplicationData.Handle, &ClientRect);
@@ -225,7 +255,7 @@ static void LoadDemoContent()
 
     GlobalD3dState.DeviceContext->UpdateSubresource
     (
-        GlobalD3dState.ConstantBuffers[CBT_APPLICATION],
+        GlobalD3dState.ConstantBuffers[CBT_PROJECTION_MATRIX],
         0,
         NULL,
         &GlobalD3dState.ProjectionMatrix,
@@ -235,7 +265,7 @@ static void LoadDemoContent()
 }
 
 static void
-InitializeGlobalState()
+InitializeApplicationAndSceneData()
 {
     GlobalApplicationData.Width = 1280;
     GlobalApplicationData.Height = 720;
@@ -243,18 +273,14 @@ InitializeGlobalState()
     GlobalApplicationData.ClassName = "directx_demo_window_class";
     GlobalApplicationData.EnableVSync = TRUE;
 
-    vertex CubeVertices[8] =
-    {
-        {DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f)},
-        {DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f), DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f)},
-        {DirectX::XMFLOAT3(1.0f, 1.0f, -1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 0.0f)},
-        {DirectX::XMFLOAT3(1.0f, -1.0f, -1.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f)},
-        {DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f)},
-        {DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 1.0f, 1.0f)},
-        {DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f)},
-        {DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 1.0f)}
-    };
-    memcpy(GlobalSceneData.CubeVertices, CubeVertices, sizeof(CubeVertices));
+    GlobalSceneData.CubeVertices[0] = {DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f)};
+    GlobalSceneData.CubeVertices[1] = {DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f), DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f)};
+    GlobalSceneData.CubeVertices[2] = {DirectX::XMFLOAT3(1.0f, 1.0f, -1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 0.0f)};
+    GlobalSceneData.CubeVertices[3] = {DirectX::XMFLOAT3(1.0f, -1.0f, -1.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f)};
+    GlobalSceneData.CubeVertices[4] = {DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f)};
+    GlobalSceneData.CubeVertices[5] = {DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 1.0f, 1.0f)};
+    GlobalSceneData.CubeVertices[6] = {DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f)};
+    GlobalSceneData.CubeVertices[7] = {DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 1.0f)};
 
     u16 CubeVertexIndices[36] =
     {
@@ -333,7 +359,21 @@ DXGI_RATIONAL QueryRefreshRate(u32 ScreenWidth, u32 ScreenHeight, b32 EnableVSyn
 }
 
 static void
-InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
+CleanupD3dState()
+{
+    d3d_state *D3D = &GlobalD3dState;
+    SafeReleaseComObject((IUnknown **)&D3D->DepthStencilView);
+    SafeReleaseComObject((IUnknown **)&D3D->RenderTargetView);
+    SafeReleaseComObject((IUnknown **)&D3D->DepthStencilBuffer);
+    SafeReleaseComObject((IUnknown **)&D3D->DepthStencilState);
+    SafeReleaseComObject((IUnknown **)&D3D->RasterizerState);
+    SafeReleaseComObject((IUnknown **)&D3D->SwapChain);
+    SafeReleaseComObject((IUnknown **)&D3D->DeviceContext);
+    SafeReleaseComObject((IUnknown **)&D3D->Device);
+}
+
+static void
+InitializeD3dState()
 {
     Assert(GlobalApplicationData.Handle);
 
@@ -350,7 +390,7 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
     SwapChainDescriptor.BufferDesc.Height = ClientAreaHeight;
     SwapChainDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     SwapChainDescriptor.BufferDesc.RefreshRate =
-        QueryRefreshRate(ClientAreaWidth, ClientAreaHeight, EnableVSync);
+        QueryRefreshRate(ClientAreaWidth, ClientAreaHeight, GlobalApplicationData.EnableVSync);
     SwapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     SwapChainDescriptor.OutputWindow = GlobalApplicationData.Handle;
     SwapChainDescriptor.SampleDesc.Count = 1;
@@ -375,10 +415,17 @@ InitializeD3dState(HINSTANCE Instance, b32 EnableVSync)
 
     HRESULT Result = D3D11CreateDeviceAndSwapChain
     (
-        NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, DeviceCreationFlags,
-        FeatureLevelOptions, ArrayCount(FeatureLevelOptions), D3D11_SDK_VERSION,
-        &SwapChainDescriptor, &GlobalD3dState.SwapChain,
-        &GlobalD3dState.Device, &FeatureLevelPicked,
+        NULL,
+        D3D_DRIVER_TYPE_HARDWARE,
+        NULL,
+        DeviceCreationFlags,
+        FeatureLevelOptions,
+        ArrayCount(FeatureLevelOptions), 
+        D3D11_SDK_VERSION,
+        &SwapChainDescriptor,
+        &GlobalD3dState.SwapChain,
+        &GlobalD3dState.Device,
+        &FeatureLevelPicked,
         &GlobalD3dState.DeviceContext
     );
 
@@ -485,19 +532,19 @@ MainWindowCallback(HWND Window, u32 Message, WPARAM WParam, LPARAM LParam)
 
 int CALLBACK WinMain
 (
-    HINSTANCE hInstance,
+    HINSTANCE Instance,
     HINSTANCE hPrevInstance,
     LPSTR lpCmdLine,
     i32 nCmdShow
 )
 {
-    InitializeGlobalState();
+    InitializeApplicationAndSceneData();
 
     WNDCLASSEX WindowClass = {};
     WindowClass.cbSize = sizeof(WNDCLASSEX);
     WindowClass.style = CS_HREDRAW | CS_VREDRAW;
     WindowClass.lpfnWndProc = &MainWindowCallback;
-    WindowClass.hInstance = hInstance;
+    WindowClass.hInstance = Instance;
     WindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     WindowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     WindowClass.lpszMenuName = NULL;
@@ -521,10 +568,10 @@ int CALLBACK WinMain
         CW_USEDEFAULT,
         WindowRectangle.right - WindowRectangle.left,
         WindowRectangle.bottom - WindowRectangle.top,
-        NULL, NULL, hInstance, NULL
+        NULL, NULL, Instance, NULL
     );
 
-    InitializeD3dState(hInstance, GlobalApplicationData.EnableVSync);
+    InitializeD3dState();
 
     ShowWindow(GlobalApplicationData.Handle, nCmdShow);
     UpdateWindow(GlobalApplicationData.Handle);
@@ -558,6 +605,9 @@ int CALLBACK WinMain
             // TODO: sleep the rest of the frame time to lock the frame rate
         }
     }
+
+    UnloadDemoContent();
+    CleanupD3dState();
 
     return (i32)Message.wParam;
 }
