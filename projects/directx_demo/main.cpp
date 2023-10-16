@@ -420,7 +420,7 @@ InitializeD3dState()
         NULL,
         DeviceCreationFlags,
         FeatureLevelOptions,
-        ArrayCount(FeatureLevelOptions), 
+        ArrayCount(FeatureLevelOptions),
         D3D11_SDK_VERSION,
         &SwapChainDescriptor,
         &GlobalD3dState.SwapChain,

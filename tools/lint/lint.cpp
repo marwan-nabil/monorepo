@@ -219,7 +219,7 @@ b32 LintFile(char *FileRelativePath)
         return FALSE;
     }
 
-    FreeFileMemory(SourceFile.FileMemory);
+    FreeFileMemory(SourceFile);
     VirtualFree(BufferMemory, 0, MEM_RELEASE);
     VirtualFree(OutputFileMemory, 0, MEM_RELEASE);
 

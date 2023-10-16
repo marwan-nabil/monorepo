@@ -14,26 +14,30 @@ b32 BuildX86Kernel(build_context *BuildContext)
 
     BuildSuccess = BuildSuccess && CompileAssembly(BuildContext);
 
-    ClearBuildContext(BuildContext);
+    fat12_disk *Fat12Disk = Fat12CreateDiskImage();
 
-    fat12_disk *Fat12Disk = Fat12CreateRamDisk();
+    ClearBuildContext(BuildContext);
+    SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
+    read_file_result BootSectorImageFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
+    Fat12WriteBootSector(Fat12Disk, BootSectorImageFile.FileMemory);
+    FreeFileMemory(BootSectorImageFile);
+
+    ClearBuildContext(BuildContext);
     SetOuputBinaryPath(BuildContext, "\\x86_kernel.img");
     read_file_result KernelImageFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
-    AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
-    FreeFileMemory(KernelImageFile.FileMemory);
+    Fat12AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
+    FreeFileMemory(KernelImageFile);
 
     ClearBuildContext(BuildContext);
-
     SetOuputBinaryPath(BuildContext, "\\floppy.img");
+    BuildSuccess = BuildSuccess && WriteFileFromMemory
+    (
+        BuildContext->OutputBinaryPath,
+        Fat12Disk,
+        sizeof(fat12_disk)
+    );
+    VirtualFree(Fat12Disk, 0, MEM_RELEASE);
 
-    WriteFileFromMemory(BuildContext->OutputBinaryPath, Fat12Disk, sizeof(fat12_disk));
-    FreeFileMemory(Fat12Disk);
-
-    char SourceBinaryFilePath[1024] = {};
-    StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), BuildContext->OutputDirectoryPath);
-    StringCchCatA(SourceBinaryFilePath, ArrayCount(SourceBinaryFilePath), "\\boot_sector.img");
-
-    BuildSuccess = BuildSuccess && WriteBinaryFileOverAnother(BuildContext->OutputBinaryPath, SourceBinaryFilePath, 0);
     return BuildSuccess;
 }
 

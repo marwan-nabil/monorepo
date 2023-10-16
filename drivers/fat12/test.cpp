@@ -10,13 +10,14 @@
 #include "platform\console\console.h"
 
 #include "fat12.h"
+#include "fat12_interface.h"
 
 #include "platform\console\console.cpp"
 #include "platform\strings\strings.cpp"
 
 #include "fat12_get.cpp"
 #include "fat12_set.cpp"
-#include "fat12_access_layer.cpp"
+#include "fat12_interface.cpp"
 
 struct ram_file
 {
@@ -66,21 +67,21 @@ i32 main(i32 argc, char **argv)
     ram_file File5 = CreateDummyFile("File5", "txt", 400, 0xFFFFFFFF);
     ram_file File6 = CreateDummyFile("File6", "txt", 8000, 0xFFFFFFFF);
 
-    u16 File1Cluster = AddFileToRootDirectory(Disk, File1.Memory, File1.Size, File1.Name, File1.Extension);
-    u16 File2Cluster = AddFileToRootDirectory(Disk, File2.Memory, File2.Size, File2.Name, File2.Extension);
+    u16 File1Cluster = Fat12AddFileToRootDirectory(Disk, File1.Memory, File1.Size, File1.Name, File1.Extension);
+    u16 File2Cluster = Fat12AddFileToRootDirectory(Disk, File2.Memory, File2.Size, File2.Name, File2.Extension);
 
     u16 Folder1Cluster = AddDirectoryToRootDirectory(Disk, "folder1");
 
-    ListRootDirectory(Disk);
+    Fat12ListRootDirectory(Disk);
 
     u16 File3Cluster = AddFileToDirectory(Disk, Folder1Cluster, File3.Memory, File3.Size, File3.Name, File3.Extension);
     u16 SubDir0Cluster = AddDirectoryToDirectory(Disk, Folder1Cluster, "SubDir0");
 
-    ListDirectory(Disk, Folder1Cluster);
+    Fat12ListDirectory(Disk, Folder1Cluster);
 
-    CreateFilePathSegmentList("\\aaaa\\bbbb\\cccc\\ddddd");
+    Fat12CreateFilePathSegmentList("\\aaaa\\bbbb\\cccc\\ddddd");
 
-    directory_entry *File3DirectoryEntry = GetDirectoryEntryOfFileByPath(Disk, "\\folder1\\File3.txt");
+    directory_entry *File3DirectoryEntry = Fat12GetDirectoryEntryOfFile(Disk, "\\folder1\\File3.txt");
 
     free(Disk);
     free(File1.Memory);

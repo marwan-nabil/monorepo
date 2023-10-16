@@ -110,30 +110,6 @@ u16 AddFileToDirectory
     return FirstLogicalCluster;
 }
 
-u16 AddFileToRootDirectory
-(
-    fat12_disk *Disk, void *Memory, u32 Size, char *FileName, char *Extension
-)
-{
-    directory_entry *FreeDirectoryEntry = GetFirstFreeEntryInRootDirectory(Disk);
-    if (!FreeDirectoryEntry)
-    {
-        return 0;
-    }
-
-    u16 FirstLogicalCluster = AllocateSectorsFromMemory(Disk, Memory, Size);
-    if (FirstLogicalCluster)
-    {
-        memcpy(FreeDirectoryEntry->FileName, FileName, 8);
-        memcpy(FreeDirectoryEntry->FileExtension, Extension, 3);
-        FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_NORMAL;
-        FreeDirectoryEntry->FileSize = Size;
-        FreeDirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
-    }
-
-    return FirstLogicalCluster;
-}
-
 u16 AddDirectoryToDirectory
 (
     fat12_disk *Disk, u16 DirectoryLogicalCluster, char *DirectoryName

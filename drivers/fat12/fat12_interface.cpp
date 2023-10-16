@@ -1,6 +1,7 @@
-inline void
-FreeFilePathSegmentList(file_path_node *RootNode)
+static void
+Fat12FreeFilePathSegmentList(file_path_node *RootNode)
 {
+    // TODO: move to platform/file_system as a generic implementation
     file_path_node *CurrentNode = RootNode;
     file_path_node *ChildNode;
 
@@ -12,9 +13,10 @@ FreeFilePathSegmentList(file_path_node *RootNode)
     }
 }
 
-inline file_path_node *
-CreateFilePathSegmentList(char *FileFullPath)
+static file_path_node *
+Fat12CreateFilePathSegmentList(char *FileFullPath)
 {
+    // TODO: move to platform/file_system as a generic implementation
     char LocalPathBuffer[FAT12_MAX_PATH] = {};
     StringCchCat(LocalPathBuffer, ArrayCount(LocalPathBuffer), FileFullPath);
 
@@ -58,10 +60,10 @@ CreateFilePathSegmentList(char *FileFullPath)
     return LastFilePathNode;
 }
 
-inline directory_entry *
-GetDirectoryEntryOfFileByPath(fat12_disk *Disk, char *FullFilePath)
+static directory_entry *
+Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePath)
 {
-    file_path_node *CurrentNode = CreateFilePathSegmentList(FullFilePath);
+    file_path_node *CurrentNode = Fat12CreateFilePathSegmentList(FullFilePath);
     directory_entry *CurrentEntry =
         GetDirectoryEntryOfFileInRootDirectory(Disk, CurrentNode->FileName, CurrentNode->FileExtension);
 
@@ -94,7 +96,8 @@ GetDirectoryEntryOfFileByPath(fat12_disk *Disk, char *FullFilePath)
     return NULL;
 }
 
-void ListDirectorySector(sector *Sector)
+static void
+Fat12ListDirectorySector(sector *Sector)
 {
     for
     (
@@ -106,7 +109,6 @@ void ListDirectorySector(sector *Sector)
         directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
         if (DirectoryEntry->FileName[0] == FAT12_FILENAME_EMPTY_SLOT)
         {
-            // printf("    > empty entry.\n");
         }
         else if (DirectoryEntry->FileName[0] == FAT12_FILENAME_DELETED_SLOT)
         {
@@ -116,13 +118,16 @@ void ListDirectorySector(sector *Sector)
         {
             if (DirectoryEntry->FileAttributes == FAT12_FILE_ATTRIBUTE_NORMAL)
             {
-                char FileNameString[13];
+                char FileNameString[9];
+                char FileExtensionString[4];
 
                 memcpy(FileNameString, DirectoryEntry->FileName, 8);
-                memcpy(FileNameString + 8, (void *)".", 1);
-                memcpy(FileNameString + 9, DirectoryEntry->FileExtension, 3);
-                FileNameString[12] = 0;
-                printf("    FILE:   %s\n", FileNameString);
+                memcpy(FileExtensionString, DirectoryEntry->FileExtension, 3);
+
+                FileNameString[8] = 0;
+                FileExtensionString[3] = 0;
+
+                printf("    FILE:   %s.%s\n", FileNameString, FileExtensionString);
             }
             else if (DirectoryEntry->FileAttributes == FAT12_FILE_ATTRIBUTE_DIRECTORY)
             {
@@ -136,7 +141,7 @@ void ListDirectorySector(sector *Sector)
     }
 }
 
-void ListDirectory(fat12_disk *Disk, u16 LogicalCluster)
+static void Fat12ListDirectory(fat12_disk *Disk, u16 LogicalCluster)
 {
     printf("\nlist directory contents:\n");
 
@@ -146,7 +151,7 @@ void ListDirectory(fat12_disk *Disk, u16 LogicalCluster)
     while (1)
     {
         sector *PhysicalSector = GetSector(Disk, CurrentLogicalCluster);
-        ListDirectorySector(PhysicalSector);
+        Fat12ListDirectorySector(PhysicalSector);
 
         if (IsFatEntryEndOfFile(CurrentFatEntry))
         {
@@ -160,7 +165,7 @@ void ListDirectory(fat12_disk *Disk, u16 LogicalCluster)
     }
 }
 
-void ListRootDirectory(fat12_disk *Disk)
+static void Fat12ListRootDirectory(fat12_disk *Disk)
 {
     printf("\nlist root directory contents:\n");
 
@@ -169,11 +174,42 @@ void ListRootDirectory(fat12_disk *Disk)
     for (u32 SectorIndex = 0; SectorIndex < ArrayCount(RootDirectory->Sectors); SectorIndex++)
     {
         sector *Sector = &RootDirectory->Sectors[SectorIndex];
-        ListDirectorySector(Sector);
+        Fat12ListDirectorySector(Sector);
     }
 }
 
-fat12_disk *Fat12CreateRamDisk()
+static u16
+Fat12AddFileToRootDirectory
+(
+    fat12_disk *Disk, void *Memory, u32 Size, char *FileName, char *Extension
+)
+{
+    directory_entry *FreeDirectoryEntry = GetFirstFreeEntryInRootDirectory(Disk);
+    if (!FreeDirectoryEntry)
+    {
+        return 0;
+    }
+
+    u16 FirstLogicalCluster = AllocateSectorsFromMemory(Disk, Memory, Size);
+    if (FirstLogicalCluster)
+    {
+        memcpy(FreeDirectoryEntry->FileName, FileName, 8);
+        memcpy(FreeDirectoryEntry->FileExtension, Extension, 3);
+        FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_NORMAL;
+        FreeDirectoryEntry->FileSize = Size;
+        FreeDirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
+    }
+
+    return FirstLogicalCluster;
+}
+
+static void
+Fat12WriteBootSector(fat12_disk *Disk, void *BootSector)
+{
+    memcpy(&Disk->BootSector, BootSector, FAT12_DISK_SECTOR_SIZE);
+}
+
+static fat12_disk *Fat12CreateDiskImage()
 {
     fat12_disk *Disk = (fat12_disk *)VirtualAlloc
     (

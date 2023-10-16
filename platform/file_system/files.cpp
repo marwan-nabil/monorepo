@@ -1,8 +1,8 @@
-void FreeFileMemory(void *FileMemory)
+void FreeFileMemory(read_file_result File)
 {
-    if (FileMemory)
+    if (File.FileMemory)
     {
-        VirtualFree(FileMemory, 0, MEM_RELEASE);
+        VirtualFree(File.FileMemory, 0, MEM_RELEASE);
     }
 }
 
@@ -32,7 +32,7 @@ read_file_result ReadFileIntoMemory(char *FilePath)
                 }
                 else
                 {
-                    FreeFileMemory(FileMemory);
+                    VirtualFree(FileMemory, 0, MEM_RELEASE);
                 }
             }
         }
@@ -105,8 +105,8 @@ b32 WriteBinaryFileOverAnother(char *DestinationBinaryFilePath, char *SourceBina
         free(NewFileMemory);
     }
 
-    FreeFileMemory(SourceBinary.FileMemory);
-    FreeFileMemory(DestinationBinary.FileMemory);
+    FreeFileMemory(SourceBinary);
+    FreeFileMemory(DestinationBinary);
 
     return Result;
 }

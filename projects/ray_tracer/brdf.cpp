@@ -2,7 +2,7 @@ inline void
 LoadReflectionDataForMaterial(char *FileName, material *Material)
 {
     read_file_result TableFile = ReadFileIntoMemory(FileName);
-    FreeFileMemory(TableFile.FileMemory);
+    FreeFileMemory(TableFile);
 }
 
 inline v3_lane

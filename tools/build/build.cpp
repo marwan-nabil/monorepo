@@ -12,6 +12,7 @@
 #include "platform\console\console.h"
 #include "platform\file_system\files.h"
 #include "drivers\fat12\fat12.h"
+#include "drivers\fat12\fat12_interface.h"
 
 #include "build.h"
 
@@ -23,7 +24,7 @@
 #include "platform\processes\processes.cpp"
 #include "drivers\fat12\fat12_get.cpp"
 #include "drivers\fat12\fat12_set.cpp"
-#include "drivers\fat12\fat12_access_layer.cpp"
+#include "drivers\fat12\fat12_interface.cpp"
 
 #include "build_helpers.cpp"
 
@@ -135,10 +136,12 @@ int main(int argc, char **argv)
 
     if (BuildSuccess)
     {
+        ConsolePrintColored("INFO: Build Succeeded.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
         return 0;
     }
     else
     {
+        ConsolePrintColored("ERROR: Build Failed.\n", &GlobalConsoleContext, FOREGROUND_RED);
         return 1;
     }
 }

@@ -36,10 +36,10 @@ struct d3d_state
 
     ID3D11DepthStencilState *DepthStencilState;
     ID3D11RasterizerState *RasterizerState;
-    
+
     ID3D11DepthStencilView *DepthStencilView;
     ID3D11RenderTargetView *RenderTargetView;
-    
+
     D3D11_VIEWPORT ViewPort;
     DirectX::XMMATRIX WorldMatrix;
     DirectX::XMMATRIX ViewMatrix;
