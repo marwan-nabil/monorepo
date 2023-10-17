@@ -1,16 +1,16 @@
-void AddCompilerFlags(build_context *BuildContext, const char *Flags)
+static void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 {
     StringCchCatA(BuildContext->CompilerFlags, ArrayCount(BuildContext->CompilerFlags), Flags);
     StringCchCatA(BuildContext->CompilerFlags, ArrayCount(BuildContext->CompilerFlags), " ");
 }
 
-void AddLinkerFlags(build_context *BuildContext, const char *Flags)
+static void AddLinkerFlags(build_context *BuildContext, const char *Flags)
 {
     StringCchCatA(BuildContext->LinkerFlags, ArrayCount(BuildContext->LinkerFlags), Flags);
     StringCchCatA(BuildContext->LinkerFlags, ArrayCount(BuildContext->LinkerFlags), " ");
 }
 
-void AddSourceFile(build_context *BuildContext, const char *SourceFile)
+static void AddSourceFile(build_context *BuildContext, const char *SourceFile)
 {
     StringCchCatA
     (
@@ -22,7 +22,7 @@ void AddSourceFile(build_context *BuildContext, const char *SourceFile)
     StringCchCatA(BuildContext->SourcesString, ArrayCount(BuildContext->SourcesString), " ");
 }
 
-void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryName)
+static void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryName)
 {
     StringCchCatA
     (
@@ -38,7 +38,7 @@ void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryNam
     );
 }
 
-void ClearBuildContext(build_context *BuildContext)
+static void ClearBuildContext(build_context *BuildContext)
 {
     *BuildContext->CompilerFlags = {};
     *BuildContext->LinkerFlags = {};
@@ -46,7 +46,7 @@ void ClearBuildContext(build_context *BuildContext)
     *BuildContext->SourcesString = {};
 }
 
-void DisplayHelp()
+static void DisplayHelp()
 {
     printf("INFO: Available build targets:\n");
     printf("          build help\n");
@@ -63,7 +63,7 @@ void DisplayHelp()
     printf("          build x86_kernel_tests\n");
 }
 
-b32 CompileShader(build_context *BuildContext)
+static b32 CompileShader(build_context *BuildContext)
 {
     char CompilerCommand[1024];
     *CompilerCommand = {};
@@ -83,7 +83,7 @@ b32 CompileShader(build_context *BuildContext)
     return Result;
 }
 
-b32 CompileCpp(build_context *BuildContext)
+static b32 CompileCpp(build_context *BuildContext)
 {
     char CompilerCommand[1024];
     *CompilerCommand = {};
@@ -106,7 +106,7 @@ b32 CompileCpp(build_context *BuildContext)
     return Result;
 }
 
-b32 CompileAssembly(build_context *BuildContext)
+static b32 CompileAssembly(build_context *BuildContext)
 {
     char AssemblerCommand[1024];
     *AssemblerCommand = {};

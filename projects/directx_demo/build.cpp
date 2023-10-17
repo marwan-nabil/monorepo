@@ -12,6 +12,10 @@ b32 BuildDirectxDemo(build_context *BuildContext)
     SetOuputBinaryPath(BuildContext, "\\directx_demo.exe");
 
     b32 BuildSuccess = CompileCpp(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
 
     ClearBuildContext(BuildContext);
 
@@ -23,7 +27,11 @@ b32 BuildDirectxDemo(build_context *BuildContext)
     );
     SetOuputBinaryPath(BuildContext, "\\vertex_shader.cso");
 
-    BuildSuccess = BuildSuccess && CompileShader(BuildContext);
+    BuildSuccess = CompileShader(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
 
     ClearBuildContext(BuildContext);
 
@@ -35,6 +43,6 @@ b32 BuildDirectxDemo(build_context *BuildContext)
     );
     SetOuputBinaryPath(BuildContext, "\\pixel_shader.cso");
 
-    BuildSuccess = BuildSuccess && CompileShader(BuildContext);
+    BuildSuccess = CompileShader(BuildContext);
     return BuildSuccess;
 }

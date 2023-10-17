@@ -1,4 +1,6 @@
+; BIOS will load the boot sector at this address
 org 0x7C00
+; Real mode
 bits 16
 
 %define CRLF 0x0D, 0x0A
@@ -10,6 +12,9 @@ Entry:
     jmp short Start
     nop
 
+; ================================================================= ;
+;                       boot sector BIOS data
+; ================================================================= ;
 ; --------------------
 ; OEM name, 8 bytes
 ; --------------------
@@ -17,96 +22,88 @@ OEMName:
     db "MARWAN", 0, 0
 
 ; --------------------
-; BIOS parameter block, 19 bytes
+; BIOS parameter block, 25 bytes
 ; --------------------
 BytesPerSector:
-    dw 0x0200
+    dw 512
 SectorsPerCluster:
-    db 0x01
+    db 1
 NumberOfReserevedSectors:
-    dw 0x0001
+    dw 1
 NumberOfFATs:
-    db 0x02
+    db 2
 RootDirectoryEntries:
     dw 0x00E0
 TotalSectors:
-    dw 0x0B40
+    dw 2880
 MediaDescriptor:
     db 0xF0
 SectorsPerFAT:
-    dw 0x0009
+    dw 9
 SectorsPerTrack:
-    dw 0x0012
+    dw 18
 NumberOfHeads:
-    dw 0x0002
+    dw 2
 HiddenSectors:
-    dd 0x00000000
+    dd 0
 LargeSectors:
-    dd 0x00000000
+    dd 0
 
 ; --------------------
 ; extended data, 26 bytes
 ; --------------------
 DriveNumber:
-    db 0x00
-    db 0 ; reserved
+    db 0
+Reserved:
+    db 0
 Signature:
     db 0x29
 VolumeId:
-    dd 0x78563412
+    dd 12h, 34h, 56h, 78h
 VolumeLabel:
     db 'SYSTEM     '
 SystemId:
     db 'FAT12   '
 
+; ================================================================= ;
+;                       boot sector code
+; ================================================================= ;
 ; --------------------
-; boot sector code & data, 448 bytes
-; --------------------
-
-; --------------------
-; entry point
+; real entry point
 ; --------------------
 Start:
     ; initialize segment registers
-    mov ax, 0
+    xor ax, ax
     mov ds, ax
     mov es, ax
-    mov ss, ax
 
     ; initialize stack
-    mov sp, 0x8000
+    mov ss, ax
+    mov sp, 0x7C00
 
+    ; ---------------------
     ; read some data from the disk
-    ; dl == drive number, set by BIOS
-    mov [DriveNumber], dl
-
-    ; LBA == 1, second reserved sector in the data area of the fat12 disk
+    ; ---------------------
     mov ax, 1
+    ; ax == logical block address,
+    ; second reserved sector in the data
+    ; area of the fat12 disk
     mov cl, 1
+    ; cl == number of sectors to read
+    mov [DriveNumber], dl
+    ; dl == drive number, set by BIOS
     mov bx, 0x7E00
-    ; bx == start of the next sector after the loaded boot sector
-
-    ; call the disk read function
-    ; in:
-    ;       ax == logical block address
-    ;       cl == number of sectors to read
-    ;       dl == driver number
-    ;       es:bx == address to write disk data to
-    ; call ReadFromDisk
+    ; es:bx == address to write disk data to,
+    ; start of the next sector after the
+    ; loaded boot sector
+    call ReadFromDisk
 
     ; print the hello world message
     mov si, HelloWorldMessage
     call PutString
 
-    jmp Halt
-
-; --------------------
-; Floppy Disk Error handler
-; --------------------
-FloppyError:
-    mov si, DiskReadFailedMessage
-    call PutString
-    jmp WaitForKeyThenReboot
+    cli
+    hlt
 
 ; --------------------
 ; waits for a keyboard input then reboots
@@ -119,31 +116,39 @@ WaitForKeyThenReboot:
     jmp 0FFFFh:0
 
 ; --------------------
-; generic error handler
+; Floppy Disk Error handler
 ; --------------------
-Halt:
-    ; disable interrupts
-    cli
-    hlt
+FloppyErrorHandler:
+    mov si, DiskReadFailedMessage
+    call PutString
+    jmp WaitForKeyThenReboot
 
 ; --------------------
 ; prints a string
+; in:
+;       si -> address of string
 ; --------------------
 PutString:
+    ; save touched register
     push si
     push ax
-    mov ah, 0x0E
-    mov bh, 0
+    push bx
+
 .Loop0:
     ; load signed byte from [ds:si] into al, also increments si
     lodsb
-    ; test if al is 0
     or al, al
     jz .Done
+
     ; print the character
+    ; BIOS function to print a character
+    mov ah, 0x0E
+    mov bh, 0
     int 0x10
     jmp .Loop0
+
 .Done:
+    pop bx
     pop ax
     pop si
     ret
@@ -246,11 +251,13 @@ ReadFromDisk:
 
 .Fail:
     ; disk read BIOS function keeps failing
-    jmp FloppyError
+    jmp FloppyErrorHandler
 
 .Done:
     ; disk read succeeded
     popa
+    mov si, DiskReadSuccessMessage
+    call PutString
 
     ; restore touched registers
     pop di
@@ -271,19 +278,22 @@ DiskReset:
     mov ah, 0
     stc
     int 13h
-    jc FloppyError
+    jc FloppyErrorHandler
 
     popa
     ret
 
-; -------------
-; string data
-; -------------
+; ================================================================= ;
+;                         boot sector data
+; ================================================================= ;
 HelloWorldMessage:
     db 'Hello, world!', CRLF, 0
 
 DiskReadFailedMessage:
-    db 'ERROR: failed to read from disk', CRLF, 0
+    db 'ERROR: failed to read from disk.', CRLF, 0
+
+DiskReadSuccessMessage:
+    db 'INFO: read from disk succeeded.', CRLF, 0
 
 ; ---------------------------------------
 ; pad with 0 until you reach address 0x7DFE

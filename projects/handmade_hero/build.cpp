@@ -35,6 +35,10 @@ b32 BuildHandmadeHero(build_context *BuildContext)
     CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     b32 BuildSuccess = CompileCpp(BuildContext);
     DeleteFileA(LockFilePath);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
 
     ClearBuildContext(BuildContext);
 
@@ -48,6 +52,6 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\win32_platform.exe");
 
-    BuildSuccess = BuildSuccess && CompileCpp(BuildContext);
+    BuildSuccess = CompileCpp(BuildContext);
     return BuildSuccess;
 }

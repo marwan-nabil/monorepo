@@ -5,6 +5,10 @@ b32 BuildX86Kernel(build_context *BuildContext)
     SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
 
     b32 BuildSuccess = CompileAssembly(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
 
     ClearBuildContext(BuildContext);
 
@@ -13,6 +17,10 @@ b32 BuildX86Kernel(build_context *BuildContext)
     SetOuputBinaryPath(BuildContext, "\\x86_kernel.img");
 
     BuildSuccess = BuildSuccess && CompileAssembly(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
 
     fat12_disk *Fat12Disk = Fat12CreateDiskImage();
 
