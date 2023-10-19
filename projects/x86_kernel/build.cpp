@@ -22,18 +22,22 @@ b32 BuildX86Kernel(build_context *BuildContext)
         return FALSE;
     }
 
-    fat12_disk *Fat12Disk = Fat12CreateDiskImage();
+    fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
+    (
+        0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
+    );
+    memset(Fat12Disk, 0, sizeof(fat12_disk));
 
     ClearBuildContext(BuildContext);
     SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
     read_file_result BootSectorImageFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
-    Fat12WriteBootSector(Fat12Disk, BootSectorImageFile.FileMemory);
+    memcpy(&Fat12Disk->BootSector, BootSectorImageFile.FileMemory, FAT12_SECTOR_SIZE);
     FreeFileMemory(BootSectorImageFile);
 
     ClearBuildContext(BuildContext);
     SetOuputBinaryPath(BuildContext, "\\x86_kernel.img");
     read_file_result KernelImageFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
-    Fat12AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
+    AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
     FreeFileMemory(KernelImageFile);
 
     ClearBuildContext(BuildContext);

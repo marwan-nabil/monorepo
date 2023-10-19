@@ -1,10 +1,20 @@
 #pragma once
 
-#define FAT12_DISK_SECTOR_SIZE 512
-#define FAT12_DISK_CLUSTER_SIZE 512
+#define FAT12_SECTORS_PER_CLUSTER 1
+#define FAT12_SECTORS_PER_FAT 9
+#define FAT12_SECTORS_IN_ROOT_DIRECTORY 14
+#define FAT12_SECTORS_IN_DATA_AREA 2847
+#define FAT12_TOTAL_DISK_SECTORS 2880
+
+#define FAT12_DIRECTORY_ENTRIES_PER_SECTOR 16
+#define FAT12_DATA_AREA_START_SECTOR 33
+
+#define FAT12_SECTOR_SIZE 512
+#define FAT12_CLUSTER_SIZE (FAT12_SECTOR_SIZE * FAT12_SECTORS_PER_CLUSTER)
+#define FAT12_FAT_SIZE (FAT12_SECTOR_SIZE * FAT12_SECTORS_PER_FAT)
+
 #define FAT12_BOOT_SIGNATURE 0xAA55
 #define FAT12_ENTRIES_PER_FAT 3072
-#define FAT12_MAX_PATH 1024
 
 #define FAT12_FILENAME_EMPTY_SLOT 0x00
 #define FAT12_FILENAME_DELETED_SLOT 0xE5
@@ -63,33 +73,33 @@ struct directory_entry
     u16 CreationTime;
     u16 CreationDate;
     u16 LastAccessDate;
-    u16 HighWordOfClusterNumber;
+    u16 ClusterNumberHighWord;
     u16 LastWriteTime;
     u16 LastWriteDate;
-    u16 FirstLogicalCluster;
+    u16 ClusterNumberLowWord;
     u32 FileSize;
 };
 
 union sector
 {
-    u8 Bytes[FAT12_DISK_SECTOR_SIZE];
-    directory_entry DirectoryEntries[16];
+    u8 Bytes[FAT12_SECTOR_SIZE];
+    directory_entry DirectoryEntries[FAT12_DIRECTORY_ENTRIES_PER_SECTOR];
 };
 
 union file_allocation_table
 {
-    sector Sectors[9];
-    u8 Bytes[4608];
+    sector Sectors[FAT12_SECTORS_PER_FAT];
+    u8 Bytes[FAT12_FAT_SIZE];
 };
 
 struct root_directory
 {
-    sector Sectors[14];
+    sector Sectors[FAT12_SECTORS_IN_ROOT_DIRECTORY];
 };
 
 struct data_area
 {
-    sector Sectors[2847];
+    sector Sectors[FAT12_SECTORS_IN_DATA_AREA];
 };
 
 union fat12_disk
@@ -102,7 +112,7 @@ union fat12_disk
         root_directory RootDirectory;
         data_area DataArea;
     };
-    sector Sectors[2880];
+    sector Sectors[FAT12_TOTAL_DISK_SECTORS];
 };
 
 #pragma pack(pop)

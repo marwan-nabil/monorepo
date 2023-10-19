@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <strsafe.h>
 #include <io.h>
 
 #include "platform\base_types.h"
@@ -8,7 +9,7 @@
 #include "platform\console\console.h"
 
 #include "platform\console\console.cpp"
-#include "platform\strings\strings.cpp"
+#include "platform\strings.cpp"
 #include "platform\processes\processes.cpp"
 
 console_context GlobalConsoleContext;

@@ -1,8 +1,8 @@
-inline u16 TranslateLogicalCluster(u16 LogicalCluster)
+inline u16 TranslateClusterNumberToSectorIndex(u16 ClusterNumber)
 {
-    Assert(LogicalCluster >= 2);
-    u16 PhysicalCluster = 33 + LogicalCluster - 2;
-    return PhysicalCluster;
+    Assert(ClusterNumber >= 2);
+    u16 PhysicalSectorIndex = FAT12_DATA_AREA_START_SECTOR + ClusterNumber - 2;
+    return PhysicalSectorIndex;
 }
 
 inline b32 IsFatEntryEndOfFile(u16 FatEntry)
@@ -22,21 +22,20 @@ inline b32 IsFatEntryEndOfFile(u16 FatEntry)
 }
 
 inline sector *
-GetSector(fat12_disk *Disk, u16 LogicalCluster)
+GetSectorFromClusterNumber(fat12_disk *Disk, u16 ClusterNumber)
 {
-    Assert(LogicalCluster >= 2);
-    sector *Result = &Disk->Sectors[TranslateLogicalCluster(LogicalCluster)];
+    sector *Result = &Disk->Sectors[TranslateClusterNumberToSectorIndex(ClusterNumber)];
     return Result;
 }
 
 inline u16
-GetFatEntry(fat12_disk *Disk, u32 LogicalCluster)
+GetFatEntry(fat12_disk *Disk, u32 ClusterNumber)
 {
-    Assert(LogicalCluster >= 2);
+    Assert(ClusterNumber >= 2);
     u16 Result = 0;
-    u32 StartingByteIndex = LogicalCluster * 3 / 2;
+    u32 StartingByteIndex = ClusterNumber * 3 / 2;
 
-    if ((LogicalCluster % 2) == 0)
+    if ((ClusterNumber % 2) == 0)
     {
         Result = (u16)Disk->Fat1.Bytes[StartingByteIndex];
         Result |= ((u16)Disk->Fat1.Bytes[StartingByteIndex + 1] & 0x000F) << 8;
@@ -51,27 +50,27 @@ GetFatEntry(fat12_disk *Disk, u32 LogicalCluster)
 }
 
 inline u16
-GetFirstFreeLogicalCluster(fat12_disk *Disk)
+GetFirstFreeClusterNumber(fat12_disk *Disk)
 {
-    for (u16 LogicalCluster = 2; LogicalCluster < FAT12_ENTRIES_PER_FAT; LogicalCluster++)
+    for (u16 ClusterNumber = 2; ClusterNumber < FAT12_ENTRIES_PER_FAT; ClusterNumber++)
     {
-        u16 FatEntry = GetFatEntry(Disk, LogicalCluster);
+        u16 FatEntry = GetFatEntry(Disk, ClusterNumber);
         if (FatEntry == FAT12_FAT_ENTRY_FREE_CLUSTER)
         {
-            return LogicalCluster;
+            return ClusterNumber;
         }
     }
     return 0;
 }
 
 inline u32
-GetNumberOfFreeLogicalClusters(fat12_disk *Disk)
+CalculateNumberOfFreeClusters(fat12_disk *Disk)
 {
     u32 Result = 0;
 
-    for (u16 LogicalCluster = 2; LogicalCluster < FAT12_ENTRIES_PER_FAT; LogicalCluster++)
+    for (u16 ClusterNumber = 2; ClusterNumber < FAT12_ENTRIES_PER_FAT; ClusterNumber++)
     {
-        u16 FatEntry = GetFatEntry(Disk, LogicalCluster);
+        u16 FatEntry = GetFatEntry(Disk, ClusterNumber);
         if (FatEntry == FAT12_FAT_ENTRY_FREE_CLUSTER)
         {
             Result++;
@@ -87,7 +86,7 @@ GetFirstFreeDirectoryEntryInSector(sector *Sector)
     for
     (
         u32 DirectoryEntryIndex = 0;
-        DirectoryEntryIndex < ArrayCount(Sector->DirectoryEntries);
+        DirectoryEntryIndex < FAT12_DIRECTORY_ENTRIES_PER_SECTOR;
         DirectoryEntryIndex++
     )
     {
@@ -101,18 +100,18 @@ GetFirstFreeDirectoryEntryInSector(sector *Sector)
     return NULL;
 }
 
-inline directory_entry *
-GetFirstFreeEntryInDirectory(fat12_disk *Disk, u16 DirectoryLogicalCluster)
+static directory_entry *
+GetFirstFreeDirectoryEntryInDirectory(fat12_disk *Disk, directory_entry *Directory)
 {
     directory_entry *FirstFreeDirectoryEntry = NULL;
 
-    u16 CurrentLogicalCluster = DirectoryLogicalCluster;
-    u16 CurrentFatEntry = GetFatEntry(Disk, CurrentLogicalCluster);
+    u16 CurrentClusterNumber = Directory->ClusterNumberLowWord;
+    u16 CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
 
-    while (1)
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
-        sector *PhysicalSector = GetSector(Disk, CurrentLogicalCluster);
-        FirstFreeDirectoryEntry = GetFirstFreeDirectoryEntryInSector(PhysicalSector);
+        sector *Sector = GetSectorFromClusterNumber(Disk, CurrentClusterNumber);
+        FirstFreeDirectoryEntry = GetFirstFreeDirectoryEntryInSector(Sector);
 
         if (FirstFreeDirectoryEntry)
         {
@@ -126,8 +125,8 @@ GetFirstFreeEntryInDirectory(fat12_disk *Disk, u16 DirectoryLogicalCluster)
             }
             else
             {
-                CurrentLogicalCluster = CurrentFatEntry;
-                CurrentFatEntry = GetFatEntry(Disk, CurrentLogicalCluster);
+                CurrentClusterNumber = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
             }
         }
     }
@@ -135,12 +134,12 @@ GetFirstFreeEntryInDirectory(fat12_disk *Disk, u16 DirectoryLogicalCluster)
     return FirstFreeDirectoryEntry;
 }
 
-inline directory_entry *
-GetFirstFreeEntryInRootDirectory(fat12_disk *Disk)
+static directory_entry *
+GetFirstFreeDirectoryEntryInRootDirectory(fat12_disk *Disk)
 {
     directory_entry *FirstFreeDirectoryEntry = NULL;
 
-    for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
+    for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
     {
         FirstFreeDirectoryEntry =
             GetFirstFreeDirectoryEntryInSector(&Disk->RootDirectory.Sectors[SectorIndex]);
@@ -152,26 +151,6 @@ GetFirstFreeEntryInRootDirectory(fat12_disk *Disk)
     }
 
     return FirstFreeDirectoryEntry;
-}
-
-inline directory_entry *
-GetDirectoryEntryOfFileInSector(sector *Sector, u16 FileLogicalCluster)
-{
-    for
-    (
-        u32 DirectoryEntryIndex = 0;
-        DirectoryEntryIndex < ArrayCount(Sector->DirectoryEntries);
-        DirectoryEntryIndex++
-    )
-    {
-        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
-        if (DirectoryEntry->FirstLogicalCluster == FileLogicalCluster)
-        {
-            return DirectoryEntry;
-        }
-    }
-
-    return NULL;
 }
 
 inline directory_entry *
@@ -199,54 +178,40 @@ GetDirectoryEntryOfFileInSector(sector *Sector, char *FileName, char *Extension)
 }
 
 inline directory_entry *
-GetDirectoryEntryOfFileInDirectory(fat12_disk *Disk, u16 DirectoryLogicalCluster, u16 FileLogicalCluster)
+GetDirectoryEntryOfDirectoryInSector(sector *Sector, char *DirectoryName)
 {
-    directory_entry *FoundDirectoryEntry = NULL;
-
-    u16 CurrentLogicalCluster = DirectoryLogicalCluster;
-    u16 CurrentFatEntry = GetFatEntry(Disk, CurrentLogicalCluster);
-
-    while (1)
+    for
+    (
+        u32 DirectoryEntryIndex = 0;
+        DirectoryEntryIndex < ArrayCount(Sector->DirectoryEntries);
+        DirectoryEntryIndex++
+    )
     {
-        sector *PhysicalSector = GetSector(Disk, CurrentLogicalCluster);
-        FoundDirectoryEntry = GetDirectoryEntryOfFileInSector(PhysicalSector, FileLogicalCluster);
-
-        if (FoundDirectoryEntry)
+        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+        if (memcmp(DirectoryEntry->FileName, DirectoryName, 8) == 0)
         {
-            break;
-        }
-        else
-        {
-            if (IsFatEntryEndOfFile(CurrentFatEntry))
-            {
-                break;
-            }
-            else
-            {
-                CurrentLogicalCluster = CurrentFatEntry;
-                CurrentFatEntry = GetFatEntry(Disk, CurrentLogicalCluster);
-            }
+            return DirectoryEntry;
         }
     }
 
-    return FoundDirectoryEntry;
+    return NULL;
 }
 
 inline directory_entry *
 GetDirectoryEntryOfFileInDirectory
 (
-    fat12_disk *Disk, u16 DirectoryLogicalCluster,
+    fat12_disk *Disk, directory_entry *Directory,
     char *FileName, char *Extension
 )
 {
     directory_entry *FoundDirectoryEntry = NULL;
 
-    u16 CurrentLogicalCluster = DirectoryLogicalCluster;
-    u16 CurrentFatEntry = GetFatEntry(Disk, CurrentLogicalCluster);
+    u16 CurrentClusterNumber = Directory->ClusterNumberLowWord;
+    u16 CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
 
-    while (1)
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
-        sector *PhysicalSector = GetSector(Disk, CurrentLogicalCluster);
+        sector *PhysicalSector = GetSectorFromClusterNumber(Disk, CurrentClusterNumber);
         FoundDirectoryEntry = GetDirectoryEntryOfFileInSector(PhysicalSector, FileName, Extension);
 
         if (FoundDirectoryEntry)
@@ -261,8 +226,8 @@ GetDirectoryEntryOfFileInDirectory
             }
             else
             {
-                CurrentLogicalCluster = CurrentFatEntry;
-                CurrentFatEntry = GetFatEntry(Disk, CurrentLogicalCluster);
+                CurrentClusterNumber = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
             }
         }
     }
@@ -271,18 +236,36 @@ GetDirectoryEntryOfFileInDirectory
 }
 
 inline directory_entry *
-GetDirectoryEntryOfFileInRootDirectory(fat12_disk *Disk, u16 FileLogicalCluster)
+GetDirectoryEntryOfDirectoryInDirectory
+(
+    fat12_disk *Disk, directory_entry *Directory, char *DirectoryName
+)
 {
     directory_entry *FoundDirectoryEntry = NULL;
 
-    for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
+    u16 CurrentClusterNumber = Directory->ClusterNumberLowWord;
+    u16 CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
+
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
-        FoundDirectoryEntry =
-            GetDirectoryEntryOfFileInSector(&Disk->RootDirectory.Sectors[SectorIndex], FileLogicalCluster);
+        sector *PhysicalSector = GetSectorFromClusterNumber(Disk, CurrentClusterNumber);
+        FoundDirectoryEntry = GetDirectoryEntryOfDirectoryInSector(PhysicalSector, DirectoryName);
 
         if (FoundDirectoryEntry)
         {
             break;
+        }
+        else
+        {
+            if (IsFatEntryEndOfFile(CurrentFatEntry))
+            {
+                break;
+            }
+            else
+            {
+                CurrentClusterNumber = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
+            }
         }
     }
 
@@ -298,6 +281,25 @@ GetDirectoryEntryOfFileInRootDirectory(fat12_disk *Disk, char *FileName, char *E
     {
         FoundDirectoryEntry =
             GetDirectoryEntryOfFileInSector(&Disk->RootDirectory.Sectors[SectorIndex], FileName, Extension);
+
+        if (FoundDirectoryEntry)
+        {
+            break;
+        }
+    }
+
+    return FoundDirectoryEntry;
+}
+
+inline directory_entry *
+GetDirectoryEntryOfDirectoryInRootDirectory(fat12_disk *Disk, char *DirectoryName)
+{
+    directory_entry *FoundDirectoryEntry = NULL;
+
+    for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
+    {
+        FoundDirectoryEntry =
+            GetDirectoryEntryOfDirectoryInSector(&Disk->RootDirectory.Sectors[SectorIndex], DirectoryName);
 
         if (FoundDirectoryEntry)
         {

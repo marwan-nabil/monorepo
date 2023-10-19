@@ -149,3 +149,16 @@ GetFileNameAndExtensionFromString
         }
     }
 }
+
+inline void
+FillFixedSizeStringBuffer(char *Buffer, u32 BufferSize, char *SourceString)
+{
+    if (StringLength(SourceString) >= BufferSize)
+    {
+        memcpy(Buffer, SourceString, BufferSize);
+    }
+    else
+    {
+        StringCchCat(Buffer, BufferSize, SourceString);
+    }
+}

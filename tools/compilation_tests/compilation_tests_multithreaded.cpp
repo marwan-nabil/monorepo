@@ -20,7 +20,7 @@
 #include "platform\console\console.h"
 
 #include "platform\console\console.cpp"
-#include "platform\strings\strings.cpp"
+#include "platform\strings.cpp"
 #include "platform\processes\processes.cpp"
 
 struct test_job

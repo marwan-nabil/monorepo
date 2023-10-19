@@ -8,12 +8,13 @@
 #include "platform\base_types.h"
 #include "platform\basic_defines.h"
 #include "platform\console\console.h"
+#include "platform\file_system\path_handling.h"
 
 #include "fat12.h"
-#include "fat12_interface.h"
 
 #include "platform\console\console.cpp"
-#include "platform\strings\strings.cpp"
+#include "platform\strings.cpp"
+#include "platform\file_system\path_handling.cpp"
 
 #include "fat12_get.cpp"
 #include "fat12_set.cpp"
@@ -22,12 +23,13 @@
 struct ram_file
 {
     void *Memory;
-    char Name[8];
-    char Extension[3];
+    char FullPath[MAX_PATH];
     u32 Size;
 };
 
-ram_file CreateDummyFile(char *Name, char *Extension, u32 Size, u32 FillPattern)
+console_context GlobalConsoleContext;
+
+ram_file CreateDummyFile(char *FullFilePath, u32 Size, u32 FillPattern)
 {
     ram_file Result = {};
 
@@ -35,14 +37,9 @@ ram_file CreateDummyFile(char *Name, char *Extension, u32 Size, u32 FillPattern)
     Result.Memory = (char *)malloc(Size);
     memset(Result.Memory, FillPattern, Size);
 
-    char LocalName[9] = {};
-    char LocalExtension[4] = {};
-
-    StringCchCat(LocalName, 9, Name);
-    StringCchCat(LocalExtension, 4, Extension);
-
-    memcpy(Result.Name, LocalName, 8);
-    memcpy(Result.Extension, LocalExtension, 3);
+    char LocalPath[MAX_PATH] = {};
+    StringCchCat(LocalPath, MAX_PATH, FullFilePath);
+    memcpy(Result.FullPath, LocalPath, MAX_PATH);
 
     return Result;
 }
@@ -53,45 +50,42 @@ i32 main(i32 argc, char **argv)
     Assert(sizeof(directory_entry) == 32);
     Assert(sizeof(sector) == 512);
     Assert(sizeof(file_allocation_table) == 4608);
-    Assert(sizeof(root_directory) == (14 * FAT12_DISK_SECTOR_SIZE));
-    Assert(sizeof(data_area) == (2847 * FAT12_DISK_SECTOR_SIZE));
-    Assert(sizeof(fat12_disk) == (2880 * FAT12_DISK_SECTOR_SIZE));
+    Assert(sizeof(root_directory) == (14 * FAT12_SECTOR_SIZE));
+    Assert(sizeof(data_area) == (2847 * FAT12_SECTOR_SIZE));
+    Assert(sizeof(fat12_disk) == (2880 * FAT12_SECTOR_SIZE));
+
+    InitializeConsole(&GlobalConsoleContext);
 
     fat12_disk *Disk = (fat12_disk *)malloc(sizeof(fat12_disk));
     ZeroMemory(Disk, sizeof(fat12_disk));
 
-    ram_file File1 = CreateDummyFile("File1", "txt", 600, 0xFFFFFFFF);
-    ram_file File2 = CreateDummyFile("File2", "txt", 1500, 0xFFFFFFFF);
-    ram_file File3 = CreateDummyFile("File3", "txt", 2800, 0xFFFFFFFF);
-    ram_file File4 = CreateDummyFile("File4", "txt", 40, 0xFFFFFFFF);
-    ram_file File5 = CreateDummyFile("File5", "txt", 400, 0xFFFFFFFF);
-    ram_file File6 = CreateDummyFile("File6", "txt", 8000, 0xFFFFFFFF);
+    ram_file File1 = CreateDummyFile("\\File1.txt", 600, 0xFFFFFFFF);
+    ram_file File2 = CreateDummyFile("\\Folder1\\File2.txt", 1500, 0xFFFFFFFF);
+    ram_file File3 = CreateDummyFile("\\File3.txt", 600, 0xFFFFFFFF);
+    ram_file File4 = CreateDummyFile("\\Folder1\\Sub1\\File4.txt", 8000, 0xFFFFFFFF);
 
-    u16 File1Cluster = Fat12AddFileToRootDirectory(Disk, File1.Memory, File1.Size, File1.Name, File1.Extension);
-    u16 File2Cluster = Fat12AddFileToRootDirectory(Disk, File2.Memory, File2.Size, File2.Name, File2.Extension);
+    // add files & folders in the root folder of the disk
+    Fat12AddFile(Disk, File1.FullPath, File1.Memory, File1.Size);
+    Fat12AddFile(Disk, File3.FullPath, File3.Memory, File3.Size);
+    Fat12AddDirectory(Disk, "\\Folder1");
+    Fat12AddDirectory(Disk, "\\Folder2");
 
-    u16 Folder1Cluster = AddDirectoryToRootDirectory(Disk, "folder1");
+    // add files and folders in \folder1
+    Fat12AddFile(Disk, File2.FullPath, File2.Memory, File2.Size);
+    Fat12AddDirectory(Disk, "\\Folder1\\Sub1");
 
-    Fat12ListRootDirectory(Disk);
+    // add files and folders in \folder1\Sub1
+    Fat12AddFile(Disk, File4.FullPath, File4.Memory, File4.Size);
 
-    u16 File3Cluster = AddFileToDirectory(Disk, Folder1Cluster, File3.Memory, File3.Size, File3.Name, File3.Extension);
-    u16 SubDir0Cluster = AddDirectoryToDirectory(Disk, Folder1Cluster, "SubDir0");
-
-    Fat12ListDirectory(Disk, Folder1Cluster);
-
-    Fat12CreateFilePathSegmentList("\\aaaa\\bbbb\\cccc\\ddddd");
-
-    directory_entry *File3DirectoryEntry = Fat12GetDirectoryEntryOfFile(Disk, "\\folder1\\File3.txt");
+    Fat12ListDirectory(Disk, "\\");
+    Fat12ListDirectory(Disk, "\\Folder1");
+    Fat12ListDirectory(Disk, "\\Folder1\\Sub1");
 
     free(Disk);
     free(File1.Memory);
     free(File2.Memory);
-    free(File3.Memory);
-    free(File4.Memory);
-    free(File5.Memory);
-    free(File6.Memory);
 
-    printf("\nFinished.\n");
+    ConsolePrintColored("\nFinished.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
 
-    return TRUE;
+    return 0;
 }

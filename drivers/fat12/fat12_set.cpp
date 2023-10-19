@@ -1,10 +1,10 @@
 inline void
-SetFatEntry(fat12_disk *Disk, u32 LogicalCluster, u16 FatEntry)
+SetFatEntry(fat12_disk *Disk, u32 ClusterNumber, u16 FatEntry)
 {
-    Assert(LogicalCluster >= 2);
-    u32 StartingByteIndex = LogicalCluster * 3 / 2;
+    Assert(ClusterNumber >= 2);
+    u32 StartingByteIndex = ClusterNumber * 3 / 2;
 
-    if ((LogicalCluster % 2) == 0)
+    if ((ClusterNumber % 2) == 0)
     {
         Disk->Fat1.Bytes[StartingByteIndex] = (u8)FatEntry;
         Disk->Fat1.Bytes[StartingByteIndex + 1] &= (u8)0xF0;
@@ -18,144 +18,224 @@ SetFatEntry(fat12_disk *Disk, u32 LogicalCluster, u16 FatEntry)
     }
 }
 
-inline u16 AllocateSectorsFromMemory(fat12_disk *Disk, void *Memory, u32 Size)
+static u16
+AllocateDiskClusters(fat12_disk *Disk, void *Memory, u32 Size)
 {
-    u16 FirstLogicalCluster = 0;
+    u16 FirstAllocatedClusterNumber = 0;
 
-    u32 ClustersNeeded = (Size + FAT12_DISK_CLUSTER_SIZE - 1) / FAT12_DISK_CLUSTER_SIZE;
-    if (ClustersNeeded > GetNumberOfFreeLogicalClusters(Disk))
+    u32 ClustersNeeded = (Size + FAT12_CLUSTER_SIZE - 1) / FAT12_CLUSTER_SIZE;
+    if (ClustersNeeded > CalculateNumberOfFreeClusters(Disk))
     {
         return 0;
     }
+    Assert(ClustersNeeded <= FAT12_SECTORS_IN_DATA_AREA);
 
     u32 SizeLeft = Size;
     char *ReadPointer = (char *)Memory;
+    u16 PreviousClusterNumber = 0;
 
-    u16 PreviousLogicalCluster = 0;
-
-    while (ClustersNeeded)
+    for (u32 ClusterIndex = 0; ClusterIndex < ClustersNeeded; ClusterIndex++)
     {
-        u16 LogicalCluster = GetFirstFreeLogicalCluster(Disk);
-        Assert(LogicalCluster);
+        u16 ClusterNumber = GetFirstFreeClusterNumber(Disk);
+        Assert(ClusterNumber);
 
-        SetFatEntry(Disk, LogicalCluster, FAT12_FAT_ENTRY_RESERVED_CLUSTER);
+        SetFatEntry(Disk, ClusterNumber, FAT12_FAT_ENTRY_RESERVED_CLUSTER);
 
-        if (PreviousLogicalCluster)
+        if (PreviousClusterNumber)
         {
-            SetFatEntry(Disk, PreviousLogicalCluster, LogicalCluster);
+            SetFatEntry(Disk, PreviousClusterNumber, ClusterNumber);
         }
         else
         {
-            FirstLogicalCluster = LogicalCluster;
+            FirstAllocatedClusterNumber = ClusterNumber;
         }
 
-        u16 PhysicalCluster = TranslateLogicalCluster(LogicalCluster);
+        u16 SectorIndex = TranslateClusterNumberToSectorIndex(ClusterNumber);
 
-        u32 BytesToCopy = 512;
+        u32 BytesToCopy = FAT12_SECTOR_SIZE;
         u32 BytesToZero = 0;
 
-        if (SizeLeft < 512)
+        if (SizeLeft < BytesToCopy)
         {
             BytesToCopy = SizeLeft;
-            BytesToZero = 512 - SizeLeft;
+            BytesToZero = FAT12_SECTOR_SIZE - SizeLeft;
         }
 
         if (ReadPointer)
         {
-            memcpy(Disk->Sectors[PhysicalCluster].Bytes, ReadPointer, BytesToCopy);
+            memcpy(Disk->Sectors[SectorIndex].Bytes, ReadPointer, BytesToCopy);
             ReadPointer += BytesToCopy;
-            ZeroMemory(Disk->Sectors[PhysicalCluster].Bytes + BytesToCopy, BytesToZero);
+            ZeroMemory(Disk->Sectors[SectorIndex].Bytes + BytesToCopy, BytesToZero);
         }
         else
         {
-            ZeroMemory(Disk->Sectors[PhysicalCluster].Bytes, BytesToCopy + BytesToZero);
+            ZeroMemory(Disk->Sectors[SectorIndex].Bytes, BytesToCopy + BytesToZero);
         }
 
         SizeLeft -= BytesToCopy;
-        ClustersNeeded--;
-
-        PreviousLogicalCluster = LogicalCluster;
 
         if (SizeLeft == 0)
         {
-            SetFatEntry(Disk, LogicalCluster, FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END);
+            SetFatEntry(Disk, ClusterNumber, FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END);
         }
+
+        PreviousClusterNumber = ClusterNumber;
     }
 
-    return FirstLogicalCluster;
+    return FirstAllocatedClusterNumber;
 }
 
-u16 AddFileToDirectory
+inline b32
+AllocateFileToDirectoryEntry
 (
-    fat12_disk *Disk, u16 DirectoryLogicalCluster,
-    void *Memory, u32 Size, char *FileName, char *Extension
+    fat12_disk *Disk, directory_entry *DirectoryEntry,
+    char *FileName, char *Extension, void *Memory, u32 Size
 )
 {
-    directory_entry *FreeDirectoryEntry = GetFirstFreeEntryInDirectory(Disk, DirectoryLogicalCluster);
-    if (!FreeDirectoryEntry)
+    u16 ClusterNumber = AllocateDiskClusters(Disk, Memory, Size);
+    if (ClusterNumber)
     {
-        return 0;
+        *DirectoryEntry = {};
+        memcpy(DirectoryEntry->FileName, FileName, 8);
+        memcpy(DirectoryEntry->FileExtension, Extension, 3);
+        DirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_NORMAL;
+        DirectoryEntry->FileSize = Size;
+        DirectoryEntry->ClusterNumberLowWord = ClusterNumber;
+        return TRUE;
     }
 
-    u16 FirstLogicalCluster = AllocateSectorsFromMemory(Disk, Memory, Size);
-    if (FirstLogicalCluster)
-    {
-        memcpy(FreeDirectoryEntry->FileName, FileName, 8);
-        memcpy(FreeDirectoryEntry->FileExtension, Extension, 3);
-        FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_NORMAL;
-        FreeDirectoryEntry->FileSize = Size;
-        FreeDirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
-    }
-
-    return FirstLogicalCluster;
+    return FALSE;
 }
 
-u16 AddDirectoryToDirectory
+inline b32
+AllocateDirectoryToDirectoryEntry
 (
-    fat12_disk *Disk, u16 DirectoryLogicalCluster, char *DirectoryName
+    fat12_disk *Disk, directory_entry *DirectoryEntry, char *DirectoryName
 )
 {
-    directory_entry *FreeDirectoryEntry = GetFirstFreeEntryInDirectory(Disk, DirectoryLogicalCluster);
-    if (!FreeDirectoryEntry)
+    u16 ClusterNumber = AllocateDiskClusters(Disk, 0, FAT12_CLUSTER_SIZE);
+    if (ClusterNumber)
     {
-        return 0;
+        *DirectoryEntry = {};
+        memcpy((void *)DirectoryEntry->FileName, DirectoryName, 8);
+        DirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
+        DirectoryEntry->FileSize = 0;
+        DirectoryEntry->ClusterNumberLowWord = ClusterNumber;
+        return TRUE;
     }
 
-    u16 FirstLogicalCluster = AllocateSectorsFromMemory(Disk, 0, 512);
-    if (FirstLogicalCluster)
-    {
-        StringCchCat((char *)FreeDirectoryEntry->FileName, 8, DirectoryName);
-        *FreeDirectoryEntry->FileExtension = {};
-
-        FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
-        FreeDirectoryEntry->FileSize = 0;
-        FreeDirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
-    }
-
-    return FirstLogicalCluster;
+    return FALSE;
 }
 
-u16 AddDirectoryToRootDirectory
+static directory_entry *
+AddFileToRootDirectory
+(
+    fat12_disk *Disk,
+    char *FileName, char *Extension,
+    void *Memory, u32 Size
+)
+{
+    directory_entry *FoundDirectoryEntry = GetFirstFreeDirectoryEntryInRootDirectory(Disk);
+    if (!FoundDirectoryEntry)
+    {
+        return NULL;
+    }
+
+    b32 Result = AllocateFileToDirectoryEntry
+    (
+        Disk,
+        FoundDirectoryEntry,
+        FileName,
+        Extension,
+        Memory,
+        Size
+    );
+
+    if (Result)
+    {
+        return FoundDirectoryEntry;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+static directory_entry *
+AddDirectoryToRootDirectory
 (
     fat12_disk *Disk, char *DirectoryName
 )
 {
-    directory_entry *FreeDirectoryEntry = GetFirstFreeEntryInRootDirectory(Disk);
-    if (!FreeDirectoryEntry)
+    directory_entry *FoundDirectoryEntry = GetFirstFreeDirectoryEntryInRootDirectory(Disk);
+    if (!FoundDirectoryEntry)
     {
-        return 0;
+        return NULL;
     }
 
-    u16 FirstLogicalCluster = AllocateSectorsFromMemory(Disk, 0, 512);
-    if (FirstLogicalCluster)
+    b32 Result = AllocateDirectoryToDirectoryEntry(Disk, FoundDirectoryEntry, DirectoryName);
+    if (Result)
     {
-        StringCchCat((char *)FreeDirectoryEntry->FileName, 8, DirectoryName);
-        *FreeDirectoryEntry->FileExtension = {};
+        return FoundDirectoryEntry;
+    }
+    else
+    {
+        return NULL;
+    }
+}
 
-        FreeDirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
-        FreeDirectoryEntry->FileSize = 0;
-        FreeDirectoryEntry->FirstLogicalCluster = FirstLogicalCluster;
+static directory_entry *
+AddFileToDirectory
+(
+    fat12_disk *Disk, directory_entry *Directory,
+    char *FileName, char *Extension, void *Memory, u32 Size
+)
+{
+    directory_entry *FoundDirectoryEntry = GetFirstFreeDirectoryEntryInDirectory(Disk, Directory);
+    if (!FoundDirectoryEntry)
+    {
+        return NULL;
     }
 
-    return FirstLogicalCluster;
+    b32 Result = AllocateFileToDirectoryEntry
+    (
+        Disk,
+        FoundDirectoryEntry,
+        FileName,
+        Extension,
+        Memory,
+        Size
+    );
+
+    if (Result)
+    {
+        return FoundDirectoryEntry;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+static directory_entry *
+AddDirectoryToDirectory
+(
+    fat12_disk *Disk, directory_entry *Directory, char *DirectoryName
+)
+{
+    directory_entry *FoundDirectoryEntry = GetFirstFreeDirectoryEntryInDirectory(Disk, Directory);
+    if (!FoundDirectoryEntry)
+    {
+        return NULL;
+    }
+
+    b32 Result = AllocateDirectoryToDirectoryEntry(Disk, FoundDirectoryEntry, DirectoryName);
+    if (Result)
+    {
+        return FoundDirectoryEntry;
+    }
+    else
+    {
+        return NULL;
+    }
 }

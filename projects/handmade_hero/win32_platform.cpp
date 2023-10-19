@@ -5,6 +5,7 @@
 #include <dsound.h>
 #include <intrin.h>
 #include <stdio.h>
+#include <strsafe.h>
 
 #include "platform\base_types.h"
 #include "platform\basic_defines.h"
@@ -15,7 +16,7 @@
 #include "win32_platform.h"
 
 #include "math\scalar_conversions.cpp"
-#include "platform\strings\strings.cpp"
+#include "platform\strings.cpp"
 #include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};

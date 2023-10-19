@@ -12,18 +12,19 @@
 #include "platform\console\console.h"
 #include "platform\file_system\files.h"
 #include "drivers\fat12\fat12.h"
-#include "drivers\fat12\fat12_interface.h"
+#include "drivers\fat12\path_handling.h"
 
 #include "build.h"
 
 #include "math\scalar_conversions.cpp"
-#include "platform\strings\strings.cpp"
+#include "platform\strings.cpp"
 #include "platform\console\console.cpp"
 #include "platform\file_system\files.cpp"
 #include "platform\file_system\folders.cpp"
 #include "platform\processes\processes.cpp"
 #include "drivers\fat12\fat12_get.cpp"
 #include "drivers\fat12\fat12_set.cpp"
+#include "drivers\fat12\path_handling.cpp"
 #include "drivers\fat12\fat12_interface.cpp"
 
 #include "build_helpers.cpp"

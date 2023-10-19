@@ -3,10 +3,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <io.h>
+#include <strsafe.h>
 
 #include "platform\base_types.h"
 #include "platform\basic_defines.h"
-#include "platform\strings\strings.cpp"
+#include "platform\strings.cpp"
 
 struct data_chunk
 {
