@@ -16,7 +16,7 @@ b32 BuildX86Kernel(build_context *BuildContext)
     AddCompilerFlags(BuildContext, "-f bin");
     SetOuputBinaryPath(BuildContext, "\\x86_kernel.img");
 
-    BuildSuccess = BuildSuccess && CompileAssembly(BuildContext);
+    BuildSuccess = CompileAssembly(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
@@ -37,12 +37,12 @@ b32 BuildX86Kernel(build_context *BuildContext)
     ClearBuildContext(BuildContext);
     SetOuputBinaryPath(BuildContext, "\\x86_kernel.img");
     read_file_result KernelImageFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
-    AddFileToRootDirectory(Fat12Disk, KernelImageFile.FileMemory, KernelImageFile.Size, "kernel", "bin");
+    Fat12AddFile(Fat12Disk, "\\kernel  .bin", KernelImageFile.FileMemory, KernelImageFile.Size);
     FreeFileMemory(KernelImageFile);
 
     ClearBuildContext(BuildContext);
     SetOuputBinaryPath(BuildContext, "\\floppy.img");
-    BuildSuccess = BuildSuccess && WriteFileFromMemory
+    BuildSuccess = WriteFileFromMemory
     (
         BuildContext->OutputBinaryPath,
         Fat12Disk,

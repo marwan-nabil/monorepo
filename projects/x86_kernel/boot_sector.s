@@ -1,9 +1,9 @@
-; BIOS will load the boot sector at this address
 org 0x7C00
-; Real mode
 bits 16
 
 %define CRLF 0x0D, 0x0A
+%define KERNEL_LOAD_SEGMENT 0x2000
+%define KERNEL_LOAD_OFFSET 0x0
 
 ; --------------------
 ; jump instruction, 3 bytes
@@ -59,7 +59,7 @@ Reserved:
 Signature:
     db 0x29
 VolumeId:
-    dd 12h, 34h, 56h, 78h
+    db 12h, 34h, 56h, 78h
 VolumeLabel:
     db 'SYSTEM     '
 SystemId:
@@ -81,27 +81,188 @@ Start:
     mov ss, ax
     mov sp, 0x7C00
 
-    ; ---------------------
-    ; read some data from the disk
-    ; ---------------------
-    mov ax, 1
-    ; ax == logical block address,
-    ; second reserved sector in the data
-    ; area of the fat12 disk
-    mov cl, 1
-    ; cl == number of sectors to read
-    mov [DriveNumber], dl
-    ; dl == drive number, set by BIOS
-    mov bx, 0x7E00
-    ; es:bx == address to write disk data to,
-    ; start of the next sector after the
-    ; loaded boot sector
-    call ReadFromDisk
+    ; hack to force cs to be 0x0000 
+    push ax
+    push word .JumpPoint
+    ; return address for retf is now ax:.JumpPoint
+    retf
 
-    ; print the hello world message
-    mov si, HelloWorldMessage
+.JumpPoint:
+    ; -------------------
+    ; print loading message
+    ; -------------------
+    mov si, DiskLoadingMessage
     call PutString
 
+    ; -----------------------------------
+    ; read disk drive parameters
+    ; -----------------------------------
+    mov [DriveNumber], dl
+    ; dl == drive number, set by BIOS
+
+    push es
+    mov ah, 0x08
+    int 0x13
+    jc FloppyErrorHandler
+    pop es
+
+    and cl, 0x3F
+    xor ch, ch
+    mov [SectorsPerTrack], cx
+
+    inc dh
+    mov [NumberOfHeads], dh
+
+    ; -----------------------------------------
+    ; calculate location and length of disk root directory
+    ; -----------------------------------------
+    ; calculate LBA of first sector of root directory 
+    mov ax, [SectorsPerFAT]
+    mov bl, [NumberOfFATs]
+    xor bh, bh
+    mul bx
+    add ax, [NumberOfReserevedSectors]
+    push ax
+    ; top of stack now has the LBA of root directory
+
+    ; calculate number of sectors of the root directory
+    mov ax, [RootDirectoryEntries]
+    shl ax, 5
+    ; ax == root directory bytes
+    xor dx, dx
+    div word [BytesPerSector]
+    ; test if there is remainder
+    test dx, dx
+    jz .NoRemainder
+    inc ax
+
+.NoRemainder:
+    ; ax == number of sectors in root dir
+
+    ; ---------------------------------
+    ; read root direcotry from the disk
+    ; ---------------------------------
+    mov cl, al
+    ; cl == number of sectors to read
+    pop ax
+    ; ax == logical block address of root directory
+    mov dl, [DriveNumber]
+    mov bx, RootDirectoryBuffer
+    ; es:bx == address to write disk data to
+    call ReadFromDisk
+
+    ; -------------------------------
+    ; search for kernel.bin in root directory
+    ; -------------------------------
+    xor bx, bx
+    ; bx == index of directory entry currently searching
+    mov di, RootDirectoryBuffer
+
+.SearchForKernel:
+    mov si, KernelFileName
+    mov cx, 11
+    push di
+    repe cmpsb
+    pop di
+    je .KernelFound
+
+    ; switch to the next directory entry
+    add di, 32
+    inc bx
+    cmp bx, [RootDirectoryEntries]
+    jl .SearchForKernel
+
+    ; kernel not found in root directory
+    jmp KernelNotFoundErrorHandler
+
+.KernelFound:
+    ; di == address of directory entry that
+    ; contains kernel.bin
+    mov ax, [di + 26]
+    ; ax == first logical cluster of kernel.bin
+    mov [KernelLogicalCluster], ax
+
+    ; ------------------------
+    ; load FAT1 into memory
+    ; ------------------------
+    mov ax, [NumberOfReserevedSectors]
+    mov cl, [SectorsPerFAT]
+    mov dl, [DriveNumber]
+    mov bx, FAT1Buffer
+    call ReadFromDisk
+
+    ; ------------------------
+    ; read kernel.bin into memory
+    ; ------------------------
+    mov bx, KERNEL_LOAD_SEGMENT
+    mov es, bx
+    mov bx, KERNEL_LOAD_OFFSET
+
+.LoadKernelLoop:
+    ; read next logical cluster of kernel.bin
+    mov ax, [KernelLogicalCluster]
+    add ax, 31 ; translates logical cluster to LBA
+    mov cl, 1 ; sectors to read
+    mov dl, [DriveNumber]
+    call ReadFromDisk
+
+    add bx, [BytesPerSector]
+
+    ; ------------------------------------
+    ; calculate kernel next logical cluster
+    ; ------------------------------------
+    mov ax, [KernelLogicalCluster]
+    mov cx, 3
+    mul cx
+    mov cx, 2
+    div cx
+    push ax
+    ; TOS: FAT entry starting byte index
+
+    mov ax, [KernelLogicalCluster]
+    mov cx, 2
+    div cx
+    pop ax
+    ; ax: FAT entry starting byte index
+    ; dx = (KernelLogicalCluster % 2)
+
+    mov si, FAT1Buffer
+    add si, ax
+    mov ax, [ds:si]
+    ; ax == 2 bytes of the FAT entry
+    ; dx = (KernelLogicalCluster % 2)
+
+    or dx, dx
+    jz .Even
+
+.Odd:
+    shr ax, 4
+    jmp .NextCluster
+
+.Even:
+    and ax, 0x0FFF
+
+.NextCluster:
+    ; ax == next logical cluster in the file
+    cmp ax, 0x0FF8
+    jae .ReadingFinished
+    mov [KernelLogicalCluster], ax
+    jmp .LoadKernelLoop
+
+.ReadingFinished:
+    ; ---------------------
+    ; jump to the loaded kernel
+    ; ---------------------
+    mov dl, [DriveNumber]
+    mov ax, KERNEL_LOAD_SEGMENT
+    mov ds, ax
+    mov es, ax
+    jmp KERNEL_LOAD_SEGMENT:KERNEL_LOAD_OFFSET
+
+    ; ---------------------
+    ; unreachable code
+    ; ---------------------
+    jmp WaitForKeyThenReboot
     cli
     hlt
 
@@ -111,15 +272,23 @@ Start:
 WaitForKeyThenReboot:
     mov ah, 0
     ; call the (wait for key press) BIOS function
-    int 16h
+    int 0x16
     ; jump to the BIOS entry point, same as rebooting
-    jmp 0FFFFh:0
+    jmp 0xFFFF:0
 
 ; --------------------
 ; Floppy Disk Error handler
 ; --------------------
 FloppyErrorHandler:
     mov si, DiskReadFailedMessage
+    call PutString
+    jmp WaitForKeyThenReboot
+
+; --------------------
+; kernel file not found Error handler
+; --------------------
+KernelNotFoundErrorHandler:
+    mov si, KernelNotFoundMessage
     call PutString
     jmp WaitForKeyThenReboot
 
@@ -236,7 +405,7 @@ ReadFromDisk:
     ; set carry flag
     stc
     ; call bios function
-    int 13h
+    int 0x13
     ; carry flag 0 == success
     ; carry flag 1 == failure
     jnc .Done
@@ -256,8 +425,6 @@ ReadFromDisk:
 .Done:
     ; disk read succeeded
     popa
-    mov si, DiskReadSuccessMessage
-    call PutString
 
     ; restore touched registers
     pop di
@@ -274,26 +441,30 @@ ReadFromDisk:
 ; ---------------------------------------
 DiskReset:
     pusha
-
     mov ah, 0
     stc
-    int 13h
+    int 0x13
     jc FloppyErrorHandler
-
     popa
     ret
 
 ; ================================================================= ;
 ;                         boot sector data
 ; ================================================================= ;
-HelloWorldMessage:
-    db 'Hello, world!', CRLF, 0
-
 DiskReadFailedMessage:
-    db 'ERROR: failed to read from disk.', CRLF, 0
+    db 'failed to read disk', CRLF, 0
 
-DiskReadSuccessMessage:
-    db 'INFO: read from disk succeeded.', CRLF, 0
+KernelNotFoundMessage:
+    db 'kernel.bin not found', CRLF, 0
+
+DiskLoadingMessage:
+    db 'Loading...', CRLF, 0
+
+KernelFileName:
+    db 'kernel  bin'
+
+KernelLogicalCluster:
+    dw 0
 
 ; ---------------------------------------
 ; pad with 0 until you reach address 0x7DFE
@@ -301,6 +472,12 @@ DiskReadSuccessMessage:
 times 510 - ($ - $$) db 0
 
 ; -----------------
-; boot sector signature, 2 bytes
+; 0x7DFE, boot sector signature, 2 bytes
 ; -----------------
 dw 0xAA55
+
+; -----------------------------------------------
+; 0x7E00, from here on, nothing is loaded into the floppy disk
+; -----------------------------------------------
+RootDirectoryBuffer:
+FAT1Buffer:
