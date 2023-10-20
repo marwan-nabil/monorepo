@@ -81,7 +81,7 @@ Start:
     mov ss, ax
     mov sp, 0x7C00
 
-    ; hack to force cs to be 0x0000 
+    ; hack to force cs to be 0x0000
     push ax
     push word .JumpPoint
     ; return address for retf is now ax:.JumpPoint
@@ -116,7 +116,7 @@ Start:
     ; -----------------------------------------
     ; calculate location and length of disk root directory
     ; -----------------------------------------
-    ; calculate LBA of first sector of root directory 
+    ; calculate LBA of first sector of root directory
     mov ax, [SectorsPerFAT]
     mov bl, [NumberOfFATs]
     xor bh, bh
@@ -461,7 +461,7 @@ DiskLoadingMessage:
     db 'Loading...', CRLF, 0
 
 KernelFileName:
-    db 'kernel  bin'
+    db 'bootld  bin'
 
 KernelLogicalCluster:
     dw 0

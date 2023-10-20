@@ -10,6 +10,6 @@ b32 BuildFetchData(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\fetch_data.exe");
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

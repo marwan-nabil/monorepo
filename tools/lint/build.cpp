@@ -24,6 +24,6 @@ b32 BuildLint(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\lint.exe");
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

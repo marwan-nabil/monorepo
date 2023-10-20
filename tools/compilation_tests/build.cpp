@@ -10,6 +10,6 @@ b32 BuildCompilationTests(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\compilation_tests.exe");
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

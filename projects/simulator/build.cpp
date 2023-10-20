@@ -10,6 +10,6 @@ b32 BuildSimulator(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\simulator.exe");
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

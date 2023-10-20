@@ -33,7 +33,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
     StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
 
     CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     DeleteFileA(LockFilePath);
     if (!BuildSuccess)
     {
@@ -52,6 +52,6 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\win32_platform.exe");
 
-    BuildSuccess = CompileCpp(BuildContext);
+    BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

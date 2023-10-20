@@ -10,6 +10,6 @@ b32 BuildFat12Tests(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\fat12_tests.exe");
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

@@ -36,6 +36,6 @@ b32 BuildImguiDemo(build_context *BuildContext)
         return FALSE;
     }
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

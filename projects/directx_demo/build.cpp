@@ -11,7 +11,7 @@ b32 BuildDirectxDemo(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\directx_demo.exe");
 
-    b32 BuildSuccess = CompileCpp(BuildContext);
+    b32 BuildSuccess = CompileWithMSVC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
