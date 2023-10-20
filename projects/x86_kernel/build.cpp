@@ -1,63 +1,23 @@
-static b32 BuildBootloader(build_context *BuildContext)
+static b32 BuildBootSectorImage(build_context *BuildContext)
 {
-    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\entry.s");
-    AddCompilerFlags(BuildContext, "-f obj");
-    SetOuputBinaryPath(BuildContext, "\\bl_entry.obj");
-    b32 BuildSuccess = AssembleWithNasm(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-    ClearBuildContext(BuildContext);
-
-    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\main.c");
-    AddCompilerFlags(BuildContext, "-4 -d3 -s -wx -ms -zl -zq");
-    SetOuputBinaryPath(BuildContext, "\\bl_main.obj");
-    BuildSuccess = CompileWithWatcom(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-    ClearBuildContext(BuildContext);
-
-    AddLinkerInputFile(BuildContext, "\\bl_entry.obj");
-    AddLinkerInputFile(BuildContext, "\\bl_main.obj");
-    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\linker.ls");
-    AddLinkerFlags(BuildContext, "OPTION MAP=bootloader.map");
-    SetOuputBinaryPath(BuildContext, "\\bootloader.img");
-    BuildSuccess = LinkWithWatcom(BuildContext);
-    return BuildSuccess;
-}
-
-static b32 BuildX86Kernel(build_context *BuildContext)
-{
-    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\boot_sector.s");
+    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\boot_sector\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin");
     SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-    ClearBuildContext(BuildContext);
+    return BuildSuccess;
+}
 
-    BuildSuccess = BuildBootloader(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-    ClearBuildContext(BuildContext);
-
+static b32 BuildKernelImage(build_context *BuildContext)
+{
     AddSourceFile(BuildContext, "\\projects\\x86_kernel\\kernel\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin");
     SetOuputBinaryPath(BuildContext, "\\kernel.img");
-    BuildSuccess = AssembleWithNasm(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-    ClearBuildContext(BuildContext);
+    b32 BuildSuccess = AssembleWithNasm(BuildContext);
+    return BuildSuccess;
+}
 
+static b32 BuildFloppyDiskImage(build_context *BuildContext)
+{
     fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
     (
         0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
@@ -83,13 +43,41 @@ static b32 BuildX86Kernel(build_context *BuildContext)
     ClearBuildContext(BuildContext);
 
     SetOuputBinaryPath(BuildContext, "\\floppy.img");
-    BuildSuccess = WriteFileFromMemory
+    b32 BuildSuccess = WriteFileFromMemory
     (
         BuildContext->OutputBinaryPath,
         Fat12Disk,
         sizeof(fat12_disk)
     );
     VirtualFree(Fat12Disk, 0, MEM_RELEASE);
+    return BuildSuccess;
+}
+
+static b32 Buildx86Kernel(build_context *BuildContext)
+{
+    b32 BuildSuccess = BuildBootSectorImage(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
+    ClearBuildContext(BuildContext);
+
+    BuildSuccess = BuildBootloaderImage(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
+    ClearBuildContext(BuildContext);
+
+    BuildSuccess = BuildKernelImage(BuildContext);
+    if (!BuildSuccess)
+    {
+        return FALSE;
+    }
+    ClearBuildContext(BuildContext);
+
+    BuildSuccess = BuildFloppyDiskImage(BuildContext);
+    ClearBuildContext(BuildContext);
 
     return BuildSuccess;
 }

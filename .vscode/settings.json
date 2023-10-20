@@ -14,27 +14,28 @@
     "C_Cpp.default.defines":
     [
         // shared
-        "ENABLE_ASSERTIONS",
-        "_CRT_SECURE_NO_WARNINGS",
+        "ENABLE_ASSERTIONS=",
+        "_CRT_SECURE_NO_WARNINGS=",
         
         // build
-        "_CRT_RAND_S",
+        "_CRT_RAND_S=",
         
         // ray_tracer
         "SIMD_NUMBEROF_LANES=8",
 
         // imgui_demo
-        "UNICODE",
-        "_UNICODE",
+        "UNICODE=",
+        "_UNICODE=",
 
         // handmade_hero
         "HANDMADE_WIN32=1",
         "HANDMADE_SLOW=1",
         "HANDMADE_INTERNAL=1",
         
-        // directx_demo
-
         // lint
-        "JOB_PER_FILE",
+        "JOB_PER_FILE=",
+
+        // x86_kernel
+        "_cdecl=",
     ],
 }

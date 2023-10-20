@@ -38,6 +38,7 @@
 #include "projects\handmade_hero\build.cpp"
 #include "projects\imgui_demo\build.cpp"
 #include "projects\ray_tracer\build.cpp"
+#include "projects\x86_kernel\bootloader\build.cpp"
 #include "projects\x86_kernel\build.cpp"
 
 #include "target_mappings.cpp"

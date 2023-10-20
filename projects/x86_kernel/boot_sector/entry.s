@@ -2,8 +2,8 @@ org 0x7C00
 bits 16
 
 %define CRLF 0x0D, 0x0A
-%define KERNEL_LOAD_SEGMENT 0x2000
-%define KERNEL_LOAD_OFFSET 0x0
+%define BOOTLOADER_LOAD_SEGMENT 0x2000
+%define BOOTLOADER_LOAD_OFFSET 0x0
 
 ; --------------------
 ; jump instruction, 3 bytes
@@ -152,35 +152,35 @@ Start:
     call ReadFromDisk
 
     ; -------------------------------
-    ; search for kernel.bin in root directory
+    ; search for bootld.bin in root directory
     ; -------------------------------
     xor bx, bx
     ; bx == index of directory entry currently searching
     mov di, RootDirectoryBuffer
 
-.SearchForKernel:
-    mov si, KernelFileName
+.SearchForBootloader:
+    mov si, BootloaderFileName
     mov cx, 11
     push di
     repe cmpsb
     pop di
-    je .KernelFound
+    je .BootloaderFound
 
     ; switch to the next directory entry
     add di, 32
     inc bx
     cmp bx, [RootDirectoryEntries]
-    jl .SearchForKernel
+    jl .SearchForBootloader
 
-    ; kernel not found in root directory
-    jmp KernelNotFoundErrorHandler
+    ; Bootloader not found in root directory
+    jmp BootloaderNotFoundErrorHandler
 
-.KernelFound:
+.BootloaderFound:
     ; di == address of directory entry that
-    ; contains kernel.bin
+    ; contains bootld.bin
     mov ax, [di + 26]
-    ; ax == first logical cluster of kernel.bin
-    mov [KernelLogicalCluster], ax
+    ; ax == first logical cluster of bootld.bin
+    mov [BootloaderLogicalCluster], ax
 
     ; ------------------------
     ; load FAT1 into memory
@@ -192,15 +192,15 @@ Start:
     call ReadFromDisk
 
     ; ------------------------
-    ; read kernel.bin into memory
+    ; read bootld.bin into memory
     ; ------------------------
-    mov bx, KERNEL_LOAD_SEGMENT
+    mov bx, BOOTLOADER_LOAD_SEGMENT
     mov es, bx
-    mov bx, KERNEL_LOAD_OFFSET
+    mov bx, BOOTLOADER_LOAD_OFFSET
 
-.LoadKernelLoop:
-    ; read next logical cluster of kernel.bin
-    mov ax, [KernelLogicalCluster]
+.LoadBootloaderLoop:
+    ; read next logical cluster of bootld.bin
+    mov ax, [BootloaderLogicalCluster]
     add ax, 31 ; translates logical cluster to LBA
     mov cl, 1 ; sectors to read
     mov dl, [DriveNumber]
@@ -209,9 +209,9 @@ Start:
     add bx, [BytesPerSector]
 
     ; ------------------------------------
-    ; calculate kernel next logical cluster
+    ; calculate Bootloader next logical cluster
     ; ------------------------------------
-    mov ax, [KernelLogicalCluster]
+    mov ax, [BootloaderLogicalCluster]
     mov cx, 3
     mul cx
     mov cx, 2
@@ -219,18 +219,18 @@ Start:
     push ax
     ; TOS: FAT entry starting byte index
 
-    mov ax, [KernelLogicalCluster]
+    mov ax, [BootloaderLogicalCluster]
     mov cx, 2
     div cx
     pop ax
     ; ax: FAT entry starting byte index
-    ; dx = (KernelLogicalCluster % 2)
+    ; dx = (BootloaderLogicalCluster % 2)
 
     mov si, FAT1Buffer
     add si, ax
     mov ax, [ds:si]
     ; ax == 2 bytes of the FAT entry
-    ; dx = (KernelLogicalCluster % 2)
+    ; dx = (BootloaderLogicalCluster % 2)
 
     or dx, dx
     jz .Even
@@ -246,18 +246,18 @@ Start:
     ; ax == next logical cluster in the file
     cmp ax, 0x0FF8
     jae .ReadingFinished
-    mov [KernelLogicalCluster], ax
-    jmp .LoadKernelLoop
+    mov [BootloaderLogicalCluster], ax
+    jmp .LoadBootloaderLoop
 
 .ReadingFinished:
     ; ---------------------
-    ; jump to the loaded kernel
+    ; jump to the loaded Bootloader
     ; ---------------------
     mov dl, [DriveNumber]
-    mov ax, KERNEL_LOAD_SEGMENT
+    mov ax, BOOTLOADER_LOAD_SEGMENT
     mov ds, ax
     mov es, ax
-    jmp KERNEL_LOAD_SEGMENT:KERNEL_LOAD_OFFSET
+    jmp BOOTLOADER_LOAD_SEGMENT:BOOTLOADER_LOAD_OFFSET
 
     ; ---------------------
     ; unreachable code
@@ -285,10 +285,10 @@ FloppyErrorHandler:
     jmp WaitForKeyThenReboot
 
 ; --------------------
-; kernel file not found Error handler
+; Bootloader file not found Error handler
 ; --------------------
-KernelNotFoundErrorHandler:
-    mov si, KernelNotFoundMessage
+BootloaderNotFoundErrorHandler:
+    mov si, BootloaderNotFoundMessage
     call PutString
     jmp WaitForKeyThenReboot
 
@@ -454,16 +454,16 @@ DiskReset:
 DiskReadFailedMessage:
     db 'failed to read disk', CRLF, 0
 
-KernelNotFoundMessage:
-    db 'kernel.bin not found', CRLF, 0
+BootloaderNotFoundMessage:
+    db 'bootld.bin not found', CRLF, 0
 
 DiskLoadingMessage:
-    db 'Loading...', CRLF, 0
+    db 'Bootsector..', CRLF, 0
 
-KernelFileName:
+BootloaderFileName:
     db 'bootld  bin'
 
-KernelLogicalCluster:
+BootloaderLogicalCluster:
     dw 0
 
 ; ---------------------------------------

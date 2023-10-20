@@ -9,6 +9,6 @@ target_mapping BuildTargetMappings[] =
     {"handmade_hero", &BuildHandmadeHero},
     {"imgui_demo", &BuildImguiDemo},
     {"ray_tracer", &BuildRayTracer},
-    {"x86_kernel", &BuildX86Kernel},
+    {"x86_kernel", &Buildx86Kernel},
     {"x86_kernel_tests", &BuildX86KernelTests},
 };
