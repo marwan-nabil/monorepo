@@ -13,6 +13,7 @@ struct build_context
     char CompilerFlags[1024];
     char LinkerFlags[1024];
     char SourcesString[1024];
+    char LinkerInputsString[1024];
     char OutputBinaryPath[1024];
 };
 

@@ -84,7 +84,7 @@ int main(int argc, char **argv)
         {
             "obj", "pdb", "log", "ilk", "sln", "bmp", "txt", "ini",
             "dll", "exp", "lib", "map", "hmi", "cso", "lock", "exe",
-            "img", "h"
+            "img", "h", "err"
         };
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)

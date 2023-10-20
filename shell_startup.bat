@@ -9,8 +9,12 @@ set path=C:\Program Files\Bochs-2.7;%path%
 set path=%cd%\scripts;%path%
 
 @REM setup watcom environment
-set wcc="C:\Program Files\Watcom\binnt\wcc.exe"
-set wlink="C:\Program Files\Watcom\binnt\wlink.exe"
+SET PATH=C:\Watcom\BINW;%PATH%
+SET PATH=C:\Watcom\BINNT;%PATH%
+SET WATCOM=C:\Watcom
+SET EDPATH=C:\Watcom\EDDAT
+SET WHTMLHELP=C:\Watcom\BINNT\HELP
+SET WIPFC=C:\Watcom\WIPFC
 
 @REM setup MSVC environment
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"

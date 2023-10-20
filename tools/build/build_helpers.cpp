@@ -22,6 +22,18 @@ static void AddSourceFile(build_context *BuildContext, const char *SourceFile)
     StringCchCatA(BuildContext->SourcesString, ArrayCount(BuildContext->SourcesString), " ");
 }
 
+static void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
+{
+    StringCchCatA
+    (
+        BuildContext->LinkerInputsString,
+        ArrayCount(BuildContext->LinkerInputsString),
+        BuildContext->OutputDirectoryPath
+    );
+    StringCchCatA(BuildContext->LinkerInputsString, ArrayCount(BuildContext->LinkerInputsString), LinkerInputFile);
+    StringCchCatA(BuildContext->LinkerInputsString, ArrayCount(BuildContext->LinkerInputsString), " ");
+}
+
 static void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryName)
 {
     StringCchCatA
@@ -44,6 +56,7 @@ static void ClearBuildContext(build_context *BuildContext)
     *BuildContext->LinkerFlags = {};
     *BuildContext->OutputBinaryPath = {};
     *BuildContext->SourcesString = {};
+    *BuildContext->LinkerInputsString = {};
 }
 
 static void DisplayHelp()
@@ -83,7 +96,7 @@ static b32 CompileShader(build_context *BuildContext)
     return Result;
 }
 
-static b32 CompileCpp(build_context *BuildContext)
+static b32 CompileWithMSVC(build_context *BuildContext)
 {
     char CompilerCommand[1024];
     *CompilerCommand = {};
@@ -106,7 +119,51 @@ static b32 CompileCpp(build_context *BuildContext)
     return Result;
 }
 
-static b32 CompileAssembly(build_context *BuildContext)
+static b32 CompileWithWatcom(build_context *BuildContext)
+{
+    char CompilerCommand[1024];
+    *CompilerCommand = {};
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "wcc.exe ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->SourcesString);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -fo=\"");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->OutputBinaryPath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
+
+    b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->ConsoleContext);
+    if (!Result)
+    {
+        ConsolePrintColored("ERROR: compilation failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
+    }
+
+    return Result;
+}
+
+static b32 LinkWithWatcom(build_context *BuildContext)
+{
+    char CompilerCommand[1024];
+    *CompilerCommand = {};
+
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "wlink.exe NAME ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->OutputBinaryPath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " FILE {");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkerInputsString);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "} ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " @");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->SourcesString);
+
+    b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->ConsoleContext);
+    if (!Result)
+    {
+        ConsolePrintColored("ERROR: compilation failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
+    }
+
+    return Result;
+}
+
+static b32 AssembleWithNasm(build_context *BuildContext)
 {
     char AssemblerCommand[1024];
     *AssemblerCommand = {};
