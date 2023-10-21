@@ -64,7 +64,13 @@ b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirector
             else
             {
                 char *Extension = PathFindExtensionA(FindOperationData.cFileName);
-                if ((strcmp(Extension, ".cpp") == 0) || (strcmp(Extension, ".h") == 0) || (strcmp(Extension, ".s") == 0))
+                if
+                (
+                    (strcmp(Extension, ".cpp") == 0) ||
+                    (strcmp(Extension, ".h") == 0) ||
+                    (strcmp(Extension, ".c") == 0) ||
+                    (strcmp(Extension, ".s") == 0)
+                )
                 {
                     if (!DirectoryContainsSourceCode)
                     {

@@ -1,6 +1,6 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    
+
     "files.exclude":
     {
         "third_party/**": true,
@@ -10,16 +10,16 @@
         // "math/simd/4_wide/": true,
         // "math/simd/8_wide/": true,
     },
-    
+
     "C_Cpp.default.defines":
     [
         // shared
         "ENABLE_ASSERTIONS=",
         "_CRT_SECURE_NO_WARNINGS=",
-        
+
         // build
         "_CRT_RAND_S=",
-        
+
         // ray_tracer
         "SIMD_NUMBEROF_LANES=8",
 
@@ -31,11 +31,12 @@
         "HANDMADE_WIN32=1",
         "HANDMADE_SLOW=1",
         "HANDMADE_INTERNAL=1",
-        
+
         // lint
         "JOB_PER_FILE=",
 
         // x86_kernel
         "_cdecl=",
+        "far=",
     ],
 }

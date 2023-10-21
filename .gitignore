@@ -1,8 +1,2 @@
-**/*.exe
-**/*.obj
-**/*.pdb
-**/*.ilk
-**/*.ini
-**/.vs
 output/**
-/data/**
+data/**

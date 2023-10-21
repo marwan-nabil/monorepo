@@ -2,7 +2,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
 {
     char *AssemblySources[]=
     {
-        "entry", "x86"
+        "x86"
     };
 
     for (u32 SourceIndex = 0; SourceIndex < ArrayCount(AssemblySources); SourceIndex++)
@@ -30,7 +30,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
 
     char *CSources[]=
     {
-        "main", "strings"
+        "main"
     };
 
     for (u32 SourceIndex = 0; SourceIndex < ArrayCount(CSources); SourceIndex++)
@@ -48,7 +48,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         SetOuputBinaryPath(BuildContext, ObjectFileName);
 
         AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -i=..");
-        AddCompilerFlags(BuildContext, "-wx -wcd=138");
+        AddCompilerFlags(BuildContext, "-wx -wcd=138 -wcd=202");
         b32 BuildSuccess = CompileWithWatcom(BuildContext);
         if (!BuildSuccess)
         {
