@@ -47,7 +47,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
         SetOuputBinaryPath(BuildContext, ObjectFileName);
 
-        AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq");
+        AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -i=..");
         AddCompilerFlags(BuildContext, "-wx -wcd=138");
         b32 BuildSuccess = CompileWithWatcom(BuildContext);
         if (!BuildSuccess)

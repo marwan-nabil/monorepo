@@ -1,21 +1,3 @@
-static b32 BuildBootSectorImage(build_context *BuildContext)
-{
-    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\boot_sector\\entry.s");
-    AddCompilerFlags(BuildContext, "-f bin");
-    SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
-    b32 BuildSuccess = AssembleWithNasm(BuildContext);
-    return BuildSuccess;
-}
-
-static b32 BuildKernelImage(build_context *BuildContext)
-{
-    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\kernel\\entry.s");
-    AddCompilerFlags(BuildContext, "-f bin");
-    SetOuputBinaryPath(BuildContext, "\\kernel.img");
-    b32 BuildSuccess = AssembleWithNasm(BuildContext);
-    return BuildSuccess;
-}
-
 static b32 BuildFloppyDiskImage(build_context *BuildContext)
 {
     fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
