@@ -15,13 +15,13 @@
 #include <strsafe.h>
 #include <io.h>
 
-#include "platform\base_types.h"
-#include "platform\basic_defines.h"
-#include "platform\console\console.h"
+#include "win32\base_types.h"
+#include "shared\basic_defines.h"
+#include "win32\console\console.h"
 
-#include "platform\console\console.cpp"
-#include "platform\strings.cpp"
-#include "platform\processes\processes.cpp"
+#include "win32\console\console.cpp"
+#include "win32\strings.cpp"
+#include "win32\processes\processes.cpp"
 
 struct test_job
 {

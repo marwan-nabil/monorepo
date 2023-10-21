@@ -7,16 +7,16 @@
 #include <stdio.h>
 #include <strsafe.h>
 
-#include "platform\base_types.h"
-#include "platform\basic_defines.h"
-#include "math\vector2.h"
-#include "math\vector3.h"
-#include "math\vector4.h"
+#include "win32\base_types.h"
+#include "shared\basic_defines.h"
+#include "win32\math\vector2.h"
+#include "win32\math\vector3.h"
+#include "win32\math\vector4.h"
 #include "game_interface.h"
 #include "win32_platform.h"
 
-#include "math\scalar_conversions.cpp"
-#include "platform\strings.cpp"
+#include "win32\math\scalar_conversions.cpp"
+#include "win32\strings.cpp"
 #include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};

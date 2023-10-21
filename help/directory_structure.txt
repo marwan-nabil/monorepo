@@ -1,0 +1,44 @@
+-------------------
+==> generic folders
+-------------------
+scripts/ --> small batch scripts
+output/ --> build outputs and working path for executables
+data/ --> storage for binary data used by programs
+help/ --> documentation
+
+-------------------------------------------------------------------------
+==> independent programs, each project is, in general, platform dependent
+-------------------------------------------------------------------------
+projects/
+    directx_demo/ --> test program for directx
+    handmade_hero/ --> handmade hero game
+    imgui_demo/ --> test program for imgui library
+    ray_tracer/ --> software ray tracer
+    simulator/ --> physical simulation experiments
+    tools/
+        build/ --> build system main executable
+        compilation_tests/ --> program that tests all compilation targets
+        fetch_data --> tool to fetch the binary program data found in data/
+        lint/ --> source code linter program
+    x86_kernel/ --> small x86 operating system
+
+-------------------------------------------------------------
+==> fully portable, compiler & platform independent code that 
+    can be included from any project
+-------------------------------------------------------------
+shared/
+
+-----------------------------------
+==> win32/MSVC specific shared code
+-----------------------------------
+win32/
+     math/
+     ...
+
+---------------------------------------------------
+==> x86/BIOS specific shared code, does not use the 
+    standard library or any os syscalls
+---------------------------------------------------
+x86/
+     math/
+     ...

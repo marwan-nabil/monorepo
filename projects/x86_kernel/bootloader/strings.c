@@ -1,4 +1,4 @@
-#include "projects\x86_kernel\platform\base_types.h"
+#include "x86\base_types.h"
 #include "x86.h"
 
 void PutCharacter(char Character)
