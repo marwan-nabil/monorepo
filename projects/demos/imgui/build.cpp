@@ -17,13 +17,13 @@ b32 BuildImguiDemo(build_context *BuildContext)
 
     if (strcmp(BuildContext->argv[2], "opengl2") == 0)
     {
-        AddSourceFile(BuildContext, "\\projects\\imgui_demo\\main_opengl2.cpp");
+        AddSourceFile(BuildContext, "\\projects\\demos\\imgui\\main_opengl2.cpp");
         AddLinkerFlags(BuildContext, "opengl32.lib");
         SetOuputBinaryPath(BuildContext, "\\imgui_demo_opengl2.exe");
     }
     else if (strcmp(BuildContext->argv[2], "dx11") == 0)
     {
-        AddSourceFile(BuildContext, "\\projects\\imgui_demo\\main_dx11.cpp");
+        AddSourceFile(BuildContext, "\\projects\\demos\\imgui\\main_dx11.cpp");
         AddLinkerFlags(BuildContext, "d3d11.lib d3dcompiler.lib");
         SetOuputBinaryPath(BuildContext, "\\imgui_demo_dx11.exe");
     }

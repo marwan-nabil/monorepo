@@ -8,11 +8,11 @@
 #include <directxcolors.h>
 #include <dxgi.h>
 
-#include "win32\base_types.h"
-#include "shared\basic_defines.h"
+#include "platform\win32\base_types.h"
+#include "platform\shared\basic_defines.h"
 #include "directx_demo.h"
 
-#include "win32\math\floats.cpp"
+#include "platform\win32\math\floats.cpp"
 
 application_data GlobalApplicationData;
 d3d_state GlobalD3dState;

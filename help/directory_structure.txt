@@ -1,6 +1,6 @@
--------------------
-==> generic folders
--------------------
+--------------------------
+==> generic shared folders
+--------------------------
 scripts/ --> small batch scripts
 output/ --> build outputs and working path for executables
 data/ --> storage for binary data used by programs
@@ -10,35 +10,40 @@ help/ --> documentation
 ==> independent programs, each project is, in general, platform dependent
 -------------------------------------------------------------------------
 projects/
-    directx_demo/ --> test program for directx
+    demos/
+        directx/ --> demo program for directx
+        imgui/ --> demo program for imgui library
+
     handmade_hero/ --> handmade hero game
-    imgui_demo/ --> test program for imgui library
+
     ray_tracer/ --> software ray tracer
+
     simulator/ --> physical simulation experiments
+
     tools/
         build/ --> build system main executable
         compilation_tests/ --> program that tests all compilation targets
-        fetch_data --> tool to fetch the binary program data found in data/
+        fetch_data/ --> tool to fetch the binary program data found in data/
         lint/ --> source code linter program
+
     x86_kernel/ --> small x86 operating system
 
--------------------------------------------------------------
-==> fully portable, compiler & platform independent code that 
-    can be included from any project
--------------------------------------------------------------
-shared/
+---------------------------------
+==> platform specific shared code
+---------------------------------
+platform/
+    shared/ --> platform (compiler/os) independent code that can be included from any project
 
------------------------------------
-==> win32/MSVC specific shared code
------------------------------------
-win32/
-     math/
-     ...
+    win32/ --> win32/MSVC specific shared code
+        console/ --> windows console api wrappers
+        fat12/ --> fat12 ram filesystem driver
+        file_system/ --> windows files/folders/paths handling
+        floppy_disk/ --> ram floppy disk driver
+        math/ --> math library, depends on the c stdlib, and MSVC intrinsics for SIMD
+        processes/ --> win32 processes api wrappers
+        rasterizer/ --> software renderer, depends on win32/math
+        strings/ --> string handling code, depends on win32 APIs
+        system/ --> win32 version info api wrappers
+        windows/ --> windowing and dpi APIs
 
----------------------------------------------------
-==> x86/BIOS specific shared code, does not use the 
-    standard library or any os syscalls
----------------------------------------------------
-x86/
-     math/
-     ...
+    x86/ --> x86/BIOS specific shared code doesn't use the standard library or any os syscalls
