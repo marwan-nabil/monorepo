@@ -1,34 +1,34 @@
-void PutCharacter(char Character)
+void PrintCharacter(char Character)
 {
     x86_PrintCharacter(Character, 0);
 }
 
-void PutString(const char *String)
+void PrintString(const char *String)
 {
     while (*String)
     {
-        PutCharacter(*String);
+        PrintCharacter(*String);
         String++;
     }
 }
 
-void PutFarString(const char far *String)
+void PrintFarString(const char far *String)
 {
     while(*String)
     {
-        PutCharacter(*String);
+        PrintCharacter(*String);
         String++;
     }
 }
 
-i32 *PrintNumber(int *ArgPointer, printf_length_type LengthType, b8 Signed, int Radix)
+i32 *PrintNumber(i32 *ArgPointer, printf_length_type LengthType, b8 Signed, i32 Radix)
 {
     const char HexCharacters[] = "0123456789abcdef";
 
     char LocalStringBuffer[32];
-    unsigned long long Number;
-    int Sign = 1;
-    int BufferPosition = 0;
+    u64 Number;
+    i32 Sign = 1;
+    i32 BufferPosition = 0;
 
     switch (LengthType)
     {
@@ -38,17 +38,17 @@ i32 *PrintNumber(int *ArgPointer, printf_length_type LengthType, b8 Signed, int 
         {
             if (Signed)
             {
-                int Value = *ArgPointer;
+                i32 Value = *ArgPointer;
                 if (Value < 0)
                 {
                     Value = -Value;
                     Sign = -1;
                 }
-                Number = (unsigned long long)Value;
+                Number = (u64)Value;
             }
             else
             {
-                Number = *(unsigned int *)ArgPointer;
+                Number = *(u32 *)ArgPointer;
             }
             ArgPointer++;
         } break;
@@ -57,17 +57,17 @@ i32 *PrintNumber(int *ArgPointer, printf_length_type LengthType, b8 Signed, int 
         {
             if (Signed)
             {
-                long int Value = *(long int *)ArgPointer;
+                i32 Value = *(i32 *)ArgPointer;
                 if (Value < 0)
                 {
                     Value = -Value;
                     Sign = -1;
                 }
-                Number = (unsigned long long)Value;
+                Number = (u64)Value;
             }
             else
             {
-                Number = *(unsigned long int *)ArgPointer;
+                Number = *(u32 *)ArgPointer;
             }
             ArgPointer += 2;
         } break;
@@ -76,17 +76,17 @@ i32 *PrintNumber(int *ArgPointer, printf_length_type LengthType, b8 Signed, int 
         {
             if (Signed)
             {
-                long long int Value = *(long long int *)ArgPointer;
+                i32 Value = *(i32 *)ArgPointer;
                 if (Value < 0)
                 {
                     Value = -Value;
                     Sign = -1;
                 }
-                Number = (unsigned long long)Value;
+                Number = (u64)Value;
             }
             else
             {
-                Number = *(unsigned long long *)ArgPointer;
+                Number = *(u64 *)ArgPointer;
             }
             ArgPointer += 4;
         } break;
@@ -106,7 +106,7 @@ i32 *PrintNumber(int *ArgPointer, printf_length_type LengthType, b8 Signed, int 
 
     while (--BufferPosition >= 0)
     {
-        PutCharacter(LocalStringBuffer[BufferPosition]);
+        PrintCharacter(LocalStringBuffer[BufferPosition]);
     }
 
     return ArgPointer;
@@ -114,10 +114,10 @@ i32 *PrintNumber(int *ArgPointer, printf_length_type LengthType, b8 Signed, int 
 
 void _cdecl PrintF(const char *FormatString, ...)
 {
-    int *ArgPointer = (int *)&FormatString;
+    i32 *ArgPointer = (i32 *)&FormatString;
     printf_state State = PRINTF_STATE_NORMAL;
     printf_length_type LengthType = PRINTF_LENGTH_TYPE_DEFAULT;
-    int Radix = 10;
+    i32 Radix = 10;
     b8 Signed = FALSE;
 
     ArgPointer++;
@@ -134,7 +134,7 @@ void _cdecl PrintF(const char *FormatString, ...)
                 }
                 else
                 {
-                    PutCharacter(*FormatString);
+                    PrintCharacter(*FormatString);
                 }
                 FormatString++;
             } break;
@@ -191,25 +191,25 @@ void _cdecl PrintF(const char *FormatString, ...)
             {
                 if (*FormatString == 'c')
                 {
-                    PutCharacter((char)*ArgPointer);
+                    PrintCharacter((char)*ArgPointer);
                     ArgPointer++;
                 }
                 else if (*FormatString == 's')
                 {
                     if ((LengthType == PRINTF_LENGTH_TYPE_LONG) || (LengthType == PRINTF_LENGTH_TYPE_LONG_LONG))
                     {
-                        PutFarString(*(const char far **)ArgPointer);
+                        PrintFarString(*(const char far **)ArgPointer);
                         ArgPointer += 2;
                     }
                     else
                     {
-                        PutString(*(const char **)ArgPointer);
+                        PrintString(*(const char **)ArgPointer);
                         ArgPointer++;
                     }
                 }
                 else if (*FormatString == '%')
                 {
-                    PutCharacter('%');
+                    PrintCharacter('%');
                 }
                 else if ((*FormatString == 'd') || (*FormatString == 'i'))
                 {
