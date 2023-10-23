@@ -5,9 +5,9 @@
 #include <io.h>
 #include <strsafe.h>
 
-#include "platform\win32\base_types.h"
-#include "platform\shared\basic_defines.h"
-#include "platform\win32\strings\strings.cpp"
+#include "platforms\win32\base_types.h"
+#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\strings\strings.cpp"
 
 struct data_chunk
 {

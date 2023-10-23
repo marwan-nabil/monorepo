@@ -1,5 +1,5 @@
-#include "platform\x86\base_types.h"
-#include "platform\shared\basic_defines.h"
+#include "platforms\x86\base_types.h"
+#include "platforms\shared\basic_defines.h"
 
 #include "x86.h"
 #include "strings.h"

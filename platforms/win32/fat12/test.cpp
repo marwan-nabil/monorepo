@@ -5,16 +5,16 @@
 #include <math.h>
 #include <strsafe.h>
 
-#include "platform\win32\base_types.h"
-#include "platform\shared\basic_defines.h"
-#include "platform\win32\console\console.h"
-#include "platform\win32\file_system\path_handling.h"
+#include "platforms\win32\base_types.h"
+#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\console\console.h"
+#include "platforms\win32\file_system\path_handling.h"
 
 #include "fat12.h"
 
-#include "platform\win32\console\console.cpp"
-#include "platform\win32\strings\strings.cpp"
-#include "platform\win32\file_system\path_handling.cpp"
+#include "platforms\win32\console\console.cpp"
+#include "platforms\win32\strings\strings.cpp"
+#include "platforms\win32\file_system\path_handling.cpp"
 
 #include "fat12_get.cpp"
 #include "fat12_set.cpp"

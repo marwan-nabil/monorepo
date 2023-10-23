@@ -7,69 +7,69 @@
 #include <float.h>
 #include <time.h>
 
-#include "platform\win32\base_types.h"
-#include "platform\shared\basic_defines.h"
-#include "platform\win32\file_system\files.h"
+#include "platforms\win32\base_types.h"
+#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\file_system\files.h"
 
-#include "platform\win32\math\constants.h"
-#include "platform\win32\math\random.h"
-#include "platform\win32\math\vector2.h"
-#include "platform\win32\math\vector3.h"
-#include "platform\win32\math\vector4.h"
+#include "platforms\win32\math\constants.h"
+#include "platforms\win32\math\random.h"
+#include "platforms\win32\math\vector2.h"
+#include "platforms\win32\math\vector3.h"
+#include "platforms\win32\math\vector4.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "platform\win32\math\simd\1_wide\math.h"
+#   include "platforms\win32\math\simd\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "platform\win32\math\simd\4_wide\math.h"
+#   include "platforms\win32\math\simd\4_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 8)
-#   include "platform\win32\math\simd\8_wide\math.h"
+#   include "platforms\win32\math\simd\8_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
 
-#include "platform\win32\math\simd\shared\math.h"
-#include "platform\win32\math\simd\shared\random.h"
+#include "platforms\win32\math\simd\shared\math.h"
+#include "platforms\win32\math\simd\shared\random.h"
 
 #include "brdf.h"
 #include "ray_tracer.h"
 
-#include "platform\win32\math\random.cpp"
-#include "platform\win32\math\scalar_conversions.cpp"
-#include "platform\win32\math\integers.cpp"
-#include "platform\win32\math\floats.cpp"
-#include "platform\win32\math\transcendentals.cpp"
-#include "platform\win32\math\vector2.cpp"
-#include "platform\win32\math\vector3.cpp"
-#include "platform\win32\math\vector4.cpp"
+#include "platforms\win32\math\random.cpp"
+#include "platforms\win32\math\scalar_conversions.cpp"
+#include "platforms\win32\math\integers.cpp"
+#include "platforms\win32\math\floats.cpp"
+#include "platforms\win32\math\transcendentals.cpp"
+#include "platforms\win32\math\vector2.cpp"
+#include "platforms\win32\math\vector3.cpp"
+#include "platforms\win32\math\vector4.cpp"
 
-#include "platform\win32\file_system\files.cpp"
+#include "platforms\win32\file_system\files.cpp"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "platform\win32\math\simd\1_wide\conversions.cpp"
-#   include "platform\win32\math\simd\1_wide\integers.cpp"
-#   include "platform\win32\math\simd\1_wide\floats.cpp"
-#   include "platform\win32\math\simd\1_wide\assertions.cpp"
+#   include "platforms\win32\math\simd\1_wide\conversions.cpp"
+#   include "platforms\win32\math\simd\1_wide\integers.cpp"
+#   include "platforms\win32\math\simd\1_wide\floats.cpp"
+#   include "platforms\win32\math\simd\1_wide\assertions.cpp"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "platform\win32\math\simd\4_wide\conversions.cpp"
-#   include "platform\win32\math\simd\4_wide\integers.cpp"
-#   include "platform\win32\math\simd\4_wide\floats.cpp"
-#   include "platform\win32\math\simd\4_wide\assertions.cpp"
-#   include "platform\win32\math\simd\4_wide\vector3.cpp"
+#   include "platforms\win32\math\simd\4_wide\conversions.cpp"
+#   include "platforms\win32\math\simd\4_wide\integers.cpp"
+#   include "platforms\win32\math\simd\4_wide\floats.cpp"
+#   include "platforms\win32\math\simd\4_wide\assertions.cpp"
+#   include "platforms\win32\math\simd\4_wide\vector3.cpp"
 #elif (SIMD_NUMBEROF_LANES == 8)
-#   include "platform\win32\math\simd\8_wide\conversions.cpp"
-#   include "platform\win32\math\simd\8_wide\integers.cpp"
-#   include "platform\win32\math\simd\8_wide\floats.cpp"
-#   include "platform\win32\math\simd\8_wide\assertions.cpp"
-#   include "platform\win32\math\simd\8_wide\vector3.cpp"
+#   include "platforms\win32\math\simd\8_wide\conversions.cpp"
+#   include "platforms\win32\math\simd\8_wide\integers.cpp"
+#   include "platforms\win32\math\simd\8_wide\floats.cpp"
+#   include "platforms\win32\math\simd\8_wide\assertions.cpp"
+#   include "platforms\win32\math\simd\8_wide\vector3.cpp"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
 
-#include "platform\win32\math\simd\shared\conversions.cpp"
-#include "platform\win32\math\simd\shared\integers.cpp"
-#include "platform\win32\math\simd\shared\floats.cpp"
-#include "platform\win32\math\simd\shared\vector3.cpp"
-#include "platform\win32\math\simd\shared\random.cpp"
+#include "platforms\win32\math\simd\shared\conversions.cpp"
+#include "platforms\win32\math\simd\shared\integers.cpp"
+#include "platforms\win32\math\simd\shared\floats.cpp"
+#include "platforms\win32\math\simd\shared\vector3.cpp"
+#include "platforms\win32\math\simd\shared\random.cpp"
 
 #include "brdf.cpp"
 
