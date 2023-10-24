@@ -1,4 +1,4 @@
-#include "platforms\x86\base_types.h"
+#include "platforms\x86_real\base_types.h"
 #include "platforms\shared\basic_defines.h"
 
 #include "x86.h"

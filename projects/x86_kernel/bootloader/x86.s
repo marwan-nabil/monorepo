@@ -96,8 +96,8 @@ _X86PrintCharacter:
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
-global _X86Divide64BitsBy32Bits
-_X86Divide64BitsBy32Bits:
+global _X86DivideU64ByU32
+_X86DivideU64ByU32:
     ; make new call frame
     push bp ; save old call frame
     mov bp, sp ; initialize new call frame
