@@ -11,7 +11,7 @@ bits 16
 ; --------------------
 Entry:
     mov si, HelloWorldMessage
-    call PutString
+    call PrintString
 
 .Halt:
     cli
@@ -22,7 +22,7 @@ Entry:
 ; in:
 ;       si -> address of string
 ; --------------------
-PutString:
+PrintString:
     ; save touched register
     push si
     push ax

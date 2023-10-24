@@ -12,7 +12,7 @@ section _ENTRY class=CODE
 global entry
 entry:
     mov si, BootloaderEntryMessage
-    call PutString
+    call PrintString
 
     cli
     mov ax, ds
@@ -34,7 +34,7 @@ entry:
 ; in:
 ;       si -> address of string
 ; --------------------
-PutString:
+PrintString:
     ; save touched register
     push si
     push ax
@@ -70,8 +70,8 @@ section _TEXT class=CODE
 ; --------------------
 ; writes a character using a BIOS function
 ; --------------------
-global _x86_PrintCharacter
-_x86_PrintCharacter:
+global _X86PrintCharacter
+_X86PrintCharacter:
     push bp
     mov bp, sp
 
@@ -96,8 +96,8 @@ _x86_PrintCharacter:
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
-global _x86_Divide64By32
-_x86_Divide64By32:
+global _X86Divide64BitsBy32Bits
+_X86Divide64BitsBy32Bits:
     ; make new call frame
     push bp ; save old call frame
     mov bp, sp ; initialize new call frame

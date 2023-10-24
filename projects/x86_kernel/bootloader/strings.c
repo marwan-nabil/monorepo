@@ -1,11 +1,11 @@
 void PrintCharacter(char Character)
 {
-    x86_PrintCharacter(Character, 0);
+    X86PrintCharacter(Character, 0);
 }
 
 void PrintString(const char *String)
 {
-    while (*String)
+    while(*String)
     {
         PrintCharacter(*String);
         String++;
@@ -21,228 +21,202 @@ void PrintFarString(const char far *String)
     }
 }
 
-i32 *PrintNumber(i32 *ArgPointer, printf_length_type LengthType, b8 Signed, i32 Radix)
+int *printf_number(int* argp, int length, b8 sign, int radix)
 {
     const char HexCharacters[] = "0123456789abcdef";
+    char buffer[32];
+    unsigned long long number;
+    int number_sign = 1;
+    int pos = 0;
 
-    char LocalStringBuffer[32];
-    u64 Number;
-    i32 Sign = 1;
-    i32 BufferPosition = 0;
-
-    switch (LengthType)
+    // process length
+    switch (length)
     {
         case PRINTF_LENGTH_TYPE_SHORT_SHORT:
         case PRINTF_LENGTH_TYPE_SHORT:
         case PRINTF_LENGTH_TYPE_DEFAULT:
-        {
-            if (Signed)
+            if (sign)
             {
-                i32 Value = *ArgPointer;
-                if (Value < 0)
+                int n = *argp;
+                if (n < 0)
                 {
-                    Value = -Value;
-                    Sign = -1;
+                    n = -n;
+                    number_sign = -1;
                 }
-                Number = (u64)Value;
+                number = (unsigned long long)n;
             }
             else
             {
-                Number = *(u32 *)ArgPointer;
+                number = *(unsigned int*)argp;
             }
-            ArgPointer++;
-        } break;
+            argp++;
+            break;
 
         case PRINTF_LENGTH_TYPE_LONG:
-        {
-            if (Signed)
+            if (sign)
             {
-                i32 Value = *(i32 *)ArgPointer;
-                if (Value < 0)
+                long int n = *(long int*)argp;
+                if (n < 0)
                 {
-                    Value = -Value;
-                    Sign = -1;
+                    n = -n;
+                    number_sign = -1;
                 }
-                Number = (u64)Value;
+                number = (unsigned long long)n;
             }
             else
             {
-                Number = *(u32 *)ArgPointer;
+                number = *(unsigned long int*)argp;
             }
-            ArgPointer += 2;
-        } break;
+            argp += 2;
+            break;
 
         case PRINTF_LENGTH_TYPE_LONG_LONG:
-        {
-            if (Signed)
+            if (sign)
             {
-                i32 Value = *(i32 *)ArgPointer;
-                if (Value < 0)
+                long long int n = *(long long int*)argp;
+                if (n < 0)
                 {
-                    Value = -Value;
-                    Sign = -1;
+                    n = -n;
+                    number_sign = -1;
                 }
-                Number = (u64)Value;
+                number = (unsigned long long)n;
             }
             else
             {
-                Number = *(u64 *)ArgPointer;
+                number = *(unsigned long long int*)argp;
             }
-            ArgPointer += 4;
-        } break;
+            argp += 4;
+            break;
     }
 
-    do
+    // convert number to ASCII
+    do 
     {
-        u32 Remainder;
-        x86_Divide64By32(Number, Radix, &Number, &Remainder);
-        LocalStringBuffer[BufferPosition++] = HexCharacters[Remainder];
-    } while (Number > 0);
+        u32 rem;
+        X86Divide64BitsBy32Bits(number, radix, &number, &rem);
+        buffer[pos++] = HexCharacters[rem];
+    } while (number > 0);
 
-    if (Signed && (Sign < 0))
-    {
-        LocalStringBuffer[BufferPosition++] = '-';
-    }
+    // add sign
+    if (sign && number_sign < 0)
+        buffer[pos++] = '-';
 
-    while (--BufferPosition >= 0)
-    {
-        PrintCharacter(LocalStringBuffer[BufferPosition]);
-    }
+    // print number in reverse order
+    while (--pos >= 0)
+        PrintCharacter(buffer[pos]);
 
-    return ArgPointer;
+    return argp;
 }
 
-void _cdecl PrintFormatted(const char *FormatString, ...)
+void _cdecl PrintFormatted(const char* fmt, ...)
 {
-    i32 *ArgPointer = (i32 *)&FormatString;
-    printf_state State = PRINTF_STATE_NORMAL;
-    printf_length_type LengthType = PRINTF_LENGTH_TYPE_DEFAULT;
-    i32 Radix = 10;
-    b8 Signed = FALSE;
+    int* argp = (int*)&fmt;
+    int state = PRINTF_STATE_NORMAL;
+    int length = PRINTF_LENGTH_TYPE_DEFAULT;
+    int radix = 10;
+    b8 sign = FALSE;
 
-    ArgPointer++;
+    argp++;
 
-    while (*FormatString)
+    while (*fmt)
     {
-        switch (State)
+        switch (state)
         {
             case PRINTF_STATE_NORMAL:
-            {
-                if (*FormatString == '%')
+                switch (*fmt)
                 {
-                    State = PRINTF_STATE_CHECK_LENGTH;
+                    case '%':   state = PRINTF_STATE_CHECK_LENGTH;
+                                break;
+                    default:    PrintCharacter(*fmt);
+                                break;
                 }
-                else
-                {
-                    PrintCharacter(*FormatString);
-                }
-                FormatString++;
-            } break;
+                break;
 
             case PRINTF_STATE_CHECK_LENGTH:
-            {
-                if (*FormatString == 'h')
+                switch (*fmt)
                 {
-                    LengthType = PRINTF_LENGTH_TYPE_SHORT;
-                    State = PRINTF_STATE_SHORT_LENGTH;
-                    FormatString++;
+                    case 'h':   length = PRINTF_LENGTH_TYPE_SHORT;
+                                state = PRINTF_STATE_SHORT_LENGTH;
+                                break;
+                    case 'l':   length = PRINTF_LENGTH_TYPE_LONG;
+                                state = PRINTF_STATE_LONG_LENGTH;
+                                break;
+                    default:    goto PRINTF_STATE_SPEC_;
                 }
-                else if (*FormatString == 'l')
-                {
-                    LengthType = PRINTF_LENGTH_TYPE_LONG;
-                    State = PRINTF_STATE_LONG_LENGTH;
-                    FormatString++;
-                }
-                else
-                {
-                    State = PRINTF_STATE_CHECK_SPECIFIER;
-                }
-            } break;
+                break;
 
             case PRINTF_STATE_SHORT_LENGTH:
-            {
-                if (*FormatString == 'h')
+                if (*fmt == 'h')
                 {
-                    LengthType = PRINTF_LENGTH_TYPE_SHORT_SHORT;
-                    State = PRINTF_STATE_CHECK_SPECIFIER;
-                    FormatString++;
+                    length = PRINTF_LENGTH_TYPE_SHORT_SHORT;
+                    state = PRINTF_STATE_CHECK_SPECIFIER;
                 }
-                else
-                {
-                    State = PRINTF_STATE_CHECK_SPECIFIER;
-                }
-            } break;
+                else goto PRINTF_STATE_SPEC_;
+                break;
 
             case PRINTF_STATE_LONG_LENGTH:
-            {
-                if (*FormatString == 'l')
+                if (*fmt == 'l')
                 {
-                    LengthType = PRINTF_LENGTH_TYPE_LONG_LONG;
-                    State = PRINTF_STATE_CHECK_SPECIFIER;
-                    FormatString++;
+                    length = PRINTF_LENGTH_TYPE_LONG_LONG;
+                    state = PRINTF_STATE_CHECK_SPECIFIER;
                 }
-                else
-                {
-                    State = PRINTF_STATE_CHECK_SPECIFIER;
-                }
-            } break;
+                else goto PRINTF_STATE_SPEC_;
+                break;
 
             case PRINTF_STATE_CHECK_SPECIFIER:
-            {
-                if (*FormatString == 'c')
+            PRINTF_STATE_SPEC_:
+                switch (*fmt)
                 {
-                    PrintCharacter((char)*ArgPointer);
-                    ArgPointer++;
-                }
-                else if (*FormatString == 's')
-                {
-                    if ((LengthType == PRINTF_LENGTH_TYPE_LONG) || (LengthType == PRINTF_LENGTH_TYPE_LONG_LONG))
-                    {
-                        PrintFarString(*(const char far **)ArgPointer);
-                        ArgPointer += 2;
-                    }
-                    else
-                    {
-                        PrintString(*(const char **)ArgPointer);
-                        ArgPointer++;
-                    }
-                }
-                else if (*FormatString == '%')
-                {
-                    PrintCharacter('%');
-                }
-                else if ((*FormatString == 'd') || (*FormatString == 'i'))
-                {
-                    Radix = 10;
-                    Signed = TRUE;
-                    ArgPointer = PrintNumber(ArgPointer, LengthType, Signed, Radix);
-                }
-                else if (*FormatString == 'u')
-                {
-                    Radix = 10;
-                    Signed = FALSE;
-                    ArgPointer = PrintNumber(ArgPointer, LengthType, Signed, Radix);
-                }
-                else if ((*FormatString == 'x') || (*FormatString == 'X') || (*FormatString == 'P'))
-                {
-                    Radix = 16;
-                    Signed = FALSE;
-                    ArgPointer = PrintNumber(ArgPointer, LengthType, Signed, Radix);
-                }
-                else if (*FormatString == 'o')
-                {
-                    Radix = 8;
-                    Signed = FALSE;
-                    ArgPointer = PrintNumber(ArgPointer, LengthType, Signed, Radix);
+                    case 'c':   PrintCharacter((char)*argp);
+                                argp++;
+                                break;
+
+                    case 's':   if (length == PRINTF_LENGTH_TYPE_LONG || length == PRINTF_LENGTH_TYPE_LONG_LONG) 
+                                {
+                                    PrintFarString(*(const char far**)argp);
+                                    argp += 2;
+                                }
+                                else 
+                                {
+                                    PrintString(*(const char**)argp);
+                                    argp++;
+                                }
+                                break;
+
+                    case '%':   PrintCharacter('%');
+                                break;
+
+                    case 'd':
+                    case 'i':   radix = 10; sign = TRUE;
+                                argp = printf_number(argp, length, sign, radix);
+                                break;
+
+                    case 'u':   radix = 10; sign = FALSE;
+                                argp = printf_number(argp, length, sign, radix);
+                                break;
+
+                    case 'X':
+                    case 'x':
+                    case 'p':   radix = 16; sign = FALSE;
+                                argp = printf_number(argp, length, sign, radix);
+                                break;
+
+                    case 'o':   radix = 8; sign = FALSE;
+                                argp = printf_number(argp, length, sign, radix);
+                                break;
+
+                    // ignore invalid spec
+                    default:    break;
                 }
 
-                State = PRINTF_STATE_NORMAL;
-                LengthType = PRINTF_LENGTH_TYPE_DEFAULT;
-                Radix = 10;
-                Signed = FALSE;
-
-                FormatString++;
-            } break;
+                // reset state
+                state = PRINTF_STATE_NORMAL;
+                length = PRINTF_LENGTH_TYPE_DEFAULT;
+                radix = 10;
+                sign = FALSE;
+                break;
         }
+
+        fmt++;
     }
 }

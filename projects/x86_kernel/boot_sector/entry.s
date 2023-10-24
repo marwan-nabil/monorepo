@@ -92,7 +92,7 @@ Start:
     ; print loading message
     ; -------------------
     mov si, DiskLoadingMessage
-    call PutString
+    call PrintString
 
     ; -----------------------------------
     ; read disk drive parameters
@@ -281,7 +281,7 @@ WaitForKeyThenReboot:
 ; --------------------
 FloppyErrorHandler:
     mov si, DiskReadFailedMessage
-    call PutString
+    call PrintString
     jmp WaitForKeyThenReboot
 
 ; --------------------
@@ -289,7 +289,7 @@ FloppyErrorHandler:
 ; --------------------
 BootloaderNotFoundErrorHandler:
     mov si, BootloaderNotFoundMessage
-    call PutString
+    call PrintString
     jmp WaitForKeyThenReboot
 
 ; --------------------
@@ -297,7 +297,7 @@ BootloaderNotFoundErrorHandler:
 ; in:
 ;       si -> address of string
 ; --------------------
-PutString:
+PrintString:
     ; save touched register
     push si
     push ax
