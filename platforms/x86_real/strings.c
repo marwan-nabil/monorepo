@@ -1,6 +1,26 @@
+// long int StringLengthFar(char far *String)
+// {
+//     long int Count = 0;
+//     while (*String++)
+//     {
+//         ++Count;
+//     }
+//     return Count;
+// }
+
+// long int StringLength(char far *String)
+// {
+//     long int Count = 0;
+//     while (*String++)
+//     {
+//         ++Count;
+//     }
+//     return Count;
+// }
+
 void PrintCharacter(char Character)
 {
-    X86PrintCharacter(Character, 0);
+    X86_PrintCharacter(Character, 0);
 }
 
 void PrintString(const char *String)
@@ -28,6 +48,8 @@ i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b
     u64 Number;
     i32 NumberSign = 1;
     i32 StringBufferPosition = 0;
+
+    MemoryZero((void *)LocalStringBuffer, 32);
 
     switch (LengthType)
     {
@@ -94,7 +116,7 @@ i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b
     do
     {
         u32 Remainder;
-        X86DivideU64ByU32(Number, Radix, &Number, &Remainder);
+        X86_DivideU64ByU32(Number, Radix, &Number, &Remainder);
         LocalStringBuffer[StringBufferPosition++] = HexCharacters[Remainder];
     } while (Number > 0);
 

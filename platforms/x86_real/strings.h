@@ -19,3 +19,6 @@ typedef enum
     PRINTF_LENGTH_TYPE_LONG,
     PRINTF_LENGTH_TYPE_LONG_LONG
 } printf_length_type;
+
+extern void _cdecl X86_PrintCharacter(char Character, u8 Page);
+extern void _cdecl X86_PrintString(u64 Dividend, u32 Divisor, u64 *QuotientOut, u32 *RemainderOut);

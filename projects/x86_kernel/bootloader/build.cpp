@@ -19,7 +19,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
         SetOuputBinaryPath(BuildContext, ObjectFileName);
 
-        AddCompilerFlags(BuildContext, "-f obj");
+        AddCompilerFlags(BuildContext, "-i ..\\ -f obj");
         b32 BuildSuccess = AssembleWithNasm(BuildContext);
         if (!BuildSuccess)
         {
