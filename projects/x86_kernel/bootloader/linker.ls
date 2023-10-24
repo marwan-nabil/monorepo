@@ -5,7 +5,8 @@ OPTION
     START=entry,
     VERBOSE,
     OFFSET=0,
-    STACK=0X200
+    STACK=0X200,
+    MAP=bootloader.map
 ORDER
     CLNAME CODE
         SEGMENT _ENTRY

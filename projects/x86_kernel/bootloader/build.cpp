@@ -57,15 +57,6 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         ClearBuildContext(BuildContext);
     }
 
-    for (u32 SourceIndex = 0; SourceIndex < ArrayCount(CSources); SourceIndex++)
-    {
-        char ObjectFileName[1024] = {};
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), "\\");
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), CSources[SourceIndex]);
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
-        AddLinkerInputFile(BuildContext, ObjectFileName);
-    }
-
     for (u32 SourceIndex = 0; SourceIndex < ArrayCount(AssemblySources); SourceIndex++)
     {
         char ObjectFileName[1024] = {};
@@ -75,8 +66,16 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         AddLinkerInputFile(BuildContext, ObjectFileName);
     }
 
+    for (u32 SourceIndex = 0; SourceIndex < ArrayCount(CSources); SourceIndex++)
+    {
+        char ObjectFileName[1024] = {};
+        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), "\\");
+        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), CSources[SourceIndex]);
+        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
+        AddLinkerInputFile(BuildContext, ObjectFileName);
+    }
+
     AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\linker.ls");
-    AddLinkerFlags(BuildContext, "OPTION MAP=bootloader.map");
     SetOuputBinaryPath(BuildContext, "\\bootloader.img");
     b32 BuildSuccess = LinkWithWatcom(BuildContext);
     return BuildSuccess;

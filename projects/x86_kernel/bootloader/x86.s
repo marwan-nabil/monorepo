@@ -74,19 +74,21 @@ global _x86_PrintCharacter
 _x86_PrintCharacter:
     push bp
     mov bp, sp
+
+    ; word [bp] == previous bp
+    ; word [bp + 2] == return offset
+    ; word [bp + 4] == first argument: character to print
+    ; word [bp + 6] == second argument: page
+
     push bx
 
-    ; [bp + 0] == previous bp
-    ; [bp + 2] == return address
-    ; [bp + 4] == first argument: character to print
-    ; [bp + 6] == second argument: page
     mov ah, 0x0E
     mov al, [bp + 4]
     mov bh, [bp + 6]
-
     int 0x10
 
     pop bx
+
     mov sp, bp
     pop bp
     ret
@@ -97,25 +99,34 @@ _x86_PrintCharacter:
 global _x86_Divide64By32
 _x86_Divide64By32:
     ; make new call frame
-    push bp             ; save old call frame
-    mov bp, sp          ; initialize new call frame
+    push bp ; save old call frame
+    mov bp, sp ; initialize new call frame
+
+    ; stack
+    ; word [bp] -> previous bp
+    ; word [bp + 2] -> return offset
+    ; dword [bp + 4] -> lower 32 bits of divident
+    ; dword [bp + 8] -> upper 32 bits of dividend
+    ; dword [bp + 12] -> 32 bits of divisor
+    ; word [bp + 16] -> quotient out pointer
+    ; word [bp + 18] -> remainder out pointer
 
     push bx
 
     ; divide upper 32 bits
-    mov eax, [bp + 8]   ; eax <- upper 32 bits of dividend
-    mov ecx, [bp + 12]  ; ecx <- divisor
+    mov eax, [bp + 8]
+    mov ecx, [bp + 12]
     xor edx, edx
-    div ecx             ; eax - quot, edx - remainder
+    div ecx ; eax -> quotient, edx -> remainder
 
     ; store upper 32 bits of quotient
     mov bx, [bp + 16]
     mov [bx + 4], eax
 
     ; divide lower 32 bits
-    mov eax, [bp + 4]   ; eax <- lower 32 bits of dividend
-                        ; edx <- old remainder
-    div ecx
+    mov eax, [bp + 4]
+    ; edx -> remainder from previous divide
+    div ecx ; eax -> quotient, edx -> remainder
 
     ; store results
     mov [bx], eax
@@ -127,57 +138,4 @@ _x86_Divide64By32:
     ; restore old call frame
     mov sp, bp
     pop bp
-    ret
-
-;--------------------------------------------
-; does an unsigned 4 byte divide
-; Input:
-;       DX:AX -> Dividend
-;       CX:BX -> Divisor
-; Output:
-;       DX:AX -> Quotient
-;       CX:BX -> Remainder
-;--------------------------------------------
-global __U4D
-__U4D:
-    shl edx, 16         ; dx to upper half of edx
-    mov dx, ax          ; edx - dividend
-    mov eax, edx        ; eax - dividend
-    xor edx, edx
-
-    shl ecx, 16         ; cx to upper half of ecx
-    mov cx, bx          ; ecx - divisor
-
-    div ecx             ; eax - quot, edx - remainder
-    mov ebx, edx
-    mov ecx, edx
-    shr ecx, 16
-
-    mov edx, eax
-    shr edx, 16
-
-    ret
-
-;--------------------------------------------
-; integer four byte multiply
-; Input:
-;       DX:AX -> integer 1
-;       CX:BX -> integer 2
-; Output:
-;       DX:AX -> product
-;       CX, BX -> modified
-;--------------------------------------------
-global __U4M
-__U4M:
-    shl edx, 16         ; dx to upper half of edx
-    mov dx, ax          ; m1 in edx
-    mov eax, edx        ; m1 in eax
-
-    shl ecx, 16         ; cx to upper half of ecx
-    mov cx, bx          ; m2 in ecx
-
-    mul ecx             ; result in edx:eax (we only need eax)
-    mov edx, eax        ; move upper half to dx
-    shr edx, 16
-
     ret

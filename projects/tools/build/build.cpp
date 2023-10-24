@@ -28,6 +28,9 @@
 #include "platforms\win32\fat12\fat12_interface.cpp"
 
 #include "build_helpers.cpp"
+#include "msvc_helpers.cpp"
+#include "nasm_helpers.cpp"
+#include "watcom_helpers.cpp"
 
 #include "projects\tools\lint\build.cpp"
 #include "projects\tools\fetch_data\build.cpp"

@@ -8,6 +8,8 @@ set path=C:\Program Files\Bochs-2.7;%path%
 @REM add local scripts to system path
 set path=%cd%\scripts;%path%
 
+@REM TODO: make environment setup for watcom localized to each build target
+@REM       because the watcom paths have similar executables to MSVC paths
 @REM setup watcom environment
 SET PATH=C:\Watcom\BINW;%PATH%
 SET PATH=C:\Watcom\BINNT;%PATH%

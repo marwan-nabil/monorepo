@@ -112,7 +112,7 @@ i32 *PrintNumber(i32 *ArgPointer, printf_length_type LengthType, b8 Signed, i32 
     return ArgPointer;
 }
 
-void _cdecl PrintF(const char *FormatString, ...)
+void _cdecl PrintFormatted(const char *FormatString, ...)
 {
     i32 *ArgPointer = (i32 *)&FormatString;
     printf_state State = PRINTF_STATE_NORMAL;
