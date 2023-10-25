@@ -1,3 +1,4 @@
+// TODO: each target is built in it's own directory in output/
 #include <Windows.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -6,6 +7,7 @@
 #include <stdio.h>
 #include <direct.h>
 #include <io.h>
+#include <shellapi.h>
 
 #include "platforms\win32\base_types.h"
 #include "platforms\shared\basic_defines.h"
@@ -46,7 +48,21 @@
 #include "projects\x86_kernel\kernel\build.cpp"
 #include "projects\x86_kernel\build.cpp"
 
-#include "target_mappings.cpp"
+target_mapping BuildTargetMappings[] =
+{
+    {"lint", &BuildLint},
+    {"fetch_data", &BuildFetchData},
+    {"compilation_tests", &BuildCompilationTests},
+    {"compilation_tests_multi_threaded", &BuildCompilationTestsMultiThreaded},
+    {"fat12_tests", &BuildFat12Tests},
+    {"simulator", &BuildSimulator},
+    {"directx_demo", &BuildDirectxDemo},
+    {"handmade_hero", &BuildHandmadeHero},
+    {"imgui_demo", &BuildImguiDemo},
+    {"ray_tracer", &BuildRayTracer},
+    {"x86_kernel", &Buildx86Kernel},
+    {"x86_kernel_tests", &BuildX86KernelTests},
+};
 
 console_context GlobalConsoleContext;
 
@@ -72,7 +88,6 @@ int main(int argc, char **argv)
 
     BuildContext.argc = argc;
     BuildContext.argv = argv;
-
     BuildContext.ConsoleContext = &GlobalConsoleContext;
 
     InitializeConsole(&GlobalConsoleContext);
@@ -95,13 +110,22 @@ int main(int argc, char **argv)
 
         for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
         {
-            BuildSuccess = CleanExtensionFromDirectory
+            CleanExtensionFromDirectory
             (
                 ExtensionsToClean[ExtensionIndex],
                 BuildContext.OutputDirectoryPath,
                 &GlobalConsoleContext
             );
         }
+
+        for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
+        {
+            if (DoesDirectoryExist(BuildTargetMappings[TargetIndex].TargetName))
+            {
+                DeleteDirectoryCompletely(BuildTargetMappings[TargetIndex].TargetName);
+            }
+        }
+        BuildSuccess = TRUE;
     }
     else if (strcmp(argv[1], "help") == 0)
     {
@@ -110,23 +134,52 @@ int main(int argc, char **argv)
     }
     else
     {
-        u32 TargetIndex;
-        for (TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
-        {
-            if (strcmp(argv[1], BuildTargetMappings[TargetIndex].TargetName) == 0)
-            {
-                BuildSuccess = BuildTargetMappings[TargetIndex].BuildFunction(&BuildContext);
-                break;
-            }
-        }
+        StringCchCatA
+        (
+            BuildContext.TargetOutputDirectoryPath,
+            ArrayCount(BuildContext.TargetOutputDirectoryPath),
+            BuildContext.OutputDirectoryPath
+        );
+        StringCchCatA
+        (
+            BuildContext.TargetOutputDirectoryPath,
+            ArrayCount(BuildContext.TargetOutputDirectoryPath),
+            "\\"
+        );
+        StringCchCatA
+        (
+            BuildContext.TargetOutputDirectoryPath,
+            ArrayCount(BuildContext.TargetOutputDirectoryPath),
+            argv[1]
+        );
 
-        if (TargetIndex == ArrayCount(BuildTargetMappings))
+        CreateDirectoryA(BuildContext.TargetOutputDirectoryPath, NULL);
+        b32 Result = SetCurrentDirectory(BuildContext.TargetOutputDirectoryPath);
+        if (Result)
         {
-            ConsoleSwitchColor(&GlobalConsoleContext, FOREGROUND_RED);
-            printf("ERROR: invalid build target \"%s\".\n", argv[1]);
-            ConsoleResetColor(&GlobalConsoleContext);
-            DisplayHelp();
-            BuildSuccess = FALSE;
+            u32 TargetIndex;
+            for (TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
+            {
+                if (strcmp(argv[1], BuildTargetMappings[TargetIndex].TargetName) == 0)
+                {
+                    // TODO: finalize synchronization using the mutex
+                    // HANDLE MutexHandle = CreateMutexA(NULL, TRUE, BuildTargetMappings.TargetName);
+                    BuildSuccess = BuildTargetMappings[TargetIndex].BuildFunction(&BuildContext);
+                    // ReleaseMutex(MutexHandle);
+                    break;
+                }
+            }
+
+            if (TargetIndex == ArrayCount(BuildTargetMappings))
+            {
+                ConsoleSwitchColor(&GlobalConsoleContext, FOREGROUND_RED);
+                printf("ERROR: invalid build target \"%s\".\n", argv[1]);
+                ConsoleResetColor(&GlobalConsoleContext);
+                DisplayHelp();
+                BuildSuccess = FALSE;
+            }
+
+            SetCurrentDirectory(BuildContext.OutputDirectoryPath);
         }
     }
 

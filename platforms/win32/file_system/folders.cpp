@@ -78,3 +78,36 @@ b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *Direct
     FindClose(FindHandle);
     return TRUE;
 }
+
+b32 DoesDirectoryExist(const char *DirectoryPath)
+{
+    DWORD FileAttributes = GetFileAttributes(DirectoryPath);
+    if
+    (
+        (FileAttributes != INVALID_FILE_ATTRIBUTES) &&
+        (FileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+    )
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+b32 DeleteDirectoryCompletely(const char *DirectoryPath)
+{
+    // TODO: implement this
+    SHFILEOPSTRUCT ShellOperation =
+    {
+        NULL,
+        FO_DELETE,
+        DirectoryPath,
+        "",
+        FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
+        FALSE,
+        0,
+        ""
+    };
+    SHFileOperation(&ShellOperation);
+
+    return FALSE;
+}

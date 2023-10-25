@@ -8,6 +8,7 @@ struct build_context
     console_context *ConsoleContext;
 
     char OutputDirectoryPath[1024];
+    char TargetOutputDirectoryPath[1024];
     char RootDirectoryPath[1024];
 
     char CompilerFlags[1024];

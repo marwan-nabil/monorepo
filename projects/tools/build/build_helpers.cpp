@@ -28,7 +28,7 @@ static void AddLinkerInputFile(build_context *BuildContext, const char *LinkerIn
     (
         BuildContext->LinkerInputsString,
         ArrayCount(BuildContext->LinkerInputsString),
-        BuildContext->OutputDirectoryPath
+        BuildContext->TargetOutputDirectoryPath
     );
     StringCchCatA(BuildContext->LinkerInputsString, ArrayCount(BuildContext->LinkerInputsString), LinkerInputFile);
     StringCchCatA(BuildContext->LinkerInputsString, ArrayCount(BuildContext->LinkerInputsString), " ");
@@ -40,7 +40,7 @@ static void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBi
     (
         BuildContext->OutputBinaryPath,
         ArrayCount(BuildContext->OutputBinaryPath),
-        BuildContext->OutputDirectoryPath
+        BuildContext->TargetOutputDirectoryPath
     );
     StringCchCatA
     (

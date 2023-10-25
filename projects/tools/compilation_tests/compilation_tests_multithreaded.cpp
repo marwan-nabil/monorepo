@@ -1,17 +1,17 @@
 // TODO:
-// - a report of passed/failed tests is presented at the end
 // - failed tests have extra error information provided
-// - run the build in a separate directory for each thread/test job
-//   so that no conflicts happen during the build due to file locking
-// TODO:
 // - build dependency graph of #include'ed files in compile targets
 // - store the test results permanently, with info about dependencies
 // - check on the last modification before running a test for a target
 // - only rerun the test if necessary, meaning, if one of the target
 //   dependencies changed since the last test run
+// - introduce file locks for the .pdb files that are shared across build target variants
+//   in this way the compiler can run multiple in multiple threads in the same target folder
+//   without any target variant failing 
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 #include <strsafe.h>
 #include <io.h>
 
@@ -54,8 +54,8 @@ char *TestCommands[] =
     "build directx_demo release",
     "build lint",
     "build fetch_data",
-    "build x86_kernel",
     "build fat12_tests",
+    "build x86_kernel",
     "build x86_kernel_tests",
 };
 

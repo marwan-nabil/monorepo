@@ -19,7 +19,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
         SetOuputBinaryPath(BuildContext, ObjectFileName);
 
-        AddCompilerFlags(BuildContext, "-i ..\\ -f obj");
+        AddCompilerFlags(BuildContext, "-i ..\\.. -f obj");
         b32 BuildSuccess = AssembleWithNasm(BuildContext);
         if (!BuildSuccess)
         {
@@ -47,7 +47,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
         SetOuputBinaryPath(BuildContext, ObjectFileName);
 
-        AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -i=..");
+        AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -i=..\\..");
         AddCompilerFlags(BuildContext, "-wx -wcd=138 -wcd=202");
         b32 BuildSuccess = CompileWithWatcom(BuildContext);
         if (!BuildSuccess)
@@ -57,6 +57,8 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
         ClearBuildContext(BuildContext);
     }
 
+    // TODO: loop over and add all the object files in the directory we're building in
+    //       instead of keeping a list of all the stems of the sources c & assembly
     for (u32 SourceIndex = 0; SourceIndex < ArrayCount(AssemblySources); SourceIndex++)
     {
         char ObjectFileName[1024] = {};

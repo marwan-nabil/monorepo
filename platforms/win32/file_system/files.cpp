@@ -110,3 +110,31 @@ b32 WriteBinaryFileOverAnother(char *DestinationBinaryFilePath, char *SourceBina
 
     return Result;
 }
+
+void AcquireLockFile()
+{
+    char LockFilePath[MAX_PATH] = {};
+    StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
+    WIN32_FILE_ATTRIBUTE_DATA IgnoredParameter = {};
+
+    b32 LockFileExists = FALSE;
+    do 
+    {
+        LockFileExists = GetFileAttributesExA
+        (
+            LockFilePath,
+            GetFileExInfoStandard,
+            &IgnoredParameter
+        );
+        Sleep(50);
+    } while (LockFileExists);
+
+    CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+}
+
+void ReleaseLockFile()
+{
+    char LockFilePath[MAX_PATH] = {};
+    StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
+    DeleteFileA(LockFilePath);
+}

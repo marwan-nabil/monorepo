@@ -27,7 +27,7 @@ i32 main(i32 argc, char **argv)
 
     char BinaryFilePath[1024] = {};
     StringCchCatA(BinaryFilePath, ArrayCount(BinaryFilePath), OutputDirectoryPath);
-    StringCchCatA(BinaryFilePath, ArrayCount(BinaryFilePath), "\\floppy.img");
+    StringCchCatA(BinaryFilePath, ArrayCount(BinaryFilePath), "\\x86_kernel\\floppy.img");
 
     read_file_result DiskFile = ReadFileIntoMemory(BinaryFilePath);
     fat12_disk *Disk = (fat12_disk *)DiskFile.FileMemory;
