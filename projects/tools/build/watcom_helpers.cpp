@@ -36,7 +36,7 @@ static b32 LinkWithWatcom(build_context *BuildContext)
     b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->ConsoleContext);
     if (!Result)
     {
-        ConsolePrintColored("ERROR: compilation failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
+        ConsolePrintColored("ERROR: linking failed.\n", BuildContext->ConsoleContext, FOREGROUND_RED);
     }
 
     return Result;

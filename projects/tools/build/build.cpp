@@ -53,7 +53,6 @@ target_mapping BuildTargetMappings[] =
     {"lint", &BuildLint},
     {"fetch_data", &BuildFetchData},
     {"compilation_tests", &BuildCompilationTests},
-    {"compilation_tests_multi_threaded", &BuildCompilationTestsMultiThreaded},
     {"fat12_tests", &BuildFat12Tests},
     {"simulator", &BuildSimulator},
     {"directx_demo", &BuildDirectxDemo},
@@ -101,23 +100,6 @@ int main(int argc, char **argv)
 
     if (strcmp(argv[1], "clean") == 0)
     {
-        const char *ExtensionsToClean[] =
-        {
-            "obj", "pdb", "log", "ilk", "sln", "bmp", "txt", "ini",
-            "dll", "exp", "lib", "map", "hmi", "cso", "lock", "exe",
-            "img", "h", "err"
-        };
-
-        for (u32 ExtensionIndex = 0; ExtensionIndex < ArrayCount(ExtensionsToClean); ExtensionIndex++)
-        {
-            CleanExtensionFromDirectory
-            (
-                ExtensionsToClean[ExtensionIndex],
-                BuildContext.OutputDirectoryPath,
-                &GlobalConsoleContext
-            );
-        }
-
         for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
         {
             if (DoesDirectoryExist(BuildTargetMappings[TargetIndex].TargetName))
@@ -125,6 +107,11 @@ int main(int argc, char **argv)
                 DeleteDirectoryCompletely(BuildTargetMappings[TargetIndex].TargetName);
             }
         }
+        BuildSuccess = TRUE;
+    }
+    else if (strcmp(argv[1], "clean_all") == 0)
+    {
+        EmptyDirectory(BuildContext.OutputDirectoryPath);
         BuildSuccess = TRUE;
     }
     else if (strcmp(argv[1], "help") == 0)
@@ -162,10 +149,7 @@ int main(int argc, char **argv)
             {
                 if (strcmp(argv[1], BuildTargetMappings[TargetIndex].TargetName) == 0)
                 {
-                    // TODO: finalize synchronization using the mutex
-                    // HANDLE MutexHandle = CreateMutexA(NULL, TRUE, BuildTargetMappings.TargetName);
                     BuildSuccess = BuildTargetMappings[TargetIndex].BuildFunction(&BuildContext);
-                    // ReleaseMutex(MutexHandle);
                     break;
                 }
             }

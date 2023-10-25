@@ -37,7 +37,6 @@ b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirector
 
     WIN32_FIND_DATAA FindOperationData;
     HANDLE FindHandle = FindFirstFileA(DirectoryWildcard, &FindOperationData);
-
     if (FindHandle != INVALID_HANDLE_VALUE)
     {
         do

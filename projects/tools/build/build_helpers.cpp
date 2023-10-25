@@ -64,14 +64,17 @@ static void DisplayHelp()
     printf("INFO: Available build targets:\n");
     printf("          build help\n");
     printf("          build clean\n");
-    printf("          build simulator\n");
-    printf("          build handmade_hero\n");
-    printf("          build directx_demo [debug, release]\n");
-    printf("          build imgui_demo [opengl2, dx11]\n");
-    printf("          build ray_tracer [1_lane, 4_lanes, 8_lanes]\n");
+    printf("          build clean_all\n");
+
     printf("          build lint [job_per_directory]\n");
-    printf("          build x86_kernel\n");
+    printf("          build fetch_data\n");
     printf("          build compilation_tests\n");
     printf("          build fat12_tests\n");
+    printf("          build simulator\n");
+    printf("          build directx_demo [debug, release]\n");
+    printf("          build handmade_hero\n");
+    printf("          build imgui_demo [opengl2, dx11]\n");
+    printf("          build ray_tracer [1_lane, 4_lanes, 8_lanes]\n");
+    printf("          build x86_kernel\n");
     printf("          build x86_kernel_tests\n");
 }
