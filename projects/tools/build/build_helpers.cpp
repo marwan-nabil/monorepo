@@ -34,7 +34,7 @@ static void AddLinkerInputFile(build_context *BuildContext, const char *LinkerIn
     StringCchCatA(BuildContext->LinkerInputsString, ArrayCount(BuildContext->LinkerInputsString), " ");
 }
 
-static void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryName)
+static void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBinaryPath)
 {
     StringCchCatA
     (
@@ -46,8 +46,43 @@ static void SetOuputBinaryPath(build_context *BuildContext, const char *OutputBi
     (
         BuildContext->OutputBinaryPath,
         ArrayCount(BuildContext->OutputBinaryPath),
-        OutputBinaryName
+        OutputBinaryPath
     );
+}
+
+static void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath)
+{
+    StringCchCatA
+    (
+        BuildContext->CompilerIncludePath,
+        ArrayCount(BuildContext->CompilerIncludePath),
+        IncludePath
+    );
+}
+
+static void PushSubTarget(build_context *BuildContext, const char *SubTargetRelativePath)
+{
+    StringCchCatA
+    (
+        BuildContext->TargetOutputDirectoryPath,
+        ArrayCount(BuildContext->TargetOutputDirectoryPath),
+        "\\"
+    );
+    StringCchCatA
+    (
+        BuildContext->TargetOutputDirectoryPath,
+        ArrayCount(BuildContext->TargetOutputDirectoryPath),
+        SubTargetRelativePath
+    );
+
+    CreateDirectoryA(BuildContext->TargetOutputDirectoryPath, NULL);
+    SetCurrentDirectory(BuildContext->TargetOutputDirectoryPath);
+}
+
+static void PopSubTarget(build_context *BuildContext)
+{
+    RemoveLastSegmentFromPath(BuildContext->TargetOutputDirectoryPath);
+    SetCurrentDirectory(BuildContext->TargetOutputDirectoryPath);
 }
 
 static void ClearBuildContext(build_context *BuildContext)
@@ -55,26 +90,7 @@ static void ClearBuildContext(build_context *BuildContext)
     *BuildContext->CompilerFlags = {};
     *BuildContext->LinkerFlags = {};
     *BuildContext->OutputBinaryPath = {};
+    *BuildContext->CompilerIncludePath = {};
     *BuildContext->SourcesString = {};
     *BuildContext->LinkerInputsString = {};
-}
-
-static void DisplayHelp()
-{
-    printf("INFO: Available build targets:\n");
-    printf("          build help\n");
-    printf("          build clean\n");
-    printf("          build clean_all\n");
-
-    printf("          build lint [job_per_directory]\n");
-    printf("          build fetch_data\n");
-    printf("          build compilation_tests\n");
-    printf("          build fat12_tests\n");
-    printf("          build simulator\n");
-    printf("          build directx_demo [debug, release]\n");
-    printf("          build handmade_hero\n");
-    printf("          build imgui_demo [opengl2, dx11]\n");
-    printf("          build ray_tracer [1_lane, 4_lanes, 8_lanes]\n");
-    printf("          build x86_kernel\n");
-    printf("          build x86_kernel_tests\n");
 }

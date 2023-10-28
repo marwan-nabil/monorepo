@@ -48,3 +48,16 @@ CreateFilePathSegmentList(char *FileFullPath)
 
     return LastFilePathNode;
 }
+
+static void RemoveLastSegmentFromPath(char *Path)
+{
+    u32 PathLength = StringLength(Path);
+    for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
+    {
+        if (Path[CharIndex] == '\\')
+        {
+            ZeroMemory(&Path[CharIndex], StringLength(&Path[CharIndex]));
+            return;
+        }
+    }
+}

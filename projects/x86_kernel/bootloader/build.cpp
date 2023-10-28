@@ -1,84 +1,36 @@
 static b32 BuildBootloaderImage(build_context *BuildContext)
 {
-    char *AssemblySources[]=
+    PushSubTarget(BuildContext, "bootloader");
+
+    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\entry.s");
+    SetOuputBinaryPath(BuildContext, "\\entry.obj");
+    AddCompilerFlags(BuildContext, "-f obj");
+    SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
+    b32 BuildSuccess = AssembleWithNasm(BuildContext);
+    if (!BuildSuccess)
     {
-        "entry"
-    };
-
-    for (u32 SourceIndex = 0; SourceIndex < ArrayCount(AssemblySources); SourceIndex++)
-    {
-        char SourceFilePath[1024] = {};
-        StringCchCat(SourceFilePath, ArrayCount(SourceFilePath), "\\projects\\x86_kernel\\bootloader\\");
-        StringCchCat(SourceFilePath, ArrayCount(SourceFilePath), AssemblySources[SourceIndex]);
-        StringCchCat(SourceFilePath, ArrayCount(SourceFilePath), ".s");
-        AddSourceFile(BuildContext, SourceFilePath);
-
-        char ObjectFileName[1024] = {};
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), "\\");
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), AssemblySources[SourceIndex]);
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
-        SetOuputBinaryPath(BuildContext, ObjectFileName);
-
-        AddCompilerFlags(BuildContext, "-i ..\\.. -f obj");
-        b32 BuildSuccess = AssembleWithNasm(BuildContext);
-        if (!BuildSuccess)
-        {
-            return FALSE;
-        }
-        ClearBuildContext(BuildContext);
+        return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
-    char *CSources[]=
+    AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\main.c");
+    SetOuputBinaryPath(BuildContext, "\\main.obj");
+    AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq");
+    AddCompilerFlags(BuildContext, "-wx -wcd=138 -wcd=202");
+    SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
+    BuildSuccess = CompileWithWatcom(BuildContext);
+    if (!BuildSuccess)
     {
-        "main"
-    };
-
-    for (u32 SourceIndex = 0; SourceIndex < ArrayCount(CSources); SourceIndex++)
-    {
-        char SourceFilePath[1024] = {};
-        StringCchCat(SourceFilePath, ArrayCount(SourceFilePath), "\\projects\\x86_kernel\\bootloader\\");
-        StringCchCat(SourceFilePath, ArrayCount(SourceFilePath), CSources[SourceIndex]);
-        StringCchCat(SourceFilePath, ArrayCount(SourceFilePath), ".c");
-        AddSourceFile(BuildContext, SourceFilePath);
-
-        char ObjectFileName[1024] = {};
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), "\\");
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), CSources[SourceIndex]);
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
-        SetOuputBinaryPath(BuildContext, ObjectFileName);
-
-        AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -i=..\\..");
-        AddCompilerFlags(BuildContext, "-wx -wcd=138 -wcd=202");
-        b32 BuildSuccess = CompileWithWatcom(BuildContext);
-        if (!BuildSuccess)
-        {
-            return FALSE;
-        }
-        ClearBuildContext(BuildContext);
+        return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
-    // TODO: loop over and add all the object files in the directory we're building in
-    //       instead of keeping a list of all the stems of the sources c & assembly
-    for (u32 SourceIndex = 0; SourceIndex < ArrayCount(AssemblySources); SourceIndex++)
-    {
-        char ObjectFileName[1024] = {};
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), "\\");
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), AssemblySources[SourceIndex]);
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
-        AddLinkerInputFile(BuildContext, ObjectFileName);
-    }
-
-    for (u32 SourceIndex = 0; SourceIndex < ArrayCount(CSources); SourceIndex++)
-    {
-        char ObjectFileName[1024] = {};
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), "\\");
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), CSources[SourceIndex]);
-        StringCchCat(ObjectFileName, ArrayCount(ObjectFileName), ".obj");
-        AddLinkerInputFile(BuildContext, ObjectFileName);
-    }
-
+    AddLinkerInputFile(BuildContext, "\\*.obj");
     AddSourceFile(BuildContext, "\\projects\\x86_kernel\\bootloader\\linker.ls");
     SetOuputBinaryPath(BuildContext, "\\bootloader.img");
-    b32 BuildSuccess = LinkWithWatcom(BuildContext);
+    BuildSuccess = LinkWithWatcom(BuildContext);
+
+    PopSubTarget(BuildContext);
+
     return BuildSuccess;
 }

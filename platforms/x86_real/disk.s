@@ -21,7 +21,6 @@ _X86_DiskReset:
     pop bp
     ret
 
-
 ; global _X86_DiskRead
 ; _X86_DiskRead:
 ;     push bp

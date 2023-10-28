@@ -48,22 +48,48 @@
 #include "projects\x86_kernel\kernel\build.cpp"
 #include "projects\x86_kernel\build.cpp"
 
-target_mapping BuildTargetMappings[] =
+build_target_config BuildTargetConfigurations[] =
 {
-    {"lint", &BuildLint},
-    {"fetch_data", &BuildFetchData},
-    {"compilation_tests", &BuildCompilationTests},
-    {"fat12_tests", &BuildFat12Tests},
-    {"simulator", &BuildSimulator},
-    {"directx_demo", &BuildDirectxDemo},
-    {"handmade_hero", &BuildHandmadeHero},
-    {"imgui_demo", &BuildImguiDemo},
-    {"ray_tracer", &BuildRayTracer},
-    {"x86_kernel", &Buildx86Kernel},
-    {"x86_kernel_tests", &BuildX86KernelTests},
+    {"lint", &BuildLint, "[job_per_directory]", NULL, NULL},
+    {"fetch_data", &BuildFetchData, NULL, NULL, NULL},
+    {"compilation_tests", &BuildCompilationTests, NULL, NULL, NULL},
+    {"fat12_tests", &BuildFat12Tests, NULL, NULL, NULL},
+    {"simulator", &BuildSimulator, NULL, NULL, NULL},
+    {"directx_demo", &BuildDirectxDemo, "[debug, release]", NULL, NULL},
+    {"handmade_hero", &BuildHandmadeHero, NULL, NULL, NULL},
+    {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
+    {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
+    {"x86_os", &Buildx86Os, NULL, NULL, NULL},
+    {"x86_kernel_tests", &BuildX86KernelTests, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;
+
+static void DisplayHelp()
+{
+    printf("INFO: Available build targets:\n");
+    printf("          build help\n");
+    printf("          build clean\n");
+    printf("          build clean_all\n");
+
+    for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
+    {
+        printf("          build %s ", BuildTargetConfigurations[TargetIndex].TargetName);
+        if (BuildTargetConfigurations[TargetIndex].FirstArgument)
+        {
+            printf("%s ", BuildTargetConfigurations[TargetIndex].FirstArgument);
+        }
+        if (BuildTargetConfigurations[TargetIndex].SecondArgument)
+        {
+            printf("%s ", BuildTargetConfigurations[TargetIndex].SecondArgument);
+        }
+        if (BuildTargetConfigurations[TargetIndex].ThirdArgument)
+        {
+            printf("%s ", BuildTargetConfigurations[TargetIndex].ThirdArgument);
+        }
+        printf("\n");
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -100,11 +126,11 @@ int main(int argc, char **argv)
 
     if (strcmp(argv[1], "clean") == 0)
     {
-        for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
+        for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
         {
-            if (DoesDirectoryExist(BuildTargetMappings[TargetIndex].TargetName))
+            if (DoesDirectoryExist(BuildTargetConfigurations[TargetIndex].TargetName))
             {
-                DeleteDirectoryCompletely(BuildTargetMappings[TargetIndex].TargetName);
+                DeleteDirectoryCompletely(BuildTargetConfigurations[TargetIndex].TargetName);
             }
         }
         BuildSuccess = TRUE;
@@ -121,49 +147,52 @@ int main(int argc, char **argv)
     }
     else
     {
-        StringCchCatA
-        (
-            BuildContext.TargetOutputDirectoryPath,
-            ArrayCount(BuildContext.TargetOutputDirectoryPath),
-            BuildContext.OutputDirectoryPath
-        );
-        StringCchCatA
-        (
-            BuildContext.TargetOutputDirectoryPath,
-            ArrayCount(BuildContext.TargetOutputDirectoryPath),
-            "\\"
-        );
-        StringCchCatA
-        (
-            BuildContext.TargetOutputDirectoryPath,
-            ArrayCount(BuildContext.TargetOutputDirectoryPath),
-            argv[1]
-        );
-
-        CreateDirectoryA(BuildContext.TargetOutputDirectoryPath, NULL);
-        b32 Result = SetCurrentDirectory(BuildContext.TargetOutputDirectoryPath);
-        if (Result)
+        build_target_config *FoundTargetConfig = NULL;
+        for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
         {
-            u32 TargetIndex;
-            for (TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetMappings); TargetIndex++)
+            if (strcmp(argv[1], BuildTargetConfigurations[TargetIndex].TargetName) == 0)
             {
-                if (strcmp(argv[1], BuildTargetMappings[TargetIndex].TargetName) == 0)
-                {
-                    BuildSuccess = BuildTargetMappings[TargetIndex].BuildFunction(&BuildContext);
-                    break;
-                }
+                FoundTargetConfig = &BuildTargetConfigurations[TargetIndex];
+                break;
             }
+        }
 
-            if (TargetIndex == ArrayCount(BuildTargetMappings))
+        if (FoundTargetConfig)
+        {
+            StringCchCatA
+            (
+                BuildContext.TargetOutputDirectoryPath,
+                ArrayCount(BuildContext.TargetOutputDirectoryPath),
+                BuildContext.OutputDirectoryPath
+            );
+            StringCchCatA
+            (
+                BuildContext.TargetOutputDirectoryPath,
+                ArrayCount(BuildContext.TargetOutputDirectoryPath),
+                "\\"
+            );
+            StringCchCatA
+            (
+                BuildContext.TargetOutputDirectoryPath,
+                ArrayCount(BuildContext.TargetOutputDirectoryPath),
+                FoundTargetConfig->TargetName
+            );
+
+            CreateDirectoryA(BuildContext.TargetOutputDirectoryPath, NULL);
+            b32 Result = SetCurrentDirectory(BuildContext.TargetOutputDirectoryPath);
+            if (Result)
             {
-                ConsoleSwitchColor(&GlobalConsoleContext, FOREGROUND_RED);
-                printf("ERROR: invalid build target \"%s\".\n", argv[1]);
-                ConsoleResetColor(&GlobalConsoleContext);
-                DisplayHelp();
-                BuildSuccess = FALSE;
+                BuildSuccess = FoundTargetConfig->BuildFunction(&BuildContext);
+                SetCurrentDirectory(BuildContext.OutputDirectoryPath);
             }
-
-            SetCurrentDirectory(BuildContext.OutputDirectoryPath);
+        }
+        else
+        {
+            ConsoleSwitchColor(&GlobalConsoleContext, FOREGROUND_RED);
+            printf("ERROR: invalid build target \"%s\".\n", argv[1]);
+            ConsoleResetColor(&GlobalConsoleContext);
+            DisplayHelp();
+            BuildSuccess = FALSE;
         }
     }
 

@@ -4,7 +4,9 @@ static b32 AssembleWithNasm(build_context *BuildContext)
     *AssemblerCommand = {};
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "nasm.exe ");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilerFlags);
-    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " ");
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "-i \"");
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilerIncludePath);
+    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->SourcesString);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " -o \"");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->OutputBinaryPath);

@@ -4,7 +4,9 @@ static b32 CompileWithWatcom(build_context *BuildContext)
     *CompilerCommand = {};
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "wcc.exe ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilerFlags);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -i=\"");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilerIncludePath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->SourcesString);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -fo=\"");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->OutputBinaryPath);

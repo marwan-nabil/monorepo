@@ -16,12 +16,18 @@ struct build_context
     char SourcesString[1024];
     char LinkerInputsString[1024];
     char OutputBinaryPath[1024];
+    char CompilerIncludePath[1024];
 };
 
 typedef b32 (build_function_type)(build_context *);
 
-struct target_mapping
+struct build_target_config
 {
     const char *TargetName;
     build_function_type *BuildFunction;
+    const char *FirstArgument;
+    const char *SecondArgument;
+    const char *ThirdArgument;
 };
+
+static void DisplayHelp();
