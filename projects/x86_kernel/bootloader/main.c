@@ -3,9 +3,11 @@
 
 #include "platforms\x86_real\strings.h"
 #include "platforms\x86_real\integers.h"
+#include "platforms\x86_real\disk.h"
 
 #include "platforms\x86_real\memory.c"
 #include "platforms\x86_real\strings.c"
+#include "platforms\x86_real\disk.c"
 
 void _cdecl cstart(u16 bootDrive)
 {
@@ -31,12 +33,12 @@ void _cdecl cstart(u16 bootDrive)
         -100000000l, 0xdeadbeeful, 10200300400ll, 0xdeadbeeffeebdaedull
     );
 
-    PrintFormatted("Test FarMemoryZero Before: %ls\r\n", FarString);
-    FarMemoryZero(FarString, OriginalStringLength);
-    PrintFormatted("Test FarMemoryZero After: %ls\r\n", FarString);
+    // PrintFormatted("Test FarMemoryZero Before: %ls\r\n", FarString);
+    // FarMemoryZero(FarString, OriginalStringLength);
+    // PrintFormatted("Test FarMemoryZero After: %ls\r\n", FarString);
 
-    FarMemoryCopy(FarString, FarString2, OriginalStringLength);
-    PrintFormatted("Test FarMemoryCopy After: %ls\r\n", FarString);
+    // FarMemoryCopy(FarString, FarString2, OriginalStringLength);
+    // PrintFormatted("Test FarMemoryCopy After: %ls\r\n", FarString);
 
     while (1) {};
 }

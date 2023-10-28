@@ -39,3 +39,4 @@ section _TEXT class=CODE
 
 %include "platforms\x86_real\strings.s"
 %include "platforms\x86_real\integers.s"
+; %include "platforms\x86_real\disk.s"

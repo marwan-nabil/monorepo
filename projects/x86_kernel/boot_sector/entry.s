@@ -97,8 +97,8 @@ Start:
     ; -----------------------------------
     ; read disk drive parameters
     ; -----------------------------------
-    mov [DriveNumber], dl
     ; dl == drive number, set by BIOS
+    mov [DriveNumber], dl
 
     push es
     mov ah, 0x08
@@ -138,6 +138,7 @@ Start:
 
 .NoRemainder:
     ; ax == number of sectors in root dir
+    ; Top of stack == LBA of first sector of the root directory
 
     ; ---------------------------------
     ; read root direcotry from the disk
@@ -155,7 +156,7 @@ Start:
     ; search for bootld.bin in root directory
     ; -------------------------------
     xor bx, bx
-    ; bx == index of directory entry currently searching
+    ; bx : index of directory entry currently searching
     mov di, RootDirectoryBuffer
 
 .SearchForBootloader:
@@ -178,7 +179,7 @@ Start:
 .BootloaderFound:
     ; di == address of directory entry that
     ; contains bootld.bin
-    mov ax, [di + 26]
+    mov ax, [di + 26] ; offset to logical cluster
     ; ax == first logical cluster of bootld.bin
     mov [BootloaderLogicalCluster], ax
 

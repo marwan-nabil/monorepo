@@ -2,7 +2,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
 {
     char *AssemblySources[]=
     {
-        "x86"
+        "entry"
     };
 
     for (u32 SourceIndex = 0; SourceIndex < ArrayCount(AssemblySources); SourceIndex++)

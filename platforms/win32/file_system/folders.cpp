@@ -123,7 +123,7 @@ void EmptyDirectory(const char *DirectoryPath)
         {
             if
             (
-                (FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 
+                (FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ==
                 FILE_ATTRIBUTE_DIRECTORY
             )
             {
