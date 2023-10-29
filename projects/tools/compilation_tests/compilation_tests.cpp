@@ -15,34 +15,12 @@
 #include "platforms\win32\base_types.h"
 #include "platforms\shared\basic_defines.h"
 #include "platforms\win32\console\console.h"
+#include "compilation_tests.h"
 
 #include "platforms\win32\console\console.cpp"
 #include "platforms\win32\strings\strings.cpp"
 #include "platforms\win32\processes\processes.cpp"
 #include "platforms\win32\timing\timing.cpp"
-
-struct test_job
-{
-    char *TestOutputBuffer;
-    u32 TestOutputBufferSize;
-    char *MutexName;
-    char *TestCommand;
-    b32 TestResult;
-};
-
-struct test_job_configuration
-{
-    char *MutexName;
-    char *TestCommand;
-};
-
-struct test_job_queue
-{
-    u32 JobCount;
-    test_job *Jobs;
-    volatile i64 NextJobIndex;
-    volatile i64 TotalJobsDone;
-};
 
 console_context GlobalConsoleContext;
 
@@ -60,7 +38,7 @@ test_job_configuration TestJobConfiguration[] =
     NULL, "build lint",
     NULL, "build fetch_data",
     NULL, "build fat12_tests",
-    NULL, "build x86_kernel",
+    NULL, "build x86_os",
     NULL, "build x86_kernel_tests",
 };
 

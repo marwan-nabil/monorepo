@@ -7,7 +7,11 @@ data/ --> storage for binary data used by programs
 help/ --> documentation
 
 -------------------------------------------------------------------------
-==> independent programs, each project is, in general, platform dependent
+==> projects:
+        - independent programs or apps or complete multi-executable projects
+        - each project is, in general, platform dependent
+            - it uses (#includes or copies) shared code from platforms/ folders
+            - only projects can contain buildable code (main translation units)
 -------------------------------------------------------------------------
 projects/
     demos/
@@ -21,18 +25,23 @@ projects/
     simulator/ --> physical simulation experiments
 
     tools/
-        build/ --> build system main executable
+        build/ --> build system for the hole workspace
         compilation_tests/ --> program that tests all compilation targets
         fetch_data/ --> tool to fetch the binary program data found in data/
         lint/ --> source code linter program
 
-    x86_kernel/ --> small x86 operating system
+    x86_os/ --> small x86 operating system
 
----------------------------------
-==> platform specific shared code
----------------------------------
+-------------------------------------------------------------------------
+==> platform:
+        - shared code categorized by it's platform dependencies
+          (architecture/Compiler/Target OS)
+        - this code is not stand alone, it must be used by an external project
+        - this code is library code that is included by a specific project and built
+          inside this project
+-------------------------------------------------------------------------
 platforms/
-    shared/ --> platform (compiler/os) independent code that can be included from any project
+    shared/ --> platform independent code that can be included from any project
 
     win32/ --> win32/MSVC specific shared code
         console/ --> windows console api wrappers
@@ -46,4 +55,6 @@ platforms/
         system/ --> win32 version info api wrappers
         windows/ --> windowing and dpi APIs
 
-    x86/ --> x86/BIOS specific shared code doesn't use the standard library or any os syscalls
+    x86_real/ --> x86 real mode & BIOS specific shared code
+                  doesn't use the standard library or any os syscalls
+                  only uses standard BIOS syscalls

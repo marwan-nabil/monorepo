@@ -43,10 +43,10 @@
 #include "projects\handmade_hero\build.cpp"
 #include "projects\demos\imgui\build.cpp"
 #include "projects\ray_tracer\build.cpp"
-#include "projects\x86_kernel\boot_sector\build.cpp"
-#include "projects\x86_kernel\bootloader\build.cpp"
-#include "projects\x86_kernel\kernel\build.cpp"
-#include "projects\x86_kernel\build.cpp"
+#include "projects\x86_os\boot_sector\build.cpp"
+#include "projects\x86_os\bootloader\build.cpp"
+#include "projects\x86_os\kernel\build.cpp"
+#include "projects\x86_os\build.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {
