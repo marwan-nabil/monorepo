@@ -3,7 +3,7 @@
 ; in:
 ;       word [sp + 2] == driver number
 ; ---------------------------------------
-global _X86_DiskReset
+section _TEXT._X86_DiskReset class=CODE
 _X86_DiskReset:
     push bp
     mov bp, sp

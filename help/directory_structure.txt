@@ -5,13 +5,14 @@ scripts/ --> small batch scripts
 output/ --> build outputs and working path for executables
 data/ --> storage for binary data used by programs
 help/ --> documentation
+third_party/ --> third party libraries and code
 
 -------------------------------------------------------------------------
 ==> projects:
-        - independent programs or apps or complete multi-executable projects
-        - each project is, in general, platform dependent
-            - it uses (#includes or copies) shared code from platforms/ folders
-            - only projects can contain buildable code (main translation units)
+    - independent programs or apps or complete multi-executable projects
+    - each project is, in general, platform dependent
+        - it uses (#includes or copies) shared code from platforms/ folders
+        - only projects can contain buildable code (main translation units)
 -------------------------------------------------------------------------
 projects/
     demos/
@@ -33,12 +34,12 @@ projects/
     x86_os/ --> small x86 operating system
 
 -------------------------------------------------------------------------
-==> platform:
-        - shared code categorized by it's platform dependencies
-          (architecture/Compiler/Target OS)
-        - this code is not stand alone, it must be used by an external project
-        - this code is library code that is included by a specific project and built
-          inside this project
+==> platforms:
+    - shared code categorized by it's platform dependencies
+        (architecture/Compiler/Target OS)
+    - this code is not stand alone, it must be used by an external project
+    - this code is library code that must be included by a specific project and built
+        inside this project, it cannot be build on it's own
 -------------------------------------------------------------------------
 platforms/
     shared/ --> platform independent code that can be included from any project

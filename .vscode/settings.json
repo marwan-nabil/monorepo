@@ -3,7 +3,7 @@
 
     "files.exclude":
     {
-        "third_party/**": true,
+        // "third_party/**": true,
         // "platforms/win32": true,
     },
 

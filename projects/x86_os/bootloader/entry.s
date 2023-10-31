@@ -1,15 +1,22 @@
 bits 16
 
-%define CRLF 0x0D, 0x0A
+%include "projects\x86_os\bootloader\entry.hs"
 
-extern _cstart
+%include "platforms\x86_real\strings.s"
+%include "platforms\x86_real\integers.s"
+%include "platforms\x86_real\disk.s"
 
-section _ENTRY class=CODE
+; --------------------
+; data
+; --------------------
+section _ENTRY.BootloaderEntryMessage class=CODE
+BootloaderEntryMessage:
+    db 'Bootloader Entered.', CRLF, 0, 0
 
 ; --------------------
 ; entry point
 ; --------------------
-global entry
+section _ENTRY.entry class=CODE
 entry:
     mov si, BootloaderEntryMessage
     call _X86_PrintString
@@ -28,15 +35,3 @@ entry:
     ; _cstart should not return
     cli
     hlt
-
-; --------------------
-; message string
-; --------------------
-BootloaderEntryMessage:
-    db 'Bootloader Entered.', CRLF, 0
-
-section _TEXT class=CODE
-
-%include "platforms\x86_real\strings.s"
-%include "platforms\x86_real\integers.s"
-; %include "platforms\x86_real\disk.s"

@@ -1,7 +1,7 @@
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
-global _X86_DivideU64ByU32
+section _TEXT._X86_DivideU64ByU32 class=CODE
 _X86_DivideU64ByU32:
     ; make new call frame
     push bp ; save old call frame
