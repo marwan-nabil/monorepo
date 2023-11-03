@@ -6,7 +6,7 @@
 #include <strsafe.h>
 
 #include "platforms\win32\base_types.h"
-#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\basic_defines.h"
 #include "platforms\win32\strings\strings.cpp"
 
 struct data_chunk

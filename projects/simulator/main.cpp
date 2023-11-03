@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "platforms\win32\base_types.h"
-#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\basic_defines.h"
 #include "platforms\win32\rasterizer\rasterizer.h"
 #include "platforms\win32\math\vector2.h"
 #include "platforms\win32\math\vector3.h"

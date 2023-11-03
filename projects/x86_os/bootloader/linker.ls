@@ -11,13 +11,16 @@ OPTION
 ORDER
     CLNAME CODE
         SEGMENT _ENTRY.entry
+        SEGMENT _ENTRY.BootloaderEntryMessage
         SEGMENT _TEXT._X86_PrintCharacter
         SEGMENT _TEXT._X86_PrintString
         SEGMENT _TEXT._X86_DivideU64ByU32
+        SEGMENT _TEXT.__U4D
         SEGMENT _TEXT._X86_DiskReset
         SEGMENT _TEXT._X86_DiskRead
+        SEGMENT _TEXT._X86_GetDiskDriveParameters
         SEGMENT _TEXT
-        SEGMENT _ENTRY.BootloaderEntryMessage
     CLNAME DATA
+        SEGMENT _DATA.DataSegmentAlignmentPadding
         SEGMENT CONST
         SEGMENT _DATA

@@ -44,3 +44,37 @@ _X86_DivideU64ByU32:
     mov sp, bp
     pop bp
     ret
+
+; --------------------
+; divides a u32 by u32
+; un:
+;       dx:ax --> dividend 
+;       cx:bx --> divisor 
+; Out:
+;       dx:ax --> quotient 
+;       cx:bx --> remainder 
+; --------------------
+section _TEXT.__U4D class=CODE
+__U4D:
+    shl edx, 16
+    mov dx, ax
+    ; edx == dividend
+
+    mov eax, edx
+    xor edx, edx
+    ; eax == dividend, edx == 0
+
+    shl ecx, 16
+    mov cx, bx
+    ; ecx == divisor
+
+    div ecx ; eax: quotient, edx: remainder
+
+    mov ebx, edx
+    mov ecx, edx
+    shr ecx, 16
+
+    mov edx, eax
+    shr edx, 16
+
+    ret

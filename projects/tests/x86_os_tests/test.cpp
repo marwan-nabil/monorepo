@@ -7,7 +7,7 @@
 #include <strsafe.h>
 
 #include "platforms\win32\base_types.h"
-#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\basic_defines.h"
 #include "platforms\win32\file_system\files.h"
 #include "platforms\win32\file_system\path_handling.h"
 #include "platforms\win32\fat12\fat12.h"

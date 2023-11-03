@@ -15,7 +15,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
 
     AddSourceFile(BuildContext, "\\projects\\x86_os\\bootloader\\main.c");
     SetOuputBinaryPath(BuildContext, "\\main.obj");
-    AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq");
+    AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -za99");
     AddCompilerFlags(BuildContext, "-wx -wcd=138 -wcd=202");
     SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
     BuildSuccess = CompileWithWatcom(BuildContext);

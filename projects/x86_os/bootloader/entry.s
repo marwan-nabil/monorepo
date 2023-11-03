@@ -13,6 +13,10 @@ section _ENTRY.BootloaderEntryMessage class=CODE
 BootloaderEntryMessage:
     db 'Bootloader Entered.', CRLF, 0
 
+section _DATA.DataSegmentAlignmentPadding class=DATA
+DataSegmentAlignmentPadding:
+    db 0
+
 ; --------------------
 ; entry point
 ; --------------------

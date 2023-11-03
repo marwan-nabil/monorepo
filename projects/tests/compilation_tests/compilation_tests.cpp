@@ -13,7 +13,7 @@
 #include <io.h>
 
 #include "platforms\win32\base_types.h"
-#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\basic_defines.h"
 #include "platforms\win32\console\console.h"
 #include "compilation_tests.h"
 

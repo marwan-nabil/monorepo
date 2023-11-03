@@ -9,7 +9,7 @@
 #include <dxgi.h>
 
 #include "platforms\win32\base_types.h"
-#include "platforms\shared\basic_defines.h"
+#include "platforms\win32\basic_defines.h"
 #include "directx_demo.h"
 
 #include "platforms\win32\math\floats.cpp"

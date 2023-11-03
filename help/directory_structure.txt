@@ -12,7 +12,8 @@ third_party/ --> third party libraries and code
     - independent programs or apps or complete multi-executable projects
     - each project is, in general, platform dependent
         - it uses (#includes or copies) shared code from platforms/ folders
-        - only projects can contain buildable code (main translation units)
+        - only projects can contain standalone buildable code 
+          (main translation units)
 -------------------------------------------------------------------------
 projects/
     demos/
@@ -25,13 +26,20 @@ projects/
 
     simulator/ --> physical simulation experiments
 
+    tests/ --> test programs for shared code or other projects
+        compilation_tests/ --> program that tests all compilation targets
+        fat12_tests/ --> tests the fat12 win32 shared code
+        x86_os_tests/ --> tests performed on the x86_os project kernel image
+
     tools/
         build/ --> build system for the hole workspace
-        compilation_tests/ --> program that tests all compilation targets
         fetch_data/ --> tool to fetch the binary program data found in data/
         lint/ --> source code linter program
 
     x86_os/ --> small x86 operating system
+        boot_sector/ --> code for the bootsector bootloader
+        bootloader/ --> code for the main kernel bootloader
+        kernel/ --> code for the main kernel
 
 -------------------------------------------------------------------------
 ==> platforms:
@@ -42,8 +50,6 @@ projects/
         inside this project, it cannot be build on it's own
 -------------------------------------------------------------------------
 platforms/
-    shared/ --> platform independent code that can be included from any project
-
     win32/ --> win32/MSVC specific shared code
         console/ --> windows console api wrappers
         fat12/ --> fat12 ram filesystem driver
