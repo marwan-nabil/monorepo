@@ -15,6 +15,7 @@ ORDER
         SEGMENT _TEXT._X86_PrintString
         SEGMENT _TEXT._X86_DivideU64ByU32
         SEGMENT _TEXT._X86_DiskReset
+        SEGMENT _TEXT._X86_DiskRead
         SEGMENT _TEXT
         SEGMENT _ENTRY.BootloaderEntryMessage
     CLNAME DATA

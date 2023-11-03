@@ -9,16 +9,15 @@
 #include "platforms\shared\basic_defines.h"
 #include "platforms\win32\console\console.h"
 #include "platforms\win32\file_system\path_handling.h"
-
-#include "fat12.h"
+#include "platforms\win32\fat12\fat12.h"
 
 #include "platforms\win32\console\console.cpp"
 #include "platforms\win32\strings\strings.cpp"
 #include "platforms\win32\file_system\path_handling.cpp"
 
-#include "fat12_get.cpp"
-#include "fat12_set.cpp"
-#include "fat12_interface.cpp"
+#include "platforms\win32\fat12\fat12_get.cpp"
+#include "platforms\win32\fat12\fat12_set.cpp"
+#include "platforms\win32\fat12\fat12_interface.cpp"
 
 struct ram_file
 {

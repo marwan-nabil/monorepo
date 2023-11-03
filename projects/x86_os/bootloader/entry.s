@@ -11,7 +11,7 @@ bits 16
 ; --------------------
 section _ENTRY.BootloaderEntryMessage class=CODE
 BootloaderEntryMessage:
-    db 'Bootloader Entered.', CRLF, 0, 0
+    db 'Bootloader Entered.', CRLF, 0
 
 ; --------------------
 ; entry point

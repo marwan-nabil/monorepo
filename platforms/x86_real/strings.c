@@ -1,22 +1,22 @@
-// long int StringLengthFar(char far *String)
-// {
-//     long int Count = 0;
-//     while (*String++)
-//     {
-//         ++Count;
-//     }
-//     return Count;
-// }
+long int StringLengthFar(char far *String)
+{
+    long int Count = 0;
+    while (*String++)
+    {
+        ++Count;
+    }
+    return Count;
+}
 
-// long int StringLength(char far *String)
-// {
-//     long int Count = 0;
-//     while (*String++)
-//     {
-//         ++Count;
-//     }
-//     return Count;
-// }
+long int StringLength(char far *String)
+{
+    long int Count = 0;
+    while (*String++)
+    {
+        ++Count;
+    }
+    return Count;
+}
 
 void PrintCharacter(char Character)
 {

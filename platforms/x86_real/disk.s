@@ -21,7 +21,7 @@ _X86_DiskReset:
     pop bp
     ret
 
-; global _X86_DiskRead
+; section _TEXT._X86_DiskRead class=CODE
 ; _X86_DiskRead:
 ;     push bp
 ;     mov bp, sp

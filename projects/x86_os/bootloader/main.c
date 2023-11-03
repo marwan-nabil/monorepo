@@ -12,8 +12,7 @@
 void _cdecl cstart(u16 bootDrive)
 {
     char far *FarString = "far string ";
-    char far *FarString2 = "aaaaaaaaaaaa";
-    u32 OriginalStringLength = 11;
+    char far *FarString2 = "aaaaaaa";
 
     PrintString("Hello world from C!\r\n");
     PrintFormatted
@@ -33,12 +32,14 @@ void _cdecl cstart(u16 bootDrive)
         -100000000l, 0xdeadbeeful, 10200300400ll, 0xdeadbeeffeebdaedull
     );
 
-    // PrintFormatted("Test FarMemoryZero Before: %ls\r\n", FarString);
-    // FarMemoryZero(FarString, OriginalStringLength);
-    // PrintFormatted("Test FarMemoryZero After: %ls\r\n", FarString);
+    PrintString(" ======================================= \r\n");
 
-    // FarMemoryCopy(FarString, FarString2, OriginalStringLength);
-    // PrintFormatted("Test FarMemoryCopy After: %ls\r\n", FarString);
+    PrintFormatted("Test FarMemoryZero Before: %ls\r\n", FarString);
+    FarMemoryZero(FarString, StringLengthFar(FarString));
+    PrintFormatted("Test FarMemoryZero After: %ls\r\n", FarString);
+
+    FarMemoryCopy(FarString, FarString2, StringLengthFar(FarString2));
+    PrintFormatted("Test FarMemoryCopy After: %ls\r\n", FarString);
 
     while (1) {};
 }

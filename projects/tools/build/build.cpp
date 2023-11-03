@@ -36,8 +36,9 @@
 
 #include "projects\tools\lint\build.cpp"
 #include "projects\tools\fetch_data\build.cpp"
-#include "projects\tools\compilation_tests\build.cpp"
-#include "platforms\win32\fat12\build.cpp"
+#include "projects\tests\compilation_tests\build.cpp"
+#include "projects\tests\fat12_tests\build.cpp"
+#include "projects\tests\x86_os_tests\build.cpp"
 #include "projects\simulator\build.cpp"
 #include "projects\demos\directx\build.cpp"
 #include "projects\handmade_hero\build.cpp"
@@ -60,7 +61,7 @@ build_target_config BuildTargetConfigurations[] =
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
     {"x86_os", &Buildx86Os, NULL, NULL, NULL},
-    {"x86_kernel_tests", &BuildX86KernelTests, NULL, NULL, NULL},
+    {"x86_os_tests", &BuildX86KernelTests, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;
