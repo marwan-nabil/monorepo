@@ -16,6 +16,10 @@
 #   define FALSE 0
 #endif
 
+#ifndef NULL
+#   define NULL ((void *)0)
+#endif
+
 #ifdef ENABLE_ASSERTIONS
 #   define Assert(Expression) {if(!(Expression)){ *(int *)0 = 0; }}
 #   define AssertIsBit(Value) Assert(!((Value) & (~1ull)))

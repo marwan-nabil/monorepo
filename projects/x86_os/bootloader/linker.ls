@@ -5,7 +5,7 @@ OPTION
     START=entry,
     VERBOSE,
     OFFSET=0,
-    STACK=0X200,
+    STACK=0x200,
     MAP=bootloader.map
 
 ORDER
@@ -16,6 +16,7 @@ ORDER
         SEGMENT _TEXT._X86_PrintString
         SEGMENT _TEXT._X86_DivideU64ByU32
         SEGMENT _TEXT.__U4D
+        SEGMENT _TEXT.__U4M
         SEGMENT _TEXT._X86_DiskReset
         SEGMENT _TEXT._X86_DiskRead
         SEGMENT _TEXT._X86_GetDiskDriveParameters

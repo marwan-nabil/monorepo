@@ -1,4 +1,4 @@
-b8 InitializeDisk(floppy_disk_parameters *DiskParameters, u8 DriveNumber)
+b8 GetDiskDriveParameters(floppy_disk_parameters *DiskParameters, u8 DriveNumber)
 {
     b8 Result = FALSE;
     u8 DriveType;
@@ -40,7 +40,7 @@ b8 ReadDiskSectors
     u16 Cylinder, Head, Sector;
     TranslateLbaToChs(DiskParameters, LogicalBlockAddress, &Cylinder, &Head, &Sector);
 
-    for (u16 Trials = 0; Trials < 3; Trials++)
+    for (u16 Retry = 0; Retry < DISK_OPERATION_MAXIMUM_RETRIES; Retry++)
     {
         b8 ReadOk = X86_DiskRead
         (
@@ -53,8 +53,10 @@ b8 ReadDiskSectors
         {
             return TRUE;
         }
-
-        X86_DiskReset(DiskParameters->Id);
+        else
+        {
+            X86_DiskReset(DiskParameters->Id);
+        }
     }
 
     return FALSE;

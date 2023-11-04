@@ -1,11 +1,14 @@
 #include "platforms\x86_real\base_types.h"
 #include "platforms\x86_real\basic_defines.h"
 
+#include "memory_layout.h"
+
 #include "platforms\x86_real\strings.h"
 #include "platforms\x86_real\integers.h"
 #include "platforms\x86_real\disk.h"
 
 #include "platforms\x86_real\memory.c"
+#include "platforms\x86_real\characters.c"
 #include "platforms\x86_real\strings.c"
 #include "platforms\x86_real\disk.c"
 

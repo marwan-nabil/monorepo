@@ -1,3 +1,27 @@
+char *StringCopy(char *Destination, const char *Source)
+{
+    char *Result = Destination;
+
+    if (Destination == NULL)
+    {
+        return Result;
+    }
+
+    if (Source == NULL)
+    {
+        *Destination = '\0';
+        return Result;
+    }
+
+    while (*Source)
+    {
+        *Destination++ = *Source++;
+    }
+    
+    *Destination = '\0';
+    return Result;
+}
+
 long int StringLengthFar(char far *String)
 {
     long int Count = 0;
@@ -16,11 +40,6 @@ long int StringLength(char far *String)
         ++Count;
     }
     return Count;
-}
-
-void PrintCharacter(char Character)
-{
-    X86_PrintCharacter(Character, 0);
 }
 
 void PrintString(const char *String)

@@ -47,10 +47,10 @@ _X86_DivideU64ByU32:
 
 ; --------------------
 ; divides a u32 by u32
-; un:
+; in:
 ;       dx:ax --> dividend 
 ;       cx:bx --> divisor 
-; Out:
+; out:
 ;       dx:ax --> quotient 
 ;       cx:bx --> remainder 
 ; --------------------
@@ -75,6 +75,31 @@ __U4D:
     shr ecx, 16
 
     mov edx, eax
+    shr edx, 16
+
+    ret
+
+; --------------------------------------
+; multiplies a u32 by a u32
+; in:
+;       DX:AX operand 1
+;       CX:BX operand 2
+; out:
+;       DX:AX product
+; side effects:
+;       CX, BX modified
+; --------------------------------------
+section _TEXT.__U4M class=CODE
+__U4M:
+    shl edx, 16 ; dx to upper half of edx
+    mov dx, ax ; m1 in edx
+    mov eax, edx ; m1 in eax
+
+    shl ecx, 16 ; cx to upper half of ecx
+    mov cx, bx ; m2 in ecx
+
+    mul ecx ; result in edx:eax (we only need eax)
+    mov edx, eax ; move upper half to dx
     shr edx, 16
 
     ret
