@@ -3,7 +3,7 @@ void StringAndMemoryUtilsTests()
     char far *FarString = "far string ";
     char far *FarString2 = "aaaaaaa";
 
-    PrintString("\r\n============ string tests ============== \r\n");
+    PrintString("\r\n============ formatted print tests ============== \r\n");
     PrintFormatted
     (
         "Formatted %% %c %s %ls\r\n",
@@ -27,6 +27,14 @@ void StringAndMemoryUtilsTests()
     PrintFormatted("Test MemoryZeroFar After: %ls\r\n", FarString);
     MemoryCopyFarToFar(FarString, FarString2, StringLengthFar(FarString2));
     PrintFormatted("Test MemoryCopyFarToFar After: %ls\r\n", FarString);
+
+    PrintString("\r\n============ other string tests ============== \r\n");
+    char LocalPathBuffer[PATH_HANDLING_MAX_PATH];
+    MemoryZeroNear(LocalPathBuffer, ArrayCount(LocalPathBuffer));
+
+    StringConcatenateFarToNear(LocalPathBuffer, ArrayCount(LocalPathBuffer), "test ");
+    StringConcatenateFarToNear(LocalPathBuffer, ArrayCount(LocalPathBuffer), "string");
+    PrintFormatted("Test string after concatenation: %s\r\n", LocalPathBuffer);
 }
 
 void DiskDriverTests(u8 BootDriveNumber)
@@ -82,9 +90,6 @@ void AllocatorTests(u16 BootDriveNumber)
 {
     PrintString("\r\n=========== memory allocator tests ================= \r\n");
 
-    disk_parameters DiskParameters;
-    GetDiskDriveParameters(&DiskParameters, BootDriveNumber);
-
     memory_arena LocalMemoryArena;
     InitializeMemoryArena
     (
@@ -110,7 +115,33 @@ void AllocatorTests(u16 BootDriveNumber)
 
 void PathHandlingTests(u16 BootDriveNumber)
 {
+    PrintString("\r\n=========== path handling tests ================= \r\n");
 
+    memory_arena LocalMemoryArena;
+    InitializeMemoryArena
+    (
+        (memory_arena far *)&LocalMemoryArena,
+        KiloBytes(10),
+        MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
+    );
+
+    file_path_node far *PathListHead = CreateFilePathSegmentList
+    (
+        "\\aaa\\bbb\\ccc",
+        (memory_arena far *)&LocalMemoryArena
+    );
+    PrintFormatted
+    (
+        "reconstructed path: %ls %ls %ls\r\n",
+        PathListHead->FileName,
+        PathListHead->ChildNode->FileName,
+        PathListHead->ChildNode->ChildNode->FileName
+    );
+
+    char far *LocalString = "\\xxx\\yyy\\zzz";
+    PrintFormatted("local string before trimming: %ls\r\n", LocalString);
+    RemoveLastSegmentFromPath(LocalString);
+    PrintFormatted("local string after trimming: %ls\r\n", LocalString);
 }
 
 void FileSystemTests(u16 BootDriveNumber)

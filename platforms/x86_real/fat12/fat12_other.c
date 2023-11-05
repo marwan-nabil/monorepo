@@ -268,7 +268,7 @@ file far *Fat12OpenFile(disk_parameters *disk, const char *path)
         }
         else
         {
-            unsigned len = StringLength((char *)path);
+            unsigned len = StringLengthNear((char *)path);
             MemoryCopyNearToNear(name, (void *)path, len);
             name[len + 1] = '\0';
             path += len;

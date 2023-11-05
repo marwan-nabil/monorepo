@@ -47,31 +47,119 @@ void PrintCharacter(char Character)
     X86_PrintCharacter(Character, 0);
 }
 
-char *StringCopy(char *Destination, const char *Source)
+void StringConcatenateNearToNear(char *Destination, u32 Size, char *Source)
 {
-    char *Result = Destination;
-
-    if (Destination == NULL)
+    if ((Destination == NULL) || (Source == NULL))
     {
-        return Result;
+        return;
     }
 
-    if (Source == NULL)
+    u32 CharIndex = 0;
+
+    while (Destination[CharIndex])
     {
-        *Destination = '\0';
-        return Result;
+        CharIndex++;
     }
 
-    while (*Source)
+    for (; CharIndex < (Size - 1); CharIndex++)
     {
-        *Destination++ = *Source++;
+        if (*Source)
+        {
+            Destination[CharIndex] = *Source++;
+        }
+        else
+        {
+            break;
+        }
     }
-
-    *Destination = '\0';
-    return Result;
+    Destination[CharIndex] = '\0';
 }
 
-long int StringLengthFar(char far *String)
+void StringConcatenateFarToNear(char *Destination, u32 Size, char far *Source)
+{
+    if ((Destination == NULL) || (Source == NULL))
+    {
+        return;
+    }
+
+    u32 CharIndex = 0;
+
+    while (Destination[CharIndex])
+    {
+        CharIndex++;
+    }
+
+    for (; CharIndex < (Size - 1); CharIndex++)
+    {
+        if (*Source)
+        {
+            Destination[CharIndex] = *Source++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    Destination[CharIndex] = '\0';
+}
+
+void StringConcatenateNearToFar(char far *Destination, u32 Size, char *Source)
+{
+    if ((Destination == NULL) || (Source == NULL))
+    {
+        return;
+    }
+
+    u32 CharIndex = 0;
+
+    while (Destination[CharIndex])
+    {
+        CharIndex++;
+    }
+
+    for (; CharIndex < (Size - 1); CharIndex++)
+    {
+        if (*Source)
+        {
+            Destination[CharIndex] = *Source++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    Destination[CharIndex] = '\0';
+}
+
+void StringConcatenateFarToFar(char far *Destination, u32 Size, char far *Source)
+{
+    if ((Destination == NULL) || (Source == NULL))
+    {
+        return;
+    }
+
+    u32 CharIndex = 0;
+
+    while (Destination[CharIndex])
+    {
+        CharIndex++;
+    }
+
+    for (; CharIndex < (Size - 1); CharIndex++)
+    {
+        if (*Source)
+        {
+            Destination[CharIndex] = *Source++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    Destination[CharIndex] = '\0';
+}
+
+long int StringLengthNear(char *String)
 {
     long int Count = 0;
     while (*String++)
@@ -81,7 +169,7 @@ long int StringLengthFar(char far *String)
     return Count;
 }
 
-long int StringLength(char *String)
+long int StringLengthFar(char far *String)
 {
     long int Count = 0;
     while (*String++)
@@ -100,7 +188,7 @@ void PrintString(const char *String)
     }
 }
 
-void PrintFarString(const char far *String)
+void PrintStringFar(const char far *String)
 {
     while (*String)
     {
@@ -295,7 +383,7 @@ void _cdecl PrintFormatted(const char *FormatString, ...)
                             (LengthType == PRINTF_LENGTH_TYPE_LONG_LONG)
                         )
                         {
-                            PrintFarString(*(const char far **)ArgumentPointer);
+                            PrintStringFar(*(const char far **)ArgumentPointer);
                             ArgumentPointer += 2;
                         }
                         else

@@ -3,6 +3,7 @@
 #include "platforms\x86_real\strings\strings.h"
 #include "platforms\x86_real\math\integers.h"
 #include "platforms\x86_real\memory\allocator.h"
+#include "platforms\x86_real\path_handling\path_handling.h"
 #include "platforms\x86_real\disk\disk.h"
 #include "platforms\x86_real\fat12\fat12.h"
 
@@ -12,6 +13,7 @@
 #include "platforms\x86_real\strings\strings.c"
 #include "platforms\x86_real\math\integers.c"
 #include "platforms\x86_real\memory\allocator.c"
+#include "platforms\x86_real\path_handling\path_handling.c"
 #include "platforms\x86_real\timing.c"
 #include "platforms\x86_real\disk\disk.c"
 #include "platforms\x86_real\fat12\fat12_get.c"
@@ -30,9 +32,9 @@ void _cdecl cstart(u16 BootDriveNumber)
 
     // AllocatorTests(BootDriveNumber);
 
-    PathHandlingTests(BootDriveNumber);
+    // PathHandlingTests(BootDriveNumber);
 
-    // FileSystemTests(BootDriveNumber);
+    FileSystemTests(BootDriveNumber);
 
     // AllocatorTests();
 
