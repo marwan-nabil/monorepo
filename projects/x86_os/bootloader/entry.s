@@ -2,9 +2,9 @@ bits 16
 
 %include "projects\x86_os\bootloader\entry.hs"
 
-%include "platforms\x86_real\strings.s"
-%include "platforms\x86_real\integers.s"
-%include "platforms\x86_real\disk.s"
+%include "platforms\x86_real\console\strings.s"
+%include "platforms\x86_real\math\integers.s"
+%include "platforms\x86_real\disk\disk.s"
 
 ; --------------------
 ; data
