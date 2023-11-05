@@ -1,13 +1,13 @@
-void InitializeMemoryArena(memory_arena *Arena, u32 Size, void *BaseAddress)
+void InitializeMemoryArena(memory_arena far *Arena, u32 Size, void far *BaseAddress)
 {
     Arena->Size = Size;
     Arena->Used = 0;
-    Arena->BaseAddress = (u8 *)BaseAddress;
+    Arena->BaseAddress = (u8 far *)BaseAddress;
 }
 
-void *PushOntoMemoryArena(memory_arena *Arena, u32 PushSize)
+void far *PushOntoMemoryArena(memory_arena far *Arena, u32 PushSize)
 {
-    void *Result = Arena->BaseAddress + Arena->Used;
+    void far *Result = Arena->BaseAddress + Arena->Used;
     Arena->Used += PushSize;
     return Result;
 }

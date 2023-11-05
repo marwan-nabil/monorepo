@@ -22,29 +22,108 @@ void StringAndMemoryUtilsTests()
     );
 
     PrintString("\r\n=========== memory utils tests ================= \r\n");
-    PrintFormatted("Test FarMemoryZero Before: %ls\r\n", FarString);
-    FarMemoryZero(FarString, StringLengthFar(FarString));
-    PrintFormatted("Test FarMemoryZero After: %ls\r\n", FarString);
-    FarMemoryCopy(FarString, FarString2, StringLengthFar(FarString2));
-    PrintFormatted("Test FarMemoryCopy After: %ls\r\n", FarString);
+    PrintFormatted("Test MemoryZeroFar Before: %ls\r\n", FarString);
+    MemoryZeroFar(FarString, StringLengthFar(FarString));
+    PrintFormatted("Test MemoryZeroFar After: %ls\r\n", FarString);
+    MemoryCopyFarToFar(FarString, FarString2, StringLengthFar(FarString2));
+    PrintFormatted("Test MemoryCopyFarToFar After: %ls\r\n", FarString);
 }
 
-void DiskDriverTests()
+void DiskDriverTests(u8 BootDriveNumber)
 {
     PrintString("\r\n=========== disk driver tests ================= \r\n");
-    
+
+    disk_parameters DiskParameters;
+    GetDiskDriveParameters(&DiskParameters, BootDriveNumber);
+
+    PrintFormatted("Basic Disk Drive parameters:\r\n");
+    PrintFormatted("ID: %hhd\r\n", DiskParameters.Id);
+    PrintFormatted("Cylinders: %hd\r\n", DiskParameters.Cylinders);
+    PrintFormatted("Heads: %hd\r\n", DiskParameters.Heads);
+    PrintFormatted("Sectors: %hd\r\n", DiskParameters.Sectors);
+    PrintFormatted("\r\n");
+
+    PrintFormatted("LBA to CHS translation examples:\r\n");
+    u16 LBA, Cylinder, Head, Sector;
+    for (u16 Index = 0; Index < 3; Index++)
+    {
+        LBA = Index;
+        TranslateLbaToChs(&DiskParameters, LBA, &Cylinder, &Head, &Sector);
+        PrintFormatted("LBA: %hd    CHS: %hd  %hd  %hd\r\n", LBA, Cylinder, Head, Sector);
+        SpinlockSleep(100);
+    }
+    PrintFormatted("\r\n");
+
+    PrintFormatted("reading from disk:\r\n");
+    ReadDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
+
+    char OEMName[9];
+    MemoryZeroFar(OEMName, ArrayCount(OEMName));
+    MemoryCopyFarToNear
+    (
+        OEMName,
+        &((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
+        ArrayCount(OEMName) - 1
+    );
+    PrintFormatted("BootSector OEM name: %s\r\n", OEMName);
+
+    u16 BootSignature = 0;
+    MemoryCopyFarToNear
+    (
+        &BootSignature,
+        &((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->BootSectorSignature,
+        sizeof(u16)
+    );
+    PrintFormatted("BootSector boot signature: %hx\r\n", BootSignature);
+    PrintFormatted("\r\n");
 }
 
-void AllocatorTests()
+void AllocatorTests(u16 BootDriveNumber)
 {
     PrintString("\r\n=========== memory allocator tests ================= \r\n");
-    
+
+    disk_parameters DiskParameters;
+    GetDiskDriveParameters(&DiskParameters, BootDriveNumber);
+
+    memory_arena LocalMemoryArena;
+    InitializeMemoryArena
+    (
+        (memory_arena far *)&LocalMemoryArena,
+        KiloBytes(10),
+        MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
+    );
+
+    typedef struct
+    {
+        u32 A;
+        u32 B;
+        u32 C;
+    } my_struct;
+
+    my_struct far *MyStructInstance = PushStruct((memory_arena far *)&LocalMemoryArena, my_struct);
+    my_struct far *MyStructInstance2 = PushStruct((memory_arena far *)&LocalMemoryArena, my_struct);
+    my_struct far *MyStructInstance3 = PushStruct((memory_arena far *)&LocalMemoryArena, my_struct);
+    PrintFormatted("Pointer of first object allocated:  0x%lx\r\n", (u32)MyStructInstance);
+    PrintFormatted("Pointer of second object allocated: 0x%lx\r\n", (u32)MyStructInstance2);
+    PrintFormatted("Pointer of third object allocated:  0x%lx\r\n", (u32)MyStructInstance3);
 }
 
-void FileSystemTests()
+void PathHandlingTests(u16 BootDriveNumber)
 {
-    PrintString("\r\n=========== fat12 filesystem tests ================= \r\n");
 
+}
+
+void FileSystemTests(u16 BootDriveNumber)
+{
+    PrintString("\r\n =========== fat12 filesystem tests ================= \r\n");
+
+    disk_parameters DiskParameters;
+    GetDiskDriveParameters(&DiskParameters, BootDriveNumber);
+
+    fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_RAMDISK_LOAD_ADDRESS;
+    Fat12LoadDiskIntoRam(&DiskParameters, RamDisk);
+
+    Fat12ListDirectory(RamDisk, "\\");
 }
 
 // void OtherFileSystemTests()

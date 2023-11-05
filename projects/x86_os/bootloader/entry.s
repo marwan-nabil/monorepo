@@ -2,7 +2,7 @@ bits 16
 
 %include "projects\x86_os\bootloader\entry.hs"
 
-%include "platforms\x86_real\console\strings.s"
+%include "platforms\x86_real\strings\strings.s"
 %include "platforms\x86_real\math\integers.s"
 %include "platforms\x86_real\disk\disk.s"
 
@@ -11,7 +11,7 @@ bits 16
 ; --------------------
 section _ENTRY.BootloaderEntryMessage class=CODE
 BootloaderEntryMessage:
-    db 'Bootloader Entered.', CRLF, 0
+    db 'Bootloader Entered...', CRLF, 0
 
 section _DATA.DataSegmentAlignmentPadding class=DATA
 DataSegmentAlignmentPadding:

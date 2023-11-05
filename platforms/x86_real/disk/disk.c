@@ -1,4 +1,4 @@
-b8 GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
+void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
 {
     b8 Result = FALSE;
     u8 DriveType;
@@ -10,14 +10,13 @@ b8 GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
     Result = X86_GetDiskDriveParameters(DriveNumber, &DriveType, &Cylinders, &Sectors, &Heads);
     if (!Result)
     {
-        return FALSE;
+        PrintFormatted("ERROR: GetDiskDriveParameters() failed.\r\n");
+        return;
     }
 
     DiskParameters->Cylinders = Cylinders;
     DiskParameters->Heads = Heads;
     DiskParameters->Sectors = Sectors;
-
-    return TRUE;
 }
 
 void TranslateLbaToChs
@@ -31,7 +30,7 @@ void TranslateLbaToChs
     *Sector = (LogicalBlockAddress % DiskParameters->Sectors) + 1;
 }
 
-b8 ReadDiskSectors
+void ReadDiskSectors
 (
     disk_parameters *DiskParameters,
     u32 LogicalBlockAddress, u8 SectorsToRead, u8 far *DataOut
@@ -51,7 +50,7 @@ b8 ReadDiskSectors
 
         if (ReadOk)
         {
-            return TRUE;
+            return;
         }
         else
         {
@@ -59,5 +58,5 @@ b8 ReadDiskSectors
         }
     }
 
-    return FALSE;
+    PrintFormatted("ERROR: ReadDiskSectors() failed.\r\n");
 }

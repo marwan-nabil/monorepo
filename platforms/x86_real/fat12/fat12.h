@@ -97,10 +97,11 @@ typedef struct
     sector Sectors[FAT12_SECTORS_IN_ROOT_DIRECTORY];
 } root_directory;
 
-struct
+typedef struct
 {
     boot_sector BootSector;
-    file_allocation_table Fat;
+    file_allocation_table Fat1;
+    file_allocation_table Fat2;
     root_directory RootDirectory;
 } fat12_ram_disk;
 

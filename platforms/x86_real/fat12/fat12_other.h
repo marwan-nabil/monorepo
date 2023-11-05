@@ -7,7 +7,7 @@
 
 #pragma pack(push, 1)
 
-typedef struct 
+typedef struct
 {
     u8 Name[11];
     u8 Attributes;
@@ -23,7 +23,7 @@ typedef struct
     u32 Size;
 } directory_entry;
 
-typedef struct 
+typedef struct
 {
     u8 BootJumpInstruction[3];
     u8 OemIdentifier[8];
@@ -53,7 +53,7 @@ typedef struct
 
 #pragma pack(pop)
 
-typedef struct 
+typedef struct
 {
     u32 Position;
     u32 Size;

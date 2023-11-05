@@ -20,7 +20,11 @@ static b32 BuildFloppyDiskImage(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\kernel\\kernel.img");
     read_file_result Kernel = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
+
     Fat12AddFile(Fat12Disk, "\\kernel  .bin", Kernel.FileMemory, Kernel.Size);
+    Fat12AddDirectory(Fat12Disk, "\\Dir0");
+    Fat12AddFile(Fat12Disk, "\\Dir0\\file0", Kernel.FileMemory, Kernel.Size);
+
     FreeFileMemory(Kernel);
     ClearBuildContext(BuildContext);
 

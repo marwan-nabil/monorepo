@@ -117,7 +117,7 @@ file far *OpenFatEntry(disk_parameters *disk, directory_entry *entry)
 }
 
 u32 GetNextCluster(u32 currentCluster)
-{    
+{
     u32 fatIndex = currentCluster * 3 / 2;
 
     if (currentCluster % 2 == 0)
@@ -129,14 +129,14 @@ u32 GetNextCluster(u32 currentCluster)
 u32 Fat12ReadFile(disk_parameters *disk, file far *file, u32 byteCount, void *dataOut)
 {
     // get file data
-    file_data far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE) 
-        ? &g_Data->RootDirectory 
+    file_data far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE)
+        ? &g_Data->RootDirectory
         : &g_Data->OpenedFiles[file->Handle];
 
     u8 *u8DataOut = (u8*)dataOut;
 
     // don't read past the end of the file
-    if (!fd->Public.IsDirectory) 
+    if (!fd->Public.IsDirectory)
         byteCount = Min(byteCount, fd->Public.Size - fd->Public.Position);
 
     while (byteCount > 0)
@@ -144,7 +144,7 @@ u32 Fat12ReadFile(disk_parameters *disk, file far *file, u32 byteCount, void *da
         u32 leftInBuffer = SECTOR_SIZE - (fd->Public.Position % SECTOR_SIZE);
         u32 take = Min(byteCount, leftInBuffer);
 
-        MemoryCopy(u8DataOut, fd->Buffer + fd->Public.Position % SECTOR_SIZE, take);
+        MemoryCopyNearToNear(u8DataOut, fd->Buffer + fd->Public.Position % SECTOR_SIZE, take);
         u8DataOut += take;
         fd->Public.Position += take;
         byteCount -= take;
@@ -218,7 +218,7 @@ b8 Fat12FindFile(disk_parameters *disk, file far *file, const char *name, direct
     directory_entry entry;
 
     // convert from name to fat name
-    MemorySet(fatName, ' ', sizeof(fatName));
+    MemorySetNear(fatName, ' ', sizeof(fatName));
     fatName[11] = '\0';
 
     const char *ext = GetCharacterPointer(name, '.');
@@ -236,13 +236,13 @@ b8 Fat12FindFile(disk_parameters *disk, file far *file, const char *name, direct
 
     while (Fat12ReadDirectoryEntry(disk, file, &entry))
     {
-        if (MemoryCompare(fatName, entry.Name, 11) == 0)
+        if (MemoryCompareNearToNear(fatName, entry.Name, 11) == 0)
         {
             *entryOut = entry;
             return TRUE;
         }
     }
-    
+
     return FALSE;
 }
 
@@ -262,19 +262,19 @@ file far *Fat12OpenFile(disk_parameters *disk, const char *path)
         const char *delim = GetCharacterPointer(path, '/');
         if (delim != NULL)
         {
-            MemoryCopy(name, (void *)path, delim - path);
+            MemoryCopyNearToNear(name, (void *)path, delim - path);
             name[delim - path + 1] = '\0';
             path = delim + 1;
         }
         else
         {
             unsigned len = StringLength((char *)path);
-            MemoryCopy(name, (void *)path, len);
+            MemoryCopyNearToNear(name, (void *)path, len);
             name[len + 1] = '\0';
             path += len;
             isLast = TRUE;
         }
-        
+
         // find directory entry in current directory
         directory_entry entry;
         if (Fat12FindFile(disk, current, name, &entry))
