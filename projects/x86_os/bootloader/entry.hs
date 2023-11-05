@@ -8,6 +8,7 @@ global _X86_PrintCharacter
 
 global _X86_DivideU64ByU32
 global __U4D
+global __U4M
 
 global _X86_DiskReset
 global _X86_DiskRead

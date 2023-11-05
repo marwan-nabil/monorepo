@@ -48,11 +48,11 @@ _X86_DivideU64ByU32:
 ; --------------------
 ; divides a u32 by u32
 ; in:
-;       dx:ax --> dividend 
-;       cx:bx --> divisor 
+;       dx:ax --> dividend
+;       cx:bx --> divisor
 ; out:
-;       dx:ax --> quotient 
-;       cx:bx --> remainder 
+;       dx:ax --> quotient
+;       cx:bx --> remainder
 ; --------------------
 section _TEXT.__U4D class=CODE
 __U4D:

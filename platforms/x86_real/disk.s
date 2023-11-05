@@ -43,7 +43,7 @@ _X86_DiskRead:
     ; read disk service
     mov dl, [bp + 4] ; drive number
 
-    mov ch, [bp + 6] ; cylinder[7:0] 
+    mov ch, [bp + 6] ; cylinder[7:0]
     mov cl, [bp + 7] ; cylinder[15:8]
     shl cl, 6
 
@@ -76,7 +76,7 @@ _X86_DiskRead:
     ret
 
 ; ---------------------------------------
-; 
+;
 ; void _cdecl X86_GetDiskDriveParameters
 ; (
 ;     u8 DriveNumber, u8 *DriveTypeOut, u16 *CylindersOut,

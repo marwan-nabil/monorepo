@@ -8,7 +8,7 @@ typedef struct
     u16 Cylinders;
     u16 Heads;
     u16 Sectors;
-} floppy_disk_parameters;
+} disk_parameters;
 
 b8 _cdecl X86_DiskReset(u8 DriveNumber);
 

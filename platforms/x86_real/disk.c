@@ -1,4 +1,4 @@
-b8 GetDiskDriveParameters(floppy_disk_parameters *DiskParameters, u8 DriveNumber)
+b8 GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
 {
     b8 Result = FALSE;
     u8 DriveType;
@@ -22,7 +22,7 @@ b8 GetDiskDriveParameters(floppy_disk_parameters *DiskParameters, u8 DriveNumber
 
 void TranslateLbaToChs
 (
-    floppy_disk_parameters *DiskParameters, 
+    disk_parameters *DiskParameters,
     u32 LogicalBlockAddress, u16 *Cylinder, u16 *Head, u16 *Sector
 )
 {
@@ -33,7 +33,7 @@ void TranslateLbaToChs
 
 b8 ReadDiskSectors
 (
-    floppy_disk_parameters *DiskParameters,
+    disk_parameters *DiskParameters,
     u32 LogicalBlockAddress, u8 SectorsToRead, u8 far *DataOut
 )
 {

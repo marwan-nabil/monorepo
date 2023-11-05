@@ -17,7 +17,7 @@ char *StringCopy(char *Destination, const char *Source)
     {
         *Destination++ = *Source++;
     }
-    
+
     *Destination = '\0';
     return Result;
 }
@@ -32,7 +32,7 @@ long int StringLengthFar(char far *String)
     return Count;
 }
 
-long int StringLength(char far *String)
+long int StringLength(char *String)
 {
     long int Count = 0;
     while (*String++)

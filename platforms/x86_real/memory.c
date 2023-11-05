@@ -56,7 +56,7 @@ i16 MemoryCompare(void *Source1, void *Source2, u32 Size)
     {
         if
         (
-            ((u8 *)Source1)[Index] != 
+            ((u8 *)Source1)[Index] !=
             ((u8 *)Source2)[Index]
         )
         {
@@ -73,7 +73,7 @@ i16 FarMemoryCompare(void far *Source1, void far *Source2, u32 Size)
     {
         if
         (
-            ((u8 far *)Source1)[Index] != 
+            ((u8 far *)Source1)[Index] !=
             ((u8 far *)Source2)[Index]
         )
         {
