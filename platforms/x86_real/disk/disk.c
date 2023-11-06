@@ -33,7 +33,9 @@ void TranslateLbaToChs
 void ReadDiskSectors
 (
     disk_parameters *DiskParameters,
-    u32 LogicalBlockAddress, u8 SectorsToRead, u8 far *DataOut
+    u32 LogicalBlockAddress,
+    u8 SectorsToRead,
+    u8 far *DataOut
 )
 {
     u16 Cylinder, Head, Sector;
@@ -59,4 +61,15 @@ void ReadDiskSectors
     }
 
     PrintFormatted("ERROR: ReadDiskSectors() failed.\r\n");
+}
+
+void WriteDiskSectors
+(
+    disk_parameters *DiskParameters,
+    u32 LogicalBlockAddress,
+    u8 SectorsToWrite,
+    u8 far *DataIn
+)
+{
+    // TODO: implement
 }

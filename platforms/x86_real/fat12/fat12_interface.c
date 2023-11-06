@@ -1,81 +1,325 @@
-void Fat12LoadDiskIntoRam(disk_parameters *DiskParameters, void far *LoadAddress)
+void Fat12InitializeRamDisk(disk_parameters *DiskParameters, void far *LoadAddress)
 {
     u16 SectorsToLoad = 1 + (2 * FAT12_SECTORS_IN_FAT) + FAT12_SECTORS_IN_ROOT_DIRECTORY;
     ReadDiskSectors(DiskParameters, 0, SectorsToLoad, LoadAddress);
 }
 
-// ====================================================================
-// directory_entry far *
-// Fat12GetDirectoryEntryOfFile(fat12_ram_disk far *Disk, char far *FullFilePath)
-// {
-//     if (StringLengthFar(FullFilePath) == 1)
-//     {
-//         return NULL;
-//     }
+directory_entry far *
+Fat12GetDirectoryEntryOfFile
+(
+    fat12_ram_disk far *Disk,
+    memory_arena far *MemoryArena,
+    disk_parameters *DiskParameters,
+    char far *FullFilePath
+)
+{
+    if (StringLengthFar(FullFilePath) == 1)
+    {
+        return NULL;
+    }
 
-//     file_path_node *FirstNode = CreateFilePathSegmentList(FullFilePath);
-//     if (!FirstNode)
-//     {
-//         return NULL;
-//     }
+    file_path_node far *FirstNode = CreateFilePathSegmentList(FullFilePath, MemoryArena);
+    if (!FirstNode)
+    {
+        return NULL;
+    }
 
-//     file_path_node *CurrentNode = FirstNode;
+    file_path_node far *CurrentNode = FirstNode;
 
-//     char LocalFileName[8] = {};
-//     char LocalFileExtension[3] = {};
+    char LocalFileName[8];
+    char LocalFileExtension[3];
+    MemoryZeroNear(LocalFileName, 8);
+    MemoryZeroNear(LocalFileExtension, 3);
 
-//     GetFileNameAndExtensionFromString
-//     (
-//         CurrentNode->FileName, LocalFileName, 8, LocalFileExtension, 3
-//     );
+    GetFileNameAndExtensionFromString
+    (
+        CurrentNode->FileName,
+        (char far *)LocalFileName, 8,
+        (char far *)LocalFileExtension, 3
+    );
 
-//     directory_entry *CurrentEntry = GetDirectoryEntryOfFileInRootDirectory
-//     (
-//         Disk,
-//         LocalFileName,
-//         LocalFileExtension
-//     );
+    directory_entry far *CurrentEntry = GetDirectoryEntryOfFileInRootDirectory
+    (
+        Disk,
+        (char far *)LocalFileName,
+        (char far *)LocalFileExtension
+    );
 
-//     if (CurrentEntry && !CurrentNode->ChildNode)
-//     {
-//         return CurrentEntry;
-//     }
 
-//     CurrentNode = CurrentNode->ChildNode;
+    if (CurrentEntry && !CurrentNode->ChildNode)
+    {
+        return CurrentEntry;
+    }
 
-//     while (CurrentNode)
-//     {
-//         ZeroMemory(LocalFileName, ArrayCount(LocalFileName));
-//         ZeroMemory(LocalFileExtension, ArrayCount(LocalFileExtension));
+    CurrentNode = CurrentNode->ChildNode;
 
-//         GetFileNameAndExtensionFromString
-//         (
-//             CurrentNode->FileName, LocalFileName, 8, LocalFileExtension, 3
-//         );
+    while (CurrentNode)
+    {
+        MemoryZeroNear(LocalFileName, ArrayCount(LocalFileName));
+        MemoryZeroNear(LocalFileExtension, ArrayCount(LocalFileExtension));
 
-//         CurrentEntry = GetDirectoryEntryOfFileInDirectory
-//         (
-//             Disk,
-//             CurrentEntry,
-//             LocalFileName,
-//             LocalFileExtension
-//         );
+        GetFileNameAndExtensionFromString
+        (
+            CurrentNode->FileName,
+            (char far *)LocalFileName, 8,
+            (char far *)LocalFileExtension, 3
+        );
 
-//         if (CurrentEntry && !CurrentNode->ChildNode)
-//         {
-//             FreeFilePathSegmentList(FirstNode);
-//             return CurrentEntry;
-//         }
+        CurrentEntry = GetDirectoryEntryOfFileInDirectory
+        (
+            Disk,
+            MemoryArena,
+            DiskParameters,
+            CurrentEntry,
+            LocalFileName,
+            LocalFileExtension
+        );
 
-//         CurrentNode = CurrentNode->ChildNode;
-//     }
+        if (CurrentEntry && !CurrentNode->ChildNode)
+        {
+            return CurrentEntry;
+        }
 
-//     FreeFilePathSegmentList(FirstNode);
-//     return NULL;
-// }
-// ====================================================================
+        CurrentNode = CurrentNode->ChildNode;
+    }
 
-static void Fat12ListDirectorySector(sector far *Sector)
+    return NULL;
+}
+
+directory_entry far *
+Fat12AddFile
+(
+    fat12_ram_disk far *Disk,
+    memory_arena far *MemoryArena,
+    disk_parameters *DiskParameters,
+    char far *FullFilePath,
+    void far *Memory,
+    u32 Size
+)
+{
+    if (StringLengthFar(FullFilePath) == 1)
+    {
+        return NULL;
+    }
+
+    file_path_node far *CurrentPathNode = CreateFilePathSegmentList(FullFilePath, MemoryArena);
+
+    char LocalFileName[8];
+    char LocalFileExtension[3];
+    MemoryZeroNear(LocalFileName, 8);
+    MemoryZeroNear(LocalFileExtension, 3);
+
+    GetFileNameAndExtensionFromString
+    (
+        CurrentPathNode->FileName, LocalFileName, 8, LocalFileExtension, 3
+    );
+
+    if (!CurrentPathNode->ChildNode)
+    {
+        directory_entry far *FileDirectoryEntry = GetDirectoryEntryOfFileInRootDirectory
+        (
+            Disk,
+            LocalFileName,
+            LocalFileExtension
+        );
+
+        if (FileDirectoryEntry)
+        {
+            return NULL;
+        }
+        else
+        {
+            FileDirectoryEntry = AddFileToRootDirectory
+            (
+                Disk,
+                MemoryArena,
+                DiskParameters,
+                LocalFileName,
+                LocalFileExtension,
+                Memory,
+                Size
+            );
+            return FileDirectoryEntry;
+        }
+    }
+
+    directory_entry far *CurrentDirectoryEntry =
+        GetDirectoryEntryOfDirectoryInRootDirectory(Disk, LocalFileName);
+    CurrentPathNode = CurrentPathNode->ChildNode;
+
+    while (CurrentPathNode)
+    {
+        MemoryZeroNear(LocalFileName, ArrayCount(LocalFileName));
+        MemoryZeroNear(LocalFileExtension, ArrayCount(LocalFileExtension));
+
+        GetFileNameAndExtensionFromString
+        (
+            CurrentPathNode->FileName, LocalFileName, 8, LocalFileExtension, 3
+        );
+
+        if (!CurrentPathNode->ChildNode)
+        {
+            directory_entry far *FileDirectoryEntry = GetDirectoryEntryOfFileInDirectory
+            (
+                Disk,
+                MemoryArena,
+                DiskParameters,
+                CurrentDirectoryEntry,
+                LocalFileName,
+                LocalFileExtension
+            );
+
+            if (FileDirectoryEntry)
+            {
+                return NULL;
+            }
+            else
+            {
+                FileDirectoryEntry = AddFileToDirectory
+                (
+                    Disk,
+                    MemoryArena,
+                    DiskParameters,
+                    CurrentDirectoryEntry,
+                    LocalFileName,
+                    LocalFileExtension,
+                    Memory,
+                    Size
+                );
+                return FileDirectoryEntry;
+            }
+        }
+        else
+        {
+            CurrentDirectoryEntry = GetDirectoryEntryOfDirectoryInDirectory
+            (
+                Disk,
+                MemoryArena,
+                DiskParameters,
+                CurrentDirectoryEntry,
+                LocalFileName
+            );
+            CurrentPathNode = CurrentPathNode->ChildNode;
+        }
+    }
+
+    return NULL;
+}
+
+directory_entry far *
+Fat12AddDirectory
+(
+    fat12_ram_disk far *Disk,
+    memory_arena far *MemoryArena,
+    disk_parameters *DiskParameters,
+    char far *DirectoryPath
+)
+{
+    if (StringLengthFar(DirectoryPath) == 1)
+    {
+        return NULL;
+    }
+
+    file_path_node far *CurrentPathNode = CreateFilePathSegmentList(DirectoryPath, MemoryArena);
+
+    if (!CurrentPathNode->ChildNode)
+    {
+        char LocalDirectoryName[8];
+        MemoryZeroNear(LocalDirectoryName, 8);
+
+        FillFixedSizeStringBuffer
+        (
+            LocalDirectoryName,
+            ArrayCount(LocalDirectoryName),
+            CurrentPathNode->FileName
+        );
+
+        directory_entry far *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInRootDirectory
+        (
+            Disk,
+            LocalDirectoryName
+        );
+
+        if (DirectoryDirectoryEntry)
+        {
+            return NULL;
+        }
+        else
+        {
+
+            directory_entry far *DirectoryDirectoryEntry = AddDirectoryToRootDirectory
+            (
+                Disk,
+                MemoryArena,
+                DiskParameters,
+                LocalDirectoryName
+            );
+            return DirectoryDirectoryEntry;
+        }
+    }
+
+    directory_entry far *CurrentDirectoryEntry =
+        GetDirectoryEntryOfDirectoryInRootDirectory(Disk, CurrentPathNode->FileName);
+    CurrentPathNode = CurrentPathNode->ChildNode;
+
+    while (CurrentPathNode)
+    {
+        if (!CurrentPathNode->ChildNode)
+        {
+            char LocalDirectoryName[8];
+            MemoryZeroNear(LocalDirectoryName, 8);
+
+            FillFixedSizeStringBuffer
+            (
+                LocalDirectoryName,
+                ArrayCount(LocalDirectoryName),
+                CurrentPathNode->FileName
+            );
+
+            directory_entry far *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInDirectory
+            (
+                Disk,
+                MemoryArena,
+                DiskParameters,
+                CurrentDirectoryEntry,
+                LocalDirectoryName
+            );
+
+            if (DirectoryDirectoryEntry)
+            {
+                return NULL;
+            }
+            else
+            {
+                DirectoryDirectoryEntry = AddDirectoryToDirectory
+                (
+                    Disk,
+                    MemoryArena,
+                    DiskParameters,
+                    CurrentDirectoryEntry,
+                    LocalDirectoryName
+                );
+                return DirectoryDirectoryEntry;
+            }
+        }
+        else
+        {
+            CurrentDirectoryEntry = GetDirectoryEntryOfDirectoryInDirectory
+            (
+                Disk,
+                MemoryArena,
+                DiskParameters,
+                CurrentDirectoryEntry,
+                CurrentPathNode->FileName
+            );
+            CurrentPathNode = CurrentPathNode->ChildNode;
+        }
+    }
+
+    return NULL;
+}
+
+void Fat12ListDirectorySector(sector far *Sector)
 {
     for
     (
@@ -119,7 +363,13 @@ static void Fat12ListDirectorySector(sector far *Sector)
     }
 }
 
-void Fat12ListDirectory(fat12_ram_disk far *Disk, char far *DirectoryPath)
+void Fat12ListDirectory
+(
+    fat12_ram_disk far *Disk,
+    memory_arena far *MemoryArena,
+    disk_parameters *DiskParameters,
+    char far *DirectoryPath
+)
 {
     PrintFormatted("\r\nlisting %ls:\r\n", DirectoryPath);
 
@@ -136,24 +386,36 @@ void Fat12ListDirectory(fat12_ram_disk far *Disk, char far *DirectoryPath)
     }
     else
     {
-        // directory_entry far *DirectoryEntry = Fat12GetDirectoryEntryOfFile(Disk, DirectoryPath);
+        directory_entry far *DirectoryEntry = Fat12GetDirectoryEntryOfFile
+        (
+            Disk, MemoryArena, DiskParameters, DirectoryPath
+        );
 
-        // u16 CurrentClusterNumber = DirectoryEntry->ClusterNumberLowWord;
-        // u16 CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
+        u16 CurrentClusterNumber = DirectoryEntry->ClusterNumberLowWord;
+        u16 CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
 
-        // for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
-        // {
-        //     Fat12ListDirectorySector(GetSectorFromClusterNumber(Disk, CurrentClusterNumber));
+        for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
+        {
+            Fat12ListDirectorySector
+            (
+                GetSectorFromClusterNumber
+                (
+                    Disk,
+                    MemoryArena,
+                    DiskParameters,
+                    CurrentClusterNumber
+                )
+            );
 
-        //     if (IsFatEntryEndOfFile(CurrentFatEntry))
-        //     {
-        //         break;
-        //     }
-        //     else
-        //     {
-        //         CurrentClusterNumber = CurrentFatEntry;
-        //         CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
-        //     }
-        // }
+            if (IsFatEntryEndOfFile(CurrentFatEntry))
+            {
+                break;
+            }
+            else
+            {
+                CurrentClusterNumber = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntry(Disk, CurrentClusterNumber);
+            }
+        }
     }
 }

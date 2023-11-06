@@ -66,3 +66,80 @@ void RemoveLastSegmentFromPath(char far *Path)
         }
     }
 }
+
+u32 GetLastCharacterIndex(char far *String, u32 StringLength, char Character)
+{
+    for (i32 CharacterIndex = StringLength - 1; CharacterIndex >= 0; CharacterIndex--)
+    {
+        if (String[CharacterIndex] == Character)
+        {
+            return CharacterIndex;
+        }
+    }
+
+    return UINT32_MAX;
+}
+
+void GetFileNameAndExtensionFromString
+(
+    char far *SourceString,
+    char far *FileName, u32 FileNameSize,
+    char far *FileExtension, u32 FileExtensionSize
+)
+{
+    u32 SourceStringLength = StringLengthFar(SourceString);
+    u32 DotIndex = GetLastCharacterIndex(SourceString, SourceStringLength, '.');
+
+    u32 ReadIndex = 0;
+    u32 WriteIndex = 0;
+
+    while
+    (
+        (ReadIndex < DotIndex) &&
+        (ReadIndex < SourceStringLength) &&
+        (WriteIndex < FileNameSize)
+    )
+    {
+        FileName[WriteIndex++] = SourceString[ReadIndex++];
+    }
+
+    if (ReadIndex == DotIndex)
+    {
+        WriteIndex = 0;
+        ReadIndex++;
+
+        while
+        (
+            (ReadIndex < SourceStringLength) &&
+            (WriteIndex < FileExtensionSize)
+        )
+        {
+            FileExtension[WriteIndex++] = SourceString[ReadIndex++];
+        }
+    }
+    else if (ReadIndex == SourceStringLength)
+    {
+        return;
+    }
+    else if (WriteIndex == FileNameSize)
+    {
+        if (DotIndex == UINT32_MAX)
+        {
+            MemoryZeroFar(FileExtension, FileExtensionSize);
+        }
+        else
+        {
+            WriteIndex = 0;
+            ReadIndex = DotIndex + 1;
+
+            while
+            (
+                (ReadIndex < SourceStringLength) &&
+                (WriteIndex < FileExtensionSize)
+            )
+            {
+                FileExtension[WriteIndex++] = SourceString[ReadIndex++];
+            }
+        }
+    }
+}

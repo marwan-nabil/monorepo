@@ -443,3 +443,15 @@ void _cdecl PrintFormatted(const char *FormatString, ...)
         }
     }
 }
+
+void FillFixedSizeStringBuffer(char far *Buffer, u32 BufferSize, char far *SourceString)
+{
+    if (StringLengthFar(SourceString) >= BufferSize)
+    {
+        MemoryCopyFarToFar(Buffer, SourceString, BufferSize);
+    }
+    else
+    {
+        StringConcatenateFarToFar(Buffer, BufferSize, SourceString);
+    }
+}

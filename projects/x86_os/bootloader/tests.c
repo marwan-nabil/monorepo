@@ -146,15 +146,52 @@ void PathHandlingTests(u16 BootDriveNumber)
 
 void FileSystemTests(u16 BootDriveNumber)
 {
-    PrintString("\r\n =========== fat12 filesystem tests ================= \r\n");
+    PrintString("\r\n=========== fat12 filesystem tests ================= \r\n");
 
     disk_parameters DiskParameters;
     GetDiskDriveParameters(&DiskParameters, BootDriveNumber);
 
     fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_RAMDISK_LOAD_ADDRESS;
-    Fat12LoadDiskIntoRam(&DiskParameters, RamDisk);
+    Fat12InitializeRamDisk(&DiskParameters, RamDisk);
 
-    Fat12ListDirectory(RamDisk, "\\");
+    memory_arena LocalMemoryArena;
+    InitializeMemoryArena
+    (
+        (memory_arena far *)&LocalMemoryArena,
+        KiloBytes(10),
+        MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
+    );
+
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\"
+    );
+
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0"
+    );
+
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0\\Dir1"
+    );
+
+    directory_entry far *FileHandle = Fat12GetDirectoryEntryOfFile
+    (
+        RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\Dir1\\file1"
+    );
+
+    PrintFormatted("name of opened file handle: %ls\r\n", FileHandle->FileName);
 }
 
 // void OtherFileSystemTests()
