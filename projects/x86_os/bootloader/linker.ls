@@ -19,6 +19,7 @@ ORDER
         SEGMENT _TEXT.__U4M
         SEGMENT _TEXT._X86_DiskReset
         SEGMENT _TEXT._X86_DiskRead
+        SEGMENT _TEXT._X86_DiskWrite
         SEGMENT _TEXT._X86_GetDiskDriveParameters
         SEGMENT _TEXT
     CLNAME DATA

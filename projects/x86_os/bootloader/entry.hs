@@ -12,4 +12,5 @@ global __U4M
 
 global _X86_DiskReset
 global _X86_DiskRead
+global _X86_DiskWrite
 global _X86_GetDiskDriveParameters

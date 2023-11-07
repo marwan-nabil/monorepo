@@ -97,6 +97,7 @@ Fat12AddFile
     u32 Size
 )
 {
+    // NOTE: there is a bug here
     if (StringLengthFar(FullFilePath) == 1)
     {
         return NULL;

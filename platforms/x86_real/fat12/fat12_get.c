@@ -189,16 +189,23 @@ GetDirectoryEntryOfFileInSector(sector far *Sector, char far *FileName, char far
 directory_entry far *
 GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName)
 {
+    // NOTE: this function is buggy, currently debugging it
+    PrintFormatted("DirectoryName: %ls\r\n", DirectoryName);
+
     for
     (
         u32 DirectoryEntryIndex = 0;
-        DirectoryEntryIndex < ArrayCount(Sector->DirectoryEntries);
+        DirectoryEntryIndex < FAT12_DIRECTORY_ENTRIES_IN_SECTOR;
         DirectoryEntryIndex++
     )
     {
         directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+
+        // PrintFormatted("DirectoryEntry: %ls\r\n", (char far *)DirectoryEntry->FileName);
+
         if (MemoryCompareFarToFar(DirectoryEntry->FileName, DirectoryName, 8) == 0)
         {
+            // PrintFormatted("FoundDirectoryEntry->FileName: %ls\r\n", DirectoryEntry->FileName);
             return DirectoryEntry;
         }
     }
@@ -327,9 +334,11 @@ GetDirectoryEntryOfDirectoryInRootDirectory
     char far *DirectoryName
 )
 {
+    // NOTE: this function is buggy, currently debugging it
     directory_entry far *FoundDirectoryEntry = NULL;
 
     for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
+    // for (u32 SectorIndex = 0; SectorIndex < 1; SectorIndex++)
     {
         FoundDirectoryEntry =
             GetDirectoryEntryOfDirectoryInSector(&Disk->RootDirectory.Sectors[SectorIndex], DirectoryName);

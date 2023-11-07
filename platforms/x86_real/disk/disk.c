@@ -17,6 +17,7 @@ void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
     DiskParameters->Cylinders = Cylinders;
     DiskParameters->Heads = Heads;
     DiskParameters->Sectors = Sectors;
+    DiskParameters->Type = DriveType;
 }
 
 void TranslateLbaToChs
@@ -71,5 +72,27 @@ void WriteDiskSectors
     u8 far *DataIn
 )
 {
-    // TODO: implement
+    u16 Cylinder, Head, Sector;
+    TranslateLbaToChs(DiskParameters, LogicalBlockAddress, &Cylinder, &Head, &Sector);
+
+    for (u16 Retry = 0; Retry < DISK_OPERATION_MAXIMUM_RETRIES; Retry++)
+    {
+        b8 WriteOk = X86_DiskWrite
+        (
+            DiskParameters->Id,
+            Cylinder, Head, Sector,
+            SectorsToWrite, DataIn
+        );
+
+        if (WriteOk)
+        {
+            return;
+        }
+        else
+        {
+            X86_DiskReset(DiskParameters->Id);
+        }
+    }
+
+    PrintFormatted("ERROR: WriteDiskSectors() failed.\r\n");
 }

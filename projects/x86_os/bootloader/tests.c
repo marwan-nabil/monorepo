@@ -46,6 +46,7 @@ void DiskDriverTests(u8 BootDriveNumber)
 
     PrintFormatted("Basic Disk Drive parameters:\r\n");
     PrintFormatted("ID: %hhd\r\n", DiskParameters.Id);
+    PrintFormatted("Type: %hhd\r\n", DiskParameters.Type);
     PrintFormatted("Cylinders: %hd\r\n", DiskParameters.Cylinders);
     PrintFormatted("Heads: %hd\r\n", DiskParameters.Heads);
     PrintFormatted("Sectors: %hd\r\n", DiskParameters.Sectors);
@@ -66,7 +67,7 @@ void DiskDriverTests(u8 BootDriveNumber)
     ReadDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
 
     char OEMName[9];
-    MemoryZeroFar(OEMName, ArrayCount(OEMName));
+    MemoryZeroNear(OEMName, ArrayCount(OEMName));
     MemoryCopyFarToNear
     (
         OEMName,
@@ -84,6 +85,22 @@ void DiskDriverTests(u8 BootDriveNumber)
     );
     PrintFormatted("BootSector boot signature: %hx\r\n", BootSignature);
     PrintFormatted("\r\n");
+
+    PrintFormatted("modifying OEM name then writing to disk.\r\n");
+    ((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName[0] = 'K';
+    WriteDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
+
+    PrintFormatted("reading the bootsector back from disk.\r\n");
+    ReadDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
+
+    MemoryZeroNear(OEMName, ArrayCount(OEMName));
+    MemoryCopyFarToNear
+    (
+        OEMName,
+        &((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
+        ArrayCount(OEMName) - 1
+    );
+    PrintFormatted("modified BootSector OEM name: %s\r\n", OEMName);
 }
 
 void AllocatorTests(u16 BootDriveNumber)
@@ -162,22 +179,7 @@ void FileSystemTests(u16 BootDriveNumber)
         MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
     );
 
-    Fat12ListDirectory
-    (
-        RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
-        &DiskParameters,
-        "\\"
-    );
-
-    Fat12ListDirectory
-    (
-        RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
-        &DiskParameters,
-        "\\Dir0"
-    );
-
+#if 0
     Fat12ListDirectory
     (
         RamDisk,
@@ -191,53 +193,30 @@ void FileSystemTests(u16 BootDriveNumber)
         RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\Dir1\\file1"
     );
 
+    PrintFormatted("\r\n");
     PrintFormatted("name of opened file handle: %ls\r\n", FileHandle->FileName);
+
+    PrintFormatted("\r\n");
+    PrintFormatted("create a new file in root directory.\r\n");
+    Fat12AddFile(RamDisk, &LocalMemoryArena, &DiskParameters, "\\test.txt", NULL, 30);
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\"
+    );
+#endif
+
+    PrintFormatted("\r\n");
+    PrintFormatted("create a new file in sub directory.\r\n");
+    Fat12AddFile(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 30);
+    // Fat12ListDirectory
+    // (
+    //     RamDisk,
+    //     (memory_arena far *)&LocalMemoryArena,
+    //     &DiskParameters,
+    //     "\\Dir0"
+    // );
+    PrintFormatted("==> Done.\r\n");
 }
-
-// void OtherFileSystemTests()
-// {
-//     PrintString("\r\n=========== disk driver and filesystem tests ================= \r\n");
-//     void far *g_data = (void far *)0x00500200;
-//     disk_parameters disk;
-//     if (!GetDiskDriveParameters(&disk, BootDrive))
-//     {
-//         PrintFormatted("Disk init error\r\n");
-//         goto end;
-//     }
-
-//     ReadDiskSectors(&disk, 19, 1, g_data);
-
-//     if (!InitializeFat12FileSystem(&disk))
-//     {
-//         PrintFormatted("FAT init error\r\n");
-//         goto end;
-//     }
-
-//     // browse files in root
-//     file far *fd = Fat12OpenFile(&disk, "/");
-//     directory_entry entry;
-//     int i = 0;
-//     while (Fat12ReadDirectoryEntry(&disk, fd, &entry) && i++ < 5)
-//     {
-//         PrintFormatted("  ");
-//         for (int i = 0; i < 11; i++)
-//             PrintCharacter(entry.Name[i]);
-//         PrintFormatted("\r\n");
-//     }
-//     Fat12CloseFile(fd);
-
-//     // read test.txt
-//     char buffer[100];
-//     u32 read;
-//     fd = Fat12OpenFile(&disk, "mydir/test.txt");
-//     while ((read = Fat12ReadFile(&disk, fd, sizeof(buffer), buffer)))
-//     {
-//         for (u32 i = 0; i < read; i++)
-//         {
-//             if (buffer[i] == '\n')
-//                 PrintCharacter('\r');
-//             PrintCharacter(buffer[i]);
-//         }
-//     }
-//     Fat12CloseFile(fd);
-// }

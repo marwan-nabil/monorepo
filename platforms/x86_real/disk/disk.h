@@ -5,6 +5,7 @@
 typedef struct
 {
     u8 Id;
+    u8 Type;
     u16 Cylinders;
     u16 Heads;
     u16 Sectors;
@@ -16,6 +17,12 @@ b8 _cdecl X86_DiskRead
 (
     u8 DriveNumber, u16 Cylinder, u16 Head,
     u16 Sector, u8 SectorCount, u8 far *DataOut
+);
+
+b8 _cdecl X86_DiskWrite
+(
+    u8 DriveNumber, u16 Cylinder, u16 Head,
+    u16 Sector, u8 SectorCount, u8 far *DataIn
 );
 
 b8 _cdecl X86_GetDiskDriveParameters

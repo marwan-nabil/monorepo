@@ -1,7 +1,9 @@
 #pragma once
 
-#define PushStruct(Arena, DataType) (DataType far *)PushOntoMemoryArena((Arena), sizeof(DataType))
-#define PushArray(Arena, Count, DataType) (DataType far *)PushOntoMemoryArena((Arena), (Count) * sizeof(DataType))
+#define PushStruct(Arena, DataType) \
+    (DataType far *)PushOntoMemoryArena((Arena), sizeof(DataType))
+#define PushArray(Arena, Count, DataType) \
+    (DataType far *)PushOntoMemoryArena((Arena), (Count) * sizeof(DataType))
 
 typedef struct
 {

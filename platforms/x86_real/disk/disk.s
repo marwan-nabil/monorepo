@@ -59,7 +59,61 @@ _X86_DiskRead:
     mov es, bx
     mov bx, [bp + 14] ; DataOut [15:0]
 
-    mov ah, 0x02
+    mov ah, 0x02 ; disk service for reading
+    stc
+    int 0x13
+
+    mov ax, 1
+    ; carry flag is 1 in case of error in the BIOS function
+    sbb ax, 0 ; subtract the carry flag from ax
+
+    ; restore touched registers
+    pop es
+    pop bx
+
+    mov sp, bp
+    pop bp
+    ret
+
+; ---------------------------------------
+; writes sectors to floppy disk given the
+; CHS and the sector count
+; void _cdecl X86_DiskWrite
+; (
+;     u8 DriveNumber, u16 Cylinder, u16 Head,
+;     u16 Sector, u8 SectorCount, u8 far *DataIn
+; );
+; ---------------------------------------
+section _TEXT._X86_DiskWrite class=CODE
+_X86_DiskWrite:
+    push bp
+    mov bp, sp
+
+    ; save touched registers
+    push bx
+    push es
+
+    ; setup arguments for the BIOS
+    ; read disk service
+    mov dl, [bp + 4] ; drive number
+
+    mov ch, [bp + 6] ; cylinder[7:0]
+    mov cl, [bp + 7] ; cylinder[15:8]
+    shl cl, 6
+
+    mov dh, [bp + 8] ; head
+
+    mov al, [bp + 10] ; sector
+    and al, 0x3F
+    or cl, al ; cl == {cylinder[9:8], sector[5:0]}
+
+    mov al, [bp + 12] ; SectorCount
+
+    mov bx, [bp + 16] ; DataIn [31:16]
+    mov es, bx
+    mov bx, [bp + 14] ; DataIn [15:0]
+
+    mov ah, 0x03 ; disk service for reading
     stc
     int 0x13
 
