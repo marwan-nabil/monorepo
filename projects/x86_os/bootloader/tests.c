@@ -174,16 +174,16 @@ void FileSystemTests(u16 BootDriveNumber)
     memory_arena LocalMemoryArena;
     InitializeMemoryArena
     (
-        (memory_arena far *)&LocalMemoryArena,
+        &LocalMemoryArena,
         KiloBytes(10),
         MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
     );
 
-#if 0
+#if 1
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        &LocalMemoryArena,
         &DiskParameters,
         "\\Dir0\\Dir1"
     );
@@ -206,8 +206,8 @@ void FileSystemTests(u16 BootDriveNumber)
         &DiskParameters,
         "\\"
     );
-#endif
-
+#else
+    // NOTE: file creation in directories other than root directory is buggy
     PrintFormatted("\r\n");
     PrintFormatted("create a new file in sub directory.\r\n");
     Fat12AddFile(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 30);
@@ -219,4 +219,5 @@ void FileSystemTests(u16 BootDriveNumber)
     //     "\\Dir0"
     // );
     PrintFormatted("==> Done.\r\n");
+#endif
 }

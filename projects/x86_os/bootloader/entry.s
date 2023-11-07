@@ -15,7 +15,7 @@ BootloaderEntryMessage:
 
 section _DATA.DataSegmentAlignmentPadding class=DATA
 DataSegmentAlignmentPadding:
-    db 0, 0
+    db 0,
 
 ; --------------------
 ; entry point

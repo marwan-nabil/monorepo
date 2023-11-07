@@ -1,4 +1,4 @@
-void Fat12InitializeRamDisk(disk_parameters *DiskParameters, void far *LoadAddress)
+void Fat12InitializeRamDisk(disk_parameters far *DiskParameters, void far *LoadAddress)
 {
     u16 SectorsToLoad = 1 + (2 * FAT12_SECTORS_IN_FAT) + FAT12_SECTORS_IN_ROOT_DIRECTORY;
     ReadDiskSectors(DiskParameters, 0, SectorsToLoad, LoadAddress);
@@ -9,7 +9,7 @@ Fat12GetDirectoryEntryOfFile
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     char far *FullFilePath
 )
 {
@@ -44,7 +44,6 @@ Fat12GetDirectoryEntryOfFile
         (char far *)LocalFileName,
         (char far *)LocalFileExtension
     );
-
 
     if (CurrentEntry && !CurrentNode->ChildNode)
     {
@@ -91,13 +90,12 @@ Fat12AddFile
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     char far *FullFilePath,
     void far *Memory,
     u32 Size
 )
 {
-    // NOTE: there is a bug here
     if (StringLengthFar(FullFilePath) == 1)
     {
         return NULL;
@@ -212,7 +210,7 @@ Fat12AddDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     char far *DirectoryPath
 )
 {
@@ -368,7 +366,7 @@ void Fat12ListDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     char far *DirectoryPath
 )
 {

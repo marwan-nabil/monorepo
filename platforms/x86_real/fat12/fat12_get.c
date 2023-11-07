@@ -24,7 +24,7 @@ sector far *GetSectorFromClusterNumber
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     u16 ClusterNumber
 )
 {
@@ -107,7 +107,7 @@ GetFirstFreeDirectoryEntryInDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *Directory
 )
 {
@@ -201,11 +201,8 @@ GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName
     {
         directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
 
-        // PrintFormatted("DirectoryEntry: %ls\r\n", (char far *)DirectoryEntry->FileName);
-
         if (MemoryCompareFarToFar(DirectoryEntry->FileName, DirectoryName, 8) == 0)
         {
-            // PrintFormatted("FoundDirectoryEntry->FileName: %ls\r\n", DirectoryEntry->FileName);
             return DirectoryEntry;
         }
     }
@@ -218,7 +215,7 @@ GetDirectoryEntryOfFileInDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *Directory,
     char far *FileName,
     char far *Extension
@@ -266,7 +263,7 @@ GetDirectoryEntryOfDirectoryInDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *Directory,
     char far *DirectoryName
 )
@@ -334,11 +331,9 @@ GetDirectoryEntryOfDirectoryInRootDirectory
     char far *DirectoryName
 )
 {
-    // NOTE: this function is buggy, currently debugging it
     directory_entry far *FoundDirectoryEntry = NULL;
 
     for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
-    // for (u32 SectorIndex = 0; SectorIndex < 1; SectorIndex++)
     {
         FoundDirectoryEntry =
             GetDirectoryEntryOfDirectoryInSector(&Disk->RootDirectory.Sectors[SectorIndex], DirectoryName);

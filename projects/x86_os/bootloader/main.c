@@ -30,13 +30,11 @@ void _cdecl cstart(u16 BootDriveNumber)
 
     // DiskDriverTests(BootDriveNumber);
 
-    // AllocatorTests(BootDriveNumber);
+    AllocatorTests(BootDriveNumber);
 
     // PathHandlingTests(BootDriveNumber);
 
-    FileSystemTests(BootDriveNumber);
-
-    // AllocatorTests();
+    // FileSystemTests(BootDriveNumber);
 
     while (1) {};
 }

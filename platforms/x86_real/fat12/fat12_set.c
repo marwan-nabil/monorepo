@@ -20,7 +20,7 @@ u16 AllocateDiskClusters
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     void far *Memory,
     u32 Size
 )
@@ -96,7 +96,7 @@ b8 AllocateFileToDirectoryEntry
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *DirectoryEntry,
     char far *FileName,
     char far *Extension,
@@ -125,7 +125,7 @@ b8 AllocateDirectoryToDirectoryEntry
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *DirectoryEntry,
     char far *DirectoryName
 )
@@ -150,7 +150,7 @@ AddFileToRootDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     char far *FileName,
     char far *Extension,
     void far *Memory,
@@ -190,7 +190,7 @@ AddDirectoryToRootDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     char far *DirectoryName
 )
 {
@@ -224,7 +224,7 @@ AddFileToDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *Directory,
     char far *FileName,
     char far *Extension,
@@ -266,7 +266,7 @@ AddDirectoryToDirectory
 (
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
-    disk_parameters *DiskParameters,
+    disk_parameters far *DiskParameters,
     directory_entry far *Directory,
     char far *DirectoryName
 )
