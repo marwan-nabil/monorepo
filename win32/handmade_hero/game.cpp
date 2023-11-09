@@ -579,7 +579,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
                     if (CurrentEntity->MovementDistanceLimit == 0)
                     {
-                        ClearAllEnrityCollisionRules(GameState, CurrentEntity->StorageIndex);
+                        ClearAllEntityCollisionRules(GameState, CurrentEntity->StorageIndex);
                         MakeEntityNonSpatial(CurrentEntity);
                     }
 

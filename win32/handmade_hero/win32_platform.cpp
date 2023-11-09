@@ -292,7 +292,6 @@ Win32ResizePixelBuffer(win32_pixel_buffer *PixelBuffer, i32 NewWidthInPixels, i3
 
     i32 BitmapMemorySize = PixelBuffer->WidthInPixels * PixelBuffer->HeightInPixels * PixelBuffer->BytesPerPixel;
     PixelBuffer->PixelsMemory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    // TODO: clear bitmap memory to black
 }
 
 static void

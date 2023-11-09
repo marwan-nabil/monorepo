@@ -601,8 +601,6 @@ int CALLBACK WinMain
 
             Update(TimeDelta);
             Render();
-
-            // TODO: sleep the rest of the frame time to lock the frame rate
         }
     }
 

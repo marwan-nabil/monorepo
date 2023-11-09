@@ -3,8 +3,8 @@
 
     "files.exclude":
     {
-        "third_party": true,
         // "win32": true,
+        // "win32/third_party": true,
         // "x86_real": true,
     },
 

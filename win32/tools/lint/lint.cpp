@@ -68,7 +68,8 @@ b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirector
                     (strcmp(Extension, ".cpp") == 0) ||
                     (strcmp(Extension, ".h") == 0) ||
                     (strcmp(Extension, ".c") == 0) ||
-                    (strcmp(Extension, ".s") == 0)
+                    (strcmp(Extension, ".s") == 0) ||
+                    (strcmp(Extension, ".hs") == 0)
                 )
                 {
                     if (!DirectoryContainsSourceCode)

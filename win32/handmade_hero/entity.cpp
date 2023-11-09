@@ -534,7 +534,7 @@ MoveEntity
             if (!IsEntityFlagSet(MovingEntity, EF_NON_SPATIAL))
             {
                 // TODO: reduce the number of tested against entities in the sim region
-                //               using spatial partition
+                //       using spatial partition
                 entity *TestEntity = SimulationRegion->Entities;
                 for
                 (
