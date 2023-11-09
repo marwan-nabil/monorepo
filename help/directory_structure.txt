@@ -29,14 +29,14 @@ projects/
     tests/ --> test programs for shared code or other projects
         compilation_tests/ --> program that tests all compilation targets
         fat12_tests/ --> tests the fat12 win32 shared code
-        x86_os_tests/ --> tests performed on the x86_os project kernel image
+        x86_os_tests/ --> tests performed on the os project kernel image
 
     tools/
         build/ --> build system for the hole workspace
         fetch_data/ --> tool to fetch the binary program data found in data/
         lint/ --> source code linter program
 
-    x86_os/ --> small x86 operating system
+    os/ --> small x86 operating system
         boot_sector/ --> code for the bootsector bootloader
         bootloader/ --> code for the main kernel bootloader
         kernel/ --> code for the main kernel

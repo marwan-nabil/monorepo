@@ -3,9 +3,3 @@ binary file manipulation commands
 ---------------------------------
 wdis aaa.obj --> disassembles object files using watcom tools
 wdump aaa --> dump sections of object or executable file
-
--------------------------
-useful unicode characters
--------------------------
-← ↑ → ↓
-► ▼ ◄ ▲

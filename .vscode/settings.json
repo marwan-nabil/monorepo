@@ -3,9 +3,9 @@
 
     "files.exclude":
     {
-        "third_party/**": true,
-        // "platforms/win32": true,
-        // "platforms/x86_real": true,
+        "third_party": true,
+        // "win32": true,
+        // "x86_real": true,
     },
 
     "C_Cpp.default.defines":

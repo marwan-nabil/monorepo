@@ -1,7 +1,6 @@
------------------------------------
-==> Ideas for embedded applications
------------------------------------
-
+------------------------------------------
+==> Ideas for embedded device applications
+------------------------------------------
 - a device or app that allows you to navigate inside a large supermarket
     - using a mobile app, offer accurate navigation inside a building
     - searching for an item will show you a path to the item position in the store
