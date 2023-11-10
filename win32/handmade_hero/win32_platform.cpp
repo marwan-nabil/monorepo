@@ -299,7 +299,6 @@ Win32DisplayBufferInWindow(HDC DeviceContext, win32_window_dimensions WindowDime
 {
     if ((WindowDimensions.WidthInPixels >= 1280) && (WindowDimensions.HeightInPixels >= 800))
     {
-        // TODO: center when in full screen mode
         i32 DestinationWidth = (i32)(PixelBuffer->WidthInPixels * 1.3);
         i32 DestinationHeight = (i32)(PixelBuffer->HeightInPixels * 1.3);
 
@@ -387,7 +386,6 @@ Win32FillGlobalSoundBuffer
         )
     )
     {
-        // TODO: assert that the returned region sizes are valid (multiples of 4 bytes)
         i16 *SourceHalfSample = GameSoundBuffer->OutputSamples;
         i16 *DestinationHalfSample = (i16 *)BufferRegion1;
         u32 Region1SampleCount = BufferRegion1Size / SoundBufferConfiguration->BytesPerSample;
@@ -1486,7 +1484,7 @@ WinMain
                             }
                             else
                             {
-                                // TODO: log that a sleep() sleeped too much
+                                // NOTE: sleep() sleeped too much or missed frame
                             }
                         }
 #if 0

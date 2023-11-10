@@ -319,7 +319,6 @@ AddGoundBasedStorageEntity
     entity_collision_mesh_group *EntityCollisionMeshGroup
 )
 {
-    // TODO: fix buggy Z handling here?
     add_storage_entity_result Result = AddStorageEntity(GameState, Type, GroundPoint);
     Result.StorageEntity->Entity.CollisionMeshGroup = EntityCollisionMeshGroup;
     return Result;
@@ -496,7 +495,6 @@ MoveEntity
         Acceleration.Z += -9.8f;
     }
 
-    // TODO: improve velocity and postition update accuracy
     MovingEntity->Velocity = Acceleration * TimeDelta + MovingEntity->Velocity;
     Assert(Length(MovingEntity->Velocity) < SimulationRegion->MaxEntityVelocity);
 
@@ -533,8 +531,6 @@ MoveEntity
 
             if (!IsEntityFlagSet(MovingEntity, EF_NON_SPATIAL))
             {
-                // TODO: reduce the number of tested against entities in the sim region
-                //       using spatial partition
                 entity *TestEntity = SimulationRegion->Entities;
                 for
                 (
@@ -739,7 +735,6 @@ MoveEntity
         MovingEntity->MovementDistanceLimit = RemainingMovementDistance;
     }
 
-    // TODO: change to using the Acceleration vector instead
     if ((MovingEntity->Velocity.X == 0) && (MovingEntity->Velocity.Y == 0))
     {
     }

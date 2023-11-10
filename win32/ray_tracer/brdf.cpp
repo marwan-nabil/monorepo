@@ -27,7 +27,7 @@ GetMaterialReflectionColor
 
     if (!MaskIsAllZeroes(MaterialBrdfTableMask))
     {
-        // TODO: BRDF table lookup
+        // NOTE: BRDF table lookup
     }
 
     if (!MaskIsAllZeroes(~MaterialBrdfTableMask))

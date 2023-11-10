@@ -502,7 +502,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             EntityRenderPeiceGroup.Count = 0;
             hero_bitmap_group *HeroBitmapGroup = &GameState->HeroBitmapGroups[CurrentEntity->BitmapFacingDirection];
 
-            // TODO: ShadowBitMap alpha/position calculation is impercise, should be after postition update for all entities
             f32 ShadowAlphaFactor = 1.0f - 0.5f * CurrentEntity->Position.Z;
             if (ShadowAlphaFactor < 0)
             {

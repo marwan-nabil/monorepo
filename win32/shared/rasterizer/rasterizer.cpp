@@ -1,5 +1,4 @@
 #if 0
-// TODO: do a generic implementation
 static void
 ResizeRenderingBuffer(rendering_buffer *Buffer, i32 NewWidthInPixels, i32 NewHeightInPixels)
 {
@@ -22,7 +21,7 @@ ResizeRenderingBuffer(rendering_buffer *Buffer, i32 NewWidthInPixels, i32 NewHei
 
     i32 BitmapMemorySize = Buffer->WidthInPixels * Buffer->HeightInPixels * Buffer->BytesPerPixel;
     Buffer->PixelsMemory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    // TODO: clear bitmap memory to black
+    // NOTE: clear bitmap memory to black
 }
 #endif
 

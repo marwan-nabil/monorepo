@@ -1,8 +1,6 @@
-// TODO: determine a good safety margin
 inline b32
 IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
 {
-    // TODO: fix fp math so this should be < & >
     f32 ToleranceEpsilon = 0.01f;
     f32 HalfIntervalLength = 0.5f * IntervalLength + ToleranceEpsilon;
     b32 Result =
@@ -133,7 +131,6 @@ GetChunk(world *World, memory_arena *MemoryArena, i32 ChunkX, i32 ChunkY, i32 Ch
 inline void
 CanonicalizeIntervalIndexAndOffset(f32 IntervalLength, i32 *IntervalIndex, f32 *OffsetFromIntervalCenter)
 {
-    // TODO: fix this buggy mess
     i32 IntervalIndexOffset = RoundF32ToI32(*OffsetFromIntervalCenter / IntervalLength);
 
     *IntervalIndex += IntervalIndexOffset;
@@ -189,8 +186,6 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
 static entity_world_position
 GetWorldPositionFromTilePosition(world *World, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ, v3 OffsetFromTileCenter)
 {
-    // TODO: fix buggy Z handling here
-
     entity_world_position BasePosition = {};
 
     v3 TileDiameter = V3(World->TileSideInMeters, World->TileSideInMeters, World->TileDepthInMeters);
