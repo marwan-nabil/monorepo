@@ -62,7 +62,7 @@ win32/ --> x86/win32/msvc platform code
 
         lint/ --> source code linter program
 
-x86_real/ --> x86/real_mode/[nasm|watcom] platform code
+x86_bios/ --> x86/real_mode/[nasm|watcom] platform code
 
     os/ --> small x86 operating system
 

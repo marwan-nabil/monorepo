@@ -7,7 +7,7 @@ b32 BuildImguiDemo(build_context *BuildContext)
         return FALSE;
     }
 
-    AddSourceFile(BuildContext, "\\third_party\\imgui\\imgui*.cpp");
+    AddSourceFile(BuildContext, "\\win32\\third_party\\imgui\\imgui*.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /I..\\.. /Zi /MD /utf-8");
     AddCompilerFlags(BuildContext, "/DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");

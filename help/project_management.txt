@@ -11,9 +11,10 @@ tests:
   - improve compilation tests console messages:
     - info messages should denote the beginning and ending of the test clearly,
       because all the tests are usually run sequentially and output in a single log.
+    - it should be indicated clearly if not all tests have succeeded.
 
-x86_real:
-  - fix the file system library in x86_real platform:
+x86_bios:
+  - fix the file system library in x86_bios platform:
     - creating files in sub-directories does not work properly.
 
 os:

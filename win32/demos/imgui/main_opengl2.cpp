@@ -12,7 +12,7 @@
 #include "win32\shared\system\version.h"
 #include "win32\shared\windows\dpi.h"
 
-#include "third_party\imgui\imgui.h"
+#include "win32\third_party\imgui\imgui.h"
 
 #include "opengl2_backend.h"
 #include "win32_backend.h"

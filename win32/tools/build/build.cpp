@@ -43,10 +43,10 @@
 #include "win32\handmade_hero\build.cpp"
 #include "win32\demos\imgui\build.cpp"
 #include "win32\ray_tracer\build.cpp"
-#include "x86_real\os\boot_sector\build.cpp"
-#include "x86_real\os\bootloader\build.cpp"
-#include "x86_real\os\kernel\build.cpp"
-#include "x86_real\os\build.cpp"
+#include "x86_bios\os\boot_sector\build.cpp"
+#include "x86_bios\os\bootloader\build.cpp"
+#include "x86_bios\os\kernel\build.cpp"
+#include "x86_bios\os\build.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {
