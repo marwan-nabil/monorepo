@@ -1,10 +1,8 @@
-------------------------------------------
-==> Ideas for embedded device applications
-------------------------------------------
-- a device or app that allows you to navigate inside a large supermarket
-    - using a mobile app, offer accurate navigation inside a building
-    - searching for an item will show you a path to the item position in the store
-    - giving it a list of items will calculate an optimal path to get all the items
+==> supermarket navigator:
+a device or app that allows you to navigate inside a large supermarket:
+    - using a mobile app, offer accurate navigation inside a building.
+    - searching for an item will show you a path to the item position in the store.
+    - giving it a list of items will calculate an optimal path to get all the items.
     - mobile app with features for the store:
         - restocking info.
         - demand info.

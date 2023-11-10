@@ -1,4 +1,3 @@
-// TODO: each target is built in it's own directory in output/
 #include <Windows.h>
 #include <stdint.h>
 #include <stdlib.h>

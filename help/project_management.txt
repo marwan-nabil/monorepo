@@ -7,24 +7,42 @@
 -----------------------
 ==> categorized backlog
 -----------------------
-- tests:
+tests:
   - improve compilation tests console messages:
     - info messages should denote the beginning and ending of the test clearly,
       because all the tests are usually run sequentially and output in a single log.
 
-- x86_real:
+x86_real:
   - fix the file system library in x86_real platform:
-    - creating files in sub-directories does not work properly,
-      check the TODOs there.
+    - creating files in sub-directories does not work properly.
 
-- os:
+os:
   - continue work on the project.
 
-- build system:
+build system:
   - solve the environment setup issue where watcom paths will contain tools that
     conflict with msvc tools also included in path.
 
-- handmade_hero:
+handmade_hero:
   - continue work on the project.
-  - optimize the collision rules table for clearing and insertion operations.
-  - try to analyze and fix numerical and integer truncation issues.
+  - resolve all the TODOs.
+
+ray_tracer:
+  - fix BRDF table lookup or use a different BRDF implementation.
+
+lint:
+  - make linting smarter by not having to touch all the files every time.
+  - only lint files that were modified since last lint time.
+  - this requires that we save the last lint time in a metadata .json file.
+
+compilation_tests:
+  - failed tests have extra error information provided.
+  - build dependency graph of #include'ed files in compile targets.
+  - store the test results permanently, with info about dependencies.
+  - check on the last modification before running a test for a target.
+  - only rerun the test if necessary, meaning, if one of the target
+    dependencies changed since the last test run.
+
+win32/shared:
+  - resolve all the TODOs.
+  - create tests for the math library.

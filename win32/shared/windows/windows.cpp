@@ -43,7 +43,7 @@ void DisplayRenderBufferInWindow
 }
 
 #if 0
-// TODO: finish a generic implmentation
+// TODO: make a generic implmentation of these 2 functions
 static v2
 GetWindowDimensions(HWND Window)
 {

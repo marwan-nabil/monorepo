@@ -1,11 +1,17 @@
 scripts/ --> small batch scripts
+
 output/ --> build outputs and working path for executables
+
 data/ --> storage for binary data used by programs
+
 help/ --> documentation
 
 win32/ --> x86/win32/msvc platform code
+
     demos/
+
         directx/ --> demo program for directx
+
         imgui/ --> demo program for imgui library
 
     handmade_hero/ --> handmade hero game
@@ -13,42 +19,69 @@ win32/ --> x86/win32/msvc platform code
     ray_tracer/ --> software ray tracer
 
     shared/ --> shared code specific to the platform
+
         console/ --> windows console api wrappers
+
         fat12/ --> fat12 ram filesystem driver
+
         file_system/ --> windows files/folders/paths handling
+
         floppy_disk/ --> ram floppy disk driver
+
         math/ --> math library, depends on the c stdlib, and MSVC intrinsics for SIMD
+
         processes/ --> win32 processes api wrappers
+
         rasterizer/ --> software renderer, depends on win32/math
+
         strings/ --> string handling code, depends on win32 APIs
+
         system/ --> win32 version info api wrappers
+
         windows/ --> windowing and dpi APIs
 
     simulator/ --> physical simulation experiments
 
     tests/ --> test programs for shared code or other projects
+
         compilation_tests/ --> program that tests all compilation targets
+
         fat12_tests/ --> tests the fat12 win32 shared code
+
         x86_os_tests/ --> tests performed on the os project kernel image
 
     third_party/ --> third party libraries and code
+
         imgui/ --> immediate mode gui library
 
     tools/
+
         build/ --> build system for the hole workspace
+
         fetch_data/ --> tool to fetch the binary program data found in data/
+
         lint/ --> source code linter program
 
-x86_real/ --> x86/real_mode/[nasm/watcom] platform code
+x86_real/ --> x86/real_mode/[nasm|watcom] platform code
+
     os/ --> small x86 operating system
+
         boot_sector/ --> code for the bootsector bootloader
+
         bootloader/ --> code for the main kernel bootloader
+
         kernel/ --> code for the main kernel
 
     shared/ --> shared code specific to the platform
+
         disk/ --> simple BIOS based disk driver
+
         fat12/ --> fat12 filesystem implementation
+
         math/ --> math library
+
         memory/ --> memory operations and allocators
+
         path_handling/ --> sting paths handling utilities
+
         strings/ --> handling of ascii strings

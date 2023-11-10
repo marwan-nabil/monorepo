@@ -1,0 +1,7 @@
+==> build commands
+    > shell_startup.bat --> sets up the build environment in a windows command shell
+    > build help --> prints a list of available build targets
+
+==> binary file manipulation commands
+    > wdis aaa.obj --> disassembles object files using watcom tools
+    > wdump aaa --> dump sections of object or executable file

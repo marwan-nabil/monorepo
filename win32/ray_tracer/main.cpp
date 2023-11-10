@@ -394,7 +394,7 @@ main(i32 argc, char **argv)
 
     image_u32 OutputImage = CreateImage(1280, 720);
 
-    material MaterialsArray[3] = {};
+    material MaterialsArray[7] = {};
 
     MaterialsArray[0].EmmissionColor = V3(0.3, 0.4, 0.5);
 
@@ -404,16 +404,16 @@ main(i32 argc, char **argv)
     MaterialsArray[2].ReflectionColor = V3(0.7, 0.5, 0.3);
     LoadReflectionDataForMaterial("..\\data\\ray_tracer\\garnet_red.astm", &MaterialsArray[2]);
 
-    // MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
+    MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
 
-    // MaterialsArray[4].Specularity = 0.7;
-    // MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
+    MaterialsArray[4].Specularity = 0.7;
+    MaterialsArray[4].ReflectionColor = V3(0.2, 0.8, 0.2);
 
-    // MaterialsArray[5].Specularity = 0.85;
-    // MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
+    MaterialsArray[5].Specularity = 0.85;
+    MaterialsArray[5].ReflectionColor = V3(0.4, 0.8, 0.9);
 
-    // MaterialsArray[6].Specularity = 1;
-    // MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
+    MaterialsArray[6].Specularity = 1;
+    MaterialsArray[6].ReflectionColor = V3(0.95, 0.95, 0.95);
 
     plane PlanesArray[1] = {};
 
@@ -427,27 +427,27 @@ main(i32 argc, char **argv)
     // PlanesArray[1].Normal = V3(1, 0, 0);
     // PlanesArray[1].Distance = 2;
 
-    sphere SpheresArray[1] = {};
+    sphere SpheresArray[5] = {};
 
     SpheresArray[0].MaterialIndex = 2;
     SpheresArray[0].Position = V3(0, 0, 0);
     SpheresArray[0].Radius = 1;
 
-    // SpheresArray[1].MaterialIndex = 3;
-    // SpheresArray[1].Position = V3(3, -2, 0);
-    // SpheresArray[1].Radius = 1;
+    SpheresArray[1].MaterialIndex = 3;
+    SpheresArray[1].Position = V3(3, -2, 0);
+    SpheresArray[1].Radius = 1;
 
-    // SpheresArray[2].MaterialIndex = 4;
-    // SpheresArray[2].Position = V3(-2, -1, 2);
-    // SpheresArray[2].Radius = 1;
+    SpheresArray[2].MaterialIndex = 4;
+    SpheresArray[2].Position = V3(-2, -1, 2);
+    SpheresArray[2].Radius = 1;
 
-    // SpheresArray[3].MaterialIndex = 5;
-    // SpheresArray[3].Position = V3(1, -1, 3);
-    // SpheresArray[3].Radius = 1;
+    SpheresArray[3].MaterialIndex = 5;
+    SpheresArray[3].Position = V3(1, -1, 3);
+    SpheresArray[3].Radius = 1;
 
-    // SpheresArray[4].MaterialIndex = 6;
-    // SpheresArray[4].Position = V3(-2, 3, 0);
-    // SpheresArray[4].Radius = 2;
+    SpheresArray[4].MaterialIndex = 6;
+    SpheresArray[4].Position = V3(-2, 3, 0);
+    SpheresArray[4].Radius = 2;
 
     world World = {};
     World.Materials = MaterialsArray;
@@ -474,12 +474,17 @@ main(i32 argc, char **argv)
     if (OutputImage.WidthInPixels >= OutputImage.HeightInPixels)
     {
         World.Film.HalfWidth = 0.5f;
-        World.Film.HalfHeight = 0.5f * (f32)OutputImage.HeightInPixels / (f32)OutputImage.WidthInPixels;
+        World.Film.HalfHeight =
+            0.5f *
+            (f32)OutputImage.HeightInPixels /
+            (f32)OutputImage.WidthInPixels;
     }
     else
     {
         World.Film.HalfHeight = 1.0f;
-        World.Film.HalfWidth = (f32)OutputImage.WidthInPixels / (f32)OutputImage.HeightInPixels;
+        World.Film.HalfWidth =
+            (f32)OutputImage.WidthInPixels / 
+            (f32)OutputImage.HeightInPixels;
     }
 
     World.Film.HalfPixelWidth = 0.5f / (f32)OutputImage.WidthInPixels;
