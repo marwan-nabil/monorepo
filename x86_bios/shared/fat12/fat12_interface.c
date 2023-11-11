@@ -1,7 +1,23 @@
-void Fat12InitializeRamDisk(disk_parameters far *DiskParameters, void far *LoadAddress)
+void Fat12InitializeRamDisk
+(
+    disk_parameters far *DiskParameters,
+    memory_arena far *MemoryArena,
+    fat12_ram_disk far *RamDisk
+)
 {
-    u16 SectorsToLoad = 1 + (2 * FAT12_SECTORS_IN_FAT) + FAT12_SECTORS_IN_ROOT_DIRECTORY;
-    ReadDiskSectors(DiskParameters, 0, SectorsToLoad, LoadAddress);
+    boot_sector far *RamBootSector = PushStruct(MemoryArena, boot_sector);
+    ReadDiskSectors(DiskParameters, 0, 1, RamBootSector);
+    MemoryCopyFarToFar(&RamDisk->BootSectorHeader, RamBootSector, sizeof(boot_sector_header));
+    FreeMemoryArena(MemoryArena);
+
+    ReadDiskSectors(DiskParameters, 1, FAT12_SECTORS_IN_FAT, &RamDisk->Fat);
+    ReadDiskSectors
+    (
+        DiskParameters,
+        1 + (2 * FAT12_SECTORS_IN_FAT),
+        FAT12_SECTORS_IN_ROOT_DIRECTORY,
+        &RamDisk->RootDirectory
+    );
 }
 
 directory_entry far *

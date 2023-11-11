@@ -36,7 +36,7 @@ void ReadDiskSectors
     disk_parameters far *DiskParameters,
     u32 LogicalBlockAddress,
     u8 SectorsToRead,
-    u8 far *DataOut
+    void far *DataOut
 )
 {
     u16 Cylinder, Head, Sector;

@@ -4,15 +4,15 @@ void SetFatEntry(fat12_ram_disk far *Disk, u32 ClusterNumber, u16 FatEntry)
 
     if ((ClusterNumber % 2) == 0)
     {
-        Disk->Fat1.Bytes[StartingByteIndex] = (u8)FatEntry;
-        Disk->Fat1.Bytes[StartingByteIndex + 1] &= (u8)0xF0;
-        Disk->Fat1.Bytes[StartingByteIndex + 1] |= (u8)((FatEntry >> 8) & 0x000F);
+        Disk->Fat.Bytes[StartingByteIndex] = (u8)FatEntry;
+        Disk->Fat.Bytes[StartingByteIndex + 1] &= (u8)0xF0;
+        Disk->Fat.Bytes[StartingByteIndex + 1] |= (u8)((FatEntry >> 8) & 0x000F);
     }
     else
     {
-        Disk->Fat1.Bytes[StartingByteIndex] &= (u8)0x0F;
-        Disk->Fat1.Bytes[StartingByteIndex] |= (u8)((FatEntry & 0x000F) << 4);
-        Disk->Fat1.Bytes[StartingByteIndex + 1] = (u8)((FatEntry >> 4) & 0x00FF);
+        Disk->Fat.Bytes[StartingByteIndex] &= (u8)0x0F;
+        Disk->Fat.Bytes[StartingByteIndex] |= (u8)((FatEntry & 0x000F) << 4);
+        Disk->Fat.Bytes[StartingByteIndex + 1] = (u8)((FatEntry >> 4) & 0x00FF);
     }
 }
 

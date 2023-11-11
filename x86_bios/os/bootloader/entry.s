@@ -1,6 +1,6 @@
 bits 16
 
-%include "x86_bios\os\bootloader\entry.hs"
+%include "x86_bios\os\bootloader\entry.i"
 
 %include "x86_bios\shared\strings\strings.s"
 %include "x86_bios\shared\math\integers.s"
@@ -15,7 +15,7 @@ BootloaderEntryMessage:
 
 section _DATA.DataSegmentAlignmentPadding class=DATA
 DataSegmentAlignmentPadding:
-    db 0
+    db 0, 0, 0, 0, 
 
 ; --------------------
 ; entry point

@@ -1,8 +1,7 @@
 -----------------
 ==> current tasks
 -----------------
-- review all the TODOs and add backlog items for the important or large scale ones:
-  - stopped analyzing at the file win32_platform.cpp
+- complete the os tutorial.
 
 -----------------------
 ==> categorized backlog
@@ -16,9 +15,8 @@ tests:
 x86_bios:
   - fix the file system library in x86_bios platform:
     - creating files in sub-directories does not work properly.
-
-os:
-  - continue work on the project.
+  - optimize the file_io library:
+    - tighter integration with the fat12 driver (ideally should be one standalone driver).
 
 build system:
   - solve the environment setup issue where watcom paths will contain tools that
@@ -69,3 +67,15 @@ win32/shared:
     - do a generic implementation for ResizeRenderingBuffer().
   windows:
     - generic implmentation of these 2 functions for the commented out functions.
+
+---------------------
+==> application ideas
+---------------------
+supermarket navigator:
+  - a device or app that allows you to navigate inside a large supermarket:
+    - using a mobile app, offer accurate navigation inside a building.
+    - searching for an item will show you a path to the item position in the store.
+    - giving it a list of items will calculate an optimal path to get all the items.
+    - mobile app with features for the store:
+        - restocking info.
+        - demand info.

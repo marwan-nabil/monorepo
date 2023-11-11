@@ -1,0 +1,8 @@
+==> build system dependencies:
+    - MSVC: https://visualstudio.microsoft.com/
+    - OpenWatcom: https://sourceforge.net/projects/openwatcom/
+    - NASM: https://nasm.us/
+
+==> emulation:
+    - qemu: https://www.qemu.org/
+    - bochs: https://sourceforge.net/projects/bochs/

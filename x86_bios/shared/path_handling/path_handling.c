@@ -1,17 +1,3 @@
-// NOTE: no need to implement it with the arena allocator
-// void FreeFilePathSegmentList(file_path_node *RootNode)
-// {
-//     file_path_node *CurrentNode = RootNode;
-//     file_path_node *ChildNode;
-
-//     while (CurrentNode)
-//     {
-//         ChildNode = CurrentNode->ChildNode;
-//         free(CurrentNode);
-//         CurrentNode = ChildNode;
-//     }
-// }
-
 file_path_node far *
 CreateFilePathSegmentList(char far *FileFullPath, memory_arena far *MemoryArena)
 {

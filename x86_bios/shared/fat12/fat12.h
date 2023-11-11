@@ -59,6 +59,32 @@ typedef struct
     u32 VolumeId;
     u8 VolumeLabel[11];
     u8 SystemId[8];
+} boot_sector_header;
+
+typedef struct
+{
+    u8 JumpInstructionSpace[3];
+    u8 OEMName[8];
+
+    u16 BytesPerSector;
+    u8 SectorsPerCluster;
+    u16 NumberOfReserevedSectors;
+    u8 NumberOfFATs;
+    u16 RootDirectoryEntries;
+    u16 TotalSectors;
+    u8 MediaDescriptor;
+    u16 SectorsPerFAT;
+    u16 SectorsPerTrack;
+    u16 NumberOfHeads;
+    u32 HiddenSectors;
+    u32 LargeSectors;
+
+    u8 DriveNumber;
+    u8 Reserved;
+    u8 Signature;
+    u32 VolumeId;
+    u8 VolumeLabel[11];
+    u8 SystemId[8];
 
     u8 BootSectorCode[448];
     u16 BootSectorSignature;
@@ -97,12 +123,11 @@ typedef struct
     sector Sectors[FAT12_SECTORS_IN_ROOT_DIRECTORY];
 } root_directory;
 
+#pragma pack(pop)
+
 typedef struct
 {
-    boot_sector BootSector;
-    file_allocation_table Fat1;
-    file_allocation_table Fat2;
+    boot_sector_header BootSectorHeader;
+    file_allocation_table Fat;
     root_directory RootDirectory;
 } fat12_ram_disk;
-
-#pragma pack(pop)

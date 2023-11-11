@@ -112,7 +112,7 @@ void AllocatorTests(u16 BootDriveNumber)
     (
         (memory_arena far *)&LocalMemoryArena,
         KiloBytes(10),
-        MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
+        MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS
     );
 
     typedef struct
@@ -139,7 +139,7 @@ void PathHandlingTests(u16 BootDriveNumber)
     (
         (memory_arena far *)&LocalMemoryArena,
         KiloBytes(10),
-        MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
+        MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS
     );
 
     file_path_node far *PathListHead = CreateFilePathSegmentList
@@ -161,25 +161,33 @@ void PathHandlingTests(u16 BootDriveNumber)
     PrintFormatted("local string after trimming: %ls\r\n", LocalString);
 }
 
-void FileSystemTests(u16 BootDriveNumber)
+void Fat12Tests(u16 BootDriveNumber)
 {
-    PrintString("\r\n=========== fat12 filesystem tests ================= \r\n");
+    PrintString("\r\n=========== fat12 tests ================= \r\n");
 
     disk_parameters DiskParameters;
     GetDiskDriveParameters(&DiskParameters, BootDriveNumber);
-
-    fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_RAMDISK_LOAD_ADDRESS;
-    Fat12InitializeRamDisk(&DiskParameters, RamDisk);
 
     memory_arena LocalMemoryArena;
     InitializeMemoryArena
     (
         &LocalMemoryArena,
         KiloBytes(10),
-        MEMORY_LAYOUT_FAT_DRIVER_TRANSIENT_MEMORY_START_ADDRESS
+        MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS
     );
 
+    fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
+    Fat12InitializeRamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
+
 #if 1
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\"
+    );
+
     Fat12ListDirectory
     (
         RamDisk,
@@ -220,4 +228,23 @@ void FileSystemTests(u16 BootDriveNumber)
     // );
     PrintFormatted("==> Done.\r\n");
 #endif
+}
+
+void FileIoTests(u16 BootDriveNumber)
+{
+    PrintString("\r\n=========== File IO tests ================= \r\n");
+
+    file_io_context far *FileIoContext = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
+    FileIoInitialize
+    (
+        BootDriveNumber,
+        MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS,
+        MEMORY_LAYOUT_FREE_MEMORY_SIZE,
+        FileIoContext
+    );
+
+    ListDirectory(FileIoContext, "\\Dir0\\Dir1");
+
+    i16 FileHandle = FileOpen(FileIoContext, "\\Dir0\\Dir1\\file1.txt");
+    // TODO: continue the test.
 }

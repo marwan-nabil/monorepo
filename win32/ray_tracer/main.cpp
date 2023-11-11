@@ -483,7 +483,7 @@ main(i32 argc, char **argv)
     {
         World.Film.HalfHeight = 1.0f;
         World.Film.HalfWidth =
-            (f32)OutputImage.WidthInPixels / 
+            (f32)OutputImage.WidthInPixels /
             (f32)OutputImage.HeightInPixels;
     }
 

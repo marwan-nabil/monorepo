@@ -25,7 +25,7 @@ _X86_PrintCharacter:
     ret
 
 ; --------------------
-; prints a string
+; prints a null terminated string
 ; in:
 ;       si -> address of string
 ; --------------------

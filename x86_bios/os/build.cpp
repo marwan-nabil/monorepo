@@ -22,10 +22,14 @@ static b32 BuildFloppyDiskImage(build_context *BuildContext)
     read_file_result Kernel = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
 
     Fat12AddFile(Fat12Disk, "\\kernel  .bin", Kernel.FileMemory, Kernel.Size);
+
+    // NOTE: files and direcotries added to the disk image only for testing purposes,
+    //       should be removed later.
     Fat12AddDirectory(Fat12Disk, "\\Dir0");
     Fat12AddFile(Fat12Disk, "\\Dir0\\file0", Kernel.FileMemory, Kernel.Size);
     Fat12AddDirectory(Fat12Disk, "\\Dir0\\Dir1");
-    Fat12AddFile(Fat12Disk, "\\Dir0\\Dir1\\file1", Kernel.FileMemory, Kernel.Size);
+    char *LocalTextBuffer = "lorem epsum dolor set amet";
+    Fat12AddFile(Fat12Disk, "\\Dir0\\Dir1\\file1.txt", LocalTextBuffer, StringLength(LocalTextBuffer));
 
     FreeFileMemory(Kernel);
     ClearBuildContext(BuildContext);
