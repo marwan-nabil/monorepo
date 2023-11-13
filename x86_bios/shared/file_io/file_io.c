@@ -133,10 +133,59 @@ void FileRead(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 fa
     }
 }
 
-b8 FileWrite(file_io_context far *Context, i16 FileHandle, u32 ByteCount, void far *DataIn)
+void FileWrite(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 far *DataIn)
 {
-    // TODO: implement.
-    return TRUE;
+    file_io_file far *File = &Context->OpenFiles[FileHandle];
+
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
+    {
+        u32 OffsetInSector = File->Position % FAT12_SECTOR_SIZE;
+        if ((OffsetInSector + ByteCount) < FAT12_SECTOR_SIZE)
+        {
+            MemoryCopyFarToFar(&File->Buffer[OffsetInSector], DataIn, ByteCount);
+            WriteDiskSectors
+            (
+                &Context->DiskParameters,
+                TranslateFatClusterNumberToSectorIndex(File->LoadedCluster),
+                1,
+                File->Buffer
+            );
+            File->Position += ByteCount;
+            return;
+        }
+        else
+        {
+            u32 BytesToWrite = FAT12_SECTOR_SIZE - OffsetInSector;
+            MemoryCopyFarToFar(&File->Buffer[OffsetInSector], DataIn, BytesToWrite);
+            WriteDiskSectors
+            (
+                &Context->DiskParameters,
+                TranslateFatClusterNumberToSectorIndex(File->LoadedCluster),
+                1,
+                File->Buffer
+            );
+
+            File->Position += BytesToWrite;
+            ByteCount -= BytesToWrite;
+            DataIn += BytesToWrite;
+
+            u16 NextCluster = GetFatEntryFromClusterNumber(&Context->Fat12RamDisk, File->LoadedCluster);
+            if (IsFatEntryEndOfFile(NextCluster))
+            {
+                return;
+            }
+            else
+            {
+                GetDiskSectorFromFatClusterNumber
+                (
+                    &Context->DiskParameters,
+                    (sector far *)File->Buffer,
+                    NextCluster
+                );
+                File->LoadedCluster = NextCluster;
+            }
+        }
+    }
 }
 
 void FileSeek(file_io_context far *Context, i16 FileHandle, u32 NewSeekPosition)
@@ -146,8 +195,6 @@ void FileSeek(file_io_context far *Context, i16 FileHandle, u32 NewSeekPosition)
     if (NewSeekPosition < File->Size)
     {
         u32 SectorIndex = NewSeekPosition / FAT12_SECTOR_SIZE;
-
-        // loop until you get to this sector and load it
         u16 CurrentCluster = File->FirstCluster;
 
         while (SectorIndex)

@@ -258,9 +258,19 @@ void FileIoTests(u16 BootDriveNumber)
     char LocalStringBuffer[30];
     MemoryZeroNear(LocalStringBuffer, 30);
 
-    FileSeek(FileIoContext, FileHandle, 0x4890);
-    FileRead(FileIoContext, FileHandle, 29, (u8 far *)LocalStringBuffer);
+    u32 FileOffset = 0x4B10;
 
-    PrintFormatted("Data read from the file: %s", LocalStringBuffer);
-    // TODO: continue the test.
+    FileSeek(FileIoContext, FileHandle, FileOffset);
+    FileRead(FileIoContext, FileHandle, 29, (u8 far *)LocalStringBuffer);
+    PrintFormatted("Data read from the file: %s\r\n", LocalStringBuffer);
+
+    PrintFormatted("overwriting the same data read before with A's ...\r\n");
+
+    MemorySetNear(LocalStringBuffer, 'A', 30);
+    FileSeek(FileIoContext, FileHandle, FileOffset);
+    FileWrite(FileIoContext, FileHandle, 30, (u8 far *)LocalStringBuffer);
+
+    FileSeek(FileIoContext, FileHandle, FileOffset);
+    FileRead(FileIoContext, FileHandle, 29, (u8 far *)LocalStringBuffer);
+    PrintFormatted("Data read from the file: %s\r\n", LocalStringBuffer);
 }
