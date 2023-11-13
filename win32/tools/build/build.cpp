@@ -37,7 +37,6 @@
 #include "win32\tools\fetch_data\build.cpp"
 #include "win32\tests\compilation_tests\build.cpp"
 #include "win32\tests\fat12_tests\build.cpp"
-#include "win32\tests\x86_os_tests\build.cpp"
 #include "win32\simulator\build.cpp"
 #include "win32\demos\directx\build.cpp"
 #include "win32\handmade_hero\build.cpp"
@@ -60,7 +59,6 @@ build_target_config BuildTargetConfigurations[] =
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
     {"x86_os", &Buildx86Os, NULL, NULL, NULL},
-    {"x86_os_tests", &BuildX86KernelTests, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;

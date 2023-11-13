@@ -32,7 +32,6 @@ test_job_configuration TestJobConfiguration[] =
     NULL, "build fetch_data",
     NULL, "build fat12_tests",
     NULL, "build x86_os",
-    NULL, "build x86_os_tests",
 };
 
 void ProcessJob(test_job *Job)
