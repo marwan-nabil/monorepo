@@ -1,3 +1,18 @@
+void AddTestFilesToRootDirectory(build_context *BuildContext, fat12_disk *Fat12Disk)
+{
+    SetOuputBinaryPath(BuildContext, "\\bootloader\\bootloader.img");
+    read_file_result DummyBigFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
+    ClearBuildContext(BuildContext);
+
+    Fat12AddDirectory(Fat12Disk, "\\Dir0");
+    Fat12AddFile(Fat12Disk, "\\Dir0\\BigFile", DummyBigFile.FileMemory, DummyBigFile.Size);
+    FreeFileMemory(DummyBigFile);
+
+    char *LocalTextBuffer = "lorem epsum dolor set amet";
+    Fat12AddDirectory(Fat12Disk, "\\Dir0\\Dir1");
+    Fat12AddFile(Fat12Disk, "\\Dir0\\Dir1\\sample.txt", LocalTextBuffer, StringLength(LocalTextBuffer));
+}
+
 static b32 BuildFloppyDiskImage(build_context *BuildContext)
 {
     fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
@@ -20,19 +35,13 @@ static b32 BuildFloppyDiskImage(build_context *BuildContext)
 
     SetOuputBinaryPath(BuildContext, "\\kernel\\kernel.img");
     read_file_result Kernel = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
-
     Fat12AddFile(Fat12Disk, "\\kernel  .bin", Kernel.FileMemory, Kernel.Size);
+    FreeFileMemory(Kernel);
+    ClearBuildContext(BuildContext);
 
     // NOTE: files and direcotries added to the disk image only for testing purposes,
     //       should be removed later.
-    Fat12AddDirectory(Fat12Disk, "\\Dir0");
-    Fat12AddFile(Fat12Disk, "\\Dir0\\file0", Kernel.FileMemory, Kernel.Size);
-    Fat12AddDirectory(Fat12Disk, "\\Dir0\\Dir1");
-    char *LocalTextBuffer = "lorem epsum dolor set amet";
-    Fat12AddFile(Fat12Disk, "\\Dir0\\Dir1\\file1.txt", LocalTextBuffer, StringLength(LocalTextBuffer));
-
-    FreeFileMemory(Kernel);
-    ClearBuildContext(BuildContext);
+    AddTestFilesToRootDirectory(BuildContext, Fat12Disk);
 
     SetOuputBinaryPath(BuildContext, "\\floppy.img");
     b32 BuildSuccess = WriteFileFromMemory

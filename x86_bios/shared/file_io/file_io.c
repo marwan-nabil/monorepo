@@ -15,7 +15,7 @@ void FileIoInitialize
         TransientMemoryAddress
     );
 
-    Fat12InitializeRamDisk(&Context->DiskParameters, &Context->TransientMemoryArena, &Context->Fat12RamDisk);
+    InitializeFat12RamDisk(&Context->DiskParameters, &Context->TransientMemoryArena, &Context->Fat12RamDisk);
 
     Context->OpenFilesCount = 0;
     for (u16 Index = 0; Index < FILE_IO_MAX_OPEN_FILES; Index++)
@@ -47,7 +47,7 @@ i16 FileOpen(file_io_context far *Context, char far *FilePath)
     }
 
     file_io_file far *OpenedFile = &Context->OpenFiles[FileHandle];
-    directory_entry far *FileDirectoryEntry = Fat12GetDirectoryEntryOfFile
+    directory_entry far *FileDirectoryEntry = GetDirectoryEntryOfFileByPath
     (
         &Context->Fat12RamDisk,
         &Context->TransientMemoryArena,
@@ -80,33 +80,56 @@ i16 FileOpen(file_io_context far *Context, char far *FilePath)
     OpenedFile->FirstCluster = FileDirectoryEntry->ClusterNumberLowWord;
     OpenedFile->LoadedCluster = OpenedFile->FirstCluster;
 
-    ReadDiskSectors
+    GetDiskSectorFromFatClusterNumber
     (
         &Context->DiskParameters,
-        TranslateClusterNumberToSectorIndex(OpenedFile->FirstCluster),
-        1,
-        OpenedFile->Buffer
+        (sector far *)OpenedFile->Buffer,
+        OpenedFile->FirstCluster
     );
 
     FreeMemoryArena(&Context->TransientMemoryArena);
 
-    return OpenedFile->Handle;
+    return FileHandle;
 }
 
-void FileRead(file_io_context far *Context, i16 FileHandle, u32 ByteCount, void far *DataOut)
+void FileRead(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 far *DataOut)
 {
     file_io_file far *File = &Context->OpenFiles[FileHandle];
-    u32 PositionSector = File->Position / FAT12_SECTOR_SIZE;
-    u32 SectorOffset = File->Position % FAT12_SECTOR_SIZE;
 
-    if ((SectorOffset + ByteCount) < FAT12_SECTOR_SIZE)
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
-        MemoryCopyFarToFar(DataOut, &File->Buffer[SectorOffset], ByteCount);
-        File->Position += ByteCount;
-    }
-    else
-    {
-        // TODO: implement read from file that spans multiple sectors.
+        u32 OffsetInSector = File->Position % FAT12_SECTOR_SIZE;
+        if ((OffsetInSector + ByteCount) < FAT12_SECTOR_SIZE)
+        {
+            MemoryCopyFarToFar(DataOut, &File->Buffer[OffsetInSector], ByteCount);
+            File->Position += ByteCount;
+            return;
+        }
+        else
+        {
+            u32 BytesToRead = FAT12_SECTOR_SIZE - OffsetInSector;
+            MemoryCopyFarToFar(DataOut, &File->Buffer[OffsetInSector], BytesToRead);
+
+            File->Position += BytesToRead;
+            ByteCount -= BytesToRead;
+            DataOut += BytesToRead;
+
+            u16 NextCluster = GetFatEntryFromClusterNumber(&Context->Fat12RamDisk, File->LoadedCluster);
+            if (IsFatEntryEndOfFile(NextCluster))
+            {
+                return;
+            }
+            else
+            {
+                GetDiskSectorFromFatClusterNumber
+                (
+                    &Context->DiskParameters,
+                    (sector far *)File->Buffer,
+                    NextCluster
+                );
+                File->LoadedCluster = NextCluster;
+            }
+        }
     }
 }
 
@@ -114,6 +137,41 @@ b8 FileWrite(file_io_context far *Context, i16 FileHandle, u32 ByteCount, void f
 {
     // TODO: implement.
     return TRUE;
+}
+
+void FileSeek(file_io_context far *Context, i16 FileHandle, u32 NewSeekPosition)
+{
+    file_io_file far *File = &Context->OpenFiles[FileHandle];
+
+    if (NewSeekPosition < File->Size)
+    {
+        u32 SectorIndex = NewSeekPosition / FAT12_SECTOR_SIZE;
+
+        // loop until you get to this sector and load it
+        u16 CurrentCluster = File->FirstCluster;
+
+        while (SectorIndex)
+        {
+            CurrentCluster = GetFatEntryFromClusterNumber(&Context->Fat12RamDisk, CurrentCluster);
+            SectorIndex--;
+        }
+
+        GetDiskSectorFromFatClusterNumber
+        (
+            &Context->DiskParameters,
+            (sector far *)File->Buffer,
+            CurrentCluster
+        );
+
+        File->LoadedCluster = CurrentCluster;
+        File->Position = NewSeekPosition;
+    }
+}
+
+u32 FileGetPosition(file_io_context far *Context, i16 FileHandle)
+{
+    file_io_file far *File = &Context->OpenFiles[FileHandle];
+    return File->Position;
 }
 
 void FileClose(file_io_context far *Context, i16 FileHandle)

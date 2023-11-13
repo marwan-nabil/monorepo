@@ -17,9 +17,8 @@
 #include "x86_bios\shared\path_handling\path_handling.c"
 #include "x86_bios\shared\timing.c"
 #include "x86_bios\shared\disk\disk.c"
-#include "x86_bios\shared\fat12\fat12_get.c"
-#include "x86_bios\shared\fat12\fat12_set.c"
-#include "x86_bios\shared\fat12\fat12_interface.c"
+#include "x86_bios\shared\fat12\get.c"
+#include "x86_bios\shared\fat12\set.c"
 #include "x86_bios\shared\file_io\file_io.c"
 
 #include "tests.c"

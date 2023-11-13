@@ -177,7 +177,7 @@ void Fat12Tests(u16 BootDriveNumber)
     );
 
     fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
-    Fat12InitializeRamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
+    InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
 
 #if 1
     Fat12ListDirectory
@@ -187,7 +187,13 @@ void Fat12Tests(u16 BootDriveNumber)
         &DiskParameters,
         "\\"
     );
-
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0"
+    );
     Fat12ListDirectory
     (
         RamDisk,
@@ -196,17 +202,17 @@ void Fat12Tests(u16 BootDriveNumber)
         "\\Dir0\\Dir1"
     );
 
-    directory_entry far *FileHandle = Fat12GetDirectoryEntryOfFile
+    directory_entry far *FileHandle = GetDirectoryEntryOfFileByPath
     (
-        RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\Dir1\\file1"
+        RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\Dir1\\sample.txt"
     );
 
     PrintFormatted("\r\n");
     PrintFormatted("name of opened file handle: %ls\r\n", FileHandle->FileName);
 
     PrintFormatted("\r\n");
-    PrintFormatted("create a new file in root directory.\r\n");
-    Fat12AddFile(RamDisk, &LocalMemoryArena, &DiskParameters, "\\test.txt", NULL, 30);
+    PrintFormatted("creating a new file in root directory...\r\n");
+    Fat12AddFileByPath(RamDisk, &LocalMemoryArena, &DiskParameters, "\\test.txt", NULL, 30);
     Fat12ListDirectory
     (
         RamDisk,
@@ -218,7 +224,7 @@ void Fat12Tests(u16 BootDriveNumber)
     // NOTE: file creation in directories other than root directory is buggy
     PrintFormatted("\r\n");
     PrintFormatted("create a new file in sub directory.\r\n");
-    Fat12AddFile(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 30);
+    Fat12AddFileByPath(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 30);
     // Fat12ListDirectory
     // (
     //     RamDisk,
@@ -243,8 +249,18 @@ void FileIoTests(u16 BootDriveNumber)
         FileIoContext
     );
 
+    ListDirectory(FileIoContext, "\\");
+    ListDirectory(FileIoContext, "\\Dir0");
     ListDirectory(FileIoContext, "\\Dir0\\Dir1");
 
-    i16 FileHandle = FileOpen(FileIoContext, "\\Dir0\\Dir1\\file1.txt");
+    i16 FileHandle = FileOpen(FileIoContext, "\\Dir0\\BigFile");
+
+    char LocalStringBuffer[30];
+    MemoryZeroNear(LocalStringBuffer, 30);
+
+    FileSeek(FileIoContext, FileHandle, 0x4890);
+    FileRead(FileIoContext, FileHandle, 29, (u8 far *)LocalStringBuffer);
+
+    PrintFormatted("Data read from the file: %s", LocalStringBuffer);
     // TODO: continue the test.
 }
