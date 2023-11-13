@@ -1,4 +1,4 @@
-void AddTestFilesToRootDirectory(build_context *BuildContext, fat12_disk *Fat12Disk)
+void AddTestFilesToDiskImage(build_context *BuildContext, fat12_disk *Fat12Disk)
 {
     SetOuputBinaryPath(BuildContext, "\\bootloader\\bootloader.img");
     read_file_result DummyBigFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
@@ -41,7 +41,7 @@ static b32 BuildFloppyDiskImage(build_context *BuildContext)
 
     // NOTE: files and direcotries added to the disk image only for testing purposes,
     //       should be removed later.
-    AddTestFilesToRootDirectory(BuildContext, Fat12Disk);
+    AddTestFilesToDiskImage(BuildContext, Fat12Disk);
 
     SetOuputBinaryPath(BuildContext, "\\floppy.img");
     b32 BuildSuccess = WriteFileFromMemory

@@ -35,9 +35,9 @@ void _cdecl cstart(u16 BootDriveNumber)
 
     // PathHandlingTests(BootDriveNumber);
 
-    // Fat12Tests(BootDriveNumber);
+    Fat12Tests(BootDriveNumber);
 
-    FileIoTests(BootDriveNumber);
+    // FileIoTests(BootDriveNumber);
 
     while (1) {};
 }

@@ -179,7 +179,7 @@ void Fat12Tests(u16 BootDriveNumber)
     fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
     InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
 
-#if 1
+#if 0
     Fat12ListDirectory
     (
         RamDisk,
@@ -221,17 +221,23 @@ void Fat12Tests(u16 BootDriveNumber)
         "\\"
     );
 #else
-    // NOTE: file creation in directories other than root directory is buggy
     PrintFormatted("\r\n");
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0"
+    );
     PrintFormatted("create a new file in sub directory.\r\n");
-    Fat12AddFileByPath(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 30);
-    // Fat12ListDirectory
-    // (
-    //     RamDisk,
-    //     (memory_arena far *)&LocalMemoryArena,
-    //     &DiskParameters,
-    //     "\\Dir0"
-    // );
+    Fat12AddFileByPath(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 400);
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0"
+    );
     PrintFormatted("==> Done.\r\n");
 #endif
 }

@@ -1,6 +1,8 @@
 -----------------
 ==> current tasks
 -----------------
+- fix the file system library in x86_bios platform:
+  - creating files in sub-directories does not work properly.
 - complete the os tutorial.
 
 -----------------------
@@ -13,8 +15,6 @@ tests:
     - it should be indicated clearly if not all tests have succeeded.
 
 x86_bios:
-  - fix the file system library in x86_bios platform:
-    - creating files in sub-directories does not work properly.
   - optimize the file_io library:
     - tighter integration with the fat12 driver (ideally should be one standalone driver).
 

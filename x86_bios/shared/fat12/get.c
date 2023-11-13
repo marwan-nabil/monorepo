@@ -193,9 +193,6 @@ GetDirectoryEntryOfFileInSector(sector far *Sector, char far *FileName, char far
 directory_entry far *
 GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName)
 {
-    // NOTE: this function is buggy, currently debugging it
-    PrintFormatted("DirectoryName: %ls\r\n", DirectoryName);
-
     for
     (
         u32 DirectoryEntryIndex = 0;
@@ -203,9 +200,19 @@ GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName
         DirectoryEntryIndex++
     )
     {
-        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+        directory_entry far *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
 
-        if (MemoryCompareFarToFar(DirectoryEntry->FileName, DirectoryName, 8) == 0)
+        if
+        (
+            StringCompareFarToFar
+            (
+                DirectoryEntry->FileName,
+                DirectoryName,
+                StringLengthFar(DirectoryName)
+            )
+            == 
+            0
+        )
         {
             return DirectoryEntry;
         }

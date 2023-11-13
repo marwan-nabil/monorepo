@@ -381,6 +381,7 @@ Fat12AddFileByPath
 
     while (CurrentPathNode)
     {
+
         MemoryZeroNear(LocalFileName, ArrayCount(LocalFileName));
         MemoryZeroNear(LocalFileExtension, ArrayCount(LocalFileExtension));
 
@@ -417,6 +418,14 @@ Fat12AddFileByPath
                     LocalFileExtension,
                     Memory,
                     Size
+                );
+                PrintFormatted
+                (
+                    "added the file, it's new directory entry has the name: %ls\r\n"
+                    "and extension: %ls, size: %ld\r\n",
+                    FileDirectoryEntry->FileName,
+                    FileDirectoryEntry->FileExtension,
+                    FileDirectoryEntry->FileSize
                 );
                 return FileDirectoryEntry;
             }

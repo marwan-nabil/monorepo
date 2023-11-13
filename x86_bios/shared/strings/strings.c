@@ -47,6 +47,50 @@ void PrintCharacter(char Character)
     X86_PrintCharacter(Character, 0);
 }
 
+i16 StringCompareNearToNear(char *String1, char *String2, u32 ComparisonRange)
+{
+    if
+    (
+        (String1 == NULL) ||
+        (String2 == NULL)
+    )
+    {
+        return -1;
+    }
+
+    for (u32 Index = 0; Index < ComparisonRange; Index++)
+    {
+        if (String1[Index] != String2[Index])
+        {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+i16 StringCompareFarToFar(char far *String1, char far *String2, u32 ComparisonRange)
+{
+    if
+    (
+        (String1 == NULL) ||
+        (String2 == NULL)
+    )
+    {
+        return -1;
+    }
+
+    for (u32 Index = 0; Index < ComparisonRange; Index++)
+    {
+        if (String1[Index] != String2[Index])
+        {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 void StringConcatenateNearToNear(char *Destination, u32 Size, char *Source)
 {
     if ((Destination == NULL) || (Source == NULL))
