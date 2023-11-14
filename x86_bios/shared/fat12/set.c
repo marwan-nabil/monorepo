@@ -8,7 +8,6 @@ void InitializeFat12RamDisk
     boot_sector far *RamBootSector = PushStruct(MemoryArena, boot_sector);
     ReadDiskSectors(DiskParameters, 0, 1, RamBootSector);
     MemoryCopyFarToFar(&RamDisk->BootSectorHeader, RamBootSector, sizeof(boot_sector_header));
-    FreeMemoryArena(MemoryArena);
 
     ReadDiskSectors(DiskParameters, 1, FAT12_SECTORS_IN_FAT, &RamDisk->Fat);
     ReadDiskSectors
@@ -247,15 +246,46 @@ AddFileToDirectory
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
     disk_parameters far *DiskParameters,
-    directory_entry far *Directory,
+    directory_entry far *ParentDirectory,
     char far *FileName,
     char far *Extension,
     void far *Memory,
     u32 Size
 )
 {
-    directory_entry far *FoundDirectoryEntry =
-        GetFirstFreeDirectoryEntryInDirectory(Disk, MemoryArena, DiskParameters, Directory);
+    u16 FoundSectorLBA = 0;
+    sector far *FoundSector = NULL;
+    directory_entry far *FoundDirectoryEntry = NULL;
+
+    u16 CurrentClusterNumber = ParentDirectory->ClusterNumberLowWord;
+    u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
+
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
+    {
+        FoundSectorLBA = TranslateFatClusterNumberToSectorIndex(CurrentClusterNumber);
+        FoundSector = PushStruct(MemoryArena, sector);
+        ReadDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        FoundDirectoryEntry = GetFirstFreeDirectoryEntryInSector(FoundSector);
+
+        if (FoundDirectoryEntry)
+        {
+            break;
+        }
+        else
+        {
+            if (IsFatEntryEndOfFile(CurrentFatEntry))
+            {
+                // TODO: extend the directory by allocating more sectors to it instead of aborting
+                break;
+            }
+            else
+            {
+                CurrentClusterNumber = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
+            }
+        }
+    }
+
     if (!FoundDirectoryEntry)
     {
         return NULL;
@@ -275,6 +305,7 @@ AddFileToDirectory
 
     if (Result)
     {
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -289,12 +320,43 @@ AddDirectoryToDirectory
     fat12_ram_disk far *Disk,
     memory_arena far *MemoryArena,
     disk_parameters far *DiskParameters,
-    directory_entry far *Directory,
+    directory_entry far *ParentDirectory,
     char far *DirectoryName
 )
 {
-    directory_entry far *FoundDirectoryEntry =
-        GetFirstFreeDirectoryEntryInDirectory(Disk, MemoryArena, DiskParameters, Directory);
+    u16 FoundSectorLBA = 0;
+    sector far *FoundSector = NULL;
+    directory_entry far *FoundDirectoryEntry = NULL;
+
+    u16 CurrentClusterNumber = ParentDirectory->ClusterNumberLowWord;
+    u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
+
+    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
+    {
+        FoundSectorLBA = TranslateFatClusterNumberToSectorIndex(CurrentClusterNumber);
+        FoundSector = PushStruct(MemoryArena, sector);
+        ReadDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        FoundDirectoryEntry = GetFirstFreeDirectoryEntryInSector(FoundSector);
+
+        if (FoundDirectoryEntry)
+        {
+            break;
+        }
+        else
+        {
+            if (IsFatEntryEndOfFile(CurrentFatEntry))
+            {
+                // TODO: extend the directory by allocating more sectors to it instead of aborting
+                break;
+            }
+            else
+            {
+                CurrentClusterNumber = CurrentFatEntry;
+                CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
+            }
+        }
+    }
+
     if (!FoundDirectoryEntry)
     {
         return NULL;
@@ -308,8 +370,10 @@ AddDirectoryToDirectory
         FoundDirectoryEntry,
         DirectoryName
     );
+
     if (Result)
     {
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -418,14 +482,6 @@ Fat12AddFileByPath
                     LocalFileExtension,
                     Memory,
                     Size
-                );
-                PrintFormatted
-                (
-                    "added the file, it's new directory entry has the name: %ls\r\n"
-                    "and extension: %ls, size: %ld\r\n",
-                    FileDirectoryEntry->FileName,
-                    FileDirectoryEntry->FileExtension,
-                    FileDirectoryEntry->FileSize
                 );
                 return FileDirectoryEntry;
             }

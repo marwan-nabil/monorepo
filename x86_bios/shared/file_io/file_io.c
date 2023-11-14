@@ -16,6 +16,7 @@ void FileIoInitialize
     );
 
     InitializeFat12RamDisk(&Context->DiskParameters, &Context->TransientMemoryArena, &Context->Fat12RamDisk);
+    FreeMemoryArena(&Context->TransientMemoryArena);
 
     Context->OpenFilesCount = 0;
     for (u16 Index = 0; Index < FILE_IO_MAX_OPEN_FILES; Index++)

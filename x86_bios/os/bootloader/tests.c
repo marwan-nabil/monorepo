@@ -179,7 +179,6 @@ void Fat12Tests(u16 BootDriveNumber)
     fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
     InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
 
-#if 0
     Fat12ListDirectory
     (
         RamDisk,
@@ -220,7 +219,7 @@ void Fat12Tests(u16 BootDriveNumber)
         &DiskParameters,
         "\\"
     );
-#else
+
     PrintFormatted("\r\n");
     Fat12ListDirectory
     (
@@ -238,8 +237,6 @@ void Fat12Tests(u16 BootDriveNumber)
         &DiskParameters,
         "\\Dir0"
     );
-    PrintFormatted("==> Done.\r\n");
-#endif
 }
 
 void FileIoTests(u16 BootDriveNumber)

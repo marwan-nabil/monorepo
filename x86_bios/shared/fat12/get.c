@@ -106,48 +106,6 @@ GetFirstFreeDirectoryEntryInSector(sector far *Sector)
 }
 
 directory_entry far *
-GetFirstFreeDirectoryEntryInDirectory
-(
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *Directory
-)
-{
-    directory_entry far *FirstFreeDirectoryEntry = NULL;
-
-    u16 CurrentClusterNumber = Directory->ClusterNumberLowWord;
-    u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
-
-    for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
-    {
-        sector far *Sector = PushStruct(MemoryArena, sector);
-        GetDiskSectorFromFatClusterNumber(DiskParameters, Sector, CurrentClusterNumber);
-
-        FirstFreeDirectoryEntry = GetFirstFreeDirectoryEntryInSector(Sector);
-
-        if (FirstFreeDirectoryEntry)
-        {
-            break;
-        }
-        else
-        {
-            if (IsFatEntryEndOfFile(CurrentFatEntry))
-            {
-                break;
-            }
-            else
-            {
-                CurrentClusterNumber = CurrentFatEntry;
-                CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
-            }
-        }
-    }
-
-    return FirstFreeDirectoryEntry;
-}
-
-directory_entry far *
 GetFirstFreeDirectoryEntryInRootDirectory(fat12_ram_disk far *Disk)
 {
     directory_entry far *FirstFreeDirectoryEntry = NULL;
