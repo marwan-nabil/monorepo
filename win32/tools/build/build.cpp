@@ -46,6 +46,8 @@
 #include "x86_bios\os\bootloader\build.cpp"
 #include "x86_bios\os\kernel\build.cpp"
 #include "x86_bios\os\build.cpp"
+#include "x86_bios\protected_mode_os\boot_sector\build.cpp"
+#include "x86_bios\protected_mode_os\build.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {
@@ -59,6 +61,7 @@ build_target_config BuildTargetConfigurations[] =
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
     {"x86_os", &Buildx86Os, NULL, NULL, NULL},
+    {"x86_protected_os", &BuildProtectedModeOs, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;
