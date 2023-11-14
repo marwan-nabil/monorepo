@@ -178,7 +178,22 @@ AddFileToRootDirectory
     u32 Size
 )
 {
-    directory_entry far *FoundDirectoryEntry = GetFirstFreeDirectoryEntryInRootDirectory(Disk);
+    u16 FoundSectorLBA = 0;
+    sector far *FoundSector = NULL;
+    directory_entry far *FoundDirectoryEntry = NULL;
+
+    for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
+    {
+        FoundSectorLBA = 1 + (2 * FAT12_SECTORS_IN_FAT) + SectorIndex;
+        FoundSector = &Disk->RootDirectory.Sectors[SectorIndex];
+        FoundDirectoryEntry = GetFirstFreeDirectoryEntryInSector(FoundSector);
+
+        if (FoundDirectoryEntry)
+        {
+            break;
+        }
+    }
+
     if (!FoundDirectoryEntry)
     {
         return NULL;
@@ -198,6 +213,7 @@ AddFileToRootDirectory
 
     if (Result)
     {
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -215,7 +231,22 @@ AddDirectoryToRootDirectory
     char far *DirectoryName
 )
 {
-    directory_entry far *FoundDirectoryEntry = GetFirstFreeDirectoryEntryInRootDirectory(Disk);
+    u16 FoundSectorLBA = 0;
+    sector far *FoundSector = NULL;
+    directory_entry far *FoundDirectoryEntry = NULL;
+
+    for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
+    {
+        FoundSectorLBA = 1 + (2 * FAT12_SECTORS_IN_FAT) + SectorIndex;
+        FoundSector = &Disk->RootDirectory.Sectors[SectorIndex];
+        FoundDirectoryEntry = GetFirstFreeDirectoryEntryInSector(FoundSector);
+
+        if (FoundDirectoryEntry)
+        {
+            break;
+        }
+    }
+
     if (!FoundDirectoryEntry)
     {
         return NULL;
@@ -232,6 +263,7 @@ AddDirectoryToRootDirectory
 
     if (Result)
     {
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -543,7 +575,6 @@ Fat12AddDirectoryByPath
         }
         else
         {
-
             directory_entry far *DirectoryDirectoryEntry = AddDirectoryToRootDirectory
             (
                 Disk,

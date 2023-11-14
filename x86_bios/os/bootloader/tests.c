@@ -221,13 +221,6 @@ void Fat12Tests(u16 BootDriveNumber)
     );
 
     PrintFormatted("\r\n");
-    Fat12ListDirectory
-    (
-        RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
-        &DiskParameters,
-        "\\Dir0"
-    );
     PrintFormatted("create a new file in sub directory.\r\n");
     Fat12AddFileByPath(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 400);
     Fat12ListDirectory
@@ -236,6 +229,32 @@ void Fat12Tests(u16 BootDriveNumber)
         (memory_arena far *)&LocalMemoryArena,
         &DiskParameters,
         "\\Dir0"
+    );
+
+    PrintFormatted("\r\n");
+    PrintFormatted("reload the disk to see if file system modifications are persistent.\r\n");
+    InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
+
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\"
+    );
+    Fat12ListDirectory
+    (
+        RamDisk,
+        (memory_arena far *)&LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0"
+    );
+    Fat12ListDirectory
+    (
+        RamDisk,
+        &LocalMemoryArena,
+        &DiskParameters,
+        "\\Dir0\\Dir1"
     );
 }
 

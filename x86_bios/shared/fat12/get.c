@@ -106,25 +106,6 @@ GetFirstFreeDirectoryEntryInSector(sector far *Sector)
 }
 
 directory_entry far *
-GetFirstFreeDirectoryEntryInRootDirectory(fat12_ram_disk far *Disk)
-{
-    directory_entry far *FirstFreeDirectoryEntry = NULL;
-
-    for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
-    {
-        FirstFreeDirectoryEntry =
-            GetFirstFreeDirectoryEntryInSector(&Disk->RootDirectory.Sectors[SectorIndex]);
-
-        if (FirstFreeDirectoryEntry)
-        {
-            break;
-        }
-    }
-
-    return FirstFreeDirectoryEntry;
-}
-
-directory_entry far *
 GetDirectoryEntryOfFileInSector(sector far *Sector, char far *FileName, char far *Extension)
 {
     for
