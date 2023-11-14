@@ -5,7 +5,7 @@
     {
         "win32": true,
         "win32/third_party": true,
-        // "x86_bios": true,
+        // "x86": true,
     },
 
     "C_Cpp.default.defines":

@@ -1,7 +1,7 @@
 static b32 BuildKernelImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "kernel");
-    AddSourceFile(BuildContext, "\\x86_bios\\os\\kernel\\entry.s");
+    AddSourceFile(BuildContext, "\\x86\\os\\kernel\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin");
     SetOuputBinaryPath(BuildContext, "\\kernel.img");
     SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
