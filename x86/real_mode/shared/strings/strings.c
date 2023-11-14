@@ -44,7 +44,7 @@ const char *GetCharacterPointer(const char *String, char Character)
 
 void PrintCharacter(char Character)
 {
-    X86_PrintCharacter(Character, 0);
+    BIOS_PrintCharacter(Character, 0);
 }
 
 i16 StringCompareNearToNear(char *String1, char *String2, u32 ComparisonRange)
@@ -316,7 +316,7 @@ i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b
     do
     {
         u32 Remainder;
-        X86_DivideU64ByU32(Number, Radix, &Number, &Remainder);
+        DivideU64ByU32(Number, Radix, &Number, &Remainder);
         LocalStringBuffer[StringBufferPosition++] = HexCharacters[Remainder];
     } while (Number > 0);
 

@@ -2,9 +2,9 @@ bits 16
 
 %include "x86\real_mode\os\bootloader\entry.i"
 
-%include "x86\real_mode\shared\strings\strings.s"
-%include "x86\real_mode\shared\math\integers.s"
-%include "x86\real_mode\shared\disk\disk.s"
+%include "x86\real_mode\shared\bios\strings.s"
+%include "x86\real_mode\shared\bios\disk.s"
+%include "x86\shared\math\integers.s"
 
 ; --------------------
 ; data
@@ -23,7 +23,7 @@ DataSegmentAlignmentPadding:
 section _ENTRY.entry class=CODE
 entry:
     mov si, BootloaderEntryMessage
-    call _X86_PrintString
+    call _BIOS_PrintString
 
     cli
     mov ax, ds

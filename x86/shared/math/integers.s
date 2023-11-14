@@ -1,8 +1,8 @@
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
-section _TEXT._X86_DivideU64ByU32 class=CODE
-_X86_DivideU64ByU32:
+section _TEXT._DivideU64ByU32 class=CODE
+_DivideU64ByU32:
     ; make new call frame
     push bp ; save old call frame
     mov bp, sp ; initialize new call frame
@@ -47,6 +47,7 @@ _X86_DivideU64ByU32:
 
 ; --------------------
 ; divides a u32 by u32
+; watcom compiler specific
 ; in:
 ;       dx:ax --> dividend
 ;       cx:bx --> divisor
@@ -81,6 +82,7 @@ __U4D:
 
 ; --------------------------------------
 ; multiplies a u32 by a u32
+; watcom compiler specific
 ; in:
 ;       DX:AX operand 1
 ;       CX:BX operand 2

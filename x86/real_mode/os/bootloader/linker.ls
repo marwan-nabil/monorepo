@@ -12,15 +12,15 @@ ORDER
     CLNAME CODE
         SEGMENT _ENTRY.entry
         SEGMENT _ENTRY.BootloaderEntryMessage
-        SEGMENT _TEXT._X86_PrintCharacter
-        SEGMENT _TEXT._X86_PrintString
-        SEGMENT _TEXT._X86_DivideU64ByU32
+        SEGMENT _TEXT._BIOS_PrintCharacter
+        SEGMENT _TEXT._BIOS_PrintString
+        SEGMENT _TEXT._DivideU64ByU32
         SEGMENT _TEXT.__U4D
         SEGMENT _TEXT.__U4M
-        SEGMENT _TEXT._X86_DiskReset
-        SEGMENT _TEXT._X86_DiskRead
-        SEGMENT _TEXT._X86_DiskWrite
-        SEGMENT _TEXT._X86_GetDiskDriveParameters
+        SEGMENT _TEXT._BIOS_DiskReset
+        SEGMENT _TEXT._BIOS_DiskRead
+        SEGMENT _TEXT._BIOS_DiskWrite
+        SEGMENT _TEXT._BIOS_GetDiskDriveParameters
         SEGMENT _TEXT
     CLNAME DATA
         SEGMENT _DATA.DataSegmentAlignmentPadding

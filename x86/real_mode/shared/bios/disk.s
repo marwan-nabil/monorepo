@@ -3,8 +3,8 @@
 ; in:
 ;       word [sp + 2] == driver number
 ; ---------------------------------------
-section _TEXT._X86_DiskReset class=CODE
-_X86_DiskReset:
+section _TEXT._BIOS_DiskReset class=CODE
+_BIOS_DiskReset:
     push bp
     mov bp, sp
 
@@ -24,14 +24,14 @@ _X86_DiskReset:
 ; ---------------------------------------
 ; reads sectors from floppy disk given the
 ; CHS and the sector count
-; void _cdecl X86_DiskRead
+; void _cdecl BIOS_DiskRead
 ; (
 ;     u8 DriveNumber, u16 Cylinder, u16 Head,
 ;     u16 Sector, u8 SectorCount, u8 far *DataOut
 ; );
 ; ---------------------------------------
-section _TEXT._X86_DiskRead class=CODE
-_X86_DiskRead:
+section _TEXT._BIOS_DiskRead class=CODE
+_BIOS_DiskRead:
     push bp
     mov bp, sp
 
@@ -78,14 +78,14 @@ _X86_DiskRead:
 ; ---------------------------------------
 ; writes sectors to floppy disk given the
 ; CHS and the sector count
-; void _cdecl X86_DiskWrite
+; void _cdecl BIOS_DiskWrite
 ; (
 ;     u8 DriveNumber, u16 Cylinder, u16 Head,
 ;     u16 Sector, u8 SectorCount, u8 far *DataIn
 ; );
 ; ---------------------------------------
-section _TEXT._X86_DiskWrite class=CODE
-_X86_DiskWrite:
+section _TEXT._BIOS_DiskWrite class=CODE
+_BIOS_DiskWrite:
     push bp
     mov bp, sp
 
@@ -131,14 +131,14 @@ _X86_DiskWrite:
 
 ; ---------------------------------------
 ;
-; void _cdecl X86_GetDiskDriveParameters
+; void _cdecl BIOS_GetDiskDriveParameters
 ; (
 ;     u8 DriveNumber, u8 *DriveTypeOut, u16 *CylindersOut,
 ;     u16 *SectorsOut, u16 *HeadsOut
 ; );
 ; ---------------------------------------
-section _TEXT._X86_GetDiskDriveParameters class=CODE
-_X86_GetDiskDriveParameters:
+section _TEXT._BIOS_GetDiskDriveParameters class=CODE
+_BIOS_GetDiskDriveParameters:
     push bp
     mov bp, sp
 

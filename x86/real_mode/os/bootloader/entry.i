@@ -4,13 +4,13 @@ extern _cstart
 
 global entry
 
-global _X86_PrintCharacter
+global _BIOS_PrintCharacter
 
-global _X86_DivideU64ByU32
+global _DivideU64ByU32
 global __U4D
 global __U4M
 
-global _X86_DiskReset
-global _X86_DiskRead
-global _X86_DiskWrite
-global _X86_GetDiskDriveParameters
+global _BIOS_DiskReset
+global _BIOS_DiskRead
+global _BIOS_DiskWrite
+global _BIOS_GetDiskDriveParameters
