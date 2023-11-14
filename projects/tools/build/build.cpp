@@ -42,12 +42,12 @@
 #include "projects\handmade_hero\build.cpp"
 #include "projects\demos\imgui\build.cpp"
 #include "projects\ray_tracer\build.cpp"
-#include "projects\os\boot_sector\build.cpp"
-#include "projects\os\bootloader\build.cpp"
-#include "projects\os\kernel\build.cpp"
-#include "projects\os\build.cpp"
-#include "projects\os_protected_mode\boot_sector\build.cpp"
-#include "projects\os_protected_mode\build.cpp"
+#include "projects\low_level\os\boot_sector\build.cpp"
+#include "projects\low_level\os\bootloader\build.cpp"
+#include "projects\low_level\os\kernel\build.cpp"
+#include "projects\low_level\os\build.cpp"
+#include "projects\low_level\os_protected_mode\boot_sector\build.cpp"
+#include "projects\low_level\os_protected_mode\build.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {

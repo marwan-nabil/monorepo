@@ -2,7 +2,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "bootloader");
 
-    AddSourceFile(BuildContext, "\\projects\\os\\bootloader\\entry.s");
+    AddSourceFile(BuildContext, "\\projects\\low_level\\os\\bootloader\\entry.s");
     SetOuputBinaryPath(BuildContext, "\\entry.obj");
     AddCompilerFlags(BuildContext, "-f obj");
     SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
@@ -13,7 +13,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
     }
     ClearBuildContext(BuildContext);
 
-    AddSourceFile(BuildContext, "\\projects\\os\\bootloader\\main.c");
+    AddSourceFile(BuildContext, "\\projects\\low_level\\os\\bootloader\\main.c");
     SetOuputBinaryPath(BuildContext, "\\main.obj");
     AddCompilerFlags(BuildContext, "-4 -d3 -s -ms -zl -zq -za99");
     AddCompilerFlags(BuildContext, "-wx -wcd=138 -wcd=202");
@@ -26,7 +26,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
     ClearBuildContext(BuildContext);
 
     AddLinkerInputFile(BuildContext, "\\*.obj");
-    AddSourceFile(BuildContext, "\\projects\\os\\bootloader\\linker.ls");
+    AddSourceFile(BuildContext, "\\projects\\low_level\\os\\bootloader\\linker.ls");
     SetOuputBinaryPath(BuildContext, "\\bootloader.img");
     BuildSuccess = LinkWithWatcom(BuildContext);
 

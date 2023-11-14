@@ -1,6 +1,6 @@
 bits 16
 
-%include "projects\os\bootloader\entry.i"
+%include "projects\low_level\os\bootloader\entry.i"
 
 %include "libraries\x86_real\bios\strings.s"
 %include "libraries\x86_real\bios\disk.s"
