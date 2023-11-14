@@ -1,10 +1,10 @@
 bits 16
 
-%include "x86\os\bootloader\entry.i"
+%include "x86\real_mode\os\bootloader\entry.i"
 
-%include "x86\shared\strings\strings.s"
-%include "x86\shared\math\integers.s"
-%include "x86\shared\disk\disk.s"
+%include "x86\real_mode\shared\strings\strings.s"
+%include "x86\real_mode\shared\math\integers.s"
+%include "x86\real_mode\shared\disk\disk.s"
 
 ; --------------------
 ; data
