@@ -9,15 +9,15 @@
 #include <time.h>
 #include <shlwapi.h>
 
-#include "win32\shared\base_types.h"
-#include "win32\shared\basic_defines.h"
-#include "win32\shared\console\console.h"
-#include "win32\shared\file_system\files.h"
+#include "libraries\win32\base_types.h"
+#include "libraries\win32\basic_defines.h"
+#include "libraries\win32\console\console.h"
+#include "libraries\win32\file_system\files.h"
 #include "lint.h"
 
-#include "win32\shared\math\scalar_conversions.cpp"
-#include "win32\shared\console\console.cpp"
-#include "win32\shared\file_system\files.cpp"
+#include "libraries\win32\math\scalar_conversions.cpp"
+#include "libraries\win32\console\console.cpp"
+#include "libraries\win32\file_system\files.cpp"
 
 char RootDirectoryPath[1024];
 

@@ -2,9 +2,9 @@ bits 16
 
 %include "projects\os\bootloader\entry.i"
 
-%include "x86\real_mode\shared\bios\strings.s"
-%include "x86\real_mode\shared\bios\disk.s"
-%include "x86\shared\math\integers.s"
+%include "libraries\x86_real\bios\strings.s"
+%include "libraries\x86_real\bios\disk.s"
+%include "libraries\x86_real\math\integers.s"
 
 ; --------------------
 ; data

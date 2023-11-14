@@ -5,15 +5,15 @@
 #include <strsafe.h>
 #include <io.h>
 
-#include "win32\shared\base_types.h"
-#include "win32\shared\basic_defines.h"
-#include "win32\shared\console\console.h"
+#include "libraries\win32\base_types.h"
+#include "libraries\win32\basic_defines.h"
+#include "libraries\win32\console\console.h"
 #include "compilation_tests.h"
 
-#include "win32\shared\console\console.cpp"
-#include "win32\shared\strings\strings.cpp"
-#include "win32\shared\processes\processes.cpp"
-#include "win32\shared\timing\timing.cpp"
+#include "libraries\win32\console\console.cpp"
+#include "libraries\win32\strings\strings.cpp"
+#include "libraries\win32\processes\processes.cpp"
+#include "libraries\win32\timing\timing.cpp"
 
 console_context GlobalConsoleContext;
 
@@ -32,6 +32,7 @@ test_job_configuration TestJobConfiguration[] =
     NULL, "build fetch_data",
     NULL, "build fat12_tests",
     NULL, "build x86_os",
+    NULL, "build x86_protected_os",
 };
 
 void ProcessJob(test_job *Job)
