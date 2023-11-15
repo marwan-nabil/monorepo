@@ -28,15 +28,16 @@ projects/
         directx/ --> demo program for directx
         imgui/ --> demo program for imgui library
     handmade_hero/ --> handmade hero game
-    os/ --> real mode os
-        boot_sector/ --> code for the bootsector bootloader
-        bootloader/ --> code for the main kernel bootloader
-        kernel/ --> code for the main kernel
-    os_protected_mode/ --> x86 protected mode os
-        boot_sector/ --> code for the bootsector bootloader
+    low_level/
+        os_real/ --> real mode os
+            boot_sector/ --> code for the bootsector bootloader
+            bootloader/ --> code for the main kernel bootloader
+            kernel/ --> code for the main kernel
+        os_protected/ --> x86 protected mode os
+            boot_sector/ --> code for the bootsector bootloader
     ray_tracer/ --> software ray tracer
     simulator/ --> physical simulation experiments
-    tests/ --> test programs for shared code or other projects
+    tests/
         compilation_tests/ --> program that tests all compilation targets
         fat12_tests/ --> tests the fat12 win32 shared code
     tools/

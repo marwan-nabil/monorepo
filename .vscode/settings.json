@@ -3,7 +3,7 @@
 
     "files.exclude":
     {
-        // "win32": true,
+        "libraries/win32": true,
     },
 
     "C_Cpp.default.defines":
@@ -30,7 +30,7 @@
         // lint
         "JOB_PER_FILE=",
 
-        // x86_os
+        // x86_real_os
         "_cdecl=",
         "far=",
     ],

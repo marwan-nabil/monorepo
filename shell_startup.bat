@@ -21,7 +21,5 @@ call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 
 if not exist output; mkdir output
 if not exist tools; mkdir tools
-cd tools
+cd output
 call bootstrap
-cd ..\output
-cls

@@ -42,12 +42,12 @@
 #include "projects\handmade_hero\build.cpp"
 #include "projects\demos\imgui\build.cpp"
 #include "projects\ray_tracer\build.cpp"
-#include "projects\low_level\os\boot_sector\build.cpp"
-#include "projects\low_level\os\bootloader\build.cpp"
-#include "projects\low_level\os\kernel\build.cpp"
-#include "projects\low_level\os\build.cpp"
-#include "projects\low_level\os_protected_mode\boot_sector\build.cpp"
-#include "projects\low_level\os_protected_mode\build.cpp"
+#include "projects\low_level\os_real\boot_sector\build.cpp"
+#include "projects\low_level\os_real\bootloader\build.cpp"
+#include "projects\low_level\os_real\kernel\build.cpp"
+#include "projects\low_level\os_real\build.cpp"
+#include "projects\low_level\os_protected\boot_sector\build.cpp"
+#include "projects\low_level\os_protected\build.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {
@@ -60,8 +60,8 @@ build_target_config BuildTargetConfigurations[] =
     {"handmade_hero", &BuildHandmadeHero, NULL, NULL, NULL},
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
-    {"x86_os", &Buildx86Os, NULL, NULL, NULL},
-    {"x86_protected_os", &BuildProtectedModeOs, NULL, NULL, NULL},
+    {"x86_real_os", &BuildX86RealOs, NULL, NULL, NULL},
+    {"x86_protected_os", &BuildX86ProtectedOs, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;

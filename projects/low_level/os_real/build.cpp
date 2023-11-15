@@ -54,7 +54,7 @@ static b32 BuildFloppyDiskImage(build_context *BuildContext)
     return BuildSuccess;
 }
 
-static b32 Buildx86Os(build_context *BuildContext)
+static b32 BuildX86RealOs(build_context *BuildContext)
 {
     b32 BuildSuccess = BuildBootSectorImage(BuildContext);
     if (!BuildSuccess)

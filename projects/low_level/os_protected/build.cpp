@@ -23,7 +23,7 @@ static b32 BuildProtectedModeOsFloppyImage(build_context *BuildContext)
     return BuildSuccess;
 }
 
-static b32 BuildProtectedModeOs(build_context *BuildContext)
+static b32 BuildX86ProtectedOs(build_context *BuildContext)
 {
     b32 BuildSuccess = BuildProtectedModeBootSectorImage(BuildContext);
     if (!BuildSuccess)

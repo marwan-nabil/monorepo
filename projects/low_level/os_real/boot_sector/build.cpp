@@ -1,7 +1,7 @@
 static b32 BuildBootSectorImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "boot_sector");
-    AddSourceFile(BuildContext, "\\projects\\low_level\\os\\boot_sector\\entry.s");
+    AddSourceFile(BuildContext, "\\projects\\low_level\\os_real\\boot_sector\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin");
     SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
     SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);

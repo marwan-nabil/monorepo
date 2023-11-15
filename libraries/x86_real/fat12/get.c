@@ -149,7 +149,7 @@ GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName
                 DirectoryName,
                 StringLengthFar(DirectoryName)
             )
-            == 
+            ==
             0
         )
         {

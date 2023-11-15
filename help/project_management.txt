@@ -6,21 +6,27 @@
 -----------------------
 ==> categorized backlog
 -----------------------
-tests:
+projects/tests/compilation_tests:
   - improve compilation tests console messages:
     - info messages should denote the beginning and ending of the test clearly,
       because all the tests are usually run sequentially and output in a single log.
     - it should be indicated clearly if not all tests have succeeded.
+  - failed tests have extra error information provided.
+  - build dependency graph of #include'ed files in compile targets.
+  - store the test results permanently, with info about dependencies.
+  - check on the last modification before running a test for a target.
+  - only rerun the test if necessary, meaning, if one of the target
+    dependencies changed since the last test run.
 
-x86:
-  - optimize the file_io and fat12 libraries:
-    - tighter integration with the fat12 driver (ideally should be one standalone driver).
-
-build system:
+projects/tools/build:
   - solve the environment setup issue where watcom paths will contain tools that
     conflict with msvc tools also included in path. Location: shell_startup_windows.bat.
 
-handmade_hero:
+libraries/x86_real:
+  - optimize the file_io and fat12 libraries:
+    - tighter integration with the fat12 driver (ideally should be one standalone driver).
+
+projects/handmade_hero:
   - improve collision rule storage data structure to optimize for insertion and clearing.
   - fix buggy Z handling in entity.cpp AddGoundBasedStorageEntity().
   - improve velocity and postition update accuracy in MoveEntity().
@@ -40,23 +46,15 @@ handmade_hero:
   - in world.cpp CanonicalizeIntervalIndexAndOffset() fix this shit (truncation party).
   - in world.cpp GetWorldPositionFromTilePosition() fix buggy Z handling.
 
-ray_tracer:
+projects/ray_tracer:
   - fix BRDF table lookup or use a different BRDF implementation.
 
-lint:
+projects/tools/lint:
   - make linting smarter by not having to touch all the files every time.
   - only lint files that were modified since last lint time.
   - this requires that we save the last lint time in a metadata .json file.
 
-compilation_tests:
-  - failed tests have extra error information provided.
-  - build dependency graph of #include'ed files in compile targets.
-  - store the test results permanently, with info about dependencies.
-  - check on the last modification before running a test for a target.
-  - only rerun the test if necessary, meaning, if one of the target
-    dependencies changed since the last test run.
-
-win32/shared:
+libraries/win32:
   - math:
     - create tests for the math library.
     - in simd/4_wide/integers.cpp decide between the 2 HorizontalAdd() implementations.
