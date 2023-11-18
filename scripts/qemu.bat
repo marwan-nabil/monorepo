@@ -1,3 +1,5 @@
 @echo off
 
-qemu-system-x86_64 -drive format=raw,file=x86_protected_os\floppy.img
+pushd %1
+    qemu-system-x86_64 -drive format=raw,file=floppy.img
+popd

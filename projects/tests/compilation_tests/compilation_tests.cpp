@@ -31,8 +31,8 @@ test_job_configuration TestJobConfiguration[] =
     NULL, "build lint",
     NULL, "build fetch_data",
     NULL, "build fat12_tests",
-    NULL, "build x86_real_os",
-    NULL, "build x86_protected_os",
+    NULL, "build os_real",
+    NULL, "build os_protected",
 };
 
 void ProcessJob(test_job *Job)

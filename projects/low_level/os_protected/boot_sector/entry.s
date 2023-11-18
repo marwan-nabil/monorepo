@@ -10,14 +10,16 @@ org 0x7C00
 %define KEYBOARD_CONTROLLER_COMMAND_READ 0xD0
 %define KEYBOARD_CONTROLLER_COMMAND_WRITE 0xD1
 
+%define VGA_SCREEN_BUFFER 0xB8000
+
 ; ================================================================= ;
 ;                       boot sector code
 ; ================================================================= ;
 ; --------------------
 ; entry point
 ; --------------------
+[bits 16]
 Entry:
-    [bits 16]
     ; initialize segment registers
     xor ax, ax
     mov ds, ax
@@ -27,23 +29,84 @@ Entry:
     ; initialize stack
     mov sp, 0x7C00
 
-    ; ------------------------
-    ; swtich to protected mode
-    ; ------------------------
+    ; swtich to 32 bit protected mode
     cli
     call EnableA20Line
     call SetupGDT
     mov eax, cr0
     or al, 1
     mov cr0, eax
+    jmp dword 0x08:ProtectedMode32BitCode
 
-    jmp dword 0x08:.ProtectedModeCode
+[bits 32]
+ProtectedMode32BitCode:
+    ; setup segment registers
+    mov ax, 0x10
+    mov ds, ax
+    mov ss, ax
 
-.ProtectedModeCode:
-    [bits 32]
-    mov ah, 0x0e
-    mov al, 'H'
+    ; print hello world to VGA display
+    mov esi, HelloWorldStringProtected
+    mov edi, VGA_SCREEN_BUFFER
+    cld
+    mov bl, 1
+
+.Loop:
+    lodsb
+    or al, al
+    jz .Done
+
+    ; write character
+    mov [edi], al
+    inc edi
+
+    ; write color
+    mov [edi], bl
+    inc bl
+    and bl, 0x0F
+    jnz .NotBlackColor
+    or bl, 0x01
+
+.NotBlackColor:
+    inc edi
+    jmp .Loop
+
+.Done:
+    ; swtich to 16 bit protected mode
+    jmp word 0x18:ProtectedMode16BitCode
+
+[bits 16]
+ProtectedMode16BitCode:
+    ; disable protected mode
+    mov eax, cr0
+    and al, 0xFE
+    mov cr0, eax
+
+    ; jump to real mode code
+    jmp word 0x00:RealModeCode
+
+[bits 16]
+RealModeCode:
+    ; setup the segment registers
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    sti
+
+    ; test BIOS services to make sure we're in real mode
+    mov si, HelloWorldStringReal
+
+.Loop:
+    lodsb
+    or al, al
+    jz .Done
+    mov ah, 0x0E
     int 0x10
+    jmp .Loop
+
+.Done:
+
 
 .Halt:
     jmp .Halt
@@ -51,8 +114,8 @@ Entry:
 ; ----------------------------
 ; enables the A20 address line
 ; ----------------------------
+[bits 16]
 EnableA20Line:
-    [bits 16]
     call WaitUntilKeyboardControllerCanBeWritten
     mov al, KEYBOARD_CONTROLLER_COMMAND_DISABLE_KEYBOARD
     out KEYBOARD_CONTROLLER_COMMAND_PORT, al
@@ -85,8 +148,8 @@ EnableA20Line:
 ; wait until keyboard controller status bit 2 is cleared
 ; status bit 2 is for the controller input buffer
 ; ----------------------------
+[bits 16]
 WaitUntilKeyboardControllerCanBeWritten:
-    [bits 16]
     in al, KEYBOARD_CONTROLLER_COMMAND_PORT
     test al, 2
     jnz WaitUntilKeyboardControllerCanBeWritten
@@ -96,19 +159,19 @@ WaitUntilKeyboardControllerCanBeWritten:
 ; wait until keyboard controller status bit 1 is cleared
 ; status bit 2 is for the controller output buffer
 ; ----------------------------
+[bits 16]
 WaitUntilKeyboardControllerCanBeRead:
-    [bits 16]
     in al, KEYBOARD_CONTROLLER_COMMAND_PORT
     test al, 1
-    jnz WaitUntilKeyboardControllerCanBeRead
+    jz WaitUntilKeyboardControllerCanBeRead
     ret
 
 ; ----------------------------
 ; sets up the global descriptor table
 ; for protected mode segment access
 ; ----------------------------
+[bits 16]
 SetupGDT:
-    [bits 16]
     lgdt [GlobalDescriptorTableDescriptor]
     ret
 
@@ -116,7 +179,7 @@ SetupGDT:
 ;                       boot sector data
 ; ================================================================= ;
 GlobalDescriptorTable:
-    ; dq 0
+    dq 0
 
     ; 32-bit code segment
     dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
@@ -154,6 +217,11 @@ GlobalDescriptorTableDescriptor:
     dw GlobalDescriptorTableDescriptor - GlobalDescriptorTable - 1
     dd GlobalDescriptorTable
 
+HelloWorldStringProtected:
+    db "Hello world, from protected mode", 0
+
+HelloWorldStringReal:
+    db "Hello world, from real mode", 0
 ; ---------------------------------------
 ; pad with 0 until you reach address 0x7DFE
 ; ---------------------------------------

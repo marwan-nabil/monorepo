@@ -60,8 +60,8 @@ build_target_config BuildTargetConfigurations[] =
     {"handmade_hero", &BuildHandmadeHero, NULL, NULL, NULL},
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
-    {"x86_real_os", &BuildX86RealOs, NULL, NULL, NULL},
-    {"x86_protected_os", &BuildX86ProtectedOs, NULL, NULL, NULL},
+    {"os_real", &BuildX86RealOs, NULL, NULL, NULL},
+    {"os_protected", &BuildX86ProtectedOs, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;

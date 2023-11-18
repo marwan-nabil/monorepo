@@ -4,4 +4,4 @@
 
 ==> binary file manipulation commands
     > wdis aaa.obj --> disassembles object files using watcom tools
-    > wdump aaa --> dump sections of object or executable file
+    > wdump aaa.obj --> dump sections of object or executable file
