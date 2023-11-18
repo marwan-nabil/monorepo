@@ -222,6 +222,7 @@ HelloWorldStringProtected:
 
 HelloWorldStringReal:
     db "Hello world, from real mode", 0
+
 ; ---------------------------------------
 ; pad with 0 until you reach address 0x7DFE
 ; ---------------------------------------

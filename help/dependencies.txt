@@ -1,8 +1,0 @@
-==> build tools:
-    - MSVC: https://visualstudio.microsoft.com/
-    - OpenWatcom: https://sourceforge.net/projects/openwatcom/
-    - NASM: https://nasm.us/
-
-==> emulation and debugging:
-    - qemu: https://www.qemu.org/
-    - bochs: https://sourceforge.net/projects/bochs/

@@ -3,6 +3,9 @@
 
     "files.exclude":
     {
+        // "output": true,
+        // "tools": true,
+        // "data": true,
         // "libraries/win32": true,
         // "libraries/x86_real": true,
     },
