@@ -1,41 +1,191 @@
-bits 16
+global Entry
 
-%include "projects\os\bootloader\entry.i"
+extern cstart
+extern __bss_start
+extern __bss_end
 
-%include "libraries\x86\bios\strings.s"
-%include "libraries\x86\bios\disk.s"
-%include "libraries\x86\math\integers.s"
+; ================================================================= ;
+;                              definitions
+; ================================================================= ;
+%define CRLF 0x0D, 0x0A
 
-; --------------------
-; data
-; --------------------
-section .data
-BootloaderEntryMessage:
-    db 'Bootloader Entered...', CRLF, 0
+%define KEYBOARD_CONTROLLER_DATA_PORT 0x60
+%define KEYBOARD_CONTROLLER_COMMAND_PORT 0x64
 
-section .data
-DataSegmentAlignmentPadding:
-    db 0, 0, 0, 0, 0, 0, 0
+%define KEYBOARD_CONTROLLER_COMMAND_DISABLE_KEYBOARD 0xAD
+%define KEYBOARD_CONTROLLER_COMMAND_ENABLE_KEYBOARD 0xAE
+%define KEYBOARD_CONTROLLER_COMMAND_READ 0xD0
+%define KEYBOARD_CONTROLLER_COMMAND_WRITE 0xD1
 
-; --------------------
-; entry point
-; --------------------
+; ================================================================= ;
+;                              code
+; ================================================================= ;
+; ---------------------
+; real mode entry point
+; ---------------------
+[bits 16]
 section .entry
-entry:
-    mov si, BootloaderEntryMessage
-    call BIOS_PrintString
-
+Entry:
     cli
+
+    ; save the boot drive number
+    mov [BootDrive], dl
+
+    ; initialize stack
     mov ax, ds
     mov ss, ax
     mov sp, 0
     mov bp, sp
-    sti
 
-    xor dh, dh
-    push dx
+    ; swtich to 32 bit protected mode
+    call EnableA20Line
+    call SetupGDT
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+    jmp dword 0x08:ProtectedModeEntryPoint
+
+; --------------------------
+; protected mode entry point
+; --------------------------
+[bits 32]
+section .text
+ProtectedModeEntryPoint:
+    ; setup segment registers
+    mov ax, 0x10
+    mov ds, ax
+    mov ss, ax
+
+    ; clear .bss
+    mov edi, __bss_start
+    mov ecx, __bss_end
+    sub ecx, __bss_start
+    mov al, 0
+    cld
+    rep stosb
+
+    ; jump to c code
+    xor edx, edx
+    mov dl, [BootDrive]
+    push edx
     call cstart
 
-    ; _cstart should not return
+    ; unreachable code
     cli
     hlt
+
+; ----------------------------
+; enables the A20 address line
+; ----------------------------
+[bits 16]
+section .text
+EnableA20Line:
+    call WaitUntilKeyboardControllerCanBeWritten
+    mov al, KEYBOARD_CONTROLLER_COMMAND_DISABLE_KEYBOARD
+    out KEYBOARD_CONTROLLER_COMMAND_PORT, al
+
+    call WaitUntilKeyboardControllerCanBeWritten
+    mov al, KEYBOARD_CONTROLLER_COMMAND_READ
+    out KEYBOARD_CONTROLLER_COMMAND_PORT, al
+
+    call WaitUntilKeyboardControllerCanBeRead
+    in al, KEYBOARD_CONTROLLER_DATA_PORT
+    push eax
+
+    call WaitUntilKeyboardControllerCanBeWritten
+    mov al, KEYBOARD_CONTROLLER_COMMAND_WRITE
+    out KEYBOARD_CONTROLLER_COMMAND_PORT, al
+
+    call WaitUntilKeyboardControllerCanBeWritten
+    pop eax
+    or al, 2 ; set the A20 line bit
+    out KEYBOARD_CONTROLLER_DATA_PORT, al
+
+    call WaitUntilKeyboardControllerCanBeWritten
+    mov al, KEYBOARD_CONTROLLER_COMMAND_ENABLE_KEYBOARD
+    out KEYBOARD_CONTROLLER_COMMAND_PORT, al
+
+    call WaitUntilKeyboardControllerCanBeWritten
+    ret
+
+; ----------------------------
+; wait until keyboard controller status bit 2 is cleared
+; status bit 2 is for the controller input buffer
+; ----------------------------
+[bits 16]
+section .text
+WaitUntilKeyboardControllerCanBeWritten:
+    in al, KEYBOARD_CONTROLLER_COMMAND_PORT
+    test al, 2
+    jnz WaitUntilKeyboardControllerCanBeWritten
+    ret
+
+; ----------------------------
+; wait until keyboard controller status bit 1 is cleared
+; status bit 2 is for the controller output buffer
+; ----------------------------
+[bits 16]
+section .text
+WaitUntilKeyboardControllerCanBeRead:
+    in al, KEYBOARD_CONTROLLER_COMMAND_PORT
+    test al, 1
+    jz WaitUntilKeyboardControllerCanBeRead
+    ret
+
+; ----------------------------
+; sets up the global descriptor table
+; for protected mode segment access
+; ----------------------------
+[bits 16]
+section .text
+SetupGDT:
+    lgdt [GlobalDescriptorTableDescriptor]
+    ret
+
+; ================================================================= ;
+;                              data
+; ================================================================= ;
+section .data
+GlobalDescriptorTable:
+    dq 0
+
+    ; 32-bit code segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+
+    ; 32-bit data segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+
+    ; 16-bit code segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+
+    ; 16-bit data segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+
+section .data
+GlobalDescriptorTableDescriptor:
+    dw GlobalDescriptorTableDescriptor - GlobalDescriptorTable - 1
+    dd GlobalDescriptorTable
+
+section .data
+BootDrive:
+    db 0

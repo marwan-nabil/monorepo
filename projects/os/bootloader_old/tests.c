@@ -1,6 +1,11 @@
-void StringAndMemoryUtilsTests()
+void MemoryUtilsTests()
 {
-    char *FarString = "far string ";
+
+}
+
+void StringTests()
+{
+    char *FarString = "far string";
     char *FarString2 = "aaaaaaa";
 
     PrintString("\r\n============ formatted print tests ============== \r\n");

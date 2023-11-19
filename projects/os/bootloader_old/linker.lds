@@ -1,11 +1,11 @@
-ENTRY(Entry)
+ENTRY(entry)
 OUTPUT_FORMAT("binary")
 
-__load_address = 0x00000500;
+phys = 0x00000000;
 
 SECTIONS
 {
-    . = __load_address;
+    . = phys;
     .entry :
     {
         __entry_start = .;
@@ -30,7 +30,6 @@ SECTIONS
     {
         __bss_start = .;
         *(.bss)
-        __bss_end = .;
     }
     __end = .;
 }

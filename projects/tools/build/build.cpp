@@ -46,8 +46,6 @@
 #include "projects\os\bootloader\build.cpp"
 #include "projects\os\kernel\build.cpp"
 #include "projects\os\build.cpp"
-#include "projects\os_protected\boot_sector\build.cpp"
-#include "projects\os_protected\build.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {
@@ -61,7 +59,6 @@ build_target_config BuildTargetConfigurations[] =
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
     {"os", &BuildX86RealOs, NULL, NULL, NULL},
-    {"os_protected", &BuildX86ProtectedOs, NULL, NULL, NULL},
 };
 
 console_context GlobalConsoleContext;

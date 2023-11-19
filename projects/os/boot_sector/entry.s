@@ -2,8 +2,8 @@ org 0x7C00
 bits 16
 
 %define CRLF 0x0D, 0x0A
-%define BOOTLOADER_LOAD_SEGMENT 0x2000
-%define BOOTLOADER_LOAD_OFFSET 0x0
+%define BOOTLOADER_LOAD_SEGMENT 0x0
+%define BOOTLOADER_LOAD_OFFSET 0x500
 
 ; --------------------
 ; jump instruction, 3 bytes

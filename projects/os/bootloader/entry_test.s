@@ -1,5 +1,8 @@
-org 0x7C00
+global Entry
 
+; --------------------
+; definitions
+; --------------------
 %define CRLF 0x0D, 0x0A
 
 %define KEYBOARD_CONTROLLER_DATA_PORT 0x60
@@ -12,13 +15,11 @@ org 0x7C00
 
 %define VGA_SCREEN_BUFFER 0xB8000
 
-; ================================================================= ;
-;                       boot sector code
-; ================================================================= ;
-; --------------------
-; entry point
-; --------------------
+; ---------------------
+; real mode entry point
+; ---------------------
 [bits 16]
+section .entry
 Entry:
     ; initialize segment registers
     xor ax, ax
@@ -36,10 +37,14 @@ Entry:
     mov eax, cr0
     or al, 1
     mov cr0, eax
-    jmp dword 0x08:ProtectedMode32BitCode
+    jmp dword 0x08:ProtectedModeEntryPoint
 
+; --------------------------
+; protected mode entry point
+; --------------------------
 [bits 32]
-ProtectedMode32BitCode:
+section .text
+ProtectedModeEntryPoint:
     ; setup segment registers
     mov ax, 0x10
     mov ds, ax
@@ -106,8 +111,6 @@ RealModeCode:
     jmp .Loop
 
 .Done:
-
-
 .Halt:
     jmp .Halt
 
@@ -115,6 +118,7 @@ RealModeCode:
 ; enables the A20 address line
 ; ----------------------------
 [bits 16]
+section .text
 EnableA20Line:
     call WaitUntilKeyboardControllerCanBeWritten
     mov al, KEYBOARD_CONTROLLER_COMMAND_DISABLE_KEYBOARD
@@ -149,6 +153,7 @@ EnableA20Line:
 ; status bit 2 is for the controller input buffer
 ; ----------------------------
 [bits 16]
+section .text
 WaitUntilKeyboardControllerCanBeWritten:
     in al, KEYBOARD_CONTROLLER_COMMAND_PORT
     test al, 2
@@ -160,6 +165,7 @@ WaitUntilKeyboardControllerCanBeWritten:
 ; status bit 2 is for the controller output buffer
 ; ----------------------------
 [bits 16]
+section .text
 WaitUntilKeyboardControllerCanBeRead:
     in al, KEYBOARD_CONTROLLER_COMMAND_PORT
     test al, 1
@@ -171,13 +177,15 @@ WaitUntilKeyboardControllerCanBeRead:
 ; for protected mode segment access
 ; ----------------------------
 [bits 16]
+section .text
 SetupGDT:
     lgdt [GlobalDescriptorTableDescriptor]
     ret
 
 ; ================================================================= ;
-;                       boot sector data
+;                              data
 ; ================================================================= ;
+section .data
 GlobalDescriptorTable:
     dq 0
 
@@ -213,22 +221,15 @@ GlobalDescriptorTable:
     db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
     db 0                        ; base high
 
+section .data
 GlobalDescriptorTableDescriptor:
     dw GlobalDescriptorTableDescriptor - GlobalDescriptorTable - 1
     dd GlobalDescriptorTable
 
+section .data
 HelloWorldStringProtected:
     db "Hello world, from protected mode", 0
 
+section .data
 HelloWorldStringReal:
     db "Hello world, from real mode", 0
-
-; ---------------------------------------
-; pad with 0 until you reach address 0x7DFE
-; ---------------------------------------
-times 510 - ($ - $$) db 0
-
-; -----------------
-; 0x7DFE, boot sector signature, 2 bytes
-; -----------------
-dw 0xAA55
