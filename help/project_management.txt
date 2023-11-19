@@ -21,8 +21,9 @@ projects/tests/compilation_tests:
 projects/tools/build:
   - solve the environment setup issue where watcom paths will contain tools that
     conflict with msvc tools also included in path. Location: shell_startup_windows.bat.
+  - solve the [build clean] not deleting all target folders issue. 
 
-libraries/x86_real:
+libraries/x86:
   - optimize the file_io and fat12 libraries:
     - tighter integration with the fat12 driver (ideally should be one standalone driver).
 

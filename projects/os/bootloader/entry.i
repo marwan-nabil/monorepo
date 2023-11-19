@@ -5,11 +5,11 @@ extern cstart
 global entry
 
 global BIOS_PrintCharacter
+global BIOS_PrintString
 global BIOS_DiskReset
 global BIOS_DiskRead
 global BIOS_DiskWrite
 global BIOS_GetDiskDriveParameters
-
 global DivideU64ByU32
-; global _U4D
-; global _U4M
+
+global BootloaderEntryMessage

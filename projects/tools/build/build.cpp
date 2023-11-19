@@ -42,10 +42,10 @@
 #include "projects\handmade_hero\build.cpp"
 #include "projects\demos\imgui\build.cpp"
 #include "projects\ray_tracer\build.cpp"
-#include "projects\os_real\boot_sector\build.cpp"
-#include "projects\os_real\bootloader\build.cpp"
-#include "projects\os_real\kernel\build.cpp"
-#include "projects\os_real\build.cpp"
+#include "projects\os\boot_sector\build.cpp"
+#include "projects\os\bootloader\build.cpp"
+#include "projects\os\kernel\build.cpp"
+#include "projects\os\build.cpp"
 #include "projects\os_protected\boot_sector\build.cpp"
 #include "projects\os_protected\build.cpp"
 
@@ -60,7 +60,7 @@ build_target_config BuildTargetConfigurations[] =
     {"handmade_hero", &BuildHandmadeHero, NULL, NULL, NULL},
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
-    {"os_real", &BuildX86RealOs, NULL, NULL, NULL},
+    {"os", &BuildX86RealOs, NULL, NULL, NULL},
     {"os_protected", &BuildX86ProtectedOs, NULL, NULL, NULL},
 };
 

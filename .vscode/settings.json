@@ -9,7 +9,7 @@
 
         // "libraries/win32": true,
         "libraries/win32/imgui": true,
-        // "libraries/x86_real": true,
+        // "libraries/x86": true,
     },
 
     "C_Cpp.default.defines":
@@ -36,6 +36,6 @@
         // lint
         "JOB_PER_FILE=",
 
-        // os_real
+        // os
     ],
 }

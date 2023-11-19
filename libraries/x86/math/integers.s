@@ -56,7 +56,7 @@ DivideU64ByU32:
 ;       cx:bx --> remainder
 ; --------------------
 section .text
-_U4D:
+U4D:
     shl edx, 16
     mov dx, ax
     ; edx == dividend
@@ -92,7 +92,7 @@ _U4D:
 ;       CX, BX modified
 ; --------------------------------------
 section .text
-_U4M:
+U4M:
     shl edx, 16 ; dx to upper half of edx
     mov dx, ax ; m1 in edx
     mov eax, edx ; m1 in eax

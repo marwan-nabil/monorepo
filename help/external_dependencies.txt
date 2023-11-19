@@ -4,7 +4,7 @@ dependencies:
 for all projects:
     - MSVC: https://visualstudio.microsoft.com/
 
-for x86_real/protected projects:
+for x86 projects:
     - nasm: https://nasm.us/
     - qemu: https://www.qemu.org/
     - bochs: https://sourceforge.net/projects/bochs/

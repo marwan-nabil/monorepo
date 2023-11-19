@@ -31,7 +31,7 @@ test_job_configuration TestJobConfiguration[] =
     NULL, "build lint",
     NULL, "build fetch_data",
     NULL, "build fat12_tests",
-    NULL, "build os_real",
+    NULL, "build os",
     NULL, "build os_protected",
 };
 
