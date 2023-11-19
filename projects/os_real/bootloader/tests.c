@@ -1,7 +1,7 @@
 void StringAndMemoryUtilsTests()
 {
-    char far *FarString = "far string ";
-    char far *FarString2 = "aaaaaaa";
+    char *FarString = "far string ";
+    char *FarString2 = "aaaaaaa";
 
     PrintString("\r\n============ formatted print tests ============== \r\n");
     PrintFormatted
@@ -71,7 +71,7 @@ void DiskDriverTests(u8 BootDriveNumber)
     MemoryCopyFarToNear
     (
         OEMName,
-        &((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
+        &((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
         ArrayCount(OEMName) - 1
     );
     PrintFormatted("BootSector OEM name: %s\r\n", OEMName);
@@ -80,14 +80,14 @@ void DiskDriverTests(u8 BootDriveNumber)
     MemoryCopyFarToNear
     (
         &BootSignature,
-        &((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->BootSectorSignature,
+        &((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->BootSectorSignature,
         sizeof(u16)
     );
     PrintFormatted("BootSector boot signature: %hx\r\n", BootSignature);
     PrintFormatted("\r\n");
 
     PrintFormatted("modifying OEM name then writing to disk.\r\n");
-    ((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName[0] = 'K';
+    ((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName[0] = 'K';
     WriteDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
 
     PrintFormatted("reading the bootsector back from disk.\r\n");
@@ -97,7 +97,7 @@ void DiskDriverTests(u8 BootDriveNumber)
     MemoryCopyFarToNear
     (
         OEMName,
-        &((boot_sector far *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
+        &((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
         ArrayCount(OEMName) - 1
     );
     PrintFormatted("modified BootSector OEM name: %s\r\n", OEMName);
@@ -110,7 +110,7 @@ void AllocatorTests(u16 BootDriveNumber)
     memory_arena LocalMemoryArena;
     InitializeMemoryArena
     (
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         KiloBytes(10),
         MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS
     );
@@ -122,9 +122,9 @@ void AllocatorTests(u16 BootDriveNumber)
         u32 C;
     } my_struct;
 
-    my_struct far *MyStructInstance = PushStruct((memory_arena far *)&LocalMemoryArena, my_struct);
-    my_struct far *MyStructInstance2 = PushStruct((memory_arena far *)&LocalMemoryArena, my_struct);
-    my_struct far *MyStructInstance3 = PushStruct((memory_arena far *)&LocalMemoryArena, my_struct);
+    my_struct *MyStructInstance = PushStruct((memory_arena *)&LocalMemoryArena, my_struct);
+    my_struct *MyStructInstance2 = PushStruct((memory_arena *)&LocalMemoryArena, my_struct);
+    my_struct *MyStructInstance3 = PushStruct((memory_arena *)&LocalMemoryArena, my_struct);
     PrintFormatted("Pointer of first object allocated:  0x%lx\r\n", (u32)MyStructInstance);
     PrintFormatted("Pointer of second object allocated: 0x%lx\r\n", (u32)MyStructInstance2);
     PrintFormatted("Pointer of third object allocated:  0x%lx\r\n", (u32)MyStructInstance3);
@@ -137,15 +137,15 @@ void PathHandlingTests(u16 BootDriveNumber)
     memory_arena LocalMemoryArena;
     InitializeMemoryArena
     (
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         KiloBytes(10),
         MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS
     );
 
-    file_path_node far *PathListHead = CreateFilePathSegmentList
+    file_path_node *PathListHead = CreateFilePathSegmentList
     (
         "\\aaa\\bbb\\ccc",
-        (memory_arena far *)&LocalMemoryArena
+        (memory_arena *)&LocalMemoryArena
     );
     PrintFormatted
     (
@@ -155,7 +155,7 @@ void PathHandlingTests(u16 BootDriveNumber)
         PathListHead->ChildNode->ChildNode->FileName
     );
 
-    char far *LocalString = "\\xxx\\yyy\\zzz";
+    char *LocalString = "\\xxx\\yyy\\zzz";
     PrintFormatted("local string before trimming: %ls\r\n", LocalString);
     RemoveLastSegmentFromPath(LocalString);
     PrintFormatted("local string after trimming: %ls\r\n", LocalString);
@@ -176,20 +176,20 @@ void Fat12Tests(u16 BootDriveNumber)
         MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS
     );
 
-    fat12_ram_disk far *RamDisk = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
+    fat12_ram_disk *RamDisk = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
     InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
 
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         &DiskParameters,
         "\\"
     );
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         &DiskParameters,
         "\\Dir0"
     );
@@ -201,9 +201,9 @@ void Fat12Tests(u16 BootDriveNumber)
         "\\Dir0\\Dir1"
     );
 
-    directory_entry far *FileHandle = GetDirectoryEntryOfFileByPath
+    directory_entry *FileHandle = GetDirectoryEntryOfFileByPath
     (
-        RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\Dir1\\sample.txt"
+        RamDisk, (memory_arena *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\Dir1\\sample.txt"
     );
 
     PrintFormatted("\r\n");
@@ -215,18 +215,18 @@ void Fat12Tests(u16 BootDriveNumber)
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         &DiskParameters,
         "\\"
     );
 
     PrintFormatted("\r\n");
     PrintFormatted("create a new file in sub directory.\r\n");
-    Fat12AddFileByPath(RamDisk, (memory_arena far *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 400);
+    Fat12AddFileByPath(RamDisk, (memory_arena *)&LocalMemoryArena, &DiskParameters, "\\Dir0\\test.txt", NULL, 400);
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         &DiskParameters,
         "\\Dir0"
     );
@@ -238,14 +238,14 @@ void Fat12Tests(u16 BootDriveNumber)
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         &DiskParameters,
         "\\"
     );
     Fat12ListDirectory
     (
         RamDisk,
-        (memory_arena far *)&LocalMemoryArena,
+        (memory_arena *)&LocalMemoryArena,
         &DiskParameters,
         "\\Dir0"
     );
@@ -262,7 +262,7 @@ void FileIoTests(u16 BootDriveNumber)
 {
     PrintString("\r\n=========== File IO tests ================= \r\n");
 
-    file_io_context far *FileIoContext = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
+    file_io_context *FileIoContext = MEMORY_LAYOUT_FILESYSTEM_DATA_FAR_ADDRESS;
     FileIoInitialize
     (
         BootDriveNumber,
@@ -283,16 +283,16 @@ void FileIoTests(u16 BootDriveNumber)
     u32 FileOffset = 0x4B10;
 
     FileSeek(FileIoContext, FileHandle, FileOffset);
-    FileRead(FileIoContext, FileHandle, 29, (u8 far *)LocalStringBuffer);
+    FileRead(FileIoContext, FileHandle, 29, (u8 *)LocalStringBuffer);
     PrintFormatted("Data read from the file: %s\r\n", LocalStringBuffer);
 
     PrintFormatted("overwriting the same data read before with A's ...\r\n");
 
     MemorySetNear(LocalStringBuffer, 'A', 30);
     FileSeek(FileIoContext, FileHandle, FileOffset);
-    FileWrite(FileIoContext, FileHandle, 30, (u8 far *)LocalStringBuffer);
+    FileWrite(FileIoContext, FileHandle, 30, (u8 *)LocalStringBuffer);
 
     FileSeek(FileIoContext, FileHandle, FileOffset);
-    FileRead(FileIoContext, FileHandle, 29, (u8 far *)LocalStringBuffer);
+    FileRead(FileIoContext, FileHandle, 29, (u8 *)LocalStringBuffer);
     PrintFormatted("Data read from the file: %s\r\n", LocalStringBuffer);
 }

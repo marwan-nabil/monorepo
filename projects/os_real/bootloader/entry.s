@@ -9,13 +9,13 @@ bits 16
 ; --------------------
 ; data
 ; --------------------
-section .BootloaderEntryMessage
+section .data
 BootloaderEntryMessage:
     db 'Bootloader Entered...', CRLF, 0
 
-section .DataSegmentAlignmentPadding
-DataSegmentAlignmentPadding:
-    db 0, 0, 0, 0, 0, 0, 0
+; section .data
+; DataSegmentAlignmentPadding:
+;     db 0, 0, 0, 0, 0, 0, 0
 
 ; --------------------
 ; entry point
@@ -23,7 +23,7 @@ DataSegmentAlignmentPadding:
 section .entry
 entry:
     mov si, BootloaderEntryMessage
-    call _BIOS_PrintString
+    call BIOS_PrintString
 
     cli
     mov ax, ds
@@ -34,7 +34,7 @@ entry:
 
     xor dh, dh
     push dx
-    call _cstart
+    call cstart
 
     ; _cstart should not return
     cli

@@ -1,23 +1,23 @@
-void InitializeMemoryArena(memory_arena far *Arena, u32 Size, void far *BaseAddress)
+void InitializeMemoryArena(memory_arena *Arena, u32 Size, void *BaseAddress)
 {
     Arena->Size = Size;
     Arena->Used = 0;
-    Arena->BaseAddress = (u8 far *)BaseAddress;
+    Arena->BaseAddress = (u8 *)BaseAddress;
 }
 
-void FreeMemoryArena(memory_arena far *Arena)
+void FreeMemoryArena(memory_arena *Arena)
 {
     Arena->Used = 0;
 }
 
-void PrintMemoryArenaUsage(memory_arena far *Arena)
+void PrintMemoryArenaUsage(memory_arena *Arena)
 {
     PrintFormatted("Arena usage: %ld bytes.\r\n", Arena->Used);
 }
 
-void far *PushOntoMemoryArena(memory_arena far *Arena, u32 PushSize)
+void *PushOntoMemoryArena(memory_arena *Arena, u32 PushSize)
 {
-    void far *Result = Arena->BaseAddress + Arena->Used;
+    void *Result = Arena->BaseAddress + Arena->Used;
     Arena->Used += PushSize;
     return Result;
 }

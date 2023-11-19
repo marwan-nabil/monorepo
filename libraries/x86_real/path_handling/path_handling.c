@@ -1,5 +1,5 @@
-file_path_node far *
-CreateFilePathSegmentList(char far *FileFullPath, memory_arena far *MemoryArena)
+file_path_node *
+CreateFilePathSegmentList(char *FileFullPath, memory_arena *MemoryArena)
 {
     char LocalPathBuffer[PATH_HANDLING_MAX_PATH];
     MemoryZeroNear(LocalPathBuffer, ArrayCount(LocalPathBuffer));
@@ -8,10 +8,10 @@ CreateFilePathSegmentList(char far *FileFullPath, memory_arena far *MemoryArena)
 
     u32 PathLength = StringLengthNear(LocalPathBuffer);
 
-    file_path_node far *CurrentFilePathNode = PushStruct(MemoryArena, file_path_node);
+    file_path_node *CurrentFilePathNode = PushStruct(MemoryArena, file_path_node);
     MemoryZeroFar(CurrentFilePathNode, sizeof(file_path_node));
 
-    file_path_node far *LastFilePathNode = NULL;
+    file_path_node *LastFilePathNode = NULL;
 
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
     {
@@ -40,7 +40,7 @@ CreateFilePathSegmentList(char far *FileFullPath, memory_arena far *MemoryArena)
     return LastFilePathNode;
 }
 
-void RemoveLastSegmentFromPath(char far *Path)
+void RemoveLastSegmentFromPath(char *Path)
 {
     u32 PathLength = StringLengthFar(Path);
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
@@ -53,7 +53,7 @@ void RemoveLastSegmentFromPath(char far *Path)
     }
 }
 
-u32 GetLastCharacterIndex(char far *String, u32 StringLength, char Character)
+u32 GetLastCharacterIndex(char *String, u32 StringLength, char Character)
 {
     for (i32 CharacterIndex = StringLength - 1; CharacterIndex >= 0; CharacterIndex--)
     {
@@ -68,9 +68,9 @@ u32 GetLastCharacterIndex(char far *String, u32 StringLength, char Character)
 
 void GetFileNameAndExtensionFromString
 (
-    char far *SourceString,
-    char far *FileName, u32 FileNameSize,
-    char far *FileExtension, u32 FileExtensionSize
+    char *SourceString,
+    char *FileName, u32 FileNameSize,
+    char *FileExtension, u32 FileExtensionSize
 )
 {
     u32 SourceStringLength = StringLengthFar(SourceString);

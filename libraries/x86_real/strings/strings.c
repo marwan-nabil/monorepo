@@ -69,7 +69,7 @@ i16 StringCompareNearToNear(char *String1, char *String2, u32 ComparisonRange)
     return 0;
 }
 
-i16 StringCompareFarToFar(char far *String1, char far *String2, u32 ComparisonRange)
+i16 StringCompareFarToFar(char *String1, char *String2, u32 ComparisonRange)
 {
     if
     (
@@ -119,7 +119,7 @@ void StringConcatenateNearToNear(char *Destination, u32 Size, char *Source)
     Destination[CharIndex] = '\0';
 }
 
-void StringConcatenateFarToNear(char *Destination, u32 Size, char far *Source)
+void StringConcatenateFarToNear(char *Destination, u32 Size, char *Source)
 {
     if ((Destination == NULL) || (Source == NULL))
     {
@@ -147,7 +147,7 @@ void StringConcatenateFarToNear(char *Destination, u32 Size, char far *Source)
     Destination[CharIndex] = '\0';
 }
 
-void StringConcatenateNearToFar(char far *Destination, u32 Size, char *Source)
+void StringConcatenateNearToFar(char *Destination, u32 Size, char *Source)
 {
     if ((Destination == NULL) || (Source == NULL))
     {
@@ -175,7 +175,7 @@ void StringConcatenateNearToFar(char far *Destination, u32 Size, char *Source)
     Destination[CharIndex] = '\0';
 }
 
-void StringConcatenateFarToFar(char far *Destination, u32 Size, char far *Source)
+void StringConcatenateFarToFar(char *Destination, u32 Size, char *Source)
 {
     if ((Destination == NULL) || (Source == NULL))
     {
@@ -213,7 +213,7 @@ long int StringLengthNear(char *String)
     return Count;
 }
 
-long int StringLengthFar(char far *String)
+long int StringLengthFar(char *String)
 {
     long int Count = 0;
     while (*String++)
@@ -232,7 +232,7 @@ void PrintString(const char *String)
     }
 }
 
-void PrintStringFar(const char far *String)
+void PrintStringFar(const char *String)
 {
     while (*String)
     {
@@ -334,7 +334,7 @@ i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b
     return ArgumentPointer;
 }
 
-void _cdecl PrintFormatted(const char *FormatString, ...)
+void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
 {
     i16 *ArgumentPointer = (i16 *)&FormatString;
     printf_state FormatStringState = PRINTF_STATE_NORMAL;
@@ -427,7 +427,7 @@ void _cdecl PrintFormatted(const char *FormatString, ...)
                             (LengthType == PRINTF_LENGTH_TYPE_LONG_LONG)
                         )
                         {
-                            PrintStringFar(*(const char far **)ArgumentPointer);
+                            PrintStringFar(*(const char **)ArgumentPointer);
                             ArgumentPointer += 2;
                         }
                         else
@@ -488,7 +488,7 @@ void _cdecl PrintFormatted(const char *FormatString, ...)
     }
 }
 
-void FillFixedSizeStringBuffer(char far *Buffer, u32 BufferSize, char far *SourceString)
+void FillFixedSizeStringBuffer(char *Buffer, u32 BufferSize, char *SourceString)
 {
     if (StringLengthFar(SourceString) >= BufferSize)
     {

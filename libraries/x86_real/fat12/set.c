@@ -1,11 +1,11 @@
 void InitializeFat12RamDisk
 (
-    disk_parameters far *DiskParameters,
-    memory_arena far *MemoryArena,
-    fat12_ram_disk far *RamDisk
+    disk_parameters *DiskParameters,
+    memory_arena *MemoryArena,
+    fat12_ram_disk *RamDisk
 )
 {
-    boot_sector far *RamBootSector = PushStruct(MemoryArena, boot_sector);
+    boot_sector *RamBootSector = PushStruct(MemoryArena, boot_sector);
     ReadDiskSectors(DiskParameters, 0, 1, RamBootSector);
     MemoryCopyFarToFar(&RamDisk->BootSectorHeader, RamBootSector, sizeof(boot_sector_header));
 
@@ -19,7 +19,7 @@ void InitializeFat12RamDisk
     );
 }
 
-void SetFatEntry(fat12_ram_disk far *Disk, u32 ClusterNumber, u16 FatEntry)
+void SetFatEntry(fat12_ram_disk *Disk, u32 ClusterNumber, u16 FatEntry)
 {
     u32 StartingByteIndex = ClusterNumber * 3 / 2;
 
@@ -39,10 +39,10 @@ void SetFatEntry(fat12_ram_disk far *Disk, u32 ClusterNumber, u16 FatEntry)
 
 u16 AllocateDiskClusters
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    void far *Memory,
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    void *Memory,
     u32 Size
 )
 {
@@ -55,7 +55,7 @@ u16 AllocateDiskClusters
     }
 
     u32 SizeLeft = Size;
-    char far *ReadPointer = (char far *)Memory;
+    char *ReadPointer = (char *)Memory;
     u16 PreviousClusterNumber = 0;
 
     for (u32 ClusterIndex = 0; ClusterIndex < ClustersNeeded; ClusterIndex++)
@@ -84,7 +84,7 @@ u16 AllocateDiskClusters
             BytesToZero = FAT12_SECTOR_SIZE - SizeLeft;
         }
 
-        sector far *RamSector = PushStruct(MemoryArena, sector);
+        sector *RamSector = PushStruct(MemoryArena, sector);
         ReadDiskSectors(DiskParameters, SectorIndex, 1, RamSector->Bytes);
 
         if (ReadPointer)
@@ -115,13 +115,13 @@ u16 AllocateDiskClusters
 
 b8 AllocateFileToDirectoryEntry
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *DirectoryEntry,
-    char far *FileName,
-    char far *Extension,
-    void far *Memory,
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    directory_entry *DirectoryEntry,
+    char *FileName,
+    char *Extension,
+    void *Memory,
     u32 Size
 )
 {
@@ -144,11 +144,11 @@ b8 AllocateFileToDirectoryEntry
 
 b8 AllocateDirectoryToDirectoryEntry
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *DirectoryEntry,
-    char far *DirectoryName
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    directory_entry *DirectoryEntry,
+    char *DirectoryName
 )
 {
     u16 ClusterNumber = AllocateDiskClusters(Disk, MemoryArena, DiskParameters, 0, FAT12_SECTOR_SIZE);
@@ -166,21 +166,21 @@ b8 AllocateDirectoryToDirectoryEntry
     return FALSE;
 }
 
-directory_entry far *
+directory_entry *
 AddFileToRootDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    char far *FileName,
-    char far *Extension,
-    void far *Memory,
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    char *FileName,
+    char *Extension,
+    void *Memory,
     u32 Size
 )
 {
     u16 FoundSectorLBA = 0;
-    sector far *FoundSector = NULL;
-    directory_entry far *FoundDirectoryEntry = NULL;
+    sector *FoundSector = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
     {
@@ -213,7 +213,7 @@ AddFileToRootDirectory
 
     if (Result)
     {
-        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -222,18 +222,18 @@ AddFileToRootDirectory
     }
 }
 
-directory_entry far *
+directory_entry *
 AddDirectoryToRootDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    char far *DirectoryName
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    char *DirectoryName
 )
 {
     u16 FoundSectorLBA = 0;
-    sector far *FoundSector = NULL;
-    directory_entry far *FoundDirectoryEntry = NULL;
+    sector *FoundSector = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
     {
@@ -263,7 +263,7 @@ AddDirectoryToRootDirectory
 
     if (Result)
     {
-        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -272,22 +272,22 @@ AddDirectoryToRootDirectory
     }
 }
 
-directory_entry far *
+directory_entry *
 AddFileToDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *ParentDirectory,
-    char far *FileName,
-    char far *Extension,
-    void far *Memory,
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    directory_entry *ParentDirectory,
+    char *FileName,
+    char *Extension,
+    void *Memory,
     u32 Size
 )
 {
     u16 FoundSectorLBA = 0;
-    sector far *FoundSector = NULL;
-    directory_entry far *FoundDirectoryEntry = NULL;
+    sector *FoundSector = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     u16 CurrentClusterNumber = ParentDirectory->ClusterNumberLowWord;
     u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
@@ -296,7 +296,7 @@ AddFileToDirectory
     {
         FoundSectorLBA = TranslateFatClusterNumberToSectorIndex(CurrentClusterNumber);
         FoundSector = PushStruct(MemoryArena, sector);
-        ReadDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        ReadDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 *)FoundSector);
         FoundDirectoryEntry = GetFirstFreeDirectoryEntryInSector(FoundSector);
 
         if (FoundDirectoryEntry)
@@ -337,7 +337,7 @@ AddFileToDirectory
 
     if (Result)
     {
-        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -346,19 +346,19 @@ AddFileToDirectory
     }
 }
 
-directory_entry far *
+directory_entry *
 AddDirectoryToDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *ParentDirectory,
-    char far *DirectoryName
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    directory_entry *ParentDirectory,
+    char *DirectoryName
 )
 {
     u16 FoundSectorLBA = 0;
-    sector far *FoundSector = NULL;
-    directory_entry far *FoundDirectoryEntry = NULL;
+    sector *FoundSector = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     u16 CurrentClusterNumber = ParentDirectory->ClusterNumberLowWord;
     u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
@@ -367,7 +367,7 @@ AddDirectoryToDirectory
     {
         FoundSectorLBA = TranslateFatClusterNumberToSectorIndex(CurrentClusterNumber);
         FoundSector = PushStruct(MemoryArena, sector);
-        ReadDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        ReadDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 *)FoundSector);
         FoundDirectoryEntry = GetFirstFreeDirectoryEntryInSector(FoundSector);
 
         if (FoundDirectoryEntry)
@@ -405,7 +405,7 @@ AddDirectoryToDirectory
 
     if (Result)
     {
-        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 far *)FoundSector);
+        WriteDiskSectors(DiskParameters, FoundSectorLBA, 1, (u8 *)FoundSector);
         return FoundDirectoryEntry;
     }
     else
@@ -414,14 +414,14 @@ AddDirectoryToDirectory
     }
 }
 
-directory_entry far *
+directory_entry *
 Fat12AddFileByPath
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    char far *FullFilePath,
-    void far *Memory,
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    char *FullFilePath,
+    void *Memory,
     u32 Size
 )
 {
@@ -430,7 +430,7 @@ Fat12AddFileByPath
         return NULL;
     }
 
-    file_path_node far *CurrentPathNode = CreateFilePathSegmentList(FullFilePath, MemoryArena);
+    file_path_node *CurrentPathNode = CreateFilePathSegmentList(FullFilePath, MemoryArena);
 
     char LocalFileName[8];
     char LocalFileExtension[3];
@@ -444,7 +444,7 @@ Fat12AddFileByPath
 
     if (!CurrentPathNode->ChildNode)
     {
-        directory_entry far *FileDirectoryEntry = GetDirectoryEntryOfFileInRootDirectory
+        directory_entry *FileDirectoryEntry = GetDirectoryEntryOfFileInRootDirectory
         (
             Disk,
             LocalFileName,
@@ -471,7 +471,7 @@ Fat12AddFileByPath
         }
     }
 
-    directory_entry far *CurrentDirectoryEntry =
+    directory_entry *CurrentDirectoryEntry =
         GetDirectoryEntryOfDirectoryInRootDirectory(Disk, LocalFileName);
     CurrentPathNode = CurrentPathNode->ChildNode;
 
@@ -488,7 +488,7 @@ Fat12AddFileByPath
 
         if (!CurrentPathNode->ChildNode)
         {
-            directory_entry far *FileDirectoryEntry = GetDirectoryEntryOfFileInDirectory
+            directory_entry *FileDirectoryEntry = GetDirectoryEntryOfFileInDirectory
             (
                 Disk,
                 MemoryArena,
@@ -535,13 +535,13 @@ Fat12AddFileByPath
     return NULL;
 }
 
-directory_entry far *
+directory_entry *
 Fat12AddDirectoryByPath
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    char far *DirectoryPath
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    char *DirectoryPath
 )
 {
     if (StringLengthFar(DirectoryPath) == 1)
@@ -549,7 +549,7 @@ Fat12AddDirectoryByPath
         return NULL;
     }
 
-    file_path_node far *CurrentPathNode = CreateFilePathSegmentList(DirectoryPath, MemoryArena);
+    file_path_node *CurrentPathNode = CreateFilePathSegmentList(DirectoryPath, MemoryArena);
 
     if (!CurrentPathNode->ChildNode)
     {
@@ -563,7 +563,7 @@ Fat12AddDirectoryByPath
             CurrentPathNode->FileName
         );
 
-        directory_entry far *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInRootDirectory
+        directory_entry *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInRootDirectory
         (
             Disk,
             LocalDirectoryName
@@ -575,7 +575,7 @@ Fat12AddDirectoryByPath
         }
         else
         {
-            directory_entry far *DirectoryDirectoryEntry = AddDirectoryToRootDirectory
+            directory_entry *DirectoryDirectoryEntry = AddDirectoryToRootDirectory
             (
                 Disk,
                 MemoryArena,
@@ -586,7 +586,7 @@ Fat12AddDirectoryByPath
         }
     }
 
-    directory_entry far *CurrentDirectoryEntry =
+    directory_entry *CurrentDirectoryEntry =
         GetDirectoryEntryOfDirectoryInRootDirectory(Disk, CurrentPathNode->FileName);
     CurrentPathNode = CurrentPathNode->ChildNode;
 
@@ -604,7 +604,7 @@ Fat12AddDirectoryByPath
                 CurrentPathNode->FileName
             );
 
-            directory_entry far *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInDirectory
+            directory_entry *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInDirectory
             (
                 Disk,
                 MemoryArena,

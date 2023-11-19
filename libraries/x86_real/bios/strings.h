@@ -1,3 +1,3 @@
 #pragma once
 
-extern void _cdecl BIOS_PrintCharacter(char Character, u8 Page);
+extern void __attribute__((cdecl)) BIOS_PrintCharacter(char Character, u8 Page);

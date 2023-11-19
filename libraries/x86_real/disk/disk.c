@@ -1,4 +1,4 @@
-void GetDiskDriveParameters(disk_parameters far *DiskParameters, u8 DriveNumber)
+void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
 {
     b8 Result = FALSE;
     u8 DriveType;
@@ -22,7 +22,7 @@ void GetDiskDriveParameters(disk_parameters far *DiskParameters, u8 DriveNumber)
 
 void TranslateLbaToChs
 (
-    disk_parameters far *DiskParameters,
+    disk_parameters *DiskParameters,
     u32 LogicalBlockAddress, u16 *Cylinder, u16 *Head, u16 *Sector
 )
 {
@@ -33,10 +33,10 @@ void TranslateLbaToChs
 
 void ReadDiskSectors
 (
-    disk_parameters far *DiskParameters,
+    disk_parameters *DiskParameters,
     u32 LogicalBlockAddress,
     u8 SectorsToRead,
-    void far *DataOut
+    void *DataOut
 )
 {
     u16 Cylinder, Head, Sector;
@@ -66,10 +66,10 @@ void ReadDiskSectors
 
 void WriteDiskSectors
 (
-    disk_parameters far *DiskParameters,
+    disk_parameters *DiskParameters,
     u32 LogicalBlockAddress,
     u8 SectorsToWrite,
-    u8 far *DataIn
+    u8 *DataIn
 )
 {
     u16 Cylinder, Head, Sector;

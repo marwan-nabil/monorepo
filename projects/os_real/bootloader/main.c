@@ -10,7 +10,7 @@
 #include "libraries\x86_real\fat12\fat12.h"
 #include "libraries\x86_real\file_io\file_io.h"
 
-#include "memory_layout.h"
+#include "projects\os_real\bootloader\memory_layout.h"
 
 #include "libraries\x86_real\memory\memory.c"
 #include "libraries\x86_real\strings\strings.c"
@@ -23,9 +23,9 @@
 #include "libraries\x86_real\fat12\set.c"
 #include "libraries\x86_real\file_io\file_io.c"
 
-#include "tests.c"
+#include "projects\os_real\bootloader\tests.c"
 
-void _cdecl cstart(u16 BootDriveNumber)
+void __attribute__((cdecl)) cstart(u16 BootDriveNumber)
 {
     PrintString("\r\nHello world from C!\r\n");
 
@@ -39,7 +39,7 @@ void _cdecl cstart(u16 BootDriveNumber)
 
     // Fat12Tests(BootDriveNumber);
 
-    FileIoTests(BootDriveNumber);
+    // FileIoTests(BootDriveNumber);
 
     while (1) {};
 }

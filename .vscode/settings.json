@@ -4,9 +4,11 @@
     "files.exclude":
     {
         // "output": true,
-        // "tools": true,
+        "tools": true,
         // "data": true,
+
         // "libraries/win32": true,
+        "libraries/win32/imgui": true,
         // "libraries/x86_real": true,
     },
 
@@ -35,7 +37,5 @@
         "JOB_PER_FILE=",
 
         // os_real
-        "_cdecl=",
-        "far=",
     ],
 }

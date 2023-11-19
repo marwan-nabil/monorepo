@@ -1,8 +1,8 @@
 ; --------------------
 ; writes a character using a BIOS function
 ; --------------------
-section ._BIOS_PrintCharacter
-_BIOS_PrintCharacter:
+section .text
+BIOS_PrintCharacter:
     push bp
     mov bp, sp
 
@@ -29,8 +29,8 @@ _BIOS_PrintCharacter:
 ; in:
 ;       si -> address of string
 ; --------------------
-section ._BIOS_PrintString
-_BIOS_PrintString:
+section .text
+BIOS_PrintString:
     ; save touched register
     push si
     push ax

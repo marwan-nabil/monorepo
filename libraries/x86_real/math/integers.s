@@ -1,8 +1,8 @@
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
-section ._DivideU64ByU32
-_DivideU64ByU32:
+section .text
+DivideU64ByU32:
     ; make new call frame
     push bp ; save old call frame
     mov bp, sp ; initialize new call frame
@@ -55,8 +55,8 @@ _DivideU64ByU32:
 ;       dx:ax --> quotient
 ;       cx:bx --> remainder
 ; --------------------
-section .__U4D
-__U4D:
+section .text
+_U4D:
     shl edx, 16
     mov dx, ax
     ; edx == dividend
@@ -91,8 +91,8 @@ __U4D:
 ; side effects:
 ;       CX, BX modified
 ; --------------------------------------
-section .__U4M
-__U4M:
+section .text
+_U4M:
     shl edx, 16 ; dx to upper half of edx
     mov dx, ax ; m1 in edx
     mov eax, edx ; m1 in eax

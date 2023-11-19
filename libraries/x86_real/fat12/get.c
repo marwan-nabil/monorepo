@@ -28,16 +28,16 @@ u16 TranslateSectorIndexToFatClusterNumber(u16 SectorIndex)
 
 void GetDiskSectorFromFatClusterNumber
 (
-    disk_parameters far *DiskParameters,
-    sector far *SectorLocation,
+    disk_parameters *DiskParameters,
+    sector *SectorLocation,
     u16 ClusterNumber
 )
 {
     u16 LBA = TranslateFatClusterNumberToSectorIndex(ClusterNumber);
-    ReadDiskSectors(DiskParameters, LBA, 1, (u8 far *)SectorLocation);
+    ReadDiskSectors(DiskParameters, LBA, 1, (u8 *)SectorLocation);
 }
 
-u16 GetFatEntryFromClusterNumber(fat12_ram_disk far *Disk, u32 ClusterNumber)
+u16 GetFatEntryFromClusterNumber(fat12_ram_disk *Disk, u32 ClusterNumber)
 {
     u16 Result = 0;
     u32 StartingByteIndex = ClusterNumber * 3 / 2;
@@ -56,7 +56,7 @@ u16 GetFatEntryFromClusterNumber(fat12_ram_disk far *Disk, u32 ClusterNumber)
     return Result;
 }
 
-u16 GetFirstFreeClusterNumber(fat12_ram_disk far *Disk)
+u16 GetFirstFreeClusterNumber(fat12_ram_disk *Disk)
 {
     for (u16 ClusterNumber = 2; ClusterNumber < FAT12_FAT_ENTRIES_IN_FAT; ClusterNumber++)
     {
@@ -69,7 +69,7 @@ u16 GetFirstFreeClusterNumber(fat12_ram_disk far *Disk)
     return 0;
 }
 
-u32 CalculateFreeClusterNumbers(fat12_ram_disk far *Disk)
+u32 CalculateFreeClusterNumbers(fat12_ram_disk *Disk)
 {
     u32 Result = 0;
 
@@ -85,8 +85,8 @@ u32 CalculateFreeClusterNumbers(fat12_ram_disk far *Disk)
     return Result;
 }
 
-directory_entry far *
-GetFirstFreeDirectoryEntryInSector(sector far *Sector)
+directory_entry *
+GetFirstFreeDirectoryEntryInSector(sector *Sector)
 {
     for
     (
@@ -95,7 +95,7 @@ GetFirstFreeDirectoryEntryInSector(sector far *Sector)
         DirectoryEntryIndex++
     )
     {
-        directory_entry far *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
         if (DirectoryEntry->FileName[0] == FAT12_FILENAME_EMPTY_SLOT)
         {
             return DirectoryEntry;
@@ -105,8 +105,8 @@ GetFirstFreeDirectoryEntryInSector(sector far *Sector)
     return NULL;
 }
 
-directory_entry far *
-GetDirectoryEntryOfFileInSector(sector far *Sector, char far *FileName, char far *Extension)
+directory_entry *
+GetDirectoryEntryOfFileInSector(sector *Sector, char *FileName, char *Extension)
 {
     for
     (
@@ -115,7 +115,7 @@ GetDirectoryEntryOfFileInSector(sector far *Sector, char far *FileName, char far
         DirectoryEntryIndex++
     )
     {
-        directory_entry far *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
         if
         (
             (MemoryCompareFarToFar(DirectoryEntry->FileName, FileName, 8) == 0) &&
@@ -129,8 +129,8 @@ GetDirectoryEntryOfFileInSector(sector far *Sector, char far *FileName, char far
     return NULL;
 }
 
-directory_entry far *
-GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName)
+directory_entry *
+GetDirectoryEntryOfDirectoryInSector(sector *Sector, char *DirectoryName)
 {
     for
     (
@@ -139,7 +139,7 @@ GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName
         DirectoryEntryIndex++
     )
     {
-        directory_entry far *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
 
         if
         (
@@ -160,25 +160,25 @@ GetDirectoryEntryOfDirectoryInSector(sector far *Sector, char far *DirectoryName
     return NULL;
 }
 
-directory_entry far *
+directory_entry *
 GetDirectoryEntryOfFileInDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *Directory,
-    char far *FileName,
-    char far *Extension
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    directory_entry *Directory,
+    char *FileName,
+    char *Extension
 )
 {
-    directory_entry far *FoundDirectoryEntry = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     u16 CurrentClusterNumber = Directory->ClusterNumberLowWord;
     u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
 
     for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
-        sector far *PhysicalSector = PushStruct(MemoryArena, sector);
+        sector *PhysicalSector = PushStruct(MemoryArena, sector);
         GetDiskSectorFromFatClusterNumber
         (
             DiskParameters,
@@ -208,24 +208,24 @@ GetDirectoryEntryOfFileInDirectory
     return FoundDirectoryEntry;
 }
 
-directory_entry far *
+directory_entry *
 GetDirectoryEntryOfDirectoryInDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    directory_entry far *Directory,
-    char far *DirectoryName
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    directory_entry *Directory,
+    char *DirectoryName
 )
 {
-    directory_entry far *FoundDirectoryEntry = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     u16 CurrentClusterNumber = Directory->ClusterNumberLowWord;
     u16 CurrentFatEntry = GetFatEntryFromClusterNumber(Disk, CurrentClusterNumber);
 
     for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
-        sector far *PhysicalSector = PushStruct(MemoryArena, sector);
+        sector *PhysicalSector = PushStruct(MemoryArena, sector);
         GetDiskSectorFromFatClusterNumber
         (
             DiskParameters,
@@ -255,15 +255,15 @@ GetDirectoryEntryOfDirectoryInDirectory
     return FoundDirectoryEntry;
 }
 
-directory_entry far *
+directory_entry *
 GetDirectoryEntryOfFileInRootDirectory
 (
-    fat12_ram_disk far *Disk,
-    char far *FileName,
-    char far *Extension
+    fat12_ram_disk *Disk,
+    char *FileName,
+    char *Extension
 )
 {
-    directory_entry far *FoundDirectoryEntry = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     for (u32 SectorIndex = 0; SectorIndex < ArrayCount(Disk->RootDirectory.Sectors); SectorIndex++)
     {
@@ -279,14 +279,14 @@ GetDirectoryEntryOfFileInRootDirectory
     return FoundDirectoryEntry;
 }
 
-directory_entry far *
+directory_entry *
 GetDirectoryEntryOfDirectoryInRootDirectory
 (
-    fat12_ram_disk far *Disk,
-    char far *DirectoryName
+    fat12_ram_disk *Disk,
+    char *DirectoryName
 )
 {
-    directory_entry far *FoundDirectoryEntry = NULL;
+    directory_entry *FoundDirectoryEntry = NULL;
 
     for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
     {
@@ -302,13 +302,13 @@ GetDirectoryEntryOfDirectoryInRootDirectory
     return FoundDirectoryEntry;
 }
 
-directory_entry far *
+directory_entry *
 GetDirectoryEntryOfFileByPath
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    char far *FullFilePath
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    char *FullFilePath
 )
 {
     if (StringLengthFar(FullFilePath) == 1)
@@ -316,13 +316,13 @@ GetDirectoryEntryOfFileByPath
         return NULL;
     }
 
-    file_path_node far *FirstNode = CreateFilePathSegmentList(FullFilePath, MemoryArena);
+    file_path_node *FirstNode = CreateFilePathSegmentList(FullFilePath, MemoryArena);
     if (!FirstNode)
     {
         return NULL;
     }
 
-    file_path_node far *CurrentNode = FirstNode;
+    file_path_node *CurrentNode = FirstNode;
 
     char LocalFileName[8];
     char LocalFileExtension[3];
@@ -332,15 +332,15 @@ GetDirectoryEntryOfFileByPath
     GetFileNameAndExtensionFromString
     (
         CurrentNode->FileName,
-        (char far *)LocalFileName, 8,
-        (char far *)LocalFileExtension, 3
+        (char *)LocalFileName, 8,
+        (char *)LocalFileExtension, 3
     );
 
-    directory_entry far *CurrentEntry = GetDirectoryEntryOfFileInRootDirectory
+    directory_entry *CurrentEntry = GetDirectoryEntryOfFileInRootDirectory
     (
         Disk,
-        (char far *)LocalFileName,
-        (char far *)LocalFileExtension
+        (char *)LocalFileName,
+        (char *)LocalFileExtension
     );
 
     if (CurrentEntry && !CurrentNode->ChildNode)
@@ -358,8 +358,8 @@ GetDirectoryEntryOfFileByPath
         GetFileNameAndExtensionFromString
         (
             CurrentNode->FileName,
-            (char far *)LocalFileName, 8,
-            (char far *)LocalFileExtension, 3
+            (char *)LocalFileName, 8,
+            (char *)LocalFileExtension, 3
         );
 
         CurrentEntry = GetDirectoryEntryOfFileInDirectory
@@ -383,7 +383,7 @@ GetDirectoryEntryOfFileByPath
     return NULL;
 }
 
-void Fat12ListDirectorySector(sector far *Sector)
+void Fat12ListDirectorySector(sector *Sector)
 {
     for
     (
@@ -392,7 +392,7 @@ void Fat12ListDirectorySector(sector far *Sector)
         DirectoryEntryIndex++
     )
     {
-        directory_entry far *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
+        directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
         if (DirectoryEntry->FileName[0] == FAT12_FILENAME_EMPTY_SLOT)
         {
         }
@@ -429,10 +429,10 @@ void Fat12ListDirectorySector(sector far *Sector)
 
 void Fat12ListDirectory
 (
-    fat12_ram_disk far *Disk,
-    memory_arena far *MemoryArena,
-    disk_parameters far *DiskParameters,
-    char far *DirectoryPath
+    fat12_ram_disk *Disk,
+    memory_arena *MemoryArena,
+    disk_parameters *DiskParameters,
+    char *DirectoryPath
 )
 {
     PrintFormatted("\r\nlisting %ls:\r\n", DirectoryPath);
@@ -450,7 +450,7 @@ void Fat12ListDirectory
     }
     else
     {
-        directory_entry far *DirectoryEntry = GetDirectoryEntryOfFileByPath
+        directory_entry *DirectoryEntry = GetDirectoryEntryOfFileByPath
         (
             Disk, MemoryArena, DiskParameters, DirectoryPath
         );
@@ -460,7 +460,7 @@ void Fat12ListDirectory
 
         for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
         {
-            sector far *Sector = PushStruct(MemoryArena, sector);
+            sector *Sector = PushStruct(MemoryArena, sector);
             GetDiskSectorFromFatClusterNumber
             (
                 DiskParameters,

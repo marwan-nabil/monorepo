@@ -1,9 +1,9 @@
 void FileIoInitialize
 (
     u16 DriveNumber,
-    void far *TransientMemoryAddress,
+    void *TransientMemoryAddress,
     u32 TransientMemorySize,
-    file_io_context far *Context
+    file_io_context *Context
 )
 {
     GetDiskDriveParameters(&Context->DiskParameters, DriveNumber);
@@ -25,7 +25,7 @@ void FileIoInitialize
     }
 }
 
-i16 FileOpen(file_io_context far *Context, char far *FilePath)
+i16 FileOpen(file_io_context *Context, char *FilePath)
 {
     if (Context->OpenFilesCount >= FILE_IO_MAX_OPEN_FILES)
     {
@@ -47,8 +47,8 @@ i16 FileOpen(file_io_context far *Context, char far *FilePath)
         return FILE_IO_INVALID_HANDLE;
     }
 
-    file_io_file far *OpenedFile = &Context->OpenFiles[FileHandle];
-    directory_entry far *FileDirectoryEntry = GetDirectoryEntryOfFileByPath
+    file_io_file *OpenedFile = &Context->OpenFiles[FileHandle];
+    directory_entry *FileDirectoryEntry = GetDirectoryEntryOfFileByPath
     (
         &Context->Fat12RamDisk,
         &Context->TransientMemoryArena,
@@ -84,7 +84,7 @@ i16 FileOpen(file_io_context far *Context, char far *FilePath)
     GetDiskSectorFromFatClusterNumber
     (
         &Context->DiskParameters,
-        (sector far *)OpenedFile->Buffer,
+        (sector *)OpenedFile->Buffer,
         OpenedFile->FirstCluster
     );
 
@@ -93,9 +93,9 @@ i16 FileOpen(file_io_context far *Context, char far *FilePath)
     return FileHandle;
 }
 
-void FileRead(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 far *DataOut)
+void FileRead(file_io_context *Context, i16 FileHandle, u32 ByteCount, u8 *DataOut)
 {
-    file_io_file far *File = &Context->OpenFiles[FileHandle];
+    file_io_file *File = &Context->OpenFiles[FileHandle];
 
     for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
@@ -125,7 +125,7 @@ void FileRead(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 fa
                 GetDiskSectorFromFatClusterNumber
                 (
                     &Context->DiskParameters,
-                    (sector far *)File->Buffer,
+                    (sector *)File->Buffer,
                     NextCluster
                 );
                 File->LoadedCluster = NextCluster;
@@ -134,9 +134,9 @@ void FileRead(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 fa
     }
 }
 
-void FileWrite(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 far *DataIn)
+void FileWrite(file_io_context *Context, i16 FileHandle, u32 ByteCount, u8 *DataIn)
 {
-    file_io_file far *File = &Context->OpenFiles[FileHandle];
+    file_io_file *File = &Context->OpenFiles[FileHandle];
 
     for (u32 LoopIndex = 0; LoopIndex < FAT12_SECTORS_IN_DATA_AREA; LoopIndex++)
     {
@@ -180,7 +180,7 @@ void FileWrite(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 f
                 GetDiskSectorFromFatClusterNumber
                 (
                     &Context->DiskParameters,
-                    (sector far *)File->Buffer,
+                    (sector *)File->Buffer,
                     NextCluster
                 );
                 File->LoadedCluster = NextCluster;
@@ -189,9 +189,9 @@ void FileWrite(file_io_context far *Context, i16 FileHandle, u32 ByteCount, u8 f
     }
 }
 
-void FileSeek(file_io_context far *Context, i16 FileHandle, u32 NewSeekPosition)
+void FileSeek(file_io_context *Context, i16 FileHandle, u32 NewSeekPosition)
 {
-    file_io_file far *File = &Context->OpenFiles[FileHandle];
+    file_io_file *File = &Context->OpenFiles[FileHandle];
 
     if (NewSeekPosition < File->Size)
     {
@@ -207,7 +207,7 @@ void FileSeek(file_io_context far *Context, i16 FileHandle, u32 NewSeekPosition)
         GetDiskSectorFromFatClusterNumber
         (
             &Context->DiskParameters,
-            (sector far *)File->Buffer,
+            (sector *)File->Buffer,
             CurrentCluster
         );
 
@@ -216,19 +216,19 @@ void FileSeek(file_io_context far *Context, i16 FileHandle, u32 NewSeekPosition)
     }
 }
 
-u32 FileGetPosition(file_io_context far *Context, i16 FileHandle)
+u32 FileGetPosition(file_io_context *Context, i16 FileHandle)
 {
-    file_io_file far *File = &Context->OpenFiles[FileHandle];
+    file_io_file *File = &Context->OpenFiles[FileHandle];
     return File->Position;
 }
 
-void FileClose(file_io_context far *Context, i16 FileHandle)
+void FileClose(file_io_context *Context, i16 FileHandle)
 {
-    file_io_file far *File = &Context->OpenFiles[FileHandle];
+    file_io_file *File = &Context->OpenFiles[FileHandle];
     File->IsOpen = FALSE;
 }
 
-void ListDirectory(file_io_context far *Context, char *DirectoryFilePath)
+void ListDirectory(file_io_context *Context, char *DirectoryFilePath)
 {
     Fat12ListDirectory
     (

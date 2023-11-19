@@ -6,5 +6,5 @@
 typedef struct _file_path_node
 {
     char FileName[PATH_HANDLING_MAX_FILENAME];
-    struct _file_path_node far *ChildNode;
+    struct _file_path_node *ChildNode;
 } file_path_node;
