@@ -9,18 +9,18 @@ bits 16
 ; --------------------
 ; data
 ; --------------------
-section _ENTRY.BootloaderEntryMessage class=CODE
+section .BootloaderEntryMessage
 BootloaderEntryMessage:
     db 'Bootloader Entered...', CRLF, 0
 
-section _DATA.DataSegmentAlignmentPadding class=DATA
+section .DataSegmentAlignmentPadding
 DataSegmentAlignmentPadding:
     db 0, 0, 0, 0, 0, 0, 0
 
 ; --------------------
 ; entry point
 ; --------------------
-section _ENTRY.entry class=CODE
+section .entry
 entry:
     mov si, BootloaderEntryMessage
     call _BIOS_PrintString

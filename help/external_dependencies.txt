@@ -28,8 +28,9 @@ how to install nasm, watcom, bochs and qemu
 -----------------------------------------------
 how to setup a windows-based gcc cross compiler
 -----------------------------------------------
-- download and install cygwin and some packages:
-    - wget, tar, make, nasm, gcc-g++, bison, flex, libgmp-devel, libmpc-devel, libmpfr-devel, texinfo
+- download and install cygwin in tools/cygwin
+- install those cygwin packages:
+    - wget, tar, make, gcc-g++, bison, flex, libgmp-devel, libmpc-devel, libmpfr-devel, texinfo
 - download latest binutils and gcc source archives, then extract them to output/
 - open cygwin command shell C:\cygwin64\Cygwin.bat and switch to output/ folder
 - setup some environment variables by performing those commands:
@@ -56,6 +57,3 @@ how to setup a windows-based gcc cross compiler
     - make install-gcc
     - make install-target-libgcc
 - binutils and gcc cross compiler are now installed under tools/i686-elf
-
-# when compiling with GCC always use these flags:
-    -std=c99 -g

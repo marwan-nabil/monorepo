@@ -3,7 +3,7 @@
 ; in:
 ;       word [sp + 2] == driver number
 ; ---------------------------------------
-section _TEXT._BIOS_DiskReset class=CODE
+section ._BIOS_DiskReset
 _BIOS_DiskReset:
     push bp
     mov bp, sp
@@ -30,7 +30,7 @@ _BIOS_DiskReset:
 ;     u16 Sector, u8 SectorCount, u8 far *DataOut
 ; );
 ; ---------------------------------------
-section _TEXT._BIOS_DiskRead class=CODE
+section ._BIOS_DiskRead
 _BIOS_DiskRead:
     push bp
     mov bp, sp
@@ -84,7 +84,7 @@ _BIOS_DiskRead:
 ;     u16 Sector, u8 SectorCount, u8 far *DataIn
 ; );
 ; ---------------------------------------
-section _TEXT._BIOS_DiskWrite class=CODE
+section ._BIOS_DiskWrite
 _BIOS_DiskWrite:
     push bp
     mov bp, sp
@@ -137,7 +137,7 @@ _BIOS_DiskWrite:
 ;     u16 *SectorsOut, u16 *HeadsOut
 ; );
 ; ---------------------------------------
-section _TEXT._BIOS_GetDiskDriveParameters class=CODE
+section ._BIOS_GetDiskDriveParameters
 _BIOS_GetDiskDriveParameters:
     push bp
     mov bp, sp

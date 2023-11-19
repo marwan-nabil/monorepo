@@ -1,7 +1,7 @@
 ; --------------------
 ; writes a character using a BIOS function
 ; --------------------
-section _TEXT._BIOS_PrintCharacter class=CODE
+section ._BIOS_PrintCharacter
 _BIOS_PrintCharacter:
     push bp
     mov bp, sp
@@ -29,7 +29,7 @@ _BIOS_PrintCharacter:
 ; in:
 ;       si -> address of string
 ; --------------------
-section _TEXT._BIOS_PrintString class=CODE
+section ._BIOS_PrintString
 _BIOS_PrintString:
     ; save touched register
     push si
