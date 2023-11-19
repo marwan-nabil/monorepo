@@ -5,13 +5,15 @@ for all projects:
     - MSVC: https://visualstudio.microsoft.com/
 
 for x86_real/protected projects:
-    - NASM: https://nasm.us/
-    - OpenWatcom: https://sourceforge.net/projects/openwatcom/
-    - wsl: windows subsystem for linux
+    - nasm: https://nasm.us/
     - qemu: https://www.qemu.org/
     - bochs: https://sourceforge.net/projects/bochs/
-    - gcc source code
-    - binutils source code
+    - OpenWatcom: https://sourceforge.net/projects/openwatcom/ [to be removed]
+
+for building our gcc cross compiler:
+    - cygwin
+    - gcc-13.2.0 source code
+    - binutils-2.41 source code
 
 -------------------------------------------
 how to install nasm, watcom, bochs and qemu
@@ -23,44 +25,37 @@ how to install nasm, watcom, bochs and qemu
     - tools/bochs
     - tools/qemu
 
----------------------------------------------
-how to setup a linux-based gcc cross compiler
----------------------------------------------
-- enable wsl from windows features
-- switch to wsl form a cmd shell
-- install ubuntu
-- install some packages:
-    - sudo apt update
-    - sudo apt install build-essential
-    - modify /etc/apt/sources.list and uncomment the first deb-src line
-    - sudo apt update
-    - sudo apt build-dep gcc-11
-- download the source code of the latest gcc and binutils into data/
-- extract the sources into output/:
-    - tar -xvf ../data/binutils-2.40.90.tar
-    - tar -xvf ../data/gcc-13.2.0.tar.x
+-----------------------------------------------
+how to setup a windows-based gcc cross compiler
+-----------------------------------------------
+- download and install cygwin and some packages:
+    - wget, tar, make, nasm, gcc-g++, bison, flex, libgmp-devel, libmpc-devel, libmpfr-devel, texinfo
+- download latest binutils and gcc source archives, then extract them to output/
+- open cygwin command shell C:\cygwin64\Cygwin.bat and switch to output/ folder
 - setup some environment variables by performing those commands:
     - export PREFIX="$PWD/../tools/i686-elf"
     - export TARGET=i686-elf
     - export PATH="$PREFIX/bin:$PATH"
-- create 2 directories for building both gcc and binutils:
-    - mkdir binutils-build
-    - mkdir gcc-build
-- switch to binutils-build directory: 
-    - cd binutils-build
-- configure, build and install it:
-    - ../binutils-2.40.90/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
+- create the binutils-build and gcc-build directories, then switch to binutils-build
+- configure binutils with the following flags:
+    - ../binutils-2.41/configure --target=$TARGET --prefix=$PREFIX --with-sysroot --disable-nls --disable-werror
+- build binutils:
     - make -sj12
+    - if building binutils fails with the latest version,
+      switch to an older version or 2.41 (guaranteed to work under cygwin)
+- install binutils:
     - make install
-- switch to gcc-build directory: 
-    - cd gcc-build
-- configure, build and install it:
-    - ../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
-    - make gcc-all -sj12
+- switch to gcc-build folder then configure gcc:
+    - ../gcc-13.2.0/configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c,c++ --without-headers
+- build gcc:
+    - make all-gcc -sj12 [currently here]
     - make all-target-libgcc -sj12
+    - if building gcc fails with the latest version,
+      switch to an older version or 13.2.0 (guaranteed to work under cygwin)
+- install gcc:
     - make install-gcc
     - make install-target-libgcc
+- binutils and gcc cross compiler are now installed under tools/i686-elf
 
------------------------------------------------
-TODO: how to setup a windows-based gcc cross compiler
------------------------------------------------
+# when compiling with GCC always use these flags:
+    -std=c99 -g
