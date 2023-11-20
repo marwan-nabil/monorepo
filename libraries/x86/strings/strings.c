@@ -44,10 +44,10 @@ const char *GetCharacterPointer(const char *String, char Character)
 
 void PrintCharacter(char Character)
 {
-    BIOS_PrintCharacter(Character, 0);
+    BIOSPrintCharacter(Character, 0);
 }
 
-i16 StringCompareNearToNear(char *String1, char *String2, u32 ComparisonRange)
+i16 StringCompare(char *String1, char *String2, u32 ComparisonRange)
 {
     if
     (
@@ -69,29 +69,7 @@ i16 StringCompareNearToNear(char *String1, char *String2, u32 ComparisonRange)
     return 0;
 }
 
-i16 StringCompareFarToFar(char *String1, char *String2, u32 ComparisonRange)
-{
-    if
-    (
-        (String1 == NULL) ||
-        (String2 == NULL)
-    )
-    {
-        return -1;
-    }
-
-    for (u32 Index = 0; Index < ComparisonRange; Index++)
-    {
-        if (String1[Index] != String2[Index])
-        {
-            return -1;
-        }
-    }
-
-    return 0;
-}
-
-void StringConcatenateNearToNear(char *Destination, u32 Size, char *Source)
+void StringConcatenate(char *Destination, u32 Size, char *Source)
 {
     if ((Destination == NULL) || (Source == NULL))
     {
@@ -119,101 +97,7 @@ void StringConcatenateNearToNear(char *Destination, u32 Size, char *Source)
     Destination[CharIndex] = '\0';
 }
 
-void StringConcatenateFarToNear(char *Destination, u32 Size, char *Source)
-{
-    if ((Destination == NULL) || (Source == NULL))
-    {
-        return;
-    }
-
-    u32 CharIndex = 0;
-
-    while (Destination[CharIndex])
-    {
-        CharIndex++;
-    }
-
-    for (; CharIndex < (Size - 1); CharIndex++)
-    {
-        if (*Source)
-        {
-            Destination[CharIndex] = *Source++;
-        }
-        else
-        {
-            break;
-        }
-    }
-    Destination[CharIndex] = '\0';
-}
-
-void StringConcatenateNearToFar(char *Destination, u32 Size, char *Source)
-{
-    if ((Destination == NULL) || (Source == NULL))
-    {
-        return;
-    }
-
-    u32 CharIndex = 0;
-
-    while (Destination[CharIndex])
-    {
-        CharIndex++;
-    }
-
-    for (; CharIndex < (Size - 1); CharIndex++)
-    {
-        if (*Source)
-        {
-            Destination[CharIndex] = *Source++;
-        }
-        else
-        {
-            break;
-        }
-    }
-    Destination[CharIndex] = '\0';
-}
-
-void StringConcatenateFarToFar(char *Destination, u32 Size, char *Source)
-{
-    if ((Destination == NULL) || (Source == NULL))
-    {
-        return;
-    }
-
-    u32 CharIndex = 0;
-
-    while (Destination[CharIndex])
-    {
-        CharIndex++;
-    }
-
-    for (; CharIndex < (Size - 1); CharIndex++)
-    {
-        if (*Source)
-        {
-            Destination[CharIndex] = *Source++;
-        }
-        else
-        {
-            break;
-        }
-    }
-    Destination[CharIndex] = '\0';
-}
-
-long int StringLengthNear(char *String)
-{
-    long int Count = 0;
-    while (*String++)
-    {
-        ++Count;
-    }
-    return Count;
-}
-
-long int StringLengthFar(char *String)
+long int StringLength(char *String)
 {
     long int Count = 0;
     while (*String++)
@@ -232,15 +116,6 @@ void PrintString(const char *String)
     }
 }
 
-void PrintStringFar(const char *String)
-{
-    while (*String)
-    {
-        PrintCharacter(*String);
-        String++;
-    }
-}
-
 i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b8 IsSigned, u32 Radix)
 {
     const char HexCharacters[] = "0123456789abcdef";
@@ -249,7 +124,7 @@ i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b
     i32 NumberSign = 1;
     i32 StringBufferPosition = 0;
 
-    MemoryZeroNear((void *)LocalStringBuffer, 32);
+    MemoryZero((void *)LocalStringBuffer, 32);
 
     switch (LengthType)
     {
@@ -427,7 +302,7 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
                             (LengthType == PRINTF_LENGTH_TYPE_LONG_LONG)
                         )
                         {
-                            PrintStringFar(*(const char **)ArgumentPointer);
+                            PrintString(*(const char **)ArgumentPointer);
                             ArgumentPointer += 2;
                         }
                         else
@@ -490,12 +365,12 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
 
 void FillFixedSizeStringBuffer(char *Buffer, u32 BufferSize, char *SourceString)
 {
-    if (StringLengthFar(SourceString) >= BufferSize)
+    if (StringLength(SourceString) >= BufferSize)
     {
-        MemoryCopyFarToFar(Buffer, SourceString, BufferSize);
+        MemoryCopy(Buffer, SourceString, BufferSize);
     }
     else
     {
-        StringConcatenateFarToFar(Buffer, BufferSize, SourceString);
+        StringConcatenate(Buffer, BufferSize, SourceString);
     }
 }

@@ -5,9 +5,9 @@
     {
         // "output": true,
         "tools": true,
-        // "data": true,
+        "data": true,
 
-        // "libraries/win32": true,
+        "libraries/win32": true,
         "libraries/win32/imgui": true,
         // "libraries/x86": true,
     },

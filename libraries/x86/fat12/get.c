@@ -118,8 +118,8 @@ GetDirectoryEntryOfFileInSector(sector *Sector, char *FileName, char *Extension)
         directory_entry *DirectoryEntry = &Sector->DirectoryEntries[DirectoryEntryIndex];
         if
         (
-            (MemoryCompareFarToFar(DirectoryEntry->FileName, FileName, 8) == 0) &&
-            (MemoryCompareFarToFar(DirectoryEntry->FileExtension, Extension, 3) == 0)
+            (MemoryCompare(DirectoryEntry->FileName, FileName, 8) == 0) &&
+            (MemoryCompare(DirectoryEntry->FileExtension, Extension, 3) == 0)
         )
         {
             return DirectoryEntry;
@@ -143,11 +143,11 @@ GetDirectoryEntryOfDirectoryInSector(sector *Sector, char *DirectoryName)
 
         if
         (
-            StringCompareFarToFar
+            StringCompare
             (
                 DirectoryEntry->FileName,
                 DirectoryName,
-                StringLengthFar(DirectoryName)
+                StringLength(DirectoryName)
             )
             ==
             0
@@ -311,7 +311,7 @@ GetDirectoryEntryOfFileByPath
     char *FullFilePath
 )
 {
-    if (StringLengthFar(FullFilePath) == 1)
+    if (StringLength(FullFilePath) == 1)
     {
         return NULL;
     }
@@ -326,8 +326,8 @@ GetDirectoryEntryOfFileByPath
 
     char LocalFileName[8];
     char LocalFileExtension[3];
-    MemoryZeroNear(LocalFileName, 8);
-    MemoryZeroNear(LocalFileExtension, 3);
+    MemoryZero(LocalFileName, 8);
+    MemoryZero(LocalFileExtension, 3);
 
     GetFileNameAndExtensionFromString
     (
@@ -352,8 +352,8 @@ GetDirectoryEntryOfFileByPath
 
     while (CurrentNode)
     {
-        MemoryZeroNear(LocalFileName, ArrayCount(LocalFileName));
-        MemoryZeroNear(LocalFileExtension, ArrayCount(LocalFileExtension));
+        MemoryZero(LocalFileName, ArrayCount(LocalFileName));
+        MemoryZero(LocalFileExtension, ArrayCount(LocalFileExtension));
 
         GetFileNameAndExtensionFromString
         (
@@ -407,8 +407,8 @@ void Fat12ListDirectorySector(sector *Sector)
                 char FileNameString[9];
                 char FileExtensionString[4];
 
-                MemoryCopyFarToNear(FileNameString, DirectoryEntry->FileName, 8);
-                MemoryCopyFarToNear(FileExtensionString, DirectoryEntry->FileExtension, 3);
+                MemoryCopy(FileNameString, DirectoryEntry->FileName, 8);
+                MemoryCopy(FileExtensionString, DirectoryEntry->FileExtension, 3);
 
                 FileNameString[8] = 0;
                 FileExtensionString[3] = 0;
@@ -419,7 +419,7 @@ void Fat12ListDirectorySector(sector *Sector)
             {
                 char FileNameString[9];
 
-                MemoryCopyFarToNear(FileNameString, DirectoryEntry->FileName, 8);
+                MemoryCopy(FileNameString, DirectoryEntry->FileName, 8);
                 FileNameString[8] = 0;
                 PrintFormatted("     DIR:   %s\r\n", FileNameString);
             }
@@ -439,8 +439,8 @@ void Fat12ListDirectory
 
     if
     (
-        (StringLengthFar(DirectoryPath) == 1) &&
-        (MemoryCompareFarToFar(DirectoryPath, "\\", 1) == 0)
+        (StringLength(DirectoryPath) == 1) &&
+        (MemoryCompare(DirectoryPath, "\\", 1) == 0)
     )
     {
         for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)

@@ -7,7 +7,7 @@ void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
     u16 Heads;
 
     DiskParameters->Id = DriveNumber;
-    Result = BIOS_GetDiskDriveParameters(DriveNumber, &DriveType, &Cylinders, &Sectors, &Heads);
+    Result = BIOSGetDiskDriveParameters(DriveNumber, &DriveType, &Cylinders, &Sectors, &Heads);
     if (!Result)
     {
         PrintFormatted("ERROR: GetDiskDriveParameters() failed.\r\n");
@@ -44,7 +44,7 @@ void ReadDiskSectors
 
     for (u16 Retry = 0; Retry < DISK_OPERATION_MAXIMUM_RETRIES; Retry++)
     {
-        b8 ReadOk = BIOS_DiskRead
+        b8 ReadOk = BIOSDiskRead
         (
             DiskParameters->Id,
             Cylinder, Head, Sector,
@@ -57,7 +57,7 @@ void ReadDiskSectors
         }
         else
         {
-            BIOS_DiskReset(DiskParameters->Id);
+            BIOSDiskReset(DiskParameters->Id);
         }
     }
 
@@ -77,7 +77,7 @@ void WriteDiskSectors
 
     for (u16 Retry = 0; Retry < DISK_OPERATION_MAXIMUM_RETRIES; Retry++)
     {
-        b8 WriteOk = BIOS_DiskWrite
+        b8 WriteOk = BIOSDiskWrite
         (
             DiskParameters->Id,
             Cylinder, Head, Sector,
@@ -90,7 +90,7 @@ void WriteDiskSectors
         }
         else
         {
-            BIOS_DiskReset(DiskParameters->Id);
+            BIOSDiskReset(DiskParameters->Id);
         }
     }
 

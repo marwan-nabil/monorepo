@@ -102,14 +102,14 @@ void FileRead(file_io_context *Context, i16 FileHandle, u32 ByteCount, u8 *DataO
         u32 OffsetInSector = File->Position % FAT12_SECTOR_SIZE;
         if ((OffsetInSector + ByteCount) < FAT12_SECTOR_SIZE)
         {
-            MemoryCopyFarToFar(DataOut, &File->Buffer[OffsetInSector], ByteCount);
+            MemoryCopy(DataOut, &File->Buffer[OffsetInSector], ByteCount);
             File->Position += ByteCount;
             return;
         }
         else
         {
             u32 BytesToRead = FAT12_SECTOR_SIZE - OffsetInSector;
-            MemoryCopyFarToFar(DataOut, &File->Buffer[OffsetInSector], BytesToRead);
+            MemoryCopy(DataOut, &File->Buffer[OffsetInSector], BytesToRead);
 
             File->Position += BytesToRead;
             ByteCount -= BytesToRead;
@@ -143,7 +143,7 @@ void FileWrite(file_io_context *Context, i16 FileHandle, u32 ByteCount, u8 *Data
         u32 OffsetInSector = File->Position % FAT12_SECTOR_SIZE;
         if ((OffsetInSector + ByteCount) < FAT12_SECTOR_SIZE)
         {
-            MemoryCopyFarToFar(&File->Buffer[OffsetInSector], DataIn, ByteCount);
+            MemoryCopy(&File->Buffer[OffsetInSector], DataIn, ByteCount);
             WriteDiskSectors
             (
                 &Context->DiskParameters,
@@ -157,7 +157,7 @@ void FileWrite(file_io_context *Context, i16 FileHandle, u32 ByteCount, u8 *Data
         else
         {
             u32 BytesToWrite = FAT12_SECTOR_SIZE - OffsetInSector;
-            MemoryCopyFarToFar(&File->Buffer[OffsetInSector], DataIn, BytesToWrite);
+            MemoryCopy(&File->Buffer[OffsetInSector], DataIn, BytesToWrite);
             WriteDiskSectors
             (
                 &Context->DiskParameters,

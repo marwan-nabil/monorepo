@@ -2,7 +2,7 @@
 ; writes a character using a BIOS function
 ; --------------------
 section .text
-BIOS_PrintCharacter:
+BIOSPrintCharacter:
     push bp
     mov bp, sp
 

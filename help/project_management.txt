@@ -3,9 +3,9 @@
 -----------------
 - complete the os tutorial.
 
------------------------
-==> categorized backlog
------------------------
+------------
+==>  backlog
+------------
 projects/tests/compilation_tests:
   - improve compilation tests console messages:
     - info messages should denote the beginning and ending of the test clearly,
@@ -21,7 +21,7 @@ projects/tests/compilation_tests:
 projects/tools/build:
   - solve the environment setup issue where watcom paths will contain tools that
     conflict with msvc tools also included in path. Location: shell_startup_windows.bat.
-  - solve the [build clean] not deleting all target folders issue. 
+  - solve the [build clean] not deleting all target folders issue (sporradic).
 
 libraries/x86:
   - optimize the file_io and fat12 libraries:
@@ -64,15 +64,3 @@ libraries/win32:
     - do a generic implementation for ResizeRenderingBuffer().
   windows:
     - generic implmentation of these 2 functions for the commented out functions.
-
----------------------
-==> application ideas
----------------------
-supermarket navigator:
-  - a device or app that allows you to navigate inside a large supermarket:
-    - using a mobile app, offer accurate navigation inside a building.
-    - searching for an item will show you a path to the item position in the store.
-    - giving it a list of items will calculate an optimal path to get all the items.
-    - mobile app with features for the store:
-        - restocking info.
-        - demand info.

@@ -7,7 +7,7 @@ void InitializeFat12RamDisk
 {
     boot_sector *RamBootSector = PushStruct(MemoryArena, boot_sector);
     ReadDiskSectors(DiskParameters, 0, 1, RamBootSector);
-    MemoryCopyFarToFar(&RamDisk->BootSectorHeader, RamBootSector, sizeof(boot_sector_header));
+    MemoryCopy(&RamDisk->BootSectorHeader, RamBootSector, sizeof(boot_sector_header));
 
     ReadDiskSectors(DiskParameters, 1, FAT12_SECTORS_IN_FAT, &RamDisk->Fat);
     ReadDiskSectors
@@ -89,13 +89,13 @@ u16 AllocateDiskClusters
 
         if (ReadPointer)
         {
-            MemoryCopyFarToFar(RamSector->Bytes, ReadPointer, BytesToCopy);
+            MemoryCopy(RamSector->Bytes, ReadPointer, BytesToCopy);
             ReadPointer += BytesToCopy;
-            MemoryZeroFar(RamSector->Bytes + BytesToCopy, BytesToZero);
+            MemoryZero(RamSector->Bytes + BytesToCopy, BytesToZero);
         }
         else
         {
-            MemoryZeroFar(RamSector->Bytes, BytesToCopy + BytesToZero);
+            MemoryZero(RamSector->Bytes, BytesToCopy + BytesToZero);
         }
 
         WriteDiskSectors(DiskParameters, SectorIndex, 1, RamSector->Bytes);
@@ -128,10 +128,10 @@ b8 AllocateFileToDirectoryEntry
     u16 ClusterNumber = AllocateDiskClusters(Disk, MemoryArena, DiskParameters, Memory, Size);
     if (ClusterNumber)
     {
-        MemoryZeroFar(DirectoryEntry, sizeof(directory_entry));
+        MemoryZero(DirectoryEntry, sizeof(directory_entry));
 
-        MemoryCopyFarToFar(DirectoryEntry->FileName, FileName, 8);
-        MemoryCopyFarToFar(DirectoryEntry->FileExtension, Extension, 3);
+        MemoryCopy(DirectoryEntry->FileName, FileName, 8);
+        MemoryCopy(DirectoryEntry->FileExtension, Extension, 3);
 
         DirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_NORMAL;
         DirectoryEntry->FileSize = Size;
@@ -154,9 +154,9 @@ b8 AllocateDirectoryToDirectoryEntry
     u16 ClusterNumber = AllocateDiskClusters(Disk, MemoryArena, DiskParameters, 0, FAT12_SECTOR_SIZE);
     if (ClusterNumber)
     {
-        MemoryZeroFar(DirectoryEntry, sizeof(directory_entry));
+        MemoryZero(DirectoryEntry, sizeof(directory_entry));
 
-        MemoryCopyFarToFar(DirectoryEntry->FileName, DirectoryName, 8);
+        MemoryCopy(DirectoryEntry->FileName, DirectoryName, 8);
         DirectoryEntry->FileAttributes = FAT12_FILE_ATTRIBUTE_DIRECTORY;
         DirectoryEntry->FileSize = 0;
         DirectoryEntry->ClusterNumberLowWord = ClusterNumber;
@@ -425,7 +425,7 @@ Fat12AddFileByPath
     u32 Size
 )
 {
-    if (StringLengthFar(FullFilePath) == 1)
+    if (StringLength(FullFilePath) == 1)
     {
         return NULL;
     }
@@ -434,8 +434,8 @@ Fat12AddFileByPath
 
     char LocalFileName[8];
     char LocalFileExtension[3];
-    MemoryZeroNear(LocalFileName, 8);
-    MemoryZeroNear(LocalFileExtension, 3);
+    MemoryZero(LocalFileName, 8);
+    MemoryZero(LocalFileExtension, 3);
 
     GetFileNameAndExtensionFromString
     (
@@ -478,8 +478,8 @@ Fat12AddFileByPath
     while (CurrentPathNode)
     {
 
-        MemoryZeroNear(LocalFileName, ArrayCount(LocalFileName));
-        MemoryZeroNear(LocalFileExtension, ArrayCount(LocalFileExtension));
+        MemoryZero(LocalFileName, ArrayCount(LocalFileName));
+        MemoryZero(LocalFileExtension, ArrayCount(LocalFileExtension));
 
         GetFileNameAndExtensionFromString
         (
@@ -544,7 +544,7 @@ Fat12AddDirectoryByPath
     char *DirectoryPath
 )
 {
-    if (StringLengthFar(DirectoryPath) == 1)
+    if (StringLength(DirectoryPath) == 1)
     {
         return NULL;
     }
@@ -554,7 +554,7 @@ Fat12AddDirectoryByPath
     if (!CurrentPathNode->ChildNode)
     {
         char LocalDirectoryName[8];
-        MemoryZeroNear(LocalDirectoryName, 8);
+        MemoryZero(LocalDirectoryName, 8);
 
         FillFixedSizeStringBuffer
         (
@@ -595,7 +595,7 @@ Fat12AddDirectoryByPath
         if (!CurrentPathNode->ChildNode)
         {
             char LocalDirectoryName[8];
-            MemoryZeroNear(LocalDirectoryName, 8);
+            MemoryZero(LocalDirectoryName, 8);
 
             FillFixedSizeStringBuffer
             (

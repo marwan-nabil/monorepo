@@ -4,7 +4,7 @@
 ;       word [sp + 2] == driver number
 ; ---------------------------------------
 section .text
-BIOS_DiskReset:
+BIOSDiskReset:
     push bp
     mov bp, sp
 
@@ -24,14 +24,14 @@ BIOS_DiskReset:
 ; ---------------------------------------
 ; reads sectors from floppy disk given the
 ; CHS and the sector count
-; void __attribute__((cdecl)) BIOS_DiskRead
+; void __attribute__((cdecl)) BIOSDiskRead
 ; (
 ;     u8 DriveNumber, u16 Cylinder, u16 Head,
 ;     u16 Sector, u8 SectorCount, u8 *DataOut
 ; );
 ; ---------------------------------------
 section .text
-BIOS_DiskRead:
+BIOSDiskRead:
     push bp
     mov bp, sp
 
@@ -78,14 +78,14 @@ BIOS_DiskRead:
 ; ---------------------------------------
 ; writes sectors to floppy disk given the
 ; CHS and the sector count
-; void __attribute__((cdecl)) BIOS_DiskWrite
+; void __attribute__((cdecl)) BIOSDiskWrite
 ; (
 ;     u8 DriveNumber, u16 Cylinder, u16 Head,
 ;     u16 Sector, u8 SectorCount, u8 *DataIn
 ; );
 ; ---------------------------------------
 section .text
-BIOS_DiskWrite:
+BIOSDiskWrite:
     push bp
     mov bp, sp
 
@@ -131,14 +131,14 @@ BIOS_DiskWrite:
 
 ; ---------------------------------------
 ;
-; void __attribute__((cdecl)) BIOS_GetDiskDriveParameters
+; void __attribute__((cdecl)) BIOSGetDiskDriveParameters
 ; (
 ;     u8 DriveNumber, u8 *DriveTypeOut, u16 *CylindersOut,
 ;     u16 *SectorsOut, u16 *HeadsOut
 ; );
 ; ---------------------------------------
 section .text
-BIOS_GetDiskDriveParameters:
+BIOSGetDiskDriveParameters:
     push bp
     mov bp, sp
 

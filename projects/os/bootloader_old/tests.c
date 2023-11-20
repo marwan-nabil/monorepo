@@ -27,18 +27,18 @@ void StringTests()
     );
 
     PrintString("\r\n=========== memory utils tests ================= \r\n");
-    PrintFormatted("Test MemoryZeroFar Before: %ls\r\n", FarString);
-    MemoryZeroFar(FarString, StringLengthFar(FarString));
-    PrintFormatted("Test MemoryZeroFar After: %ls\r\n", FarString);
-    MemoryCopyFarToFar(FarString, FarString2, StringLengthFar(FarString2));
-    PrintFormatted("Test MemoryCopyFarToFar After: %ls\r\n", FarString);
+    PrintFormatted("Test MemoryZero Before: %ls\r\n", FarString);
+    MemoryZero(FarString, StringLength(FarString));
+    PrintFormatted("Test MemoryZero After: %ls\r\n", FarString);
+    MemoryCopy(FarString, FarString2, StringLength(FarString2));
+    PrintFormatted("Test MemoryCopy After: %ls\r\n", FarString);
 
     PrintString("\r\n============ other string tests ============== \r\n");
     char LocalPathBuffer[PATH_HANDLING_MAX_PATH];
-    MemoryZeroNear(LocalPathBuffer, ArrayCount(LocalPathBuffer));
+    MemoryZero(LocalPathBuffer, ArrayCount(LocalPathBuffer));
 
-    StringConcatenateFarToNear(LocalPathBuffer, ArrayCount(LocalPathBuffer), "test ");
-    StringConcatenateFarToNear(LocalPathBuffer, ArrayCount(LocalPathBuffer), "string");
+    StringConcatenate(LocalPathBuffer, ArrayCount(LocalPathBuffer), "test ");
+    StringConcatenate(LocalPathBuffer, ArrayCount(LocalPathBuffer), "string");
     PrintFormatted("Test string after concatenation: %s\r\n", LocalPathBuffer);
 }
 
@@ -72,8 +72,8 @@ void DiskDriverTests(u8 BootDriveNumber)
     ReadDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
 
     char OEMName[9];
-    MemoryZeroNear(OEMName, ArrayCount(OEMName));
-    MemoryCopyFarToNear
+    MemoryZero(OEMName, ArrayCount(OEMName));
+    MemoryCopy
     (
         OEMName,
         &((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
@@ -82,7 +82,7 @@ void DiskDriverTests(u8 BootDriveNumber)
     PrintFormatted("BootSector OEM name: %s\r\n", OEMName);
 
     u16 BootSignature = 0;
-    MemoryCopyFarToNear
+    MemoryCopy
     (
         &BootSignature,
         &((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->BootSectorSignature,
@@ -98,8 +98,8 @@ void DiskDriverTests(u8 BootDriveNumber)
     PrintFormatted("reading the bootsector back from disk.\r\n");
     ReadDiskSectors(&DiskParameters, 0, 1, MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS);
 
-    MemoryZeroNear(OEMName, ArrayCount(OEMName));
-    MemoryCopyFarToNear
+    MemoryZero(OEMName, ArrayCount(OEMName));
+    MemoryCopy
     (
         OEMName,
         &((boot_sector *)MEMORY_LAYOUT_FREE_MEMORY_FAR_ADDRESS)->OEMName,
@@ -283,7 +283,7 @@ void FileIoTests(u16 BootDriveNumber)
     i16 FileHandle = FileOpen(FileIoContext, "\\Dir0\\BigFile");
 
     char LocalStringBuffer[30];
-    MemoryZeroNear(LocalStringBuffer, 30);
+    MemoryZero(LocalStringBuffer, 30);
 
     u32 FileOffset = 0x4B10;
 
@@ -293,7 +293,7 @@ void FileIoTests(u16 BootDriveNumber)
 
     PrintFormatted("overwriting the same data read before with A's ...\r\n");
 
-    MemorySetNear(LocalStringBuffer, 'A', 30);
+    MemorySet(LocalStringBuffer, 'A', 30);
     FileSeek(FileIoContext, FileHandle, FileOffset);
     FileWrite(FileIoContext, FileHandle, 30, (u8 *)LocalStringBuffer);
 

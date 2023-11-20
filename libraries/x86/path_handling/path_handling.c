@@ -2,14 +2,14 @@ file_path_node *
 CreateFilePathSegmentList(char *FileFullPath, memory_arena *MemoryArena)
 {
     char LocalPathBuffer[PATH_HANDLING_MAX_PATH];
-    MemoryZeroNear(LocalPathBuffer, ArrayCount(LocalPathBuffer));
+    MemoryZero(LocalPathBuffer, ArrayCount(LocalPathBuffer));
 
-    StringConcatenateFarToNear(LocalPathBuffer, ArrayCount(LocalPathBuffer), FileFullPath);
+    StringConcatenate(LocalPathBuffer, ArrayCount(LocalPathBuffer), FileFullPath);
 
-    u32 PathLength = StringLengthNear(LocalPathBuffer);
+    u32 PathLength = StringLength(LocalPathBuffer);
 
     file_path_node *CurrentFilePathNode = PushStruct(MemoryArena, file_path_node);
-    MemoryZeroFar(CurrentFilePathNode, sizeof(file_path_node));
+    MemoryZero(CurrentFilePathNode, sizeof(file_path_node));
 
     file_path_node *LastFilePathNode = NULL;
 
@@ -18,18 +18,18 @@ CreateFilePathSegmentList(char *FileFullPath, memory_arena *MemoryArena)
         if (LocalPathBuffer[CharIndex] == '\\')
         {
             char PathSegment[PATH_HANDLING_MAX_PATH];
-            MemoryZeroNear(PathSegment, ArrayCount(PathSegment));
+            MemoryZero(PathSegment, ArrayCount(PathSegment));
 
-            StringConcatenateNearToNear(PathSegment, PATH_HANDLING_MAX_PATH, &LocalPathBuffer[CharIndex + 1]);
-            MemoryZeroNear(&LocalPathBuffer[CharIndex], StringLengthNear(&LocalPathBuffer[CharIndex]));
+            StringConcatenate(PathSegment, PATH_HANDLING_MAX_PATH, &LocalPathBuffer[CharIndex + 1]);
+            MemoryZero(&LocalPathBuffer[CharIndex], StringLength(&LocalPathBuffer[CharIndex]));
 
             if (!CurrentFilePathNode)
             {
                 CurrentFilePathNode = PushStruct(MemoryArena, file_path_node);
-                MemoryZeroFar(CurrentFilePathNode, sizeof(file_path_node));
+                MemoryZero(CurrentFilePathNode, sizeof(file_path_node));
             }
 
-            MemoryCopyNearToFar(CurrentFilePathNode->FileName, PathSegment, ArrayCount(CurrentFilePathNode->FileName));
+            MemoryCopy(CurrentFilePathNode->FileName, PathSegment, ArrayCount(CurrentFilePathNode->FileName));
             CurrentFilePathNode->ChildNode = LastFilePathNode;
 
             LastFilePathNode = CurrentFilePathNode;
@@ -42,12 +42,12 @@ CreateFilePathSegmentList(char *FileFullPath, memory_arena *MemoryArena)
 
 void RemoveLastSegmentFromPath(char *Path)
 {
-    u32 PathLength = StringLengthFar(Path);
+    u32 PathLength = StringLength(Path);
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
     {
         if (Path[CharIndex] == '\\')
         {
-            MemoryZeroFar(&Path[CharIndex], StringLengthFar(&Path[CharIndex]));
+            MemoryZero(&Path[CharIndex], StringLength(&Path[CharIndex]));
             return;
         }
     }
@@ -73,7 +73,7 @@ void GetFileNameAndExtensionFromString
     char *FileExtension, u32 FileExtensionSize
 )
 {
-    u32 SourceStringLength = StringLengthFar(SourceString);
+    u32 SourceStringLength = StringLength(SourceString);
     u32 DotIndex = GetLastCharacterIndex(SourceString, SourceStringLength, '.');
 
     u32 ReadIndex = 0;
@@ -111,7 +111,7 @@ void GetFileNameAndExtensionFromString
     {
         if (DotIndex == UINT32_MAX)
         {
-            MemoryZeroFar(FileExtension, FileExtensionSize);
+            MemoryZero(FileExtension, FileExtensionSize);
         }
         else
         {

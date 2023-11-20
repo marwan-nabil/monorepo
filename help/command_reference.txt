@@ -1,17 +1,20 @@
+--------
+scripts:
+--------
 shell_startup.bat --> sets up the build environment in a windows command shell
+bochs.bat --> launches bochs emulator/debugger for the os project
 bootstrap.bat --> re-builds the build system build.exe
 build_tools.bat --> re-builds all the internal project tools
 precommit.bat --> lints the source files and runs compilation tests
+qemu.bat --> launches qemu for the os project
 raytracer.bat --> builds and runs all versions of the ray tracer project
 test_all.bat --> build and runs all available tests
-qemu.bat <target> --> launches qemu for the given build target
-bochs.bat <target> --> launches bochs emulator/debugger for the given build target
 
+---------------
+internal tools:
+---------------
 build help --> prints a list of available build targets
+build <target> --> build the given target
+build clean --> clean known targets
+build clean_all --> delete everything in the output/ folder
 lint --> runs the linting tool (removes unnecessary white space)
-
-----------------------------------------
-watcom binary file manipulation commands
-----------------------------------------
-wdis aaa.obj --> disassembles object files using watcom tools
-wdump aaa.obj --> dump sections of object or executable file
