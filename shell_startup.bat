@@ -5,7 +5,7 @@ set path=%cd%\tools\cygwin\lib\gcc\x86_64-pc-cygwin\11;%path%
 set path=%cd%\tools\cygwin\bin;%path%
 set path=%cd%\tools\i686-elf\bin;%path%
 
-@REM adding tools to path
+@REM adding external tools to path
 set path=%cd%\tools\nasm;%path%
 set path=%cd%\tools\qemu;%path%
 set path=%cd%\tools\bochs;%path%

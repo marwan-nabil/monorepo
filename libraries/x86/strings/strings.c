@@ -42,19 +42,6 @@ const char *GetCharacterPointer(const char *String, char Character)
     return NULL;
 }
 
-print_context PrintContext = {0, 0};
-
-void PrintCharacter(char Character)
-{
-    PrintCharacterColored(Character, 7, PrintContext.X, PrintContext.Y);
-    PrintContext.X++;
-    if (PrintContext.X > (VGA_SCREEN_WIDTH - 1))
-    {
-        PrintContext.X = 0;
-        PrintContext.Y++;
-    }
-}
-
 i16 StringCompare(char *String1, char *String2, u32 ComparisonRange)
 {
     if
@@ -115,118 +102,49 @@ long int StringLength(char *String)
     return Count;
 }
 
-void PrintString(const char *String)
-{
-    while (*String)
-    {
-        PrintCharacter(*String);
-        String++;
-    }
-}
-
-i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b8 IsSigned, u32 Radix)
+void PrintFormattedNumberUnsigned(u64 Number, u32 Radix)
 {
     const char HexCharacters[] = "0123456789abcdef";
-    char LocalStringBuffer[32];
-    u64 Number;
-    i32 NumberSign = 1;
-    i32 StringBufferPosition = 0;
 
+    char LocalStringBuffer[32];
     MemoryZero((void *)LocalStringBuffer, 32);
 
-    switch (LengthType)
-    {
-        case PRINTF_LENGTH_TYPE_SHORT_SHORT:
-        case PRINTF_LENGTH_TYPE_SHORT:
-        case PRINTF_LENGTH_TYPE_DEFAULT:
-        {
-            if (IsSigned)
-            {
-                i32 Value = *ArgumentPointer;
-                if (Value < 0)
-                {
-                    Value = -Value;
-                    NumberSign = -1;
-                }
-                Number = (u64)Value;
-            }
-            else
-            {
-                Number = *(u16 *)ArgumentPointer;
-            }
-            ArgumentPointer++;
-        } break;
-
-        case PRINTF_LENGTH_TYPE_LONG:
-        {
-            if (IsSigned)
-            {
-                i32 Value = *(i32 *)ArgumentPointer;
-                if (Value < 0)
-                {
-                    Value = -Value;
-                    NumberSign = -1;
-                }
-                Number = (u64)Value;
-            }
-            else
-            {
-                Number = *(u32 *)ArgumentPointer;
-            }
-            ArgumentPointer += 2;
-        } break;
-
-        case PRINTF_LENGTH_TYPE_LONG_LONG:
-        {
-            if (IsSigned)
-            {
-                i64 Value = *(i64 *)ArgumentPointer;
-                if (Value < 0)
-                {
-                    Value = -Value;
-                    NumberSign = -1;
-                }
-                Number = (u64)Value;
-            }
-            else
-            {
-                Number = *(u64 *)ArgumentPointer;
-            }
-            ArgumentPointer += 4;
-        } break;
-    }
+    i32 StringBufferPosition = 0;
 
     do
     {
-        u32 Remainder;
-        // TODO: convert this to 32 bit code
-        // DivideU64ByU32(Number, Radix, &Number, &Remainder);
+        u64 Remainder = Number % Radix;
+        Number /= Radix;
+
         LocalStringBuffer[StringBufferPosition++] = HexCharacters[Remainder];
     } while (Number > 0);
 
-    if (IsSigned && (NumberSign < 0))
+    while (--StringBufferPosition >= 0)
     {
-        LocalStringBuffer[StringBufferPosition++] = '-';
+        BIOSPrintCharacter(LocalStringBuffer[StringBufferPosition]);
     }
-
-    StringBufferPosition--;
-    while (StringBufferPosition >= 0)
-    {
-        PrintCharacter(LocalStringBuffer[StringBufferPosition--]);
-    }
-
-    return ArgumentPointer;
 }
 
-void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
+void PrintFormattedNumberSigned(u64 Number, u32 Radix)
 {
-    i16 *ArgumentPointer = (i16 *)&FormatString;
+    if (Number < 0)
+    {
+        BIOSPrintCharacter('-');
+        Number = -Number;
+    }
+    PrintFormattedNumberUnsigned(Number, Radix);
+}
+
+void PrintFormatted(const char *FormatString, ...)
+{
+    va_list ArgumentsList;
+    va_start(ArgumentsList, FormatString);
+
     printf_state FormatStringState = PRINTF_STATE_NORMAL;
     printf_length_type LengthType = PRINTF_LENGTH_TYPE_DEFAULT;
     u32 Radix = 10;
     b8 IsSigned = FALSE;
-
-    ArgumentPointer++;
+    b8 IsNumber = FALSE;
 
     while (*FormatString)
     {
@@ -240,7 +158,7 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
                 }
                 else
                 {
-                    PrintCharacter(*FormatString);
+                    BIOSPrintCharacter(*FormatString);
                 }
                 FormatString++;
             } break;
@@ -299,31 +217,17 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
                 {
                     case 'c':
                     {
-                        PrintCharacter((char)*ArgumentPointer);
-                        ArgumentPointer++;
+                        BIOSPrintCharacter((char)va_arg(ArgumentsList, i32));
                     } break;
 
                     case 's':
                     {
-                        if
-                        (
-                            (LengthType == PRINTF_LENGTH_TYPE_LONG) ||
-                            (LengthType == PRINTF_LENGTH_TYPE_LONG_LONG)
-                        )
-                        {
-                            PrintString(*(const char **)ArgumentPointer);
-                            ArgumentPointer += 2;
-                        }
-                        else
-                        {
-                            PrintString(*(const char **)ArgumentPointer);
-                            ArgumentPointer++;
-                        }
+                        BIOSPrintString(va_arg(ArgumentsList, char *));
                     } break;
 
                     case '%':
                     {
-                        PrintCharacter('%');
+                        BIOSPrintCharacter('%');
                     } break;
 
                     case 'd':
@@ -331,14 +235,14 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
                     {
                         Radix = 10;
                         IsSigned = TRUE;
-                        ArgumentPointer = PrintFormattedNumber(ArgumentPointer, LengthType, IsSigned, Radix);
+                        IsNumber = TRUE;
                     } break;
 
                     case 'u':
                     {
                         Radix = 10;
                         IsSigned = FALSE;
-                        ArgumentPointer = PrintFormattedNumber(ArgumentPointer, LengthType, IsSigned, Radix);
+                        IsNumber = TRUE;
                     } break;
 
                     case 'X':
@@ -347,13 +251,14 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
                     {
                         Radix = 16;
                         IsSigned = FALSE;
-                        ArgumentPointer = PrintFormattedNumber(ArgumentPointer, LengthType, IsSigned, Radix);
+                        IsNumber = TRUE;
                     } break;
 
                     case 'o':
                     {
-                        Radix = 8; IsSigned = FALSE;
-                        ArgumentPointer = PrintFormattedNumber(ArgumentPointer, LengthType, IsSigned, Radix);
+                        Radix = 8;
+                        IsSigned = FALSE;
+                        IsNumber = TRUE;
                     } break;
 
                     default:
@@ -361,10 +266,51 @@ void __attribute__((cdecl)) PrintFormatted(const char *FormatString, ...)
                     } break;
                 }
 
+                if (IsNumber)
+                {
+                    if (IsSigned)
+                    {
+                        switch (LengthType)
+                        {
+                            case PRINTF_LENGTH_TYPE_SHORT_SHORT:
+                            case PRINTF_LENGTH_TYPE_SHORT:
+                            case PRINTF_LENGTH_TYPE_DEFAULT:
+                            {
+                                PrintFormattedNumberSigned((u64)va_arg(ArgumentsList, i32), Radix);
+                            } break;
+
+                            case PRINTF_LENGTH_TYPE_LONG:
+                            case PRINTF_LENGTH_TYPE_LONG_LONG:
+                            {
+                                PrintFormattedNumberSigned((u64)va_arg(ArgumentsList, i64), Radix);
+                            } break;
+                        }
+                    }
+                    else
+                    {
+                        switch (LengthType)
+                        {
+                            case PRINTF_LENGTH_TYPE_SHORT_SHORT:
+                            case PRINTF_LENGTH_TYPE_SHORT:
+                            case PRINTF_LENGTH_TYPE_DEFAULT:
+                            {
+                                PrintFormattedNumberUnsigned((u64)va_arg(ArgumentsList, i32), Radix);
+                            } break;
+
+                            case PRINTF_LENGTH_TYPE_LONG:
+                            case PRINTF_LENGTH_TYPE_LONG_LONG:
+                            {
+                                PrintFormattedNumberUnsigned((u64)va_arg(ArgumentsList, i64), Radix);
+                            } break;
+                        }
+                    }
+                }
+
                 FormatStringState = PRINTF_STATE_NORMAL;
                 LengthType = PRINTF_LENGTH_TYPE_DEFAULT;
                 Radix = 10;
                 IsSigned = FALSE;
+                IsNumber = FALSE;
 
                 FormatString++;
             } break;

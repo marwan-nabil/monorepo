@@ -34,6 +34,7 @@ static b32 LinkWithGCC(build_context *BuildContext)
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), BuildContext->OutputBinaryPath);
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " ");
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), BuildContext->LinkerInputsString);
+    StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " -lgcc");
 
     b32 Result = CreateProcessAndWait(LinkerCommand, BuildContext->ConsoleContext);
     if (!Result)

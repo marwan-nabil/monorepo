@@ -3,6 +3,9 @@ global BIOSDiskReset
 global BIOSDiskRead
 global BIOSDiskWrite
 global BIOSGetDiskDriveParameters
+global BIOSPrintCharacter
+global BIOSPrintString
+global DivideU64ByU32
 
 extern cstart
 extern __bss_start
@@ -10,6 +13,8 @@ extern __bss_end
 
 %include "libraries\x86\modes\modes.s"
 %include "libraries\x86\bios\disk.s"
+%include "libraries\x86\bios\strings.s"
+%include "libraries\x86\math\integers.s"
 
 ; ================================================================= ;
 ;                              definitions

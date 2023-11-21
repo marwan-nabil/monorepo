@@ -96,51 +96,54 @@ BIOSDiskRead:
 ;     u16 Sector, u8 SectorCount, u8 *DataIn
 ; );
 ; ---------------------------------------
-; TODO: convert this to protected mode
 section .text
 BIOSDiskWrite:
     [bits 32]
-    push bp
-    mov bp, sp
+    push ebp
+    mov ebp, esp
+
+    x86EnterRealMode
 
     ; save touched registers
-    push bx
+    push ebx
     push es
 
     ; setup arguments for the BIOS
     ; read disk service
-    mov dl, [bp + 4] ; drive number
+    mov dl, [bp + 8] ; drive number
 
-    mov ch, [bp + 6] ; cylinder[7:0]
-    mov cl, [bp + 7] ; cylinder[15:8]
+    mov ch, [bp + 12] ; cylinder[7:0]
+    mov cl, [bp + 13] ; cylinder[15:8]
     shl cl, 6
 
-    mov dh, [bp + 8] ; head
+    mov dh, [bp + 16] ; head
 
-    mov al, [bp + 10] ; sector
+    mov al, [bp + 20] ; sector
     and al, 0x3F
     or cl, al ; cl == {cylinder[9:8], sector[5:0]}
 
-    mov al, [bp + 12] ; SectorCount
+    mov al, [bp + 24] ; SectorCount
 
-    mov bx, [bp + 16] ; DataIn [31:16]
-    mov es, bx
-    mov bx, [bp + 14] ; DataIn [15:0]
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 28], es, ebx, bx
 
-    mov ah, 0x03 ; disk service for reading
+    mov ah, 0x03 ; disk service for writing
     stc
     int 0x13
 
-    mov ax, 1
+    mov eax, 1
     ; carry flag is 1 in case of error in the BIOS function
-    sbb ax, 0 ; subtract the carry flag from ax
+    sbb eax, 0 ; subtract the carry flag from ax
 
     ; restore touched registers
     pop es
-    pop bx
+    pop ebx
 
-    mov sp, bp
-    pop bp
+    push eax
+    x86EnterProtectedMode
+    pop eax
+
+    mov esp, ebp
+    pop ebp
     ret
 
 ; ---------------------------------------

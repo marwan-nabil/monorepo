@@ -16,12 +16,11 @@ for building our gcc cross compiler:
     - binutils-2.41 source code
 
 -------------------------------------------
-how to install nasm, watcom, bochs and qemu
+how to install nasm, bochs and qemu
 -------------------------------------------
 - downlaod all of them
 - install them in the folders:
     - tools/nasm
-    - tools/watcom
     - tools/bochs
     - tools/qemu
 
@@ -32,7 +31,7 @@ how to setup a windows-based gcc cross compiler
 - install those cygwin packages:
     - wget, tar, make, gcc-g++, bison, flex, libgmp-devel, libmpc-devel, libmpfr-devel, texinfo
 - download latest binutils and gcc source archives, then extract them to output/
-- open cygwin command shell C:\cygwin64\Cygwin.bat and switch to output/ folder
+- open cygwin command shell tools\cygwin\Cygwin.bat and switch to output/ folder
 - setup some environment variables by performing those commands:
     - export PREFIX="$PWD/../tools/i686-elf"
     - export TARGET=i686-elf

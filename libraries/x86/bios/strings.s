@@ -1,28 +1,33 @@
 ; --------------------
 ; writes a character using a BIOS function
 ; --------------------
-[bits 16]
 section .text
 BIOSPrintCharacter:
-    push bp
-    mov bp, sp
+    [bits 32]
+    push ebp
+    mov ebp, esp
+
+    x86EnterRealMode
 
     ; word [bp] == previous bp
-    ; word [bp + 2] == return offset
-    ; word [bp + 4] == first argument: character to print
-    ; word [bp + 6] == second argument: page
+    ; word [bp + 4] == return offset
+    ; word [bp + 8] == first argument: character to print
 
     push bx
 
     mov ah, 0x0E
-    mov al, [bp + 4]
-    mov bh, [bp + 6]
+    mov al, [bp + 8]
+    mov bh, 0
     int 0x10
 
     pop bx
 
-    mov sp, bp
-    pop bp
+    push eax
+    x86EnterProtectedMode
+    pop eax
+
+    mov esp, ebp
+    pop ebp
     ret
 
 ; --------------------
@@ -30,13 +35,20 @@ BIOSPrintCharacter:
 ; in:
 ;       si -> address of string
 ; --------------------
-[bits 16]
 section .text
 BIOSPrintString:
+    [bits 32]
+    push ebp
+    mov ebp, esp
+
+    x86EnterRealMode
+
     ; save touched register
     push si
     push ax
     push bx
+
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 8], ds, esi, si
 
 .Loop0:
     ; load signed byte from [ds:si] into al, also increments si
@@ -55,4 +67,11 @@ BIOSPrintString:
     pop bx
     pop ax
     pop si
+
+    push eax
+    x86EnterProtectedMode
+    pop eax
+
+    mov esp, ebp
+    pop ebp
     ret

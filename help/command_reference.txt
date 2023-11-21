@@ -4,7 +4,7 @@ scripts:
 shell_startup.bat --> sets up the build environment in a windows command shell
 bochs.bat --> launches bochs emulator/debugger for the os project
 bootstrap.bat --> re-builds the build system build.exe
-build_tools.bat --> re-builds all the internal project tools
+bootstrap_tools.bat --> re-builds all the internal project tools
 precommit.bat --> lints the source files and runs compilation tests
 qemu.bat --> launches qemu for the os project
 raytracer.bat --> builds and runs all versions of the ray tracer project

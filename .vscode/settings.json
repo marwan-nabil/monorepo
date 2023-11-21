@@ -3,7 +3,7 @@
 
     "files.exclude":
     {
-        // "output": true,
+        "output": true,
         "tools": true,
         "data": true,
 

@@ -55,14 +55,14 @@
 ; Convert linear address to segment:offset address
 ; Args:
 ;    1: linear address
-;    2: (out) target segment (e.g. es)
-;    3: target 32-bit register to use (e.g. eax)
-;    4: target lower 16-bit half of #3 (e.g. ax)
+;    2: (out) target segment
+;    3: target 32-bit register to use
+;    4: target lower 16-bit half of #3
 ; -----------------------------------------
 %macro ConvertLinearAddressToSegmentOffsetAddress 4
-    mov %3, %1 ; linear address to eax
+    mov %3, %1
     shr %3, 4
     mov %2, %4
-    mov %3, %1 ; linear address to eax
+    mov %3, %1
     and %3, 0xf
 %endmacro

@@ -24,7 +24,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
     }
     ClearBuildContext(BuildContext);
 
-    AddLinkerFlags(BuildContext, "-nostdlib -lgcc -Wl,-Map=bootloader.map");
+    AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=bootloader.map");
     AddSourceFile(BuildContext, "\\projects\\os\\bootloader\\linker.lds");
     AddLinkerInputFile(BuildContext, "\\entry.elf");
     AddLinkerInputFile(BuildContext, "\\main.elf");

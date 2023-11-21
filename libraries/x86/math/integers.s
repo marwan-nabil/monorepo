@@ -1,48 +1,45 @@
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
-[bits 16]
 section .text
-; TODO: convert to 32 bit protected mode
 DivideU64ByU32:
-    ; make new call frame
-    push bp ; save old call frame
-    mov bp, sp ; initialize new call frame
+    [bits 32]
+    push ebp
+    mov ebp, esp
 
     ; stack
     ; word [bp] -> previous bp
-    ; word [bp + 2] -> return offset
-    ; dword [bp + 4] -> lower 32 bits of divident
-    ; dword [bp + 8] -> upper 32 bits of dividend
-    ; dword [bp + 12] -> 32 bits of divisor
-    ; word [bp + 16] -> quotient out pointer
-    ; word [bp + 18] -> remainder out pointer
+    ; word [bp + 4] -> return offset
+    ; dword [bp + 8] -> lower 32 bits of dividend
+    ; dword [bp + 12] -> upper 32 bits of dividend
+    ; dword [bp + 16] -> 32 bits of divisor
+    ; word [bp + 20] -> quotient out pointer
+    ; word [bp + 24] -> remainder out pointer
 
-    push bx
+    push ebx
 
     ; divide upper 32 bits
-    mov eax, [bp + 8]
-    mov ecx, [bp + 12]
+    mov eax, [bp + 12]
+    mov ecx, [bp + 16]
     xor edx, edx
     div ecx ; eax -> quotient, edx -> remainder
 
     ; store upper 32 bits of quotient
-    mov bx, [bp + 16]
-    mov [bx + 4], eax
+    mov ebx, [ebp + 20]
+    mov [ebx + 4], eax
 
     ; divide lower 32 bits
-    mov eax, [bp + 4]
+    mov eax, [ebp + 8]
     ; edx -> remainder from previous divide
     div ecx ; eax -> quotient, edx -> remainder
 
     ; store results
-    mov [bx], eax
-    mov bx, [bp + 18]
-    mov [bx], edx
+    mov [ebx], eax
+    mov ebx, [ebp + 24]
+    mov [ebx], edx
 
-    pop bx
+    pop ebx
 
-    ; restore old call frame
-    mov sp, bp
-    pop bp
+    mov esp, ebp
+    pop ebp
     ret

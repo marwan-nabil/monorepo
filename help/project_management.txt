@@ -52,15 +52,17 @@ projects/ray_tracer:
 
 projects/tools/lint:
   - make linting smarter by not having to touch all the files every time.
-  - only lint files that were modified since last lint time.
-  - this requires that we save the last lint time in a metadata .json file.
+    - only lint files that were modified since last lint time.
+    - this requires that we save the last lint time in a metadata .json file.
+  - exclude the data, output, tools folders from liniting.
 
-libraries/win32:
-  - math:
-    - create tests for the math library.
-    - in simd/4_wide/integers.cpp decide between the 2 HorizontalAdd() implementations.
-    - in simd/8_wide/integers.cpp decide between the 2 HorizontalAdd() implementations.
-  rasterizer:
-    - do a generic implementation for ResizeRenderingBuffer().
-  windows:
-    - generic implmentation of these 2 functions for the commented out functions.
+libraries/win32/math:
+  - create tests for the math library.
+  - in simd/4_wide/integers.cpp decide between the 2 HorizontalAdd() implementations.
+  - in simd/8_wide/integers.cpp decide between the 2 HorizontalAdd() implementations.
+
+libraries/win32/rasterizer:
+  - do a generic implementation for ResizeRenderingBuffer().
+
+libraries/win32/windows:
+  - generic implmentation of these 2 functions for the commented out functions.
