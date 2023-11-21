@@ -5,20 +5,27 @@
 ; ---------------------------------------
 section .text
 BIOSDiskReset:
-    push bp
-    mov bp, sp
+    [bits 32]
+    push ebp
+    mov ebp, esp
 
-    mov dl, [bp + 4] ; drive number
+    x86EnterRealMode
+
     mov ah, 0
+    mov dl, [bp + 8] ; drive number
     stc
     int 0x13
 
-    mov ax, 1
+    mov eax, 1
     ; carry flag is 1 in case of error in the BIOS function
-    sbb ax, 0 ; subtract the carry flag from ax
+    sbb eax, 0 ; subtract the carry flag from ax
 
-    mov sp, bp
-    pop bp
+    push eax
+    x86EnterProtectedMode
+    pop eax
+
+    mov esp, ebp
+    pop ebp
     ret
 
 ; ---------------------------------------
@@ -32,47 +39,52 @@ BIOSDiskReset:
 ; ---------------------------------------
 section .text
 BIOSDiskRead:
-    push bp
-    mov bp, sp
+    [bits 32]
+    push ebp
+    mov ebp, esp
+
+    x86EnterRealMode
 
     ; save touched registers
-    push bx
+    push ebx
     push es
 
     ; setup arguments for the BIOS
     ; read disk service
-    mov dl, [bp + 4] ; drive number
+    mov dl, [bp + 8] ; drive number
 
-    mov ch, [bp + 6] ; cylinder[7:0]
-    mov cl, [bp + 7] ; cylinder[15:8]
+    mov ch, [bp + 12] ; cylinder[7:0]
+    mov cl, [bp + 13] ; cylinder[15:8]
     shl cl, 6
 
-    mov dh, [bp + 8] ; head
+    mov dh, [bp + 16] ; head
 
-    mov al, [bp + 10] ; sector
+    mov al, [bp + 20] ; sector
     and al, 0x3F
     or cl, al ; cl == {cylinder[9:8], sector[5:0]}
 
-    mov al, [bp + 12] ; SectorCount
+    mov al, [bp + 24] ; SectorCount
 
-    mov bx, [bp + 16] ; DataOut [31:16]
-    mov es, bx
-    mov bx, [bp + 14] ; DataOut [15:0]
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 28], es, ebx, bx
 
     mov ah, 0x02 ; disk service for reading
     stc
     int 0x13
 
-    mov ax, 1
+    mov eax, 1
     ; carry flag is 1 in case of error in the BIOS function
-    sbb ax, 0 ; subtract the carry flag from ax
+    sbb eax, 0 ; subtract the carry flag from ax
 
     ; restore touched registers
     pop es
-    pop bx
+    pop ebx
 
-    mov sp, bp
-    pop bp
+    push eax
+    x86EnterProtectedMode
+    pop eax
+
+    mov esp, ebp
+    pop ebp
     ret
 
 ; ---------------------------------------
@@ -84,8 +96,10 @@ BIOSDiskRead:
 ;     u16 Sector, u8 SectorCount, u8 *DataIn
 ; );
 ; ---------------------------------------
+; TODO: convert this to protected mode
 section .text
 BIOSDiskWrite:
+    [bits 32]
     push bp
     mov bp, sp
 
@@ -130,7 +144,6 @@ BIOSDiskWrite:
     ret
 
 ; ---------------------------------------
-;
 ; void __attribute__((cdecl)) BIOSGetDiskDriveParameters
 ; (
 ;     u8 DriveNumber, u8 *DriveTypeOut, u16 *CylindersOut,
@@ -139,18 +152,22 @@ BIOSDiskWrite:
 ; ---------------------------------------
 section .text
 BIOSGetDiskDriveParameters:
-    push bp
-    mov bp, sp
+    [bits 32]
+    push ebp
+    mov ebp, esp
 
+    x86EnterRealMode
+
+    [bits 16]
     ; save registers
     push es
     push bx
-    push si
+    push esi
     push di
 
     ; prepare arguments for BIOS service that
     ; gets the drive parameters
-    mov dl, [bp + 4] ; drive number
+    mov dl, [bp + 8] ; drive number
     mov ah, 0x08 ; BIOS service number
     ; es:di == 0 to avoid BIOS bugs
     mov di, 0
@@ -158,34 +175,45 @@ BIOSGetDiskDriveParameters:
     stc
     int 0x13
 
-    mov ax, 1
-    sbb ax, 0
+    mov eax, 1
+    sbb eax, 0
 
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 12], es, esi, si
     ; store results of BIOS service
-    mov si, [bp + 6]
-    mov [si], bl ; drive type
+    mov [es:si], bl ; drive type
 
     mov bl, ch ; maximum cylinder number [7:0]
     mov bh, cl ; maximum cylinder number [9:8]
     shr bh, 6
-    mov si, [bp + 8]
-    mov [si], bx ; bx[9:0] == maximum number of cylinders
+    inc bx
+
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 16], es, esi, si
+    mov [es:si], bx ; bx[9:0] == maximum number of cylinders
 
     xor ch, ch
     and cl, 0x3F
-    mov si, [bp + 10]
-    mov [si], cx ; cx[5:0] == maximum sector number
+
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 20], es, esi, si
+    mov [es:si], cx ; cx[5:0] == maximum sector number
 
     mov cl, dh
-    mov si, [bp + 12]
-    mov [si], cx ; cx == maximum number of heads
+    inc cx
+
+    ConvertLinearAddressToSegmentOffsetAddress [bp + 24], es, esi, si
+    mov [es:si], cx ; cx == maximum number of heads
 
     ; restore registers
     pop di
-    pop si
+    pop esi
     pop bx
     pop es
 
-    mov sp, bp
-    pop bp
+    push eax
+    x86EnterProtectedMode
+
+    [bits 32]
+    pop eax
+
+    mov esp, ebp
+    pop ebp
     ret

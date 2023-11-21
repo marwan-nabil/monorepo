@@ -5,7 +5,7 @@ extern cstart
 global entry
 
 global BIOSPrintCharacter
-global BIOS_PrintString
+global BIOSPrintString
 global BIOSDiskReset
 global BIOSDiskRead
 global BIOSDiskWrite

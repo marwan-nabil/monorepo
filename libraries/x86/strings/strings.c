@@ -42,9 +42,17 @@ const char *GetCharacterPointer(const char *String, char Character)
     return NULL;
 }
 
+print_context PrintContext = {0, 0};
+
 void PrintCharacter(char Character)
 {
-    BIOSPrintCharacter(Character, 0);
+    PrintCharacterColored(Character, 7, PrintContext.X, PrintContext.Y);
+    PrintContext.X++;
+    if (PrintContext.X > (VGA_SCREEN_WIDTH - 1))
+    {
+        PrintContext.X = 0;
+        PrintContext.Y++;
+    }
 }
 
 i16 StringCompare(char *String1, char *String2, u32 ComparisonRange)
@@ -191,7 +199,8 @@ i16 *PrintFormattedNumber(i16 *ArgumentPointer, printf_length_type LengthType, b
     do
     {
         u32 Remainder;
-        DivideU64ByU32(Number, Radix, &Number, &Remainder);
+        // TODO: convert this to 32 bit code
+        // DivideU64ByU32(Number, Radix, &Number, &Remainder);
         LocalStringBuffer[StringBufferPosition++] = HexCharacters[Remainder];
     } while (Number > 0);
 

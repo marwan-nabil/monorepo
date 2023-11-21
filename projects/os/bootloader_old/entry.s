@@ -23,7 +23,7 @@ DataSegmentAlignmentPadding:
 section .entry
 entry:
     mov si, BootloaderEntryMessage
-    call BIOS_PrintString
+    call BIOSPrintString
 
     cli
     mov ax, ds

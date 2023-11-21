@@ -14,7 +14,7 @@ void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
         return;
     }
 
-    DiskParameters->Cylinders = Cylinders + 1;
+    DiskParameters->Cylinders = Cylinders;
     DiskParameters->Heads = Heads + 1;
     DiskParameters->Sectors = Sectors;
     DiskParameters->Type = DriveType;

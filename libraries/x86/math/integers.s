@@ -1,7 +1,9 @@
 ; --------------------
 ; divides a u64 by a u32
 ; --------------------
+[bits 16]
 section .text
+; TODO: convert to 32 bit protected mode
 DivideU64ByU32:
     ; make new call frame
     push bp ; save old call frame

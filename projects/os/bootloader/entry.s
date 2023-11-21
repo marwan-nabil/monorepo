@@ -1,14 +1,19 @@
 global Entry
+global BIOSDiskReset
+global BIOSDiskRead
+global BIOSDiskWrite
+global BIOSGetDiskDriveParameters
 
 extern cstart
 extern __bss_start
 extern __bss_end
 
+%include "libraries\x86\modes\modes.s"
+%include "libraries\x86\bios\disk.s"
+
 ; ================================================================= ;
 ;                              definitions
 ; ================================================================= ;
-%define CRLF 0x0D, 0x0A
-
 %define KEYBOARD_CONTROLLER_DATA_PORT 0x60
 %define KEYBOARD_CONTROLLER_COMMAND_PORT 0x64
 
@@ -34,15 +39,19 @@ Entry:
     ; initialize stack
     mov ax, ds
     mov ss, ax
-    mov sp, 0
+    mov sp, 0xFFF0
     mov bp, sp
 
-    ; swtich to 32 bit protected mode
+    ; prepare the swtich to 32 bit protected mode
     call EnableA20Line
     call SetupGDT
+
+    ; enable protected mode
     mov eax, cr0
     or al, 1
     mov cr0, eax
+
+    ; jump into 32-bit code
     jmp dword 0x08:ProtectedModeEntryPoint
 
 ; --------------------------
@@ -150,41 +159,41 @@ GlobalDescriptorTable:
     dq 0
 
     ; 32-bit code segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
-    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
+    dw 0xFFFF ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
+    dw 0 ; base (bits 0-15) = 0x0
+    db 0 ; base (bits 16-23)
+    db 0b10011010 ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 0b11001111 ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0 ; base high
 
     ; 32-bit data segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
-    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
+    dw 0xFFFF ; limit (bits 0-15) = 0xFFFFF for full 32-bit range
+    dw 0 ; base (bits 0-15) = 0x0
+    db 0 ; base (bits 16-23)
+    db 0b10010010 ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 0b11001111 ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0 ; base high
 
     ; 16-bit code segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
-    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
+    dw 0xFFFF ; limit (bits 0-15) = 0xFFFFF
+    dw 0 ; base (bits 0-15) = 0x0
+    db 0 ; base (bits 16-23)
+    db 0b10011010 ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 0b00001111 ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
+    db 0 ; base high
 
     ; 16-bit data segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
-    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
+    dw 0xFFFF ; limit (bits 0-15) = 0xFFFFF
+    dw 0 ; base (bits 0-15) = 0x0
+    db 0 ; base (bits 16-23)
+    db 0b10010010 ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 0b00001111 ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
+    db 0 ; base high
 
 section .data
 GlobalDescriptorTableDescriptor:
-    dw GlobalDescriptorTableDescriptor - GlobalDescriptorTable - 1
-    dd GlobalDescriptorTable
+    dw GlobalDescriptorTableDescriptor - GlobalDescriptorTable - 1 ; GDT size
+    dd GlobalDescriptorTable ; GDT pointer
 
 section .data
 BootDrive:

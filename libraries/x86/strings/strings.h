@@ -1,5 +1,11 @@
 #pragma once
 
+typedef struct
+{
+    u16 X;
+    u16 Y;
+} print_context;
+
 typedef enum
 {
     PRINTF_STATE_NORMAL,

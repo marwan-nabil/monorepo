@@ -1,8 +1,3 @@
-void MemoryUtilsTests()
-{
-
-}
-
 void StringTests()
 {
     char *FarString = "far string";
