@@ -130,9 +130,12 @@ void PrintFormattedNumberSigned(u64 Number, u32 Radix)
     if (Number < 0)
     {
         BIOSPrintCharacter('-');
-        Number = -Number;
+        PrintFormattedNumberUnsigned(-Number, Radix);
     }
-    PrintFormattedNumberUnsigned(Number, Radix);
+    else
+    {
+        PrintFormattedNumberUnsigned(Number, Radix);
+    }
 }
 
 void PrintFormatted(const char *FormatString, ...)
@@ -276,13 +279,13 @@ void PrintFormatted(const char *FormatString, ...)
                             case PRINTF_LENGTH_TYPE_SHORT:
                             case PRINTF_LENGTH_TYPE_DEFAULT:
                             {
-                                PrintFormattedNumberSigned((u64)va_arg(ArgumentsList, i32), Radix);
+                                PrintFormattedNumberSigned(va_arg(ArgumentsList, i32), Radix);
                             } break;
 
                             case PRINTF_LENGTH_TYPE_LONG:
                             case PRINTF_LENGTH_TYPE_LONG_LONG:
                             {
-                                PrintFormattedNumberSigned((u64)va_arg(ArgumentsList, i64), Radix);
+                                PrintFormattedNumberSigned(va_arg(ArgumentsList, i64), Radix);
                             } break;
                         }
                     }
@@ -294,13 +297,13 @@ void PrintFormatted(const char *FormatString, ...)
                             case PRINTF_LENGTH_TYPE_SHORT:
                             case PRINTF_LENGTH_TYPE_DEFAULT:
                             {
-                                PrintFormattedNumberUnsigned((u64)va_arg(ArgumentsList, i32), Radix);
+                                PrintFormattedNumberUnsigned(va_arg(ArgumentsList, u32), Radix);
                             } break;
 
                             case PRINTF_LENGTH_TYPE_LONG:
                             case PRINTF_LENGTH_TYPE_LONG_LONG:
                             {
-                                PrintFormattedNumberUnsigned((u64)va_arg(ArgumentsList, i64), Radix);
+                                PrintFormattedNumberUnsigned(va_arg(ArgumentsList, u64), Radix);
                             } break;
                         }
                     }
