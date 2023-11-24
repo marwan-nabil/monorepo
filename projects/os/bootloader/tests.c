@@ -1,5 +1,6 @@
 void TestVGA()
 {
+    BIOSPrintString("\r\n============ VGA driver tests ============== \r\n");
     for (u32 Y = 0; Y < VGA_SCREEN_HEIGHT; Y++)
     {
         for (u32 X = 0; X < VGA_SCREEN_WIDTH; X++)
@@ -7,19 +8,27 @@ void TestVGA()
             u8 Color = X + Y;
             char Character = X + Y;
             PrintCharacterColored(Character, Color, X, Y);
+            SpinlockSleep(100);
         }
     }
+    ClearScreen();
+    SetCursorPosition(0, 0);
+}
+
+void TestIO()
+{
+    BIOSPrintString("\r\n============ IO driver tests ============== \r\n");
 }
 
 void TestBIOSFunctions(u32 DriveNumber)
 {
+    BIOSPrintString("\r\n============ BIOS functions tests ============== \r\n");
     BIOSPrintCharacter('E');
     BIOSPrintString("xecuting BIOS code!\r\n");
 }
 
 void StringTests()
 {
-    // TODO: fix negative numbers printing bug in PrintFormatted
     char *FarString = "far string";
     char *FarString2 = "aaaaaaa";
 

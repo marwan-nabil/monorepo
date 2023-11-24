@@ -1,3 +1,4 @@
+// TODO: convert all BIOS calls to VGA character writes
 b8 IsCharacterLowerCase(char Character)
 {
     if ((Character >= 'a') && (Character <= 'z'))
@@ -140,6 +141,7 @@ void PrintFormattedNumberSigned(u64 Number, u32 Radix)
 
 void PrintFormatted(const char *FormatString, ...)
 {
+    // TODO: fix negative numbers printing bug in PrintFormatted
     va_list ArgumentsList;
     va_start(ArgumentsList, FormatString);
 

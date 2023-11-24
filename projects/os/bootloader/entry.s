@@ -5,16 +5,17 @@ global BIOSDiskWrite
 global BIOSGetDiskDriveParameters
 global BIOSPrintCharacter
 global BIOSPrintString
-global DivideU64ByU32
+global WriteByteToOutputPort
+global ReadByteFromOutputPort
 
 extern cstart
 extern __bss_start
 extern __bss_end
 
-%include "libraries\x86\modes\modes.s"
+%include "libraries\x86\modes.s"
 %include "libraries\x86\bios\disk.s"
 %include "libraries\x86\bios\strings.s"
-%include "libraries\x86\math\integers.s"
+%include "libraries\x86\io\io.s"
 
 ; ================================================================= ;
 ;                              definitions
