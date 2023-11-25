@@ -10,7 +10,6 @@ void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber)
     Result = BIOSGetDiskDriveParameters(DriveNumber, &DriveType, &Cylinders, &Sectors, &Heads);
     if (!Result)
     {
-        PrintFormatted("ERROR: GetDiskDriveParameters() failed.\r\n");
         return;
     }
 
@@ -60,8 +59,6 @@ void ReadDiskSectors
             BIOSDiskReset(DiskParameters->Id);
         }
     }
-
-    PrintFormatted("ERROR: ReadDiskSectors() failed.\r\n");
 }
 
 void WriteDiskSectors
@@ -93,6 +90,4 @@ void WriteDiskSectors
             BIOSDiskReset(DiskParameters->Id);
         }
     }
-
-    PrintFormatted("ERROR: WriteDiskSectors() failed.\r\n");
 }

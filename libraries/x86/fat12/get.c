@@ -383,7 +383,7 @@ GetDirectoryEntryOfFileByPath
     return NULL;
 }
 
-void Fat12ListDirectorySector(sector *Sector)
+void Fat12ListDirectorySector(sector *Sector, print_context *PrintContext)
 {
     for
     (
@@ -398,7 +398,7 @@ void Fat12ListDirectorySector(sector *Sector)
         }
         else if (DirectoryEntry->FileName[0] == FAT12_FILENAME_DELETED_SLOT)
         {
-            PrintFormatted("    > deleted file.\r\n");
+            PrintFormatted(PrintContext, "    > deleted file.\r\n");
         }
         else
         {
@@ -413,7 +413,7 @@ void Fat12ListDirectorySector(sector *Sector)
                 FileNameString[8] = 0;
                 FileExtensionString[3] = 0;
 
-                PrintFormatted("    FILE:   %s.%s\r\n", FileNameString, FileExtensionString);
+                PrintFormatted(PrintContext, "    FILE:   %s.%s\r\n", FileNameString, FileExtensionString);
             }
             else if (DirectoryEntry->FileAttributes == FAT12_FILE_ATTRIBUTE_DIRECTORY)
             {
@@ -421,7 +421,7 @@ void Fat12ListDirectorySector(sector *Sector)
 
                 MemoryCopy(FileNameString, DirectoryEntry->FileName, 8);
                 FileNameString[8] = 0;
-                PrintFormatted("     DIR:   %s\r\n", FileNameString);
+                PrintFormatted(PrintContext, "     DIR:   %s\r\n", FileNameString);
             }
         }
     }
@@ -432,10 +432,11 @@ void Fat12ListDirectory
     fat12_ram_disk *Disk,
     memory_arena *MemoryArena,
     disk_parameters *DiskParameters,
+    print_context *PrintContext,
     char *DirectoryPath
 )
 {
-    PrintFormatted("\r\nlisting %ls:\r\n", DirectoryPath);
+    PrintFormatted(PrintContext, "\r\nlisting %ls:\r\n", DirectoryPath);
 
     if
     (
@@ -445,7 +446,7 @@ void Fat12ListDirectory
     {
         for (u32 SectorIndex = 0; SectorIndex < FAT12_SECTORS_IN_ROOT_DIRECTORY; SectorIndex++)
         {
-            Fat12ListDirectorySector(&Disk->RootDirectory.Sectors[SectorIndex]);
+            Fat12ListDirectorySector(&Disk->RootDirectory.Sectors[SectorIndex], PrintContext);
         }
     }
     else
@@ -467,7 +468,7 @@ void Fat12ListDirectory
                 Sector,
                 CurrentClusterNumber
             );
-            Fat12ListDirectorySector(Sector);
+            Fat12ListDirectorySector(Sector, PrintContext);
 
             if (IsFatEntryEndOfFile(CurrentFatEntry))
             {

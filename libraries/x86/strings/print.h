@@ -19,3 +19,9 @@ typedef enum
     PRINTF_LENGTH_TYPE_LONG,
     PRINTF_LENGTH_TYPE_LONG_LONG
 } printf_length_type;
+
+typedef struct
+{
+    u32 X;
+    u32 Y;
+} print_context;

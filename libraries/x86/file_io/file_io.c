@@ -228,13 +228,14 @@ void FileClose(file_io_context *Context, i16 FileHandle)
     File->IsOpen = FALSE;
 }
 
-void ListDirectory(file_io_context *Context, char *DirectoryFilePath)
+void ListDirectory(file_io_context *Context, print_context *PrintContext, char *DirectoryFilePath)
 {
     Fat12ListDirectory
     (
         &Context->Fat12RamDisk,
         &Context->TransientMemoryArena,
         &Context->DiskParameters,
+        PrintContext,
         DirectoryFilePath
     );
     FreeMemoryArena(&Context->TransientMemoryArena);

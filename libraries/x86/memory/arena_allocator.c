@@ -10,9 +10,9 @@ void FreeMemoryArena(memory_arena *Arena)
     Arena->Used = 0;
 }
 
-void PrintMemoryArenaUsage(memory_arena *Arena)
+void PrintMemoryArenaUsage(memory_arena *Arena, print_context *PrintContext)
 {
-    PrintFormatted("Arena usage: %ld bytes.\r\n", Arena->Used);
+    PrintFormatted(PrintContext, "Arena usage: %ld bytes.\r\n", Arena->Used);
 }
 
 void *PushOntoMemoryArena(memory_arena *Arena, u32 PushSize)
