@@ -1,8 +1,12 @@
 void AddTestFilesToDiskImage(build_context *BuildContext, fat12_disk *Fat12Disk)
 {
-    SetOuputBinaryPath(BuildContext, "\\bootloader\\bootloader.img");
-    read_file_result DummyBigFile = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
-    ClearBuildContext(BuildContext);
+    char TestFilePath[1024];
+    ZeroMemory(TestFilePath, ArrayCount(TestFilePath));
+
+    StringCchCat(TestFilePath, ArrayCount(TestFilePath), BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    StringCchCat(TestFilePath, ArrayCount(TestFilePath), "\\bootloader\\bootloader.img");
+
+    read_file_result DummyBigFile = ReadFileIntoMemory(TestFilePath);
 
     Fat12AddDirectory(Fat12Disk, "\\Dir0");
     Fat12AddFile(Fat12Disk, "\\Dir0\\BigFile", DummyBigFile.FileMemory, DummyBigFile.Size);
@@ -21,32 +25,41 @@ static b32 BuildFloppyDiskImage(build_context *BuildContext)
     );
     memset(Fat12Disk, 0, sizeof(fat12_disk));
 
-    SetOuputBinaryPath(BuildContext, "\\boot_sector\\boot_sector.img");
-    read_file_result BootSector = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
+    char ImagePath[1024];
+    ZeroMemory(ImagePath, ArrayCount(ImagePath));
+    StringCchCat(ImagePath, ArrayCount(ImagePath), BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    StringCchCat(ImagePath, ArrayCount(ImagePath), "\\boot_sector\\boot_sector.img");
+
+    read_file_result BootSector = ReadFileIntoMemory(ImagePath);
     memcpy(&Fat12Disk->BootSector, BootSector.FileMemory, FAT12_SECTOR_SIZE);
     FreeFileMemory(BootSector);
-    ClearBuildContext(BuildContext);
 
-    SetOuputBinaryPath(BuildContext, "\\bootloader\\bootloader.img");
-    read_file_result Bootloader = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
+    ZeroMemory(ImagePath, ArrayCount(ImagePath));
+    StringCchCat(ImagePath, ArrayCount(ImagePath), BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    StringCchCat(ImagePath, ArrayCount(ImagePath), "\\bootloader\\bootloader.img");
+
+    read_file_result Bootloader = ReadFileIntoMemory(ImagePath);
     Fat12AddFile(Fat12Disk, "\\bootld  .bin", Bootloader.FileMemory, Bootloader.Size);
     FreeFileMemory(Bootloader);
-    ClearBuildContext(BuildContext);
 
-    SetOuputBinaryPath(BuildContext, "\\kernel\\kernel.img");
-    read_file_result Kernel = ReadFileIntoMemory(BuildContext->OutputBinaryPath);
+    ZeroMemory(ImagePath, ArrayCount(ImagePath));
+    StringCchCat(ImagePath, ArrayCount(ImagePath), BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    StringCchCat(ImagePath, ArrayCount(ImagePath), "\\kernel\\kernel.img");
+
+    read_file_result Kernel = ReadFileIntoMemory(ImagePath);
     Fat12AddFile(Fat12Disk, "\\kernel  .bin", Kernel.FileMemory, Kernel.Size);
     FreeFileMemory(Kernel);
-    ClearBuildContext(BuildContext);
 
     // NOTE: files and direcotries added to the disk image only for testing purposes,
     //       should be removed later.
     AddTestFilesToDiskImage(BuildContext, Fat12Disk);
 
-    SetOuputBinaryPath(BuildContext, "\\floppy.img");
+    ZeroMemory(ImagePath, ArrayCount(ImagePath));
+    StringCchCat(ImagePath, ArrayCount(ImagePath), BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    StringCchCat(ImagePath, ArrayCount(ImagePath), "\\floppy.img");
     b32 BuildSuccess = WriteFileFromMemory
     (
-        BuildContext->OutputBinaryPath,
+        ImagePath,
         Fat12Disk,
         sizeof(fat12_disk)
     );
@@ -78,7 +91,5 @@ static b32 BuildX86RealOs(build_context *BuildContext)
     ClearBuildContext(BuildContext);
 
     BuildSuccess = BuildFloppyDiskImage(BuildContext);
-    ClearBuildContext(BuildContext);
-
     return BuildSuccess;
 }

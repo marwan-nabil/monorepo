@@ -2,10 +2,10 @@ static b32 BuildKernelImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "kernel");
 
-    AddSourceFile(BuildContext, "\\projects\\os\\kernel\\entry.s");
+    AddCompilerSourceFile(BuildContext, "\\projects\\os\\kernel\\entry.s");
     AddCompilerFlags(BuildContext, "-f elf");
-    SetOuputBinaryPath(BuildContext, "\\entry.elf");
-    SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
+    SetCompilerOutputObject(BuildContext, "\\entry.elf");
+    SetCompilerIncludePath(BuildContext, BuildContext->EnvironmentInfo.RootDirectoryPath);
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     if (!BuildSuccess)
     {
@@ -13,10 +13,10 @@ static b32 BuildKernelImage(build_context *BuildContext)
     }
     ClearBuildContext(BuildContext);
 
-    AddSourceFile(BuildContext, "\\projects\\os\\kernel\\main.c");
-    SetOuputBinaryPath(BuildContext, "\\main.elf");
+    AddCompilerSourceFile(BuildContext, "\\projects\\os\\kernel\\main.c");
+    SetCompilerOutputObject(BuildContext, "\\main.elf");
     AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
-    SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
+    SetCompilerIncludePath(BuildContext, BuildContext->EnvironmentInfo.RootDirectoryPath);
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
@@ -25,12 +25,12 @@ static b32 BuildKernelImage(build_context *BuildContext)
     ClearBuildContext(BuildContext);
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
-    AddSourceFile(BuildContext, "\\projects\\os\\kernel\\linker.lds");
+    SetLinkerScriptPath(BuildContext, "\\projects\\os\\kernel\\linker.lds");
     AddLinkerInputFile(BuildContext, "\\entry.elf");
     AddLinkerInputFile(BuildContext, "\\main.elf");
-    SetOuputBinaryPath(BuildContext, "\\kernel.img");
+    SetLinkerOutputBinary(BuildContext, "\\kernel.img");
     BuildSuccess = LinkWithGCC(BuildContext);
-    
+
     PopSubTarget(BuildContext);
     return BuildSuccess;
 }

@@ -1,10 +1,10 @@
 static b32 BuildBootSectorImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "boot_sector");
-    AddSourceFile(BuildContext, "\\projects\\os\\boot_sector\\entry.s");
+    AddCompilerSourceFile(BuildContext, "\\projects\\os\\boot_sector\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin -lboot_sector.lst");
-    SetOuputBinaryPath(BuildContext, "\\boot_sector.img");
-    SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
+    SetCompilerIncludePath(BuildContext, "\\");
+    SetCompilerOutputObject(BuildContext, "\\boot_sector.img");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     PopSubTarget(BuildContext);
     return BuildSuccess;

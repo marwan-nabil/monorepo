@@ -94,24 +94,28 @@ int main(int argc, char **argv)
     u32 BuildSuccess = FALSE;
     build_context BuildContext = {};
 
-    _getcwd(BuildContext.OutputDirectoryPath, sizeof(BuildContext.OutputDirectoryPath));
+    _getcwd
+    (
+        BuildContext.EnvironmentInfo.OutputDirectoryPath,
+        sizeof(BuildContext.EnvironmentInfo.OutputDirectoryPath)
+    );
 
     StringCchCatA
     (
-        BuildContext.RootDirectoryPath,
-        ArrayCount(BuildContext.RootDirectoryPath),
-        BuildContext.OutputDirectoryPath
+        BuildContext.EnvironmentInfo.RootDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.RootDirectoryPath),
+        BuildContext.EnvironmentInfo.OutputDirectoryPath
     );
     StringCchCatA
     (
-        BuildContext.RootDirectoryPath,
-        ArrayCount(BuildContext.RootDirectoryPath),
+        BuildContext.EnvironmentInfo.RootDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.RootDirectoryPath),
         "\\.."
     );
 
-    BuildContext.argc = argc;
-    BuildContext.argv = argv;
-    BuildContext.ConsoleContext = &GlobalConsoleContext;
+    BuildContext.EnvironmentInfo.argc = argc;
+    BuildContext.EnvironmentInfo.argv = argv;
+    BuildContext.EnvironmentInfo.ConsoleContext = &GlobalConsoleContext;
 
     InitializeConsole(&GlobalConsoleContext);
 
@@ -135,7 +139,7 @@ int main(int argc, char **argv)
     }
     else if (strcmp(argv[1], "clean_all") == 0)
     {
-        EmptyDirectory(BuildContext.OutputDirectoryPath);
+        EmptyDirectory(BuildContext.EnvironmentInfo.OutputDirectoryPath);
         BuildSuccess = TRUE;
     }
     else if (strcmp(argv[1], "help") == 0)
@@ -159,29 +163,29 @@ int main(int argc, char **argv)
         {
             StringCchCatA
             (
-                BuildContext.TargetOutputDirectoryPath,
-                ArrayCount(BuildContext.TargetOutputDirectoryPath),
-                BuildContext.OutputDirectoryPath
+                BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+                ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+                BuildContext.EnvironmentInfo.OutputDirectoryPath
             );
             StringCchCatA
             (
-                BuildContext.TargetOutputDirectoryPath,
-                ArrayCount(BuildContext.TargetOutputDirectoryPath),
+                BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+                ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
                 "\\"
             );
             StringCchCatA
             (
-                BuildContext.TargetOutputDirectoryPath,
-                ArrayCount(BuildContext.TargetOutputDirectoryPath),
+                BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+                ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
                 FoundTargetConfig->TargetName
             );
 
-            CreateDirectoryA(BuildContext.TargetOutputDirectoryPath, NULL);
-            b32 Result = SetCurrentDirectory(BuildContext.TargetOutputDirectoryPath);
+            CreateDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath, NULL);
+            b32 Result = SetCurrentDirectory(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
             if (Result)
             {
                 BuildSuccess = FoundTargetConfig->BuildFunction(&BuildContext);
-                SetCurrentDirectory(BuildContext.OutputDirectoryPath);
+                SetCurrentDirectory(BuildContext.EnvironmentInfo.OutputDirectoryPath);
             }
         }
         else
