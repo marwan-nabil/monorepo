@@ -17,7 +17,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
     SetOuputBinaryPath(BuildContext, "\\main.elf");
     AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
     SetCompilerIncludePath(BuildContext, BuildContext->RootDirectoryPath);
-    BuildSuccess = CompilerWithGCC(BuildContext);
+    BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;

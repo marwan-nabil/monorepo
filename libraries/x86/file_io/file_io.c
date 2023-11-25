@@ -3,6 +3,7 @@ void FileIoInitialize
     u16 DriveNumber,
     void *TransientMemoryAddress,
     u32 TransientMemorySize,
+    print_context *PrintContext,
     file_io_context *Context
 )
 {
@@ -23,6 +24,8 @@ void FileIoInitialize
     {
         Context->OpenFiles[Index].IsOpen = FALSE;
     }
+
+    Context->PrintContext = PrintContext;
 }
 
 i16 FileOpen(file_io_context *Context, char *FilePath)
@@ -228,14 +231,14 @@ void FileClose(file_io_context *Context, i16 FileHandle)
     File->IsOpen = FALSE;
 }
 
-void ListDirectory(file_io_context *Context, print_context *PrintContext, char *DirectoryFilePath)
+void ListDirectory(file_io_context *Context, char *DirectoryFilePath)
 {
     Fat12ListDirectory
     (
         &Context->Fat12RamDisk,
         &Context->TransientMemoryArena,
         &Context->DiskParameters,
-        PrintContext,
+        Context->PrintContext,
         DirectoryFilePath
     );
     FreeMemoryArena(&Context->TransientMemoryArena);

@@ -1,4 +1,4 @@
-static b32 CompilerWithGCC(build_context *BuildContext)
+static b32 CompileWithGCC(build_context *BuildContext)
 {
     char CompilerCommand[1024];
     *CompilerCommand = {};

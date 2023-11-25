@@ -8,21 +8,15 @@
 
 .ProtectedMode16Bits:
     [bits 16]
-    ; 2 - disable protected mode bit in cr0
     mov eax, cr0
     and al, ~1
     mov cr0, eax
-
-    ; 3 - jump to real mode
     jmp word 00h:.RealModeCode
 
 .RealModeCode:
-    ; 4 - setup segments
     mov ax, 0
     mov ds, ax
     mov ss, ax
-
-    ; 5 - enable interrupts
     sti
 %endmacro
 
@@ -32,20 +26,13 @@
 ; ----------------------
 %macro x86EnterProtectedMode 0
     cli
-
-    ; 4 - set protection enable flag in CR0
     mov eax, cr0
     or al, 1
     mov cr0, eax
-
-    ; 5 - far jump into protected mode
     jmp dword 08h:.ProtectedModeCode
 
 .ProtectedModeCode:
-    ; we are now in protected mode!
     [bits 32]
-
-    ; 6 - setup segment registers
     mov ax, 0x10
     mov ds, ax
     mov ss, ax
@@ -53,7 +40,7 @@
 
 ; -----------------------------------------
 ; Convert linear address to segment:offset address
-; Args:
+; arguments:
 ;    1: linear address
 ;    2: (out) target segment
 ;    3: target 32-bit register to use

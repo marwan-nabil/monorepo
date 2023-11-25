@@ -327,12 +327,13 @@ void FileIoTests(u16 BootDriveNumber, void *FreeMemoryArea, print_context *Print
         BootDriveNumber,
         PushArray(&LocalMemoryArena, KiloBytes(16), u8),
         KiloBytes(16),
+        PrintContext,
         FileIoContext
     );
 
-    ListDirectory(FileIoContext, PrintContext, "\\");
-    ListDirectory(FileIoContext, PrintContext, "\\Dir0");
-    ListDirectory(FileIoContext, PrintContext, "\\Dir0\\Dir1");
+    ListDirectory(FileIoContext, "\\");
+    ListDirectory(FileIoContext, "\\Dir0");
+    ListDirectory(FileIoContext, "\\Dir0\\Dir1");
 
     i16 FileHandle = FileOpen(FileIoContext, "\\Dir0\\Dir1\\sample.txt");
 

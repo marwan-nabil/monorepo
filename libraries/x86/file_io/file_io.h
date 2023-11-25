@@ -23,6 +23,7 @@ typedef struct
     fat12_ram_disk Fat12RamDisk;
     disk_parameters DiskParameters;
     memory_arena TransientMemoryArena;
+    print_context *PrintContext;
 
     file_io_file OpenFiles[FILE_IO_MAX_OPEN_FILES];
     u8 OpenFilesCount;
