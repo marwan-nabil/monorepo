@@ -4,9 +4,9 @@ static b32 CompileWithGCC(build_context *BuildContext)
     *CompilerCommand = {};
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "i686-elf-gcc.exe -c ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerFlags);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -I\"");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -I ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "-o ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");

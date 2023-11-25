@@ -5,7 +5,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\projects\\os\\kernel\\entry.s");
     AddCompilerFlags(BuildContext, "-f elf");
     SetCompilerOutputObject(BuildContext, "\\entry.elf");
-    SetCompilerIncludePath(BuildContext, BuildContext->EnvironmentInfo.RootDirectoryPath);
+    SetCompilerIncludePath(BuildContext, "\\");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     if (!BuildSuccess)
     {
@@ -16,7 +16,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\projects\\os\\kernel\\main.c");
     SetCompilerOutputObject(BuildContext, "\\main.elf");
     AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
-    SetCompilerIncludePath(BuildContext, BuildContext->EnvironmentInfo.RootDirectoryPath);
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
