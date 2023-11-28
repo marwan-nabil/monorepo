@@ -24,15 +24,15 @@
 // #include "libraries\x86\fat12\set.c"
 // #include "libraries\x86\file_io\file_io.c"
 
-extern u8 __bss_start;
-extern u8 __end;
+extern u32 __bss_start;
+extern u32 __bss_end;
 
 u8 FreeStore[KiloBytes(64)];
 print_context GlobalPrintContext;
 
 void __attribute__((section(".entry"))) Start()
 {
-    MemoryZero(&__bss_start, (&__end) - (&__bss_start));
+    MemoryZero(&__bss_start, &__bss_end - &__bss_start);
 
     ClearScreen();
     PrintString(&GlobalPrintContext, "\r\nHello from the kernel!\r\n");

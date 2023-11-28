@@ -42,9 +42,9 @@
 ; Convert linear address to segment:offset address
 ; arguments:
 ;    1: linear address
-;    2: (out) target segment
-;    3: target 32-bit register to use
-;    4: target lower 16-bit half of #3
+;    2: 16-bit segment register
+;    3: 32-bit register that will hold the offset
+;    4: 16-bit name of register argument 3
 ; -----------------------------------------
 %macro ConvertLinearAddressToSegmentOffsetAddress 4
     mov %3, %1

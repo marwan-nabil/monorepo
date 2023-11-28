@@ -4,7 +4,7 @@
     "files.exclude":
     {
         // "output": true,
-        // "tools": true,
+        "tools/": true,
         // "data": true,
 
         // "libraries/win32": true,

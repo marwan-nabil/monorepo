@@ -33,9 +33,7 @@
 #define FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_START 0x0FF8
 #define FAT12_FAT_ENTRY_END_OF_FILE_CLUSTER_RANGE_END 0x0FFF
 
-#pragma pack(push, 1)
-
-typedef struct
+typedef struct __attribute__((packed))
 {
     u8 JumpInstructionSpace[3];
     u8 OEMName[8];
@@ -61,7 +59,7 @@ typedef struct
     u8 SystemId[8];
 } boot_sector_header;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     u8 JumpInstructionSpace[3];
     u8 OEMName[8];
@@ -90,7 +88,7 @@ typedef struct
     u16 BootSectorSignature;
 } boot_sector;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     u8 FileName[8];
     u8 FileExtension[3];
@@ -106,24 +104,22 @@ typedef struct
     u32 FileSize;
 } directory_entry;
 
-typedef union
+typedef union __attribute__((packed))
 {
     u8 Bytes[FAT12_SECTOR_SIZE];
     directory_entry DirectoryEntries[FAT12_DIRECTORY_ENTRIES_IN_SECTOR];
 } sector;
 
-typedef union
+typedef union __attribute__((packed))
 {
     sector Sectors[FAT12_SECTORS_IN_FAT];
     u8 Bytes[FAT12_FAT_SIZE];
 } file_allocation_table;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     sector Sectors[FAT12_SECTORS_IN_ROOT_DIRECTORY];
 } root_directory;
-
-#pragma pack(pop)
 
 typedef struct
 {
