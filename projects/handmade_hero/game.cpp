@@ -1,18 +1,37 @@
+// TODO:
+// - improve collision rule storage data structure to optimize for insertion and clearing.
+// - fix buggy Z handling in entity.cpp AddGoundBasedStorageEntity().
+// - improve velocity and postition update accuracy in MoveEntity().
+// - reduce the number of tested against entities in the sim region
+//   using spatial partition in MoveEntity().
+// - bitmap facing direction should be determined by the Acceleration vector instead
+//   of the velocity vector in MoveEntity().
+// - win32_platform.cpp Win32DisplayBufferInWindow() center when in full screen.
+// - win32_platform.cpp Win32FillGlobalSoundBuffer() assert that the returned region sizes
+//   from Lock() are valid (multiples of 4 bytes).
+// - in game.cpp in the simulation region entity processing loop,
+//   ShadowBitMap alpha/position calculation is impercise, should be after postition update for all entities.
+// - in win32_platform.cpp add logging for missed frames.
+// - in world.cpp IsOffsetWithinInterval():
+// - determine a good safety margin.
+// - fix fp math so this should be < & >.
+// - in world.cpp CanonicalizeIntervalIndexAndOffset() fix this shit (truncation party).
+// - in world.cpp GetWorldPositionFromTilePosition() fix buggy Z handling.
 #include <stdint.h>
 #include <math.h>
 #include <intrin.h>
 #include <string.h>
 
-#include "libraries\win32\base_types.h"
-#include "libraries\win32\basic_defines.h"
+#include "platforms\win32\base_types.h"
+#include "platforms\win32\basic_defines.h"
 
-#include "libraries\win32\math\constants.h"
-#include "libraries\win32\math\vector2.h"
-#include "libraries\win32\math\vector3.h"
-#include "libraries\win32\math\vector4.h"
-#include "libraries\win32\math\rectangle2.h"
-#include "libraries\win32\math\rectangle3.h"
-#include "libraries\win32\math\bit_operations.h"
+#include "platforms\win32\math\constants.h"
+#include "platforms\win32\math\vector2.h"
+#include "platforms\win32\math\vector3.h"
+#include "platforms\win32\math\vector4.h"
+#include "platforms\win32\math\rectangle2.h"
+#include "platforms\win32\math\rectangle3.h"
+#include "platforms\win32\math\bit_operations.h"
 
 #include "game_interface.h"
 #include "memory.h"
@@ -24,16 +43,16 @@
 #include "simulation.h"
 #include "game.h"
 
-#include "libraries\win32\math\floats.cpp"
-#include "libraries\win32\math\integers.cpp"
-#include "libraries\win32\math\scalar_conversions.cpp"
-#include "libraries\win32\math\transcendentals.cpp"
-#include "libraries\win32\math\bit_operations.cpp"
-#include "libraries\win32\math\vector2.cpp"
-#include "libraries\win32\math\vector3.cpp"
-#include "libraries\win32\math\vector4.cpp"
-#include "libraries\win32\math\rectangle2.cpp"
-#include "libraries\win32\math\rectangle3.cpp"
+#include "platforms\win32\math\floats.cpp"
+#include "platforms\win32\math\integers.cpp"
+#include "platforms\win32\math\scalar_conversions.cpp"
+#include "platforms\win32\math\transcendentals.cpp"
+#include "platforms\win32\math\bit_operations.cpp"
+#include "platforms\win32\math\vector2.cpp"
+#include "platforms\win32\math\vector3.cpp"
+#include "platforms\win32\math\vector4.cpp"
+#include "platforms\win32\math\rectangle2.cpp"
+#include "platforms\win32\math\rectangle3.cpp"
 
 #include "game_interface.cpp"
 #include "memory.cpp"

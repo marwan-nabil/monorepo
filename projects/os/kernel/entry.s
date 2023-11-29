@@ -5,6 +5,6 @@
 global WriteByteToOutputPort
 global ReadByteFromOutputPort
 
-; %include "libraries\x86\modes.s"
-; %include "libraries\x86\bios\disk.s"
-%include "libraries\x86\io\io.s"
+; %include "platforms\i686-elf\modes.s"
+; %include "platforms\i686-elf\bios\disk.s"
+%include "platforms\i686-elf\io\io.s"

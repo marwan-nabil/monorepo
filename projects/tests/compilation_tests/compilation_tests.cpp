@@ -1,3 +1,14 @@
+// TODO:
+// - improve compilation tests console messages:
+// - info messages should denote the beginning and ending of the test clearly,
+//   because all the tests are usually run sequentially and output in a single log.
+// - it should be indicated clearly if not all tests have succeeded.
+// - failed tests have extra error information provided.
+// - build dependency graph of #include'ed files in compile targets.
+// - store the test results permanently, with info about dependencies.
+// - check on the last modification before running a test for a target.
+// - only rerun the test if necessary, meaning, if one of the target
+//   dependencies changed since the last test run.
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -5,15 +16,15 @@
 #include <strsafe.h>
 #include <io.h>
 
-#include "libraries\win32\base_types.h"
-#include "libraries\win32\basic_defines.h"
-#include "libraries\win32\console\console.h"
+#include "platforms\win32\base_types.h"
+#include "platforms\win32\basic_defines.h"
+#include "platforms\win32\console\console.h"
 #include "compilation_tests.h"
 
-#include "libraries\win32\console\console.cpp"
-#include "libraries\win32\strings\strings.cpp"
-#include "libraries\win32\processes\processes.cpp"
-#include "libraries\win32\timing\timing.cpp"
+#include "platforms\win32\console\console.cpp"
+#include "platforms\win32\strings\strings.cpp"
+#include "platforms\win32\processes\processes.cpp"
+#include "platforms\win32\timing\timing.cpp"
 
 console_context GlobalConsoleContext;
 

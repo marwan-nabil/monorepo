@@ -1,3 +1,8 @@
+// TODO:
+// - make linting smarter by not having to touch all the files every time.
+//     - only lint files that were modified since last lint time.
+//     - this requires that we save the last lint time in a metadata .json file.
+// - exclude the data, output, tools folders from liniting.
 #include <Windows.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -9,15 +14,15 @@
 #include <time.h>
 #include <shlwapi.h>
 
-#include "libraries\win32\base_types.h"
-#include "libraries\win32\basic_defines.h"
-#include "libraries\win32\console\console.h"
-#include "libraries\win32\file_system\files.h"
+#include "platforms\win32\base_types.h"
+#include "platforms\win32\basic_defines.h"
+#include "platforms\win32\console\console.h"
+#include "platforms\win32\file_system\files.h"
 #include "lint.h"
 
-#include "libraries\win32\math\scalar_conversions.cpp"
-#include "libraries\win32\console\console.cpp"
-#include "libraries\win32\file_system\files.cpp"
+#include "platforms\win32\math\scalar_conversions.cpp"
+#include "platforms\win32\console\console.cpp"
+#include "platforms\win32\file_system\files.cpp"
 
 char RootDirectoryPath[1024];
 

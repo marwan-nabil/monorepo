@@ -4,13 +4,13 @@ dependencies:
 for all projects:
     - MSVC: https://visualstudio.microsoft.com/
 
-for x86 projects:
+for the os project:
     - nasm: https://nasm.us/
     - qemu: https://www.qemu.org/
     - bochs: https://sourceforge.net/projects/bochs/
-    - OpenWatcom: https://sourceforge.net/projects/openwatcom/ [to be removed]
+    - gcc cross compiler
 
-for building our gcc cross compiler:
+for building the gcc cross compiler:
     - cygwin
     - gcc-13.2.0 source code
     - binutils-2.41 source code

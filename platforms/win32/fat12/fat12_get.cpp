@@ -1,3 +1,4 @@
+// TODO: optimize fat12 driver primitives
 inline u16 TranslateClusterNumberToSectorIndex(u16 ClusterNumber)
 {
     Assert(ClusterNumber >= 2);

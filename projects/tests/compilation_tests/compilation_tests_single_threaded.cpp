@@ -4,13 +4,13 @@
 #include <strsafe.h>
 #include <io.h>
 
-#include "libraries\win32\base_types.h"
-#include "libraries\win32\basic_defines.h"
-#include "libraries\win32\console\console.h"
+#include "platforms\win32\base_types.h"
+#include "platforms\win32\basic_defines.h"
+#include "platforms\win32\console\console.h"
 
-#include "libraries\win32\console\console.cpp"
-#include "libraries\win32\strings\strings.cpp"
-#include "libraries\win32\processes\processes.cpp"
+#include "platforms\win32\console\console.cpp"
+#include "platforms\win32\strings\strings.cpp"
+#include "platforms\win32\processes\processes.cpp"
 
 console_context GlobalConsoleContext;
 

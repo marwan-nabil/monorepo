@@ -1,4 +1,5 @@
 #if 0
+// TODO: a generic implmentation to be used from multiple projects
 static void
 ResizeRenderingBuffer(rendering_buffer *Buffer, i32 NewWidthInPixels, i32 NewHeightInPixels)
 {

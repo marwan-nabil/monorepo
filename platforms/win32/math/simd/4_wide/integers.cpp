@@ -113,6 +113,7 @@ MaskIsAllZeroes(u32_lane Mask)
     return Result;
 }
 
+// TODO: decide which implmenetation of HorizontalAdd() is better
 // inline u64
 // HorizontalAdd(u32_lane WideValue)
 // {
