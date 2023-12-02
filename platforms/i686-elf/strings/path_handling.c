@@ -53,19 +53,6 @@ void RemoveLastSegmentFromPath(char *Path)
     }
 }
 
-u32 GetLastCharacterIndex(char *String, u32 StringLength, char Character)
-{
-    for (i32 CharacterIndex = StringLength - 1; CharacterIndex >= 0; CharacterIndex--)
-    {
-        if (String[CharacterIndex] == Character)
-        {
-            return CharacterIndex;
-        }
-    }
-
-    return UINT32_MAX;
-}
-
 void GetFileNameAndExtensionFromString
 (
     char *SourceString,

@@ -10,3 +10,17 @@ typedef struct
     u16 Heads;
     u16 Sectors;
 } disk_parameters;
+
+void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber);
+void TranslateLbaToChs
+(
+    disk_parameters *DiskParameters,
+    u32 LogicalBlockAddress, u16 *Cylinder, u16 *Head, u16 *Sector
+);
+
+void GetDiskDriveParameters(disk_parameters *DiskParameters, u8 DriveNumber);
+void TranslateLbaToChs
+(
+    disk_parameters *DiskParameters,
+    u32 LogicalBlockAddress, u16 *Cylinder, u16 *Head, u16 *Sector
+);

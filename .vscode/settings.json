@@ -7,7 +7,7 @@
         "tools/": true,
         "data/": true,
 
-        // "platforms/win32": true,
+        "platforms/win32": true,
         // "platforms/win32/imgui": true,
         // "platforms/i686-elf": true,
     },
@@ -35,7 +35,8 @@
 
         // lint
         "JOB_PER_FILE=",
-
+        
         // os
+        "packed=",
     ],
 }

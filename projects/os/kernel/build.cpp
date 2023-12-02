@@ -2,9 +2,9 @@ static b32 BuildKernelImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "kernel");
 
-    AddCompilerSourceFile(BuildContext, "\\projects\\os\\kernel\\entry.s");
+    AddCompilerSourceFile(BuildContext, "\\projects\\os\\kernel\\assembly.s");
     AddCompilerFlags(BuildContext, "-f elf");
-    SetCompilerOutputObject(BuildContext, "\\entry.elf");
+    SetCompilerOutputObject(BuildContext, "\\assembly.elf");
     SetCompilerIncludePath(BuildContext, "\\");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     if (!BuildSuccess)
@@ -26,7 +26,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
     SetLinkerScriptPath(BuildContext, "\\projects\\os\\kernel\\linker.lds");
-    AddLinkerInputFile(BuildContext, "\\entry.elf");
+    AddLinkerInputFile(BuildContext, "\\assembly.elf");
     AddLinkerInputFile(BuildContext, "\\main.elf");
     SetLinkerOutputBinary(BuildContext, "\\kernel.img");
     BuildSuccess = LinkWithGCC(BuildContext);

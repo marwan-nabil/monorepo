@@ -11,3 +11,8 @@ typedef struct
     u32 Used;
     u8 *BaseAddress;
 } memory_arena;
+
+void InitializeMemoryArena(memory_arena *Arena, u32 Size, void *BaseAddress);
+void FreeMemoryArena(memory_arena *Arena);
+void PrintMemoryArenaUsage(memory_arena *Arena, print_context *PrintContext);
+void *PushOntoMemoryArena(memory_arena *Arena, u32 PushSize);
