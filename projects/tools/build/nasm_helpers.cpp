@@ -1,3 +1,4 @@
+// TODO: make compilation helpers clear the build context on success
 static b32 AssembleWithNasm(build_context *BuildContext)
 {
     char AssemblerCommand[1024];

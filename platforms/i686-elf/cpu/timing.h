@@ -1,3 +1,3 @@
 #pragma once
 
-void SpinlockSleep(u32 SleepLoops);
+void SpinlockWait(u32 SleepLoops);

@@ -65,7 +65,7 @@ void LoadKernel(u32 BootDriveNumber, void *FreeMemoryArea, print_context *PrintC
     FileRead(FileIoContext, FileHandle, MEMORY_LAYOUT_KERNEL_LOAD_SIZE, KernelLoadBuffer);
     FileClose(FileIoContext, FileHandle);
 
-    SpinlockSleep(800000);
+    SpinlockWait(400);
 
     typedef void (*kernel_start_function)();
     kernel_start_function KernelStart = (kernel_start_function)KernelLoadBuffer;

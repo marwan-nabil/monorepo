@@ -1,3 +1,6 @@
+;------------------------------------
+; loads the interrupt descriptor table into the CPU
+;------------------------------------
 section .text
 LoadIDT:
     [bits 32]

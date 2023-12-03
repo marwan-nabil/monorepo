@@ -12,3 +12,13 @@ idt_entry CreateIDTEntry
     Result.EntryAddressHigh = (u16)(EntryAddress >> 16);
     return Result;
 }
+
+void EnableInterruptGate(idt_entry *IDT, u8 InterruptNumber)
+{
+    IDT[InterruptNumber].Flags |= (1 << IDTFFO_PRESENT_BIT);
+}
+
+void DisableInterruptGate(idt_entry *IDT, u8 InterruptNumber)
+{
+    IDT[InterruptNumber].Flags &= ~(1 << IDTFFO_PRESENT_BIT);
+}

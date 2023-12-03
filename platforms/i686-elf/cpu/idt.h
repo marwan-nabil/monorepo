@@ -27,4 +27,20 @@ typedef enum
     IDTFFO_PRESENT_BIT = 7,
 } idt_flags_field_offsets;
 
+#define IDT_GATE_TYPE_TASK 0x5
+#define IDT_GATE_TYPE_16BIT_INTERRUPT 0x6
+#define IDT_GATE_TYPE_16BIT_TRAP 0x7
+#define IDT_GATE_TYPE_32BIT_INTERRUPT 0xE
+#define IDT_GATE_TYPE_32BIT_TRAP 0xF
+
+#define IDT_PRIVILIGE_LEVEL_RING0 (0 << IDTFFO_PRIVILIGE_LEVEL_BIT0)
+#define IDT_PRIVILIGE_LEVEL_RING1 (1 << IDTFFO_PRIVILIGE_LEVEL_BIT0)
+#define IDT_PRIVILIGE_LEVEL_RING2 (2 << IDTFFO_PRIVILIGE_LEVEL_BIT0)
+#define IDT_PRIVILIGE_LEVEL_RING3 (3 << IDTFFO_PRIVILIGE_LEVEL_BIT0)
+
+#define IDT_PRESENT 0x80
+
 void __attribute__((cdecl)) LoadIDT(idt_descriptor *IDTDescriptor);
+idt_entry CreateIDTEntry(u32 EntryAddress, u16 SegmentSelector, u8 Flags);
+void EnableInterruptGate(idt_entry *IDT, u8 InterruptNumber);
+void DisableInterruptGate(idt_entry *IDT, u8 InterruptNumber);

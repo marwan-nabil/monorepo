@@ -11,7 +11,7 @@ void TestVGA(print_context *PrintContext)
             u8 Color = X + Y;
             char Character = X + Y;
             PrintCharacterColored(Character, Color, X, Y);
-            SpinlockSleep(100);
+            SpinlockWait(100);
         }
     }
 
@@ -94,7 +94,7 @@ void DiskDriverTests(u8 BootDriveNumber, void *FreeMemoryArea, print_context *Pr
         LBA = Index;
         TranslateLbaToChs(&DiskParameters, LBA, &Cylinder, &Head, &Sector);
         PrintFormatted(PrintContext, "LBA: %hd    CHS: %hd  %hd  %hd\r\n", LBA, Cylinder, Head, Sector);
-        SpinlockSleep(100);
+        SpinlockWait(100);
     }
     PrintFormatted(PrintContext, "\r\n");
 

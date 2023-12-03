@@ -1,5 +1,5 @@
-void SpinlockSleep(u32 SleepLoops)
+void SpinlockWait(u32 SleepLoops)
 {
-    SleepLoops *= 1000;
+    SleepLoops *= 1000000;
     for (u32 Index = 0; Index < SleepLoops; Index++) {;}
 }
