@@ -7,7 +7,7 @@ static b32 CompileShader(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo \"");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.SourcesString);
+    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->EnvironmentInfo.ConsoleContext);
     if (!Result)
@@ -32,7 +32,7 @@ static b32 CompileWithMSVC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /I");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.SourcesString);
+    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fe:\"");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkingInfo.OutputBinaryPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");

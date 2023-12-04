@@ -8,7 +8,7 @@ static b32 AssembleWithNasm(build_context *BuildContext)
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "-i ");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " ");
-    StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilationInfo.SourcesString);
+    FlattenFileNameList(BuildContext->CompilationInfo.Sources, AssemblerCommand, ArrayCount(AssemblerCommand));
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " -o \"");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");

@@ -10,7 +10,7 @@ static b32 CompileWithGCC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "-o ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.SourcesString);
+    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait
     (
@@ -42,7 +42,7 @@ static b32 LinkWithGCC(build_context *BuildContext)
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " -o ");
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), BuildContext->LinkingInfo.OutputBinaryPath);
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " ");
-    StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), BuildContext->LinkingInfo.LinkerInputsString);
+    FlattenFileNameList(BuildContext->LinkingInfo.LinkerInputs, LinkerCommand, ArrayCount(LinkerCommand));
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " -lgcc");
 
     b32 Result = CreateProcessAndWait

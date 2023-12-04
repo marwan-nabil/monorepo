@@ -8,12 +8,12 @@
 #include "platforms\win32\base_types.h"
 #include "platforms\win32\basic_defines.h"
 #include "platforms\win32\console\console.h"
-#include "platforms\win32\file_system\path_handling.h"
+#include "platforms\win32\strings\path_handling.h"
 #include "platforms\win32\fat12\fat12.h"
 
 #include "platforms\win32\console\console.cpp"
 #include "platforms\win32\strings\strings.cpp"
-#include "platforms\win32\file_system\path_handling.cpp"
+#include "platforms\win32\strings\path_handling.cpp"
 
 #include "platforms\win32\fat12\fat12_get.cpp"
 #include "platforms\win32\fat12\fat12_set.cpp"

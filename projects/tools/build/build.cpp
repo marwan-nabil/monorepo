@@ -12,7 +12,7 @@
 #include "platforms\win32\basic_defines.h"
 #include "platforms\win32\console\console.h"
 #include "platforms\win32\file_system\files.h"
-#include "platforms\win32\file_system\path_handling.h"
+#include "platforms\win32\strings\path_handling.h"
 #include "platforms\win32\fat12\fat12.h"
 
 #include "build.h"
@@ -22,7 +22,7 @@
 #include "platforms\win32\console\console.cpp"
 #include "platforms\win32\file_system\files.cpp"
 #include "platforms\win32\file_system\folders.cpp"
-#include "platforms\win32\file_system\path_handling.cpp"
+#include "platforms\win32\strings\path_handling.cpp"
 #include "platforms\win32\processes\processes.cpp"
 #include "platforms\win32\fat12\fat12_get.cpp"
 #include "platforms\win32\fat12\fat12_set.cpp"
@@ -106,12 +106,7 @@ int main(int argc, char **argv)
         ArrayCount(BuildContext.EnvironmentInfo.RootDirectoryPath),
         BuildContext.EnvironmentInfo.OutputDirectoryPath
     );
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.RootDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.RootDirectoryPath),
-        "\\.."
-    );
+    RemoveLastSegmentFromPath(BuildContext.EnvironmentInfo.RootDirectoryPath);
 
     BuildContext.EnvironmentInfo.argc = argc;
     BuildContext.EnvironmentInfo.argv = argv;
