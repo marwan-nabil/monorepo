@@ -5,19 +5,19 @@
 #include <math.h>
 #include <strsafe.h>
 
-#include "platforms\win32\base_types.h"
-#include "platforms\win32\basic_defines.h"
-#include "platforms\win32\console\console.h"
-#include "platforms\win32\strings\path_handling.h"
-#include "platforms\win32\fat12\fat12.h"
+#include "libraries\win32\base_types.h"
+#include "libraries\win32\basic_defines.h"
+#include "libraries\win32\console\console.h"
+#include "libraries\win32\strings\path_handling.h"
+#include "libraries\win32\fat12\fat12.h"
 
-#include "platforms\win32\console\console.cpp"
-#include "platforms\win32\strings\strings.cpp"
-#include "platforms\win32\strings\path_handling.cpp"
+#include "libraries\win32\console\console.cpp"
+#include "libraries\win32\strings\strings.cpp"
+#include "libraries\win32\strings\path_handling.cpp"
 
-#include "platforms\win32\fat12\fat12_get.cpp"
-#include "platforms\win32\fat12\fat12_set.cpp"
-#include "platforms\win32\fat12\fat12_interface.cpp"
+#include "libraries\win32\fat12\fat12_get.cpp"
+#include "libraries\win32\fat12\fat12_set.cpp"
+#include "libraries\win32\fat12\fat12_interface.cpp"
 
 struct ram_file
 {

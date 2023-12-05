@@ -10,9 +10,9 @@ extern cstart
 extern __bss_start
 extern __bss_end
 
-%include "platforms\i686-elf\cpu\modes.s"
-%include "platforms\i686-elf\cpu\io.s"
-%include "platforms\i686-elf\bios\disk.s"
+%include "libraries\i686-elf\cpu\modes.s"
+%include "libraries\i686-elf\cpu\io.s"
+%include "libraries\i686-elf\bios\disk.s"
 
 ; ================================================================= ;
 ;                              definitions

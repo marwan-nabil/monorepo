@@ -1,8 +1,8 @@
 #include <stdarg.h>
-#include "platforms\i686-elf\base_types.h"
-#include "platforms\i686-elf\basic_defines.h"
-#include "platforms\i686-elf\strings\print.h"
-#include "platforms\i686-elf\cpu\panic.h"
+#include "libraries\i686-elf\base_types.h"
+#include "libraries\i686-elf\basic_defines.h"
+#include "libraries\i686-elf\strings\print.h"
+#include "libraries\i686-elf\cpu\panic.h"
 
 #include "projects\os\kernel\main.h"
 

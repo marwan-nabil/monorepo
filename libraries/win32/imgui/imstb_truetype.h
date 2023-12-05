@@ -1281,7 +1281,7 @@ static stbtt__buf stbtt__cff_index_get(stbtt__buf b, int i)
 // accessors to parse data from file
 //
 
-// on platforms that don't allow misaligned reads, if we want to allow
+// on libraries that don't allow misaligned reads, if we want to allow
 // truetype fonts that aren't padded to alignment, define ALLOW_UNALIGNED_TRUETYPE
 
 #define ttBYTE(p)     (* (stbtt_uint8 *) (p))

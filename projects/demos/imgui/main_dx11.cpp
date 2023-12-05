@@ -8,18 +8,18 @@
 #include <stdio.h>
 #include <shellscalingapi.h>
 
-#include "platforms\win32\base_types.h"
-#include "platforms\win32\basic_defines.h"
-#include "platforms\win32\system\version.h"
-#include "platforms\win32\windows\dpi.h"
+#include "libraries\win32\base_types.h"
+#include "libraries\win32\basic_defines.h"
+#include "libraries\win32\system\version.h"
+#include "libraries\win32\windows\dpi.h"
 
-#include "platforms\win32\imgui\imgui.h"
+#include "libraries\win32\imgui\imgui.h"
 
 #include "win32_backend.h"
 #include "dx11_backend.h"
 
-#include "platforms\win32\system\version.cpp"
-#include "platforms\win32\windows\dpi.cpp"
+#include "libraries\win32\system\version.cpp"
+#include "libraries\win32\windows\dpi.cpp"
 
 #include "win32_backend.cpp"
 #include "dx11_backend.cpp"

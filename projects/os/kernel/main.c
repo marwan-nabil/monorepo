@@ -1,11 +1,11 @@
 #include <stdarg.h>
-#include "platforms\i686-elf\base_types.h"
-#include "platforms\i686-elf\basic_defines.h"
-#include "platforms\i686-elf\vga\vga.h"
-#include "platforms\i686-elf\memory\memory.h"
-#include "platforms\i686-elf\strings\print.h"
-#include "platforms\i686-elf\cpu\gdt.h"
-#include "platforms\i686-elf\cpu\idt.h"
+#include "libraries\i686-elf\base_types.h"
+#include "libraries\i686-elf\basic_defines.h"
+#include "libraries\i686-elf\vga\vga.h"
+#include "libraries\i686-elf\memory\memory.h"
+#include "libraries\i686-elf\strings\print.h"
+#include "libraries\i686-elf\cpu\gdt.h"
+#include "libraries\i686-elf\cpu\idt.h"
 
 #include "projects\os\kernel\linker.h"
 #include "projects\os\kernel\tests.h"

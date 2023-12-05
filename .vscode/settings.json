@@ -7,9 +7,9 @@
         "tools/": true,
         "data/": true,
 
-        // "platforms/win32": true,
-        // "platforms/win32/imgui": true,
-        // "platforms/i686-elf": true,
+        // "libraries/win32": true,
+        // "libraries/win32/imgui": true,
+        // "libraries/i686-elf": true,
     },
 
     "C_Cpp.default.defines":

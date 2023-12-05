@@ -1,8 +1,8 @@
 #include <stdarg.h>
-#include "platforms\i686-elf\base_types.h"
-#include "platforms\i686-elf\basic_defines.h"
-#include "platforms\i686-elf\cpu\gdt.h"
-#include "platforms\i686-elf\cpu\idt.h"
+#include "libraries\i686-elf\base_types.h"
+#include "libraries\i686-elf\basic_defines.h"
+#include "libraries\i686-elf\cpu\gdt.h"
+#include "libraries\i686-elf\cpu\idt.h"
 #include "projects\os\kernel\isr.h"
 
 gdt_entry GlobalRamGDT[3];
