@@ -1,3 +1,5 @@
+#pragma once
+
 /******************************************/
 /*                  floats                */
 /******************************************/
@@ -31,6 +33,14 @@ StaticCastU32LaneToF32Lane(u32_lane Value)
     return Result;
 }
 
+inline f32
+F32FromF32Lane(f32_lane Value, u32 Index)
+{
+    Assert(Index < 1);
+    f32 Result = ((f32 *)&Value)[Index];
+    return Result;
+}
+
 /******************************************/
 /*                  integers              */
 /******************************************/
@@ -39,6 +49,14 @@ U32LaneFromU32(u32 Value)
 {
     u32_lane Result;
     Result.m32i_i32[0] = Value;
+    return Result;
+}
+
+inline u32
+U32FromU32Lane(u32_lane Value, u32 Index)
+{
+    Assert(Index < 1);
+    u32 Result = ((u32 *)&Value)[Index];
     return Result;
 }
 

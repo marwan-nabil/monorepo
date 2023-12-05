@@ -84,8 +84,7 @@ void DrawRectangle(rendering_buffer *Buffer, v2 MinCorner, v2 MaxCorner, v4 Colo
     }
 }
 
-void
-DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
+void DrawLine(rendering_buffer *Buffer, v2 Start, v2 End, v4 Color)
 {
     rectangle2 BufferRectangle = RectangleFromMinMax(V2(0, 0), V2((f32)Buffer->Width, (f32)Buffer->Height));
 

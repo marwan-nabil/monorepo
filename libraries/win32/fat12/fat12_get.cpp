@@ -1,12 +1,12 @@
 // TODO: optimize fat12 driver primitives
-inline u16 TranslateClusterNumberToSectorIndex(u16 ClusterNumber)
+u16 TranslateClusterNumberToSectorIndex(u16 ClusterNumber)
 {
     Assert(ClusterNumber >= 2);
     u16 PhysicalSectorIndex = FAT12_DATA_AREA_START_SECTOR + ClusterNumber - 2;
     return PhysicalSectorIndex;
 }
 
-inline b32 IsFatEntryEndOfFile(u16 FatEntry)
+b32 IsFatEntryEndOfFile(u16 FatEntry)
 {
     if
     (
@@ -22,15 +22,13 @@ inline b32 IsFatEntryEndOfFile(u16 FatEntry)
     }
 }
 
-inline sector *
-GetSectorFromClusterNumber(fat12_disk *Disk, u16 ClusterNumber)
+sector *GetSectorFromClusterNumber(fat12_disk *Disk, u16 ClusterNumber)
 {
     sector *Result = &Disk->Sectors[TranslateClusterNumberToSectorIndex(ClusterNumber)];
     return Result;
 }
 
-inline u16
-GetFatEntry(fat12_disk *Disk, u32 ClusterNumber)
+u16 GetFatEntry(fat12_disk *Disk, u32 ClusterNumber)
 {
     Assert(ClusterNumber >= 2);
     u16 Result = 0;
@@ -50,8 +48,7 @@ GetFatEntry(fat12_disk *Disk, u32 ClusterNumber)
     return Result;
 }
 
-inline u16
-GetFirstFreeClusterNumber(fat12_disk *Disk)
+u16 GetFirstFreeClusterNumber(fat12_disk *Disk)
 {
     for (u16 ClusterNumber = 2; ClusterNumber < FAT12_ENTRIES_PER_FAT; ClusterNumber++)
     {
@@ -64,8 +61,7 @@ GetFirstFreeClusterNumber(fat12_disk *Disk)
     return 0;
 }
 
-inline u32
-CalculateNumberOfFreeClusters(fat12_disk *Disk)
+u32 CalculateNumberOfFreeClusters(fat12_disk *Disk)
 {
     u32 Result = 0;
 
@@ -81,7 +77,7 @@ CalculateNumberOfFreeClusters(fat12_disk *Disk)
     return Result;
 }
 
-inline directory_entry *
+directory_entry *
 GetFirstFreeDirectoryEntryInSector(sector *Sector)
 {
     for
@@ -154,7 +150,7 @@ GetFirstFreeDirectoryEntryInRootDirectory(fat12_disk *Disk)
     return FirstFreeDirectoryEntry;
 }
 
-inline directory_entry *
+directory_entry *
 GetDirectoryEntryOfFileInSector(sector *Sector, char *FileName, char *Extension)
 {
     for
@@ -178,7 +174,7 @@ GetDirectoryEntryOfFileInSector(sector *Sector, char *FileName, char *Extension)
     return NULL;
 }
 
-inline directory_entry *
+directory_entry *
 GetDirectoryEntryOfDirectoryInSector(sector *Sector, char *DirectoryName)
 {
     for
@@ -198,7 +194,7 @@ GetDirectoryEntryOfDirectoryInSector(sector *Sector, char *DirectoryName)
     return NULL;
 }
 
-inline directory_entry *
+directory_entry *
 GetDirectoryEntryOfFileInDirectory
 (
     fat12_disk *Disk, directory_entry *Directory,
@@ -236,7 +232,7 @@ GetDirectoryEntryOfFileInDirectory
     return FoundDirectoryEntry;
 }
 
-inline directory_entry *
+directory_entry *
 GetDirectoryEntryOfDirectoryInDirectory
 (
     fat12_disk *Disk, directory_entry *Directory, char *DirectoryName
@@ -273,7 +269,7 @@ GetDirectoryEntryOfDirectoryInDirectory
     return FoundDirectoryEntry;
 }
 
-inline directory_entry *
+directory_entry *
 GetDirectoryEntryOfFileInRootDirectory(fat12_disk *Disk, char *FileName, char *Extension)
 {
     directory_entry *FoundDirectoryEntry = NULL;
@@ -292,7 +288,7 @@ GetDirectoryEntryOfFileInRootDirectory(fat12_disk *Disk, char *FileName, char *E
     return FoundDirectoryEntry;
 }
 
-inline directory_entry *
+directory_entry *
 GetDirectoryEntryOfDirectoryInRootDirectory(fat12_disk *Disk, char *DirectoryName)
 {
     directory_entry *FoundDirectoryEntry = NULL;

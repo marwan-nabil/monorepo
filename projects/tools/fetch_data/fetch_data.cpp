@@ -7,7 +7,7 @@
 
 #include "libraries\win32\base_types.h"
 #include "libraries\win32\basic_defines.h"
-#include "libraries\win32\strings\strings.cpp"
+#include "libraries\win32\strings\strings.h"
 
 struct data_chunk
 {

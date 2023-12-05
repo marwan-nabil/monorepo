@@ -1,4 +1,4 @@
-static b32 ConfigureDpiAwareness(HMODULE NtDllModule, HMODULE User32DllModule)
+b32 ConfigureDpiAwareness(HMODULE NtDllModule, HMODULE User32DllModule)
 {
     if (IsWindowsVersionGreaterOrEqual(NtDllModule, HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10
     {
@@ -21,7 +21,7 @@ static b32 ConfigureDpiAwareness(HMODULE NtDllModule, HMODULE User32DllModule)
     return FALSE;
 }
 
-static f32 GetDpiScaleForMonitor(HMODULE NtDllModule, HMODULE ShcoreDllModule, void *Monitor)
+f32 GetDpiScaleForMonitor(HMODULE NtDllModule, HMODULE ShcoreDllModule, void *Monitor)
 {
     u32 DpiX = 96;
     u32 DpiY = 96;

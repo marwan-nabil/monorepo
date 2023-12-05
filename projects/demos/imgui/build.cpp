@@ -12,7 +12,7 @@ b32 BuildImguiDemo(build_context *BuildContext)
         return FALSE;
     }
 
-    AddCompilerSourceFile(BuildContext, "\\libraries\\win32\\imgui\\imgui*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\libraries\\imgui\\imgui*.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Zi /MD /utf-8");
     AddCompilerFlags(BuildContext, "/DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");

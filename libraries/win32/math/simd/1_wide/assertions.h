@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef ENABLE_ASSERTIONS
 
 inline void

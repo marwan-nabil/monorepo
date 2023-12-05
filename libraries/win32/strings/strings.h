@@ -1,3 +1,5 @@
+#pragma once
+
 inline void
 CombineStrings
 (

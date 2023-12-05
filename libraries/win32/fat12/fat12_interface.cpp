@@ -1,5 +1,4 @@
-static directory_entry *
-Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePath)
+directory_entry *Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePath)
 {
     if (StringLength(FullFilePath) == 1)
     {
@@ -67,8 +66,7 @@ Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePath)
     return NULL;
 }
 
-static directory_entry *
-Fat12AddFile(fat12_disk *Disk, char *FullFilePath, void *Memory, u32 Size)
+directory_entry *Fat12AddFile(fat12_disk *Disk, char *FullFilePath, void *Memory, u32 Size)
 {
     if (StringLength(FullFilePath) == 1)
     {
@@ -158,8 +156,7 @@ Fat12AddFile(fat12_disk *Disk, char *FullFilePath, void *Memory, u32 Size)
     return NULL;
 }
 
-static directory_entry *
-Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
+directory_entry *Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
 {
     if (StringLength(DirectoryPath) == 1)
     {
@@ -249,7 +246,7 @@ Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
     return NULL;
 }
 
-static void Fat12ListDirectorySector(sector *Sector)
+void Fat12ListDirectorySector(sector *Sector)
 {
     for
     (
@@ -293,7 +290,7 @@ static void Fat12ListDirectorySector(sector *Sector)
     }
 }
 
-static void Fat12ListDirectory(fat12_disk *Disk, char *DirectoryPath)
+void Fat12ListDirectory(fat12_disk *Disk, char *DirectoryPath)
 {
     printf("\nlist %s:\n", DirectoryPath);
 

@@ -10,6 +10,7 @@
 
 #include "libraries\win32\base_types.h"
 #include "libraries\win32\basic_defines.h"
+#include "libraries\win32\math\scalar_conversions.h"
 #include "libraries\win32\console\console.h"
 #include "libraries\win32\file_system\files.h"
 #include "libraries\win32\strings\path_handling.h"
@@ -17,13 +18,12 @@
 
 #include "build.h"
 
-#include "libraries\win32\math\scalar_conversions.cpp"
-#include "libraries\win32\strings\strings.cpp"
+#include "libraries\win32\strings\strings.h"
 #include "libraries\win32\console\console.cpp"
 #include "libraries\win32\file_system\files.cpp"
 #include "libraries\win32\file_system\folders.cpp"
 #include "libraries\win32\strings\path_handling.cpp"
-#include "libraries\win32\processes\processes.cpp"
+#include "libraries\win32\system\processes.cpp"
 #include "libraries\win32\fat12\fat12_get.cpp"
 #include "libraries\win32\fat12\fat12_set.cpp"
 #include "libraries\win32\fat12\fat12_interface.cpp"

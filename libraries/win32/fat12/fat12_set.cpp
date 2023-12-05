@@ -1,5 +1,4 @@
-inline void
-SetFatEntry(fat12_disk *Disk, u32 ClusterNumber, u16 FatEntry)
+void SetFatEntry(fat12_disk *Disk, u32 ClusterNumber, u16 FatEntry)
 {
     Assert(ClusterNumber >= 2);
     u32 StartingByteIndex = ClusterNumber * 3 / 2;
@@ -18,8 +17,7 @@ SetFatEntry(fat12_disk *Disk, u32 ClusterNumber, u16 FatEntry)
     }
 }
 
-static u16
-AllocateDiskClusters(fat12_disk *Disk, void *Memory, u32 Size)
+u16 AllocateDiskClusters(fat12_disk *Disk, void *Memory, u32 Size)
 {
     u16 FirstAllocatedClusterNumber = 0;
 
@@ -85,8 +83,7 @@ AllocateDiskClusters(fat12_disk *Disk, void *Memory, u32 Size)
     return FirstAllocatedClusterNumber;
 }
 
-inline b32
-AllocateFileToDirectoryEntry
+b32 AllocateFileToDirectoryEntry
 (
     fat12_disk *Disk, directory_entry *DirectoryEntry,
     char *FileName, char *Extension, void *Memory, u32 Size
@@ -107,8 +104,7 @@ AllocateFileToDirectoryEntry
     return FALSE;
 }
 
-inline b32
-AllocateDirectoryToDirectoryEntry
+b32 AllocateDirectoryToDirectoryEntry
 (
     fat12_disk *Disk, directory_entry *DirectoryEntry, char *DirectoryName
 )
@@ -127,8 +123,7 @@ AllocateDirectoryToDirectoryEntry
     return FALSE;
 }
 
-static directory_entry *
-AddFileToRootDirectory
+directory_entry *AddFileToRootDirectory
 (
     fat12_disk *Disk,
     char *FileName, char *Extension,
@@ -161,8 +156,7 @@ AddFileToRootDirectory
     }
 }
 
-static directory_entry *
-AddDirectoryToRootDirectory
+directory_entry *AddDirectoryToRootDirectory
 (
     fat12_disk *Disk, char *DirectoryName
 )
@@ -184,8 +178,7 @@ AddDirectoryToRootDirectory
     }
 }
 
-static directory_entry *
-AddFileToDirectory
+directory_entry *AddFileToDirectory
 (
     fat12_disk *Disk, directory_entry *Directory,
     char *FileName, char *Extension, void *Memory, u32 Size
@@ -217,8 +210,7 @@ AddFileToDirectory
     }
 }
 
-static directory_entry *
-AddDirectoryToDirectory
+directory_entry *AddDirectoryToDirectory
 (
     fat12_disk *Disk, directory_entry *Directory, char *DirectoryName
 )

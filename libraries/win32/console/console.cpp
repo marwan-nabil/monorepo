@@ -1,5 +1,4 @@
-inline void
-InitializeConsole(console_context *ConsoleContext)
+void InitializeConsole(console_context *ConsoleContext)
 {
     ConsoleContext->ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
@@ -7,20 +6,17 @@ InitializeConsole(console_context *ConsoleContext)
     ConsoleContext->OriginalConsoleAttributes = ConsoleInfo.wAttributes;
 }
 
-inline void
-ConsoleSwitchColor(console_context *ConsoleContext, WORD Color)
+void ConsoleSwitchColor(console_context *ConsoleContext, WORD Color)
 {
     SetConsoleTextAttribute(ConsoleContext->ConsoleHandle, Color);
 }
 
-inline void
-ConsoleResetColor(console_context *ConsoleContext)
+void ConsoleResetColor(console_context *ConsoleContext)
 {
     SetConsoleTextAttribute(ConsoleContext->ConsoleHandle, ConsoleContext->OriginalConsoleAttributes);
 }
 
-inline void
-ConsolePrintColored(const char *String, console_context *ConsoleContext, WORD Color)
+void ConsolePrintColored(const char *String, console_context *ConsoleContext, WORD Color)
 {
     ConsoleSwitchColor(ConsoleContext, Color);
     printf(String);

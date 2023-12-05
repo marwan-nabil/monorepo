@@ -9,8 +9,8 @@
 #include "libraries\win32\console\console.h"
 
 #include "libraries\win32\console\console.cpp"
-#include "libraries\win32\strings\strings.cpp"
-#include "libraries\win32\processes\processes.cpp"
+#include "libraries\win32\strings\strings.h"
+#include "libraries\win32\system\processes.cpp"
 
 console_context GlobalConsoleContext;
 

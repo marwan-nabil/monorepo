@@ -1,3 +1,5 @@
+#pragma once
+
 inline LARGE_INTEGER
 GetWindowsTimerValue()
 {

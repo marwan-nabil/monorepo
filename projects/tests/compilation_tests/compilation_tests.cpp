@@ -22,9 +22,9 @@
 #include "compilation_tests.h"
 
 #include "libraries\win32\console\console.cpp"
-#include "libraries\win32\strings\strings.cpp"
-#include "libraries\win32\processes\processes.cpp"
-#include "libraries\win32\timing\timing.cpp"
+#include "libraries\win32\strings\strings.h"
+#include "libraries\win32\system\processes.cpp"
+#include "libraries\win32\timing\timing.h"
 
 console_context GlobalConsoleContext;
 

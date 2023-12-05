@@ -12,7 +12,7 @@
 #include "libraries\win32\fat12\fat12.h"
 
 #include "libraries\win32\console\console.cpp"
-#include "libraries\win32\strings\strings.cpp"
+#include "libraries\win32\strings\strings.h"
 #include "libraries\win32\strings\path_handling.cpp"
 
 #include "libraries\win32\fat12\fat12_get.cpp"

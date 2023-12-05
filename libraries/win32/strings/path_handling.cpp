@@ -1,4 +1,4 @@
-static void
+void
 FreeFilePathSegmentList(file_path_node *RootNode)
 {
     file_path_node *CurrentNode = RootNode;
@@ -12,7 +12,7 @@ FreeFilePathSegmentList(file_path_node *RootNode)
     }
 }
 
-static file_path_node *
+file_path_node *
 CreateFilePathSegmentList(char *FileFullPath)
 {
     char LocalPathBuffer[MAX_PATH] = {};
@@ -49,7 +49,7 @@ CreateFilePathSegmentList(char *FileFullPath)
     return LastFilePathNode;
 }
 
-static void RemoveLastSegmentFromPath(char *Path)
+void RemoveLastSegmentFromPath(char *Path)
 {
     u32 PathLength = StringLength(Path);
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)

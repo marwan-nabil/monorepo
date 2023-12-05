@@ -9,14 +9,15 @@
 
 #include "libraries\win32\base_types.h"
 #include "libraries\win32\basic_defines.h"
+#include "libraries\win32\math\scalar_conversions.h"
+#include "libraries\win32\math\floats.h"
 #include "libraries\win32\math\vector2.h"
 #include "libraries\win32\math\vector3.h"
 #include "libraries\win32\math\vector4.h"
 #include "game_interface.h"
 #include "win32_platform.h"
 
-#include "libraries\win32\math\scalar_conversions.cpp"
-#include "libraries\win32\strings\strings.cpp"
+#include "libraries\win32\strings\strings.h"
 #include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};

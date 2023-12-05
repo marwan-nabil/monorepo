@@ -13,7 +13,7 @@
 #include "libraries\win32\system\version.h"
 #include "libraries\win32\windows\dpi.h"
 
-#include "libraries\win32\imgui\imgui.h"
+#include "libraries\imgui\imgui.h"
 
 #include "win32_backend.h"
 #include "dx11_backend.h"

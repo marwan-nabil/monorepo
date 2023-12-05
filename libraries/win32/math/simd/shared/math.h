@@ -66,6 +66,3 @@ struct coordinate_set_lane
 
 #define GatherV3(BasePointer, Member, Indices) \
     GatherV3Implementation(&((BasePointer)->Member), sizeof(*(BasePointer)), Indices)
-
-inline f32 F32FromF32Lane(f32_lane Value, u32 Index);
-inline u32 U32FromU32Lane(u32_lane Value, u32 Index);
