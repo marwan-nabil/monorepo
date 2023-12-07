@@ -1,5 +1,6 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "C_Cpp.errorSquiggles": "disabled",
 
     "files.exclude":
     {
