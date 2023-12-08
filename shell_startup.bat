@@ -12,6 +12,7 @@ set path=%cd%\tools\bochs;%path%
 
 @REM add local scripts and tools to shell path
 set path=%cd%\tools\build;%path%
+set path=%cd%\tools\build_dynamic;%path%
 set path=%cd%\tools\lint;%path%
 set path=%cd%\scripts;%path%
 
@@ -20,4 +21,5 @@ call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 
 if not exist outputs; mkdir outputs
 if not exist tools\build; mkdir tools\build
+if not exist tools\build_dynamic; mkdir tools\build_dynamic
 cd outputs
