@@ -20,6 +20,7 @@ static b32 CompileShader(build_context *BuildContext)
         );
     }
 
+    ClearBuildContext(BuildContext);
     return Result;
 }
 
@@ -54,5 +55,6 @@ static b32 CompileWithMSVC(build_context *BuildContext)
         );
     }
 
+    ClearBuildContext(BuildContext);
     return Result;
 }

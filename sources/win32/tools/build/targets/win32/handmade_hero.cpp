@@ -41,8 +41,6 @@ b32 BuildHandmadeHero(build_context *BuildContext)
         return FALSE;
     }
 
-    ClearBuildContext(BuildContext);
-
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\win32_platform.cpp");
 
     AddCompilerFlags(BuildContext, SharedCompilerFlags);

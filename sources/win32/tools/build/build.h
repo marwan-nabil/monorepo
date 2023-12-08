@@ -45,9 +45,6 @@ typedef b32 (build_function_type)(build_context *);
 
 struct build_target_config
 {
-    // TODO: make target configuration dynamic, i.e. the build system
-    //       loads the build.cpp file from the project, compiles and links it
-    //       to itself then calls the build function
     const char *TargetName;
     build_function_type *BuildFunction;
     const char *FirstArgument;

@@ -24,21 +24,18 @@ static b32 BuildOsFloppyDiskImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     BuildSuccess = BuildBootloaderImage(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     BuildSuccess = BuildKernelImage(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
     (
@@ -84,6 +81,7 @@ static b32 BuildOsFloppyDiskImage(build_context *BuildContext)
         Fat12Disk,
         sizeof(fat12_disk)
     );
+
     VirtualFree(Fat12Disk, 0, MEM_RELEASE);
     return BuildSuccess;
 }

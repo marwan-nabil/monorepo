@@ -17,7 +17,6 @@ b32 BuildDirectxDemo(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\directx\\vertex_shader.hlsl");
     AddCompilerFlags
@@ -31,7 +30,6 @@ b32 BuildDirectxDemo(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\directx\\pixel_shader.hlsl");
     AddCompilerFlags

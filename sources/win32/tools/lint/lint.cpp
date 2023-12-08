@@ -19,10 +19,13 @@
 #include "sources\win32\shared\math\scalar_conversions.h"
 #include "sources\win32\shared\console\console.h"
 #include "sources\win32\shared\file_system\files.h"
+#include "sources\win32\shared\strings\strings.h"
+#include "sources\win32\shared\strings\path_handling.h"
 #include "lint.h"
 
 #include "sources\win32\shared\console\console.cpp"
 #include "sources\win32\shared\file_system\files.cpp"
+#include "sources\win32\shared\strings\path_handling.cpp"
 
 char RootDirectoryPath[1024];
 
@@ -351,12 +354,12 @@ int main(int argc, char **argv)
 
     *RootDirectoryPath = {};
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
-    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), "\\..");
+    RemoveLastSegmentFromPath(RootDirectoryPath);
 
     directory_node *FoundDirectoriesList = 0;
     file_node *FoundFilesList = 0;
 
-    ProcessDirectory("", &FoundDirectoriesList, &FoundFilesList);
+    ProcessDirectory("\\sources", &FoundDirectoriesList, &FoundFilesList);
 
     u32 DirectoryCount = 0;
     directory_node *DirectoryListIterator = FoundDirectoriesList;
@@ -406,12 +409,16 @@ int main(int argc, char **argv)
         Job->Result = FALSE;
     }
 
-#if defined(JOB_PER_DIRECTORY)
-    u32 ThreadCount = LintJobQueue.JobCount;
-#endif
-#if defined(JOB_PER_FILE)
-    u32 ThreadCount = LintJobQueue.JobCount / 4;
-#endif
+    SYSTEM_INFO SystemInfo;
+    GetSystemInfo(&SystemInfo);
+    u32 ThreadCount = (u8)SystemInfo.dwNumberOfProcessors;
+
+// #if defined(JOB_PER_DIRECTORY)
+//     u32 ThreadCount = LintJobQueue.JobCount;
+// #endif
+// #if defined(JOB_PER_FILE)
+//     u32 ThreadCount = LintJobQueue.JobCount / 4;
+// #endif
 
     printf("\nCreated %d threads.\n", ThreadCount);
 

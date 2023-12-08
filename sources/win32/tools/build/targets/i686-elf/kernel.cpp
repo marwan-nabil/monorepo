@@ -14,7 +14,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\isr.s");
     AddCompilerFlags(BuildContext, SharedAsmFlags);
@@ -25,7 +24,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\platform.c");
     SetCompilerOutputObject(BuildContext, "\\platform_c.elf");
@@ -36,7 +34,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\isr.c");
     SetCompilerOutputObject(BuildContext, "\\isr_c.elf");
@@ -47,7 +44,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\descriptor_tables.c");
     SetCompilerOutputObject(BuildContext, "\\descriptor_tables.elf");
@@ -58,7 +54,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\tests.c");
     SetCompilerOutputObject(BuildContext, "\\tests.elf");
@@ -69,7 +64,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\main.c");
     SetCompilerOutputObject(BuildContext, "\\main.elf");
@@ -80,7 +74,6 @@ static b32 BuildKernelImage(build_context *BuildContext)
     {
         return FALSE;
     }
-    ClearBuildContext(BuildContext);
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
     SetLinkerScriptPath(BuildContext, "\\sources\\i686-elf\\kernel\\linker.lds");
