@@ -16,7 +16,6 @@ static void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 
 static void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath)
 {
-    // TODO: make this a list instead of a single string
     StringCchCatA
     (
         BuildContext->CompilationInfo.CompilerIncludePath,
@@ -162,8 +161,7 @@ static void PopSubTarget(build_context *BuildContext)
     SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 
-static void
-FreeFileNameList(file_name_node *RootNode)
+static void FreeFileNameList(file_name_node *RootNode)
 {
     file_name_node *CurrentNode = RootNode;
     file_name_node *ChildNode;
@@ -176,8 +174,7 @@ FreeFileNameList(file_name_node *RootNode)
     }
 }
 
-static void
-FlattenFileNameList(file_name_node *FileNameList, char *Output, u32 OutputSize)
+static void FlattenFileNameList(file_name_node *FileNameList, char *Output, u32 OutputSize)
 {
     while (FileNameList)
     {

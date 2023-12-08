@@ -5,12 +5,12 @@
     "files.exclude":
     {
         // "outputs/": true,
-        "tools/": true,
-        "data/": true,
+        // "tools/": true,
+        "assets/": true,
 
-        // "libraries/win32": true,
-        // "libraries/win32/imgui": true,
-        // "libraries/i686-elf": true,
+        // "sources/win32": true,
+        "sources/win32/imgui": true,
+        // "sources/i686-elf": true,
     },
 
     "C_Cpp.default.defines":

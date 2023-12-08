@@ -103,50 +103,50 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             MakeSimpleCollisionMeshTemplate(GameState, V3(1.0f, 0.5f, 0.5f));
 
         GameState->BackDropBitMap =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_background.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_background.bmp");
         GameState->ShadowBitMap =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_shadow.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_shadow.bmp");
         GameState->TreeBitMap =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test2/tree00.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test2/tree00.bmp");
         GameState->StairWellBitMap =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test2/rock02.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test2/rock02.bmp");
         GameState->SwordBitMap =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test2/rock03.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test2/rock03.bmp");
 
         hero_bitmap_group *HeroBitmapGroup = &GameState->HeroBitmapGroups[0];
         HeroBitmapGroup->Head =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_right_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_right_head.bmp");
         HeroBitmapGroup->Cape =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_right_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_right_cape.bmp");
         HeroBitmapGroup->Torso =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_right_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_right_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[1];
         HeroBitmapGroup->Head =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_back_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_back_head.bmp");
         HeroBitmapGroup->Cape =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_back_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_back_cape.bmp");
         HeroBitmapGroup->Torso =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_back_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_back_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[2];
         HeroBitmapGroup->Head =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_left_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_left_head.bmp");
         HeroBitmapGroup->Cape =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_left_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_left_cape.bmp");
         HeroBitmapGroup->Torso =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_left_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_left_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         HeroBitmapGroup = &GameState->HeroBitmapGroups[3];
         HeroBitmapGroup->Head =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_front_head.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_front_head.bmp");
         HeroBitmapGroup->Cape =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_front_cape.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_front_cape.bmp");
         HeroBitmapGroup->Torso =
-            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../data/handmade_hero/test/test_hero_front_torso.bmp");
+            LoadBitmap(GameMemory->PlatformReadFile, ThreadContext, (char *)"../assets/handmade_hero/test/test_hero_front_torso.bmp");
         HeroBitmapGroup->Alignment = V2(72, 182);
 
         world *World = PushStruct(&GameState->WorldArena, world);

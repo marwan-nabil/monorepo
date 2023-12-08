@@ -16,7 +16,6 @@
 #include "sources\win32\shared\strings\strings.h"
 #include "sources\win32\shared\strings\path_handling.h"
 #include "sources\win32\shared\fat12\fat12.h"
-
 #include "build.h"
 
 #include "sources\win32\shared\console\console.cpp"
@@ -27,25 +26,24 @@
 #include "sources\win32\shared\fat12\fat12_get.cpp"
 #include "sources\win32\shared\fat12\fat12_set.cpp"
 #include "sources\win32\shared\fat12\fat12_interface.cpp"
-
 #include "build_helpers.cpp"
 #include "msvc_helpers.cpp"
 #include "nasm_helpers.cpp"
 #include "gcc_cross_compiler_helpers.cpp"
 
-#include "sources\win32\tools\lint\build.cpp"
-#include "sources\win32\tools\fetch_data\build.cpp"
-#include "sources\win32\tests\compilation_tests\build.cpp"
-#include "sources\win32\tests\fat12_tests\build.cpp"
-#include "sources\win32\simulator\build.cpp"
-#include "sources\win32\demos\directx\build.cpp"
-#include "sources\win32\handmade_hero\build.cpp"
-#include "sources\win32\demos\imgui\build.cpp"
-#include "sources\win32\ray_tracer\build.cpp"
-#include "sources\i686-elf\boot_sector\build.cpp"
-#include "sources\i686-elf\bootloader\build.cpp"
-#include "sources\i686-elf\kernel\build.cpp"
-#include "sources\i686-elf\floppy_image\build.cpp"
+#include "targets\win32\lint.cpp"
+#include "targets\win32\fetch_data.cpp"
+#include "targets\win32\compilation_tests.cpp"
+#include "targets\win32\fat12_tests.cpp"
+#include "targets\win32\simulator.cpp"
+#include "targets\win32\directx_demo.cpp"
+#include "targets\win32\handmade_hero.cpp"
+#include "targets\win32\imgui_demo.cpp"
+#include "targets\win32\ray_tracer.cpp"
+#include "targets\i686-elf\boot_sector.cpp"
+#include "targets\i686-elf\bootloader.cpp"
+#include "targets\i686-elf\kernel.cpp"
+#include "targets\i686-elf\floppy_image.cpp"
 
 build_target_config BuildTargetConfigurations[] =
 {
