@@ -7,17 +7,17 @@
 #include <stdio.h>
 #include <strsafe.h>
 
-#include "shared\base_types.h"
-#include "shared\basic_defines.h"
-#include "shared\math\scalar_conversions.h"
-#include "shared\math\floats.h"
-#include "shared\math\vector2.h"
-#include "shared\math\vector3.h"
-#include "shared\math\vector4.h"
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
 #include "game_interface.h"
 #include "win32_platform.h"
 
-#include "shared\strings\strings.h"
+#include "sources\win32\shared\strings\strings.h"
 #include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};

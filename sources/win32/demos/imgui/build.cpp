@@ -17,7 +17,7 @@ b32 BuildImguiDemo(build_context *BuildContext)
     AddCompilerFlags(BuildContext, "/nologo /Zi /MD /utf-8");
     AddCompilerFlags(BuildContext, "/DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
-    SetCompilerIncludePath(BuildContext, "\\sources\\win32");
+    SetCompilerIncludePath(BuildContext, "\\");
 
     AddLinkerFlags(BuildContext, "user32.lib Gdi32.lib dwmapi.lib");
 

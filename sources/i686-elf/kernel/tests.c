@@ -1,10 +1,9 @@
 #include <stdarg.h>
-#include "shared\base_types.h"
-#include "shared\basic_defines.h"
-#include "shared\strings\print.h"
-#include "shared\cpu\panic.h"
-
-#include "kernel\main.h"
+#include "sources\i686-elf\shared\base_types.h"
+#include "sources\i686-elf\shared\basic_defines.h"
+#include "sources\i686-elf\shared\strings\print.h"
+#include "sources\i686-elf\shared\cpu\panic.h"
+#include "sources\i686-elf\kernel\main.h"
 
 void TestInterrupts()
 {

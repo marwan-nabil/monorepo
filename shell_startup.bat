@@ -18,6 +18,6 @@ set path=%cd%\scripts;%path%
 @REM setup MSVC environment
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-if not exist output; mkdir output
+if not exist outputs; mkdir outputs
 if not exist tools\build; mkdir tools\build
-cd output
+cd outputs

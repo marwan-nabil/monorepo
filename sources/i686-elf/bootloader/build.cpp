@@ -5,7 +5,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\bootloader\\entry.s");
     SetCompilerOutputObject(BuildContext, "\\entry.elf");
     AddCompilerFlags(BuildContext, "-f elf");
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     if (!BuildSuccess)
     {
@@ -16,7 +16,7 @@ static b32 BuildBootloaderImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\bootloader\\main.c");
     SetCompilerOutputObject(BuildContext, "\\main.elf");
     AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {

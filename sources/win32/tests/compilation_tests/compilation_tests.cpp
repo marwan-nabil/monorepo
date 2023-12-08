@@ -16,15 +16,15 @@
 #include <strsafe.h>
 #include <io.h>
 
-#include "shared\base_types.h"
-#include "shared\basic_defines.h"
-#include "shared\console\console.h"
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\console\console.h"
 #include "compilation_tests.h"
 
-#include "shared\console\console.cpp"
-#include "shared\strings\strings.h"
-#include "shared\system\processes.cpp"
-#include "shared\timing\timing.h"
+#include "sources\win32\shared\console\console.cpp"
+#include "sources\win32\shared\strings\strings.h"
+#include "sources\win32\shared\system\processes.cpp"
+#include "sources\win32\shared\timing\timing.h"
 
 console_context GlobalConsoleContext;
 

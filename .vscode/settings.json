@@ -4,7 +4,7 @@
 
     "files.exclude":
     {
-        // "output/": true,
+        // "outputs/": true,
         "tools/": true,
         "data/": true,
 
@@ -40,4 +40,15 @@
         // os
         "packed=",
     ],
+    "files.associations": {
+        "base_types.h": "c",
+        "basic_defines.h": "c",
+        "memory_layout.h": "c",
+        "main.h": "c",
+        "file_io.h": "c",
+        "panic.h": "c",
+        "idt.h": "c",
+        "linker.h": "c",
+        "descriptor_tables.h": "c"
+    },
 }

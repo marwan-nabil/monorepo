@@ -9,7 +9,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 
     AddCompilerFlags(BuildContext, SharedCompilerFlags);
     AddCompilerFlags(BuildContext, "/LD /Fmgame.map");
-    SetCompilerIncludePath(BuildContext, "\\sources\\win32");
+    SetCompilerIncludePath(BuildContext, "\\");
 
     AddLinkerFlags(BuildContext, "/incremental:no");
     AddLinkerFlags(BuildContext, "/EXPORT:GameGetSoundSamples /EXPORT:GameUpdateAndRender");
@@ -47,7 +47,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 
     AddCompilerFlags(BuildContext, SharedCompilerFlags);
     AddCompilerFlags(BuildContext, "/Fmwin32_platform.map");
-    SetCompilerIncludePath(BuildContext, "\\sources\\win32");
+    SetCompilerIncludePath(BuildContext, "\\");
 
     AddLinkerFlags(BuildContext, "/incremental:no /subsystem:windows /opt:ref");
     AddLinkerFlags(BuildContext, "user32.lib gdi32.lib winmm.lib");

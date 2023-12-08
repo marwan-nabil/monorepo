@@ -8,7 +8,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\platform.s");
     AddCompilerFlags(BuildContext, SharedAsmFlags);
     SetCompilerOutputObject(BuildContext, "\\platform_s.elf");
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     if (!BuildSuccess)
     {
@@ -19,7 +19,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\isr.s");
     AddCompilerFlags(BuildContext, SharedAsmFlags);
     SetCompilerOutputObject(BuildContext, "\\isr_s.elf");
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = AssembleWithNasm(BuildContext);
     if (!BuildSuccess)
     {
@@ -30,7 +30,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\platform.c");
     SetCompilerOutputObject(BuildContext, "\\platform_c.elf");
     AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
@@ -41,7 +41,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\isr.c");
     SetCompilerOutputObject(BuildContext, "\\isr_c.elf");
     AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
@@ -52,7 +52,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\descriptor_tables.c");
     SetCompilerOutputObject(BuildContext, "\\descriptor_tables.elf");
     AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
@@ -63,7 +63,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\tests.c");
     SetCompilerOutputObject(BuildContext, "\\tests.elf");
     AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {
@@ -74,7 +74,7 @@ static b32 BuildKernelImage(build_context *BuildContext)
     AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\main.c");
     SetCompilerOutputObject(BuildContext, "\\main.elf");
     AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\sources\\i686-elf");
+    SetCompilerIncludePath(BuildContext, "\\");
     BuildSuccess = CompileWithGCC(BuildContext);
     if (!BuildSuccess)
     {

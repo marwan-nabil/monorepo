@@ -5,7 +5,7 @@ b32 BuildDirectxDemo(build_context *BuildContext)
     AddCompilerFlags(BuildContext, "/nologo /FC /Oi /O2 /GR- /EHa- /Zi /MD");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
-    SetCompilerIncludePath(BuildContext, "\\sources\\win32");
+    SetCompilerIncludePath(BuildContext, "\\");
 
     AddLinkerFlags(BuildContext, "/subsystem:windows /incremental:no /opt:ref");
     AddLinkerFlags(BuildContext, "user32.lib winmm.lib d3d11.lib dxgi.lib D3DCompiler.lib");

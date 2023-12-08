@@ -1,9 +1,9 @@
 #include <stdarg.h>
-#include "shared\base_types.h"
-#include "shared\basic_defines.h"
-#include "shared\cpu\gdt.h"
-#include "shared\cpu\idt.h"
-#include "kernel\isr.h"
+#include "sources\i686-elf\shared\base_types.h"
+#include "sources\i686-elf\shared\basic_defines.h"
+#include "sources\i686-elf\shared\cpu\gdt.h"
+#include "sources\i686-elf\shared\cpu\idt.h"
+#include "sources\i686-elf\kernel\isr.h"
 
 gdt_entry GlobalRamGDT[3];
 gdt_descriptor GlobalGDTDescriptor;

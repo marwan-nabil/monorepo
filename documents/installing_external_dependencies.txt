@@ -30,8 +30,8 @@ how to setup a windows-based gcc cross compiler
 - download and install cygwin in tools/cygwin
 - install those cygwin packages:
     - wget, tar, make, gcc-g++, bison, flex, libgmp-devel, libmpc-devel, libmpfr-devel, texinfo
-- download latest binutils and gcc source archives, then extract them to output/
-- open cygwin command shell tools\cygwin\Cygwin.bat and switch to output/ folder
+- download latest binutils and gcc source archives, then extract them to outputs/
+- open cygwin command shell tools\cygwin\Cygwin.bat and switch to outputs/ folder
 - setup some environment variables by performing those commands:
     - export PREFIX="$PWD/../tools/i686-elf"
     - export TARGET=i686-elf

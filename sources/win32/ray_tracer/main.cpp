@@ -9,62 +9,62 @@
 #include <float.h>
 #include <time.h>
 
-#include "shared\base_types.h"
-#include "shared\basic_defines.h"
-#include "shared\file_system\files.h"
-#include "shared\math\constants.h"
-#include "shared\math\integers.h"
-#include "shared\math\floats.h"
-#include "shared\math\scalar_conversions.h"
-#include "shared\math\transcendentals.h"
-#include "shared\math\random.h"
-#include "shared\math\vector2.h"
-#include "shared\math\vector3.h"
-#include "shared\math\vector4.h"
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\file_system\files.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\random.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "shared\math\simd\1_wide\math.h"
+#   include "sources\win32\shared\math\simd\1_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "shared\math\simd\4_wide\math.h"
+#   include "sources\win32\shared\math\simd\4_wide\math.h"
 #elif (SIMD_NUMBEROF_LANES == 8)
-#   include "shared\math\simd\8_wide\math.h"
+#   include "sources\win32\shared\math\simd\8_wide\math.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
 
-#include "shared\math\simd\shared\math.h"
+#include "sources\win32\shared\math\simd\shared\math.h"
 
 #if (SIMD_NUMBEROF_LANES == 1)
-#   include "shared\math\simd\1_wide\conversions.h"
-#   include "shared\math\simd\1_wide\integers.h"
-#   include "shared\math\simd\1_wide\floats.h"
-#   include "shared\math\simd\1_wide\assertions.h"
+#   include "sources\win32\shared\math\simd\1_wide\conversions.h"
+#   include "sources\win32\shared\math\simd\1_wide\integers.h"
+#   include "sources\win32\shared\math\simd\1_wide\floats.h"
+#   include "sources\win32\shared\math\simd\1_wide\assertions.h"
 #elif (SIMD_NUMBEROF_LANES == 4)
-#   include "shared\math\simd\4_wide\conversions.h"
-#   include "shared\math\simd\4_wide\integers.h"
-#   include "shared\math\simd\4_wide\floats.h"
-#   include "shared\math\simd\4_wide\assertions.h"
-#   include "shared\math\simd\4_wide\vector3.h"
+#   include "sources\win32\shared\math\simd\4_wide\conversions.h"
+#   include "sources\win32\shared\math\simd\4_wide\integers.h"
+#   include "sources\win32\shared\math\simd\4_wide\floats.h"
+#   include "sources\win32\shared\math\simd\4_wide\assertions.h"
+#   include "sources\win32\shared\math\simd\4_wide\vector3.h"
 #elif (SIMD_NUMBEROF_LANES == 8)
-#   include "shared\math\simd\8_wide\conversions.h"
-#   include "shared\math\simd\8_wide\integers.h"
-#   include "shared\math\simd\8_wide\floats.h"
-#   include "shared\math\simd\8_wide\assertions.h"
-#   include "shared\math\simd\8_wide\vector3.h"
+#   include "sources\win32\shared\math\simd\8_wide\conversions.h"
+#   include "sources\win32\shared\math\simd\8_wide\integers.h"
+#   include "sources\win32\shared\math\simd\8_wide\floats.h"
+#   include "sources\win32\shared\math\simd\8_wide\assertions.h"
+#   include "sources\win32\shared\math\simd\8_wide\vector3.h"
 #else
 #   error "the defined SIMD_NUMBEROF_LANES is still not supported"
 #endif // SIMD_NUMBEROF_LANES == 1
 
-#include "shared\math\simd\shared\conversions.h"
-#include "shared\math\simd\shared\integers.h"
-#include "shared\math\simd\shared\floats.h"
-#include "shared\math\simd\shared\vector3.h"
-#include "shared\math\simd\shared\random.h"
+#include "sources\win32\shared\math\simd\shared\conversions.h"
+#include "sources\win32\shared\math\simd\shared\integers.h"
+#include "sources\win32\shared\math\simd\shared\floats.h"
+#include "sources\win32\shared\math\simd\shared\vector3.h"
+#include "sources\win32\shared\math\simd\shared\random.h"
 
 #include "brdf.h"
 #include "ray_tracer.h"
 
-#include "shared\file_system\files.cpp"
+#include "sources\win32\shared\file_system\files.cpp"
 #include "brdf.cpp"
 
 inline void

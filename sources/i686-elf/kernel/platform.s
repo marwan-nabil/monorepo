@@ -1,9 +1,9 @@
-; %include "shared\cpu\modes.s"
-%include "shared\cpu\io.s"
-%include "shared\cpu\gdt.s"
-%include "shared\cpu\idt.s"
-%include "shared\cpu\panic.s"
-; %include "shared\bios\disk.s"
+; %include "sources\i686-elf\shared\cpu\modes.s"
+%include "sources\i686-elf\shared\cpu\io.s"
+%include "sources\i686-elf\shared\cpu\gdt.s"
+%include "sources\i686-elf\shared\cpu\idt.s"
+%include "sources\i686-elf\shared\cpu\panic.s"
+; %include "sources\i686-elf\shared\bios\disk.s"
 
 ; global BIOSDiskReset
 ; global BIOSDiskRead

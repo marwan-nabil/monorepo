@@ -10,9 +10,9 @@ extern cstart
 extern __bss_start
 extern __bss_end
 
-%include "shared\cpu\modes.s"
-%include "shared\cpu\io.s"
-%include "shared\bios\disk.s"
+%include "sources\i686-elf\shared\cpu\modes.s"
+%include "sources\i686-elf\shared\cpu\io.s"
+%include "sources\i686-elf\shared\bios\disk.s"
 
 ; ================================================================= ;
 ;                              definitions

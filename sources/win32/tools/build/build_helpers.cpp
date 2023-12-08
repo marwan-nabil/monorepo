@@ -16,6 +16,7 @@ static void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 
 static void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath)
 {
+    // TODO: make this a list instead of a single string
     StringCchCatA
     (
         BuildContext->CompilationInfo.CompilerIncludePath,

@@ -1,15 +1,14 @@
 #include <stdarg.h>
-#include "shared\base_types.h"
-#include "shared\basic_defines.h"
-#include "shared\vga\vga.h"
-#include "shared\memory\memory.h"
-#include "shared\strings\print.h"
-#include "shared\cpu\gdt.h"
-#include "shared\cpu\idt.h"
-
-#include "kernel\linker.h"
-#include "kernel\tests.h"
-#include "kernel\descriptor_tables.h"
+#include "sources\i686-elf\shared\base_types.h"
+#include "sources\i686-elf\shared\basic_defines.h"
+#include "sources\i686-elf\shared\vga\vga.h"
+#include "sources\i686-elf\shared\memory\memory.h"
+#include "sources\i686-elf\shared\strings\print.h"
+#include "sources\i686-elf\shared\cpu\gdt.h"
+#include "sources\i686-elf\shared\cpu\idt.h"
+#include "sources\i686-elf\kernel\linker.h"
+#include "sources\i686-elf\kernel\tests.h"
+#include "sources\i686-elf\kernel\descriptor_tables.h"
 
 u8 FreeStore[KiloBytes(64)];
 print_context GlobalPrintContext;
