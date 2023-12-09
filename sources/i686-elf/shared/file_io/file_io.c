@@ -1,3 +1,10 @@
+#include "sources/i686-elf/shared/base_types.h"
+#include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/fat12/fat12.h"
+#include "sources/i686-elf/shared/fat12/set.h"
+#include "sources/i686-elf/shared/fat12/get.h"
+#include "sources/i686-elf/shared/file_io/file_io.h"
+
 void FileIoInitialize
 (
     u16 DriveNumber,

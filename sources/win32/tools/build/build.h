@@ -52,4 +52,4 @@ struct build_target_config
     const char *ThirdArgument;
 };
 
-static void DisplayHelp();
+void DisplayHelp();

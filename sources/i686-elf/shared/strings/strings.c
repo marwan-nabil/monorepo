@@ -1,3 +1,9 @@
+#include "sources/i686-elf/shared/base_types.h"
+#include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/memory/memory.h"
+#include "sources/i686-elf/shared/strings/print.h"
+#include "sources/i686-elf/shared/strings/path_handling.h"
+
 b8 IsCharacterLowerCase(char Character)
 {
     if ((Character >= 'a') && (Character <= 'z'))

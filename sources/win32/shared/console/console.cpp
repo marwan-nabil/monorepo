@@ -1,3 +1,11 @@
+#include <Windows.h>
+#include <stdint.h>
+#include <strsafe.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "console.h"
+
 void InitializeConsole(console_context *ConsoleContext)
 {
     ConsoleContext->ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);

@@ -1,3 +1,8 @@
+#include "sources/i686-elf/shared/base_types.h"
+#include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/fat12/fat12.h"
+#include "sources/i686-elf/shared/fat12/get.h"
+
 b8 IsFatEntryEndOfFile(u16 FatEntry)
 {
     if

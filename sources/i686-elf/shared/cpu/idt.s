@@ -2,6 +2,7 @@
 ; loads the interrupt descriptor table into the CPU
 ;------------------------------------
 section .text
+global LoadIDT
 LoadIDT:
     [bits 32]
     push ebp

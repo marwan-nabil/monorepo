@@ -1,9 +1,12 @@
+%include "sources/i686-elf/shared/cpu/modes.i"
+
 ; ---------------------------------------
 ; resets the floppy disk
 ; in:
 ;       word [sp + 2] == driver number
 ; ---------------------------------------
 section .text
+global BIOSDiskReset 
 BIOSDiskReset:
     [bits 32]
     push ebp
@@ -38,6 +41,7 @@ BIOSDiskReset:
 ; );
 ; ---------------------------------------
 section .text
+global BIOSDiskRead
 BIOSDiskRead:
     [bits 32]
     push ebp
@@ -97,6 +101,7 @@ BIOSDiskRead:
 ; );
 ; ---------------------------------------
 section .text
+global BIOSDiskWrite
 BIOSDiskWrite:
     [bits 32]
     push ebp
@@ -154,6 +159,7 @@ BIOSDiskWrite:
 ; );
 ; ---------------------------------------
 section .text
+global BIOSGetDiskDriveParameters
 BIOSGetDiskDriveParameters:
     [bits 32]
     push ebp

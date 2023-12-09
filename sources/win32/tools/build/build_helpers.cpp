@@ -1,4 +1,14 @@
-static void AddCompilerFlags(build_context *BuildContext, const char *Flags)
+#include <Windows.h>
+#include <stdint.h>
+#include <strsafe.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\console\console.h"
+#include "sources\win32\shared\strings\path_handling.h"
+#include "build.h"
+
+void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 {
     StringCchCatA
     (
@@ -14,7 +24,7 @@ static void AddCompilerFlags(build_context *BuildContext, const char *Flags)
     );
 }
 
-static void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath)
+void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath)
 {
     StringCchCatA
     (
@@ -30,7 +40,7 @@ static void SetCompilerIncludePath(build_context *BuildContext, const char *Incl
     );
 }
 
-static void AddCompilerSourceFile(build_context *BuildContext, const char *SourceFile)
+void AddCompilerSourceFile(build_context *BuildContext, const char *SourceFile)
 {
     file_name_node *NewNode = (file_name_node *)malloc(sizeof(file_name_node));
     ZeroMemory(NewNode->FileName, MAX_FILENAME);
@@ -51,7 +61,7 @@ static void AddCompilerSourceFile(build_context *BuildContext, const char *Sourc
     );
 }
 
-static void SetCompilerOutputObject(build_context *BuildContext, const char *ObjectFile)
+void SetCompilerOutputObject(build_context *BuildContext, const char *ObjectFile)
 {
     StringCchCatA
     (
@@ -67,7 +77,7 @@ static void SetCompilerOutputObject(build_context *BuildContext, const char *Obj
     );
 }
 
-static void AddLinkerFlags(build_context *BuildContext, const char *Flags)
+void AddLinkerFlags(build_context *BuildContext, const char *Flags)
 {
     StringCchCatA
     (
@@ -83,7 +93,7 @@ static void AddLinkerFlags(build_context *BuildContext, const char *Flags)
     );
 }
 
-static void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFile)
+void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFile)
 {
     StringCchCatA
     (
@@ -99,7 +109,7 @@ static void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerS
     );
 }
 
-static void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
+void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
 {
     file_name_node *NewNode = (file_name_node *)malloc(sizeof(file_name_node));
     ZeroMemory(NewNode->FileName, MAX_FILENAME);
@@ -120,7 +130,7 @@ static void AddLinkerInputFile(build_context *BuildContext, const char *LinkerIn
     );
 }
 
-static void SetLinkerOutputBinary(build_context *BuildContext, const char *OutputBinaryPath)
+void SetLinkerOutputBinary(build_context *BuildContext, const char *OutputBinaryPath)
 {
     StringCchCatA
     (
@@ -136,7 +146,7 @@ static void SetLinkerOutputBinary(build_context *BuildContext, const char *Outpu
     );
 }
 
-static void PushSubTarget(build_context *BuildContext, const char *SubTargetRelativePath)
+void PushSubTarget(build_context *BuildContext, const char *SubTargetRelativePath)
 {
     StringCchCatA
     (
@@ -155,13 +165,13 @@ static void PushSubTarget(build_context *BuildContext, const char *SubTargetRela
     SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 
-static void PopSubTarget(build_context *BuildContext)
+void PopSubTarget(build_context *BuildContext)
 {
     RemoveLastSegmentFromPath(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
     SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 
-static void FreeFileNameList(file_name_node *RootNode)
+void FreeFileNameList(file_name_node *RootNode)
 {
     file_name_node *CurrentNode = RootNode;
     file_name_node *ChildNode;
@@ -174,7 +184,7 @@ static void FreeFileNameList(file_name_node *RootNode)
     }
 }
 
-static void FlattenFileNameList(file_name_node *FileNameList, char *Output, u32 OutputSize)
+void FlattenFileNameList(file_name_node *FileNameList, char *Output, u32 OutputSize)
 {
     while (FileNameList)
     {
@@ -184,7 +194,7 @@ static void FlattenFileNameList(file_name_node *FileNameList, char *Output, u32 
     }
 }
 
-static void ClearBuildContext(build_context *BuildContext)
+void ClearBuildContext(build_context *BuildContext)
 {
     FreeFileNameList(BuildContext->CompilationInfo.Sources);
     FreeFileNameList(BuildContext->LinkingInfo.LinkerInputs);

@@ -40,7 +40,7 @@ typedef enum
 
 #define IDT_PRESENT 0x80
 
-void __attribute__((cdecl)) LoadIDT(idt_descriptor *IDTDescriptor);
 idt_entry CreateIDTEntry(u32 EntryAddress, u16 SegmentSelector, u8 Flags);
 void EnableInterruptGate(idt_entry *IDT, u8 InterruptNumber);
 void DisableInterruptGate(idt_entry *IDT, u8 InterruptNumber);
+void __attribute__((cdecl)) LoadIDT(idt_descriptor *IDTDescriptor);

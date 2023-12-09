@@ -1,51 +1,19 @@
 #include <Windows.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include <math.h>
 #include <strsafe.h>
 #include <stdio.h>
 #include <direct.h>
-#include <io.h>
-#include <shellapi.h>
 
 #include "sources\win32\shared\base_types.h"
 #include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\math\scalar_conversions.h"
 #include "sources\win32\shared\console\console.h"
-#include "sources\win32\shared\file_system\files.h"
-#include "sources\win32\shared\strings\strings.h"
+#include "sources\win32\shared\file_system\folders.h"
 #include "sources\win32\shared\strings\path_handling.h"
-#include "sources\win32\shared\fat12\fat12.h"
 #include "build.h"
+#include "i686-elf_targets.h"
+#include "win32_targets.h"
 
-#include "sources\win32\shared\console\console.cpp"
-#include "sources\win32\shared\file_system\files.cpp"
-#include "sources\win32\shared\file_system\folders.cpp"
-#include "sources\win32\shared\strings\path_handling.cpp"
-#include "sources\win32\shared\system\processes.cpp"
-#include "sources\win32\shared\fat12\fat12_get.cpp"
-#include "sources\win32\shared\fat12\fat12_set.cpp"
-#include "sources\win32\shared\fat12\fat12_interface.cpp"
-#include "build_helpers.cpp"
-#include "msvc_helpers.cpp"
-#include "nasm_helpers.cpp"
-#include "gcc_cross_compiler_helpers.cpp"
-
-#include "targets\win32\lint.cpp"
-#include "targets\win32\fetch_data.cpp"
-#include "targets\win32\compilation_tests.cpp"
-#include "targets\win32\fat12_tests.cpp"
-#include "targets\win32\simulator.cpp"
-#include "targets\win32\directx_demo.cpp"
-#include "targets\win32\handmade_hero.cpp"
-#include "targets\win32\imgui_demo.cpp"
-#include "targets\win32\ray_tracer.cpp"
-#include "targets\i686-elf\boot_sector.cpp"
-#include "targets\i686-elf\bootloader.cpp"
-#include "targets\i686-elf\kernel.cpp"
-#include "targets\i686-elf\floppy_image.cpp"
-
-build_target_config BuildTargetConfigurations[] =
+static build_target_config BuildTargetConfigurations[] =
 {
     {"lint", &BuildLint, "[job_per_directory]", NULL, NULL},
     {"fetch_data", &BuildFetchData, NULL, NULL, NULL},
@@ -59,9 +27,9 @@ build_target_config BuildTargetConfigurations[] =
     {"os", &BuildOsFloppyDiskImage, NULL, NULL, NULL},
 };
 
-console_context GlobalConsoleContext;
+static console_context GlobalConsoleContext;
 
-static void DisplayHelp()
+void DisplayHelp()
 {
     printf("INFO: Available build targets:\n");
     printf("          build help\n");

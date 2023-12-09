@@ -1,10 +1,12 @@
 section .text
+global Panic
 Panic:
     [bits 32]
     cli
     hlt
 
 section .text
+global IntentionalCrash
 IntentionalCrash:
     [bits 32]
     ; divide by zero exception

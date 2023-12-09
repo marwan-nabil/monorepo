@@ -1,0 +1,2 @@
+extern Panic
+extern IntentionalCrash

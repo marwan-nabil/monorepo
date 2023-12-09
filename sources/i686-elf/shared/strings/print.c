@@ -1,3 +1,9 @@
+#include "sources/i686-elf/shared/base_types.h"
+#include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/memory/memory.h"
+#include "sources/i686-elf/shared/strings/print.h"
+#include "sources/i686-elf/shared/strings/path_handling.h"
+
 void SetCursorPosition(print_context *Context, u32 X, u32 Y)
 {
     u32 LinearPosition = X + Y * VGA_SCREEN_WIDTH;

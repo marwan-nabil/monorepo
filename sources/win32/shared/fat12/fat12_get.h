@@ -21,4 +21,4 @@ directory_entry *GetDirectoryEntryOfDirectoryInDirectory
     fat12_disk *Disk, directory_entry *Directory, char *DirectoryName
 );
 directory_entry *GetDirectoryEntryOfFileInRootDirectory(fat12_disk *Disk, char *FileName, char *Extension);
-directory_entry *GetDirectoryEntryOfDirectoryInRootDirectory(fat12_disk *Disk, char *DirectoryName)
+directory_entry *GetDirectoryEntryOfDirectoryInRootDirectory(fat12_disk *Disk, char *DirectoryName);

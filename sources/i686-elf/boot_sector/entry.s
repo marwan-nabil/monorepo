@@ -1,9 +1,7 @@
 org 0x7C00
 bits 16
 
-%define CRLF 0x0D, 0x0A
-%define BOOTLOADER_LOAD_SEGMENT 0x0
-%define BOOTLOADER_LOAD_OFFSET 0x500
+%include "sources/i686-elf/boot_sector/entry.i"
 
 ; --------------------
 ; jump instruction, 3 bytes

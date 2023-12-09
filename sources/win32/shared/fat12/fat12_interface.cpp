@@ -1,3 +1,16 @@
+#include <Windows.h>
+#include <stdint.h>
+#include <strsafe.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\strings\strings.h"
+#include "sources\win32\shared\strings\path_handling.h"
+#include "fat12.h"
+#include "fat12_get.h"
+#include "fat12_set.h"
+#include "fat12_interface.h"
+
 directory_entry *Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePath)
 {
     if (StringLength(FullFilePath) == 1)

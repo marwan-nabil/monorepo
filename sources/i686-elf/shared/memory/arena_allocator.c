@@ -1,3 +1,8 @@
+#include "sources/i686-elf/shared/base_types.h"
+#include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/strings/print.h"
+#include "sources/i686-elf/shared/memory/arena_allocator.h"
+
 void InitializeMemoryArena(memory_arena *Arena, u32 Size, void *BaseAddress)
 {
     Arena->Size = Size;

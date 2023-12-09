@@ -1,3 +1,7 @@
+#include "sources/i686-elf/shared/base_types.h"
+#include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/cpu/idt.h"
+
 idt_entry CreateIDTEntry
 (
     u32 EntryAddress,

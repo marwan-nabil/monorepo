@@ -1,3 +1,10 @@
+#include <Windows.h>
+#include <stdint.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "fat12.h"
+
 // TODO: optimize fat12 driver primitives
 u16 TranslateClusterNumberToSectorIndex(u16 ClusterNumber)
 {

@@ -1,3 +1,13 @@
+#include <Windows.h>
+#include <stdint.h>
+#include <strsafe.h>
+#include <math.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\console\console.h"
+#include "folders.h"
+
 b32 CleanExtensionFromDirectory(const char *ExtensionToClean, const char *DirectoryPath, console_context *ConsoleContext)
 {
     char FilesWildcard[MAX_PATH] = {};

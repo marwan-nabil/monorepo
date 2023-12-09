@@ -2,6 +2,7 @@
 ; writes a character using a BIOS function
 ; --------------------
 section .text
+global BIOSPrintCharacter
 BIOSPrintCharacter:
     [bits 32]
     push ebp
@@ -36,6 +37,7 @@ BIOSPrintCharacter:
 ;       si -> address of string
 ; --------------------
 section .text
+global BIOSPrintString
 BIOSPrintString:
     [bits 32]
     push ebp

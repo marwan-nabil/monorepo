@@ -2,6 +2,7 @@
 ; loads the global descriptor table into the CPU
 ;------------------------------------
 section .text
+global LoadGDT
 LoadGDT:
     [bits 32]
 
