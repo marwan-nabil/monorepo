@@ -1,4 +1,11 @@
-static b32 IsWindowsVersionGreaterOrEqual
+#include <Windows.h>
+#include <stdint.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "version.h"
+
+b32 IsWindowsVersionGreaterOrEqual
 (
     HMODULE NtDllModule,
     u16 MajorVersion,

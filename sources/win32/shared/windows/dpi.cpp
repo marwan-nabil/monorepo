@@ -1,3 +1,12 @@
+#include <Windows.h>
+#include <stdint.h>
+#include <shellscalingapi.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\system\version.h"
+#include "dpi.h"
+
 b32 ConfigureDpiAwareness(HMODULE NtDllModule, HMODULE User32DllModule)
 {
     if (IsWindowsVersionGreaterOrEqual(NtDllModule, HIBYTE(0x0A00), LOBYTE(0x0A00), 0)) // _WIN32_WINNT_WIN10

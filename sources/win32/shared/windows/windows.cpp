@@ -1,3 +1,9 @@
+#include <Windows.h>
+#include <stdint.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+
 void DisplayRenderBufferInWindow
 (
     HWND Window, HDC DeviceContext,

@@ -4,12 +4,12 @@
 
     "files.exclude":
     {
-        "outputs/": true,
-        "tools/": true,
-        "assets/": true,
+        // "outputs/": true,
+        // "tools/": true,
+        // "assets/": true,
 
         // "sources/win32": true,
-        "sources/win32/imgui": true,
+        // "sources/win32/imgui": true,
         // "sources/i686-elf": true,
     },
 
