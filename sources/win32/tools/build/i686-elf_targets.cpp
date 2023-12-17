@@ -6,6 +6,7 @@
 #include "sources\win32\shared\basic_defines.h"
 #include "sources\win32\shared\console\console.h"
 #include "sources\win32\shared\strings\strings.h"
+#include "sources\win32\shared\strings\path_handling.h"
 #include "sources\win32\shared\fat12\fat12.h"
 #include "sources\win32\shared\fat12\fat12_interface.h"
 #include "sources\win32\shared\file_system\files.h"
@@ -28,31 +29,90 @@ b32 BuildBootSectorImage(build_context *BuildContext)
 b32 BuildBootloaderImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "bootloader");
+    b32 BuildSuccess = FALSE;
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\bootloader\\entry.s");
-    SetCompilerOutputObject(BuildContext, "\\entry.elf");
-    AddCompilerFlags(BuildContext, "-f elf");
-    SetCompilerIncludePath(BuildContext, "\\");
-    b32 BuildSuccess = AssembleWithNasm(BuildContext);
-    if (!BuildSuccess)
+    char *AssemblyFiles[] =
     {
-        return FALSE;
+        "\\sources\\i686-elf\\bootloader\\entry.s",
+        "\\sources\\i686-elf\\shared\\cpu\\io.s",
+        "\\sources\\i686-elf\\shared\\bios\\disk.s"
+    };
+
+    for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
+    {
+        AddCompilerSourceFile(BuildContext, AssemblyFiles[Index]);
+
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        SetCompilerOutputObject(BuildContext, ObjectFileName);
+
+        AddCompilerFlags(BuildContext, "-f elf");
+        SetCompilerIncludePath(BuildContext, "\\");
+        BuildSuccess = AssembleWithNasm(BuildContext);
+        if (!BuildSuccess)
+        {
+            return FALSE;
+        }
     }
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\bootloader\\main.c");
-    SetCompilerOutputObject(BuildContext, "\\main.elf");
-    AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = CompileWithGCC(BuildContext);
-    if (!BuildSuccess)
+    char *CFiles[] =
     {
-        return FALSE;
+        "\\sources\\i686-elf\\bootloader\\main.c",
+        "\\sources\\i686-elf\\bootloader\\tests.c",
+        "\\sources\\i686-elf\\shared\\vga\\vga.c",
+        "\\sources\\i686-elf\\shared\\disk\\disk.c",
+        "\\sources\\i686-elf\\shared\\strings\\strings.c",
+        "\\sources\\i686-elf\\shared\\strings\\path_handling.c",
+        "\\sources\\i686-elf\\shared\\strings\\print.c",
+        "\\sources\\i686-elf\\shared\\cpu\\timing.c",
+        "\\sources\\i686-elf\\shared\\fat12\\get.c",
+        "\\sources\\i686-elf\\shared\\fat12\\set.c",
+        "\\sources\\i686-elf\\shared\\memory\\arena_allocator.c",
+        "\\sources\\i686-elf\\shared\\memory\\memory.c",
+        "\\sources\\i686-elf\\shared\\file_io\\file_io.c",
+    };
+
+    for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
+    {
+        AddCompilerSourceFile(BuildContext, CFiles[Index]);
+
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        SetCompilerOutputObject(BuildContext, ObjectFileName);
+
+        AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
+        SetCompilerIncludePath(BuildContext, "\\");
+        BuildSuccess = CompileWithGCC(BuildContext);
+        if (!BuildSuccess)
+        {
+            return FALSE;
+        }
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=bootloader.map");
     SetLinkerScriptPath(BuildContext, "\\sources\\i686-elf\\bootloader\\linker.lds");
-    AddLinkerInputFile(BuildContext, "\\entry.elf");
-    AddLinkerInputFile(BuildContext, "\\main.elf");
+
+    for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
+    {
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        AddLinkerInputFile(BuildContext, ObjectFileName);
+    }
+    for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
+    {
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        AddLinkerInputFile(BuildContext, ObjectFileName);
+    }
+    
     SetLinkerOutputBinary(BuildContext, "\\bootloader.img");
     BuildSuccess = LinkWithGCC(BuildContext);
 
@@ -64,89 +124,97 @@ b32 BuildBootloaderImage(build_context *BuildContext)
 b32 BuildKernelImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "kernel");
+    b32 BuildSuccess = FALSE;
 
-    char *SharedCCFlags = "-std=c99 -g -ffreestanding -nostdlib";
-    char *SharedAsmFlags = "-f elf";
-
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\platform.s");
-    AddCompilerFlags(BuildContext, SharedAsmFlags);
-    SetCompilerOutputObject(BuildContext, "\\platform_s.elf");
-    SetCompilerIncludePath(BuildContext, "\\");
-    b32 BuildSuccess = AssembleWithNasm(BuildContext);
-    if (!BuildSuccess)
+    char *AssemblyFiles[] =
     {
-        return FALSE;
+        "\\sources\\i686-elf\\kernel\\isr.s",
+        "\\sources\\i686-elf\\shared\\cpu\\gdt.s",
+        "\\sources\\i686-elf\\shared\\cpu\\idt.s",
+        "\\sources\\i686-elf\\shared\\cpu\\io.s",
+        "\\sources\\i686-elf\\shared\\cpu\\panic.s",
+        "\\sources\\i686-elf\\shared\\bios\\disk.s",
+    };
+
+    for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
+    {
+        AddCompilerSourceFile(BuildContext, AssemblyFiles[Index]);
+
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        SetCompilerOutputObject(BuildContext, ObjectFileName);
+
+        AddCompilerFlags(BuildContext, "-f elf");
+        SetCompilerIncludePath(BuildContext, "\\");
+        BuildSuccess = AssembleWithNasm(BuildContext);
+        if (!BuildSuccess)
+        {
+            return FALSE;
+        }
     }
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\isr.s");
-    AddCompilerFlags(BuildContext, SharedAsmFlags);
-    SetCompilerOutputObject(BuildContext, "\\isr_s.elf");
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = AssembleWithNasm(BuildContext);
-    if (!BuildSuccess)
+    char *CFiles[] =
     {
-        return FALSE;
-    }
+        "\\sources\\i686-elf\\kernel\\main.c",
+        "\\sources\\i686-elf\\kernel\\isr.c",
+        "\\sources\\i686-elf\\kernel\\descriptor_tables.c",
+        "\\sources\\i686-elf\\kernel\\tests.c",
+        "\\sources\\i686-elf\\shared\\vga\\vga.c",
+        "\\sources\\i686-elf\\shared\\disk\\disk.c",
+        "\\sources\\i686-elf\\shared\\strings\\strings.c",
+        "\\sources\\i686-elf\\shared\\strings\\path_handling.c",
+        "\\sources\\i686-elf\\shared\\strings\\print.c",
+        "\\sources\\i686-elf\\shared\\cpu\\timing.c",
+        "\\sources\\i686-elf\\shared\\cpu\\gdt.c",
+        "\\sources\\i686-elf\\shared\\cpu\\idt.c",
+        "\\sources\\i686-elf\\shared\\fat12\\get.c",
+        "\\sources\\i686-elf\\shared\\fat12\\set.c",
+        "\\sources\\i686-elf\\shared\\memory\\arena_allocator.c",
+        "\\sources\\i686-elf\\shared\\memory\\memory.c",
+        "\\sources\\i686-elf\\shared\\file_io\\file_io.c",
+    };
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\platform.c");
-    SetCompilerOutputObject(BuildContext, "\\platform_c.elf");
-    AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = CompileWithGCC(BuildContext);
-    if (!BuildSuccess)
+    for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
     {
-        return FALSE;
-    }
+        AddCompilerSourceFile(BuildContext, CFiles[Index]);
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\isr.c");
-    SetCompilerOutputObject(BuildContext, "\\isr_c.elf");
-    AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = CompileWithGCC(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        SetCompilerOutputObject(BuildContext, ObjectFileName);
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\descriptor_tables.c");
-    SetCompilerOutputObject(BuildContext, "\\descriptor_tables.elf");
-    AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = CompileWithGCC(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\tests.c");
-    SetCompilerOutputObject(BuildContext, "\\tests.elf");
-    AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = CompileWithGCC(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
-    }
-
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\kernel\\main.c");
-    SetCompilerOutputObject(BuildContext, "\\main.elf");
-    AddCompilerFlags(BuildContext, SharedCCFlags);
-    SetCompilerIncludePath(BuildContext, "\\");
-    BuildSuccess = CompileWithGCC(BuildContext);
-    if (!BuildSuccess)
-    {
-        return FALSE;
+        AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
+        SetCompilerIncludePath(BuildContext, "\\");
+        BuildSuccess = CompileWithGCC(BuildContext);
+        if (!BuildSuccess)
+        {
+            return FALSE;
+        }
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
     SetLinkerScriptPath(BuildContext, "\\sources\\i686-elf\\kernel\\linker.lds");
-    AddLinkerInputFile(BuildContext, "\\platform_s.elf");
-    AddLinkerInputFile(BuildContext, "\\platform_c.elf");
-    AddLinkerInputFile(BuildContext, "\\isr_s.elf");
-    AddLinkerInputFile(BuildContext, "\\isr_c.elf");
-    AddLinkerInputFile(BuildContext, "\\descriptor_tables.elf");
-    AddLinkerInputFile(BuildContext, "\\tests.elf");
-    AddLinkerInputFile(BuildContext, "\\main.elf");
+    
+    for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
+    {
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        AddLinkerInputFile(BuildContext, ObjectFileName);
+    }
+    for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
+    {
+        char ObjectFileName[MAX_PATH] = {};
+        StringCchCat(ObjectFileName, MAX_PATH, "\\");
+        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
+        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        AddLinkerInputFile(BuildContext, ObjectFileName);
+    }
+
     SetLinkerOutputBinary(BuildContext, "\\kernel.img");
     BuildSuccess = LinkWithGCC(BuildContext);
 
@@ -193,6 +261,7 @@ b32 BuildOsFloppyDiskImage(build_context *BuildContext)
         return FALSE;
     }
 
+#if 0
     fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
     (
         0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
@@ -239,5 +308,6 @@ b32 BuildOsFloppyDiskImage(build_context *BuildContext)
     );
 
     VirtualFree(Fat12Disk, 0, MEM_RELEASE);
+#endif
     return BuildSuccess;
 }

@@ -43,13 +43,10 @@
     "files.associations": {
         "*.s": "nasm",
         "*.i": "nasm",
-        "gdt.h": "c",
-        "idt.h": "c",
-        "basic_defines.h": "c",
-        "timing.h": "c",
+        "base_types.h": "c",
+        "arena_allocator.h": "c",
+        "fat12.h": "c",
         "disk.h": "c",
-        "get.h": "c",
-        "print.h": "c",
-        "vga.h": "c"
+        "basic_defines.h": "c"
     },
 }

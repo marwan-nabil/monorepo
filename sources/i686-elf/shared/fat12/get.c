@@ -1,5 +1,11 @@
 #include "sources/i686-elf/shared/base_types.h"
 #include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/disk/disk.h"
+#include "sources/i686-elf/shared/strings/print.h"
+#include "sources/i686-elf/shared/strings/strings.h"
+#include "sources/i686-elf/shared/memory/memory.h"
+#include "sources/i686-elf/shared/memory/arena_allocator.h"
+#include "sources/i686-elf/shared/strings/path_handling.h"
 #include "sources/i686-elf/shared/fat12/fat12.h"
 #include "sources/i686-elf/shared/fat12/get.h"
 

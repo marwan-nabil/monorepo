@@ -15,11 +15,6 @@
 #include "opengl2_backend.h"
 #include "win32_backend.h"
 
-#include "sources\win32\shared\system\version.cpp"
-#include "sources\win32\shared\windows\dpi.cpp"
-#include "opengl2_backend.cpp"
-#include "win32_backend.cpp"
-
 static struct window_data
 {
     HDC DeviceContext;

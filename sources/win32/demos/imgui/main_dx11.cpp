@@ -3,8 +3,8 @@
 #include <dwmapi.h>
 #include <stdint.h>
 #include <d3d11.h>
-#include <d3dcompiler.h>
-#include <tchar.h>
+// #include <d3dcompiler.h>
+// #include <tchar.h>
 #include <stdio.h>
 #include <shellscalingapi.h>
 
@@ -15,11 +15,6 @@
 #include "sources\win32\imgui\imgui.h"
 #include "win32_backend.h"
 #include "dx11_backend.h"
-
-#include "sources\win32\shared\system\version.cpp"
-#include "sources\win32\shared\windows\dpi.cpp"
-#include "win32_backend.cpp"
-#include "dx11_backend.cpp"
 
 static struct global_d3d_handles
 {

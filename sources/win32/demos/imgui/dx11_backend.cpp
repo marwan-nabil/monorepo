@@ -1,3 +1,13 @@
+#include <windows.h>
+#include <stdint.h>
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\imgui\imgui.h"
+#include "dx11_backend.h"
+
 // Backend data stored in ImGuiIoInterface.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
 static dx11_backend_data *Dx11_GetBackendData()

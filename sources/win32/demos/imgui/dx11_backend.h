@@ -68,3 +68,10 @@ struct dx11_vertex_constant_buffer
 {
     f32 Mvp[4][4];
 };
+
+b32 Dx11_Initialize(ID3D11Device *D3dDevice, ID3D11DeviceContext *D3dDeviceContext);
+void Dx11_NewFrame();
+void Dx11_RenderDrawData(ImDrawData *DrawData);
+void Dx11_Shutdown();
+
+

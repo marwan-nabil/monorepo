@@ -24,3 +24,17 @@ void TranslateLbaToChs
     disk_parameters *DiskParameters,
     u32 LogicalBlockAddress, u16 *Cylinder, u16 *Head, u16 *Sector
 );
+void ReadDiskSectors
+(
+    disk_parameters *DiskParameters,
+    u32 LogicalBlockAddress,
+    u8 SectorsToRead,
+    void *DataOut
+);
+void WriteDiskSectors
+(
+    disk_parameters *DiskParameters,
+    u32 LogicalBlockAddress,
+    u8 SectorsToWrite,
+    u8 *DataIn
+);

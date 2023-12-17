@@ -42,3 +42,11 @@ struct win32_global_handles
     HMODULE User32DllModule;
     HMODULE NtDllModule;
 };
+
+extern win32_global_handles Win32GlobalHandles;
+
+LRESULT Win32_CustomCallbackHandler(HWND Window, u32 Message, WPARAM WParam, LPARAM LParam);
+b32 Win32_LoadNecessaryDlls();
+b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType);
+void Win32_NewFrame();
+void Win32_Shutdown();

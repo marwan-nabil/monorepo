@@ -11,3 +11,4 @@ struct file_path_node
 void FreeFilePathSegmentList(file_path_node *RootNode);
 file_path_node *CreateFilePathSegmentList(char *FileFullPath);
 void RemoveLastSegmentFromPath(char *Path);
+char *GetPointerToLastSegmentFromPath(char *Path);

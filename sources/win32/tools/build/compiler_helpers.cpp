@@ -6,6 +6,7 @@
 #include "sources\win32\shared\basic_defines.h"
 #include "sources\win32\shared\console\console.h"
 #include "sources\win32\shared\system\processes.h"
+#include "sources\win32\shared\strings\strings.h"
 #include "build.h"
 #include "build_helpers.h"
 
@@ -19,9 +20,12 @@ b32 CompileWithGCC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -I ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "-o ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    if (StringLength(BuildContext->CompilationInfo.OutputObjectPath) != 0)
+    {
+        StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "-o ");
+        StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
+        StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    }
     FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait
@@ -45,7 +49,7 @@ b32 CompileWithGCC(build_context *BuildContext)
 
 b32 LinkWithGCC(build_context *BuildContext)
 {
-    char LinkerCommand[1024];
+    char LinkerCommand[KiloBytes(5)];
     *LinkerCommand = {};
 
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), "i686-elf-gcc.exe ");
@@ -114,10 +118,13 @@ b32 CompileWithMSVC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
     FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fe:\"");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkingInfo.OutputBinaryPath);
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "/link ");
+    if (StringLength(BuildContext->LinkingInfo.OutputBinaryPath) != 0)
+    {
+        StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fe:\"");
+        StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkingInfo.OutputBinaryPath);
+        StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\"");
+    }
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /link ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkingInfo.LinkerFlags);
 
     b32 Result = CreateProcessAndWait

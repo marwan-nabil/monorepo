@@ -1,8 +1,15 @@
+#include <stdarg.h>
 #include "sources/i686-elf/shared/base_types.h"
 #include "sources/i686-elf/shared/basic_defines.h"
+#include "sources/i686-elf/shared/math/integers.h"
 #include "sources/i686-elf/shared/memory/memory.h"
 #include "sources/i686-elf/shared/strings/print.h"
+#include "sources/i686-elf/shared/strings/strings.h"
+#include "sources/i686-elf/shared/memory/arena_allocator.h"
 #include "sources/i686-elf/shared/strings/path_handling.h"
+#include "sources/i686-elf/shared/vga/vga.h"
+#include "sources/i686-elf/shared/bios/print.h"
+#include "sources/i686-elf/shared/cpu/io.h"
 
 void SetCursorPosition(print_context *Context, u32 X, u32 Y)
 {

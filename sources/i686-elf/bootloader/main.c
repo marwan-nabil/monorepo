@@ -15,19 +15,6 @@
 #include "sources\i686-elf\shared\file_io\file_io.h"
 #include "sources\i686-elf\bootloader\memory_layout.h"
 
-#include "sources\i686-elf\shared\vga\vga.c"
-#include "sources\i686-elf\shared\cpu\timing.c"
-#include "sources\i686-elf\shared\memory\memory.c"
-#include "sources\i686-elf\shared\strings\strings.c"
-#include "sources\i686-elf\shared\strings\print.c"
-#include "sources\i686-elf\shared\disk\disk.c"
-#include "sources\i686-elf\shared\memory\arena_allocator.c"
-#include "sources\i686-elf\shared\strings\path_handling.c"
-#include "sources\i686-elf\shared\fat12\get.c"
-#include "sources\i686-elf\shared\fat12\set.c"
-#include "sources\i686-elf\shared\file_io\file_io.c"
-#include "sources\i686-elf\bootloader\tests.c"
-
 u8 FreeStore[KiloBytes(64)];
 print_context GlobalPrintContext;
 u8 *KernelLoadBuffer = MEMORY_LAYOUT_KERNEL_LOAD_ADDRESS;

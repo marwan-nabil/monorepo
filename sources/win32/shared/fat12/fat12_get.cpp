@@ -104,7 +104,7 @@ GetFirstFreeDirectoryEntryInSector(sector *Sector)
     return NULL;
 }
 
-static directory_entry *
+directory_entry *
 GetFirstFreeDirectoryEntryInDirectory(fat12_disk *Disk, directory_entry *Directory)
 {
     directory_entry *FirstFreeDirectoryEntry = NULL;
@@ -138,7 +138,7 @@ GetFirstFreeDirectoryEntryInDirectory(fat12_disk *Disk, directory_entry *Directo
     return FirstFreeDirectoryEntry;
 }
 
-static directory_entry *
+directory_entry *
 GetFirstFreeDirectoryEntryInRootDirectory(fat12_disk *Disk)
 {
     directory_entry *FirstFreeDirectoryEntry = NULL;

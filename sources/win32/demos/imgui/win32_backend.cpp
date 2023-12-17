@@ -1,6 +1,20 @@
+#include <windows.h>
+#include <windowsx.h>
+#include <stdint.h>
+#include <tchar.h>
+#include <shellscalingapi.h>
+#include <dwmapi.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\windows\dpi.h"
+#include "sources\win32\shared\system\version.h"
+#include "sources\win32\imgui\imgui.h"
+#include "win32_backend.h"
+
 win32_global_handles Win32GlobalHandles;
 
-static win32_backend_state *Win32_GetBackendState()
+win32_backend_state *Win32_GetBackendState()
 {
     if (ImGui::GetCurrentContext())
     {
@@ -12,7 +26,7 @@ static win32_backend_state *Win32_GetBackendState()
     }
 }
 
-static b32 Win32_LoadNecessaryDlls()
+b32 Win32_LoadNecessaryDlls()
 {
     Win32GlobalHandles.User32DllModule = LoadLibraryA("user32.dll");
     Win32GlobalHandles.ShcoreDllModule = LoadLibraryA("shcore.dll");
@@ -26,19 +40,19 @@ static b32 Win32_LoadNecessaryDlls()
     return TRUE;
 }
 
-static void Win32_ShutdownPlatformInterface()
+void Win32_ShutdownPlatformInterface()
 {
     UnregisterClass(L"ImGui Platform", GetModuleHandle(NULL));
     ImGui::DestroyPlatformWindows();
 }
 
-static f32 Win32_GetDpiScaleForHwnd(void *Window)
+f32 Win32_GetDpiScaleForHwnd(void *Window)
 {
     HMONITOR Monitor = MonitorFromWindow((HWND)Window, MONITOR_DEFAULTTONEAREST);
     return GetDpiScaleForMonitor(Win32GlobalHandles.NtDllModule, Win32GlobalHandles.ShcoreDllModule, Monitor);
 }
 
-static void Win32_Shutdown()
+void Win32_Shutdown()
 {
     win32_backend_state *BackendState = Win32_GetBackendState();
     Assert(BackendState != NULL && "No platform backend to shutdown, or already shutdown?");
@@ -62,7 +76,7 @@ static void Win32_Shutdown()
     ImGui::MemFree(BackendState);
 }
 
-static b32 Win32_UpdateMouseCursor()
+b32 Win32_UpdateMouseCursor()
 {
     ImGuiIO *ImGuiIo = &ImGui::GetIO();
     if (ImGuiIo->ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
@@ -97,7 +111,7 @@ static b32 Win32_UpdateMouseCursor()
     return TRUE;
 }
 
-static b32 Win32_IsVkDown(i32 VirtualKey)
+b32 Win32_IsVkDown(i32 VirtualKey)
 {
     if ((GetKeyState(VirtualKey) & 0x8000) != 0)
     {
@@ -109,14 +123,14 @@ static b32 Win32_IsVkDown(i32 VirtualKey)
     }
 }
 
-static void Win32_AddKeyEvent(ImGuiKey Key, b32 Down, i32 NativeKeyCode, i32 NativeScanCode)
+void Win32_AddKeyEvent(ImGuiKey Key, b32 Down, i32 NativeKeyCode, i32 NativeScanCode)
 {
     ImGuiIO *ImGuiIo = &ImGui::GetIO();
     ImGuiIo->AddKeyEvent(Key, Down);
     ImGuiIo->SetKeyEventNativeData(Key, NativeKeyCode, NativeScanCode);
 }
 
-static void Win32_ProcessKeyEventsWorkarounds()
+void Win32_ProcessKeyEventsWorkarounds()
 {
     // Left & right Shift keys: when both are pressed together, Windows tend to not generate the WM_KEYUP event for the first released one.
     if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && !Win32_IsVkDown(VK_LSHIFT))
@@ -141,7 +155,7 @@ static void Win32_ProcessKeyEventsWorkarounds()
     }
 }
 
-static void Win32_UpdateKeyModifiers()
+void Win32_UpdateKeyModifiers()
 {
     ImGuiIO *ImGuiIo = &ImGui::GetIO();
     ImGuiIo->AddKeyEvent(ImGuiMod_Ctrl, Win32_IsVkDown(VK_CONTROL));
@@ -152,7 +166,7 @@ static void Win32_UpdateKeyModifiers()
 
 // This code supports multi-viewports (multiple OS Windows mapped into different Dear ImGui viewports)
 // Because of that, it is a little more complicated than your typical single-ViewPort binding code!
-static void Win32_UpdateMouseData()
+void Win32_UpdateMouseData()
 {
     win32_backend_state *BackendState = Win32_GetBackendState();
     ImGuiIO *ImGuiIo = &ImGui::GetIO();
@@ -237,7 +251,7 @@ static void Win32_UpdateMouseData()
     ImGuiIo->AddMouseViewportEvent(MouseViewportId);
 }
 
-static i32 CALLBACK Win32_UpdateMonitorsEnumFunction(HMONITOR Monitor, HDC, LPRECT, LPARAM)
+i32 CALLBACK Win32_UpdateMonitorsEnumFunction(HMONITOR Monitor, HDC, LPRECT, LPARAM)
 {
     MONITORINFO MonitorInfo = {};
     MonitorInfo.cbSize = sizeof(MONITORINFO);
@@ -269,7 +283,7 @@ static i32 CALLBACK Win32_UpdateMonitorsEnumFunction(HMONITOR Monitor, HDC, LPRE
     return TRUE;
 }
 
-static void Win32_UpdateMonitors()
+void Win32_UpdateMonitors()
 {
     win32_backend_state *BackendState = Win32_GetBackendState();
     (&ImGui::GetPlatformIO())->Monitors.resize(0);
@@ -325,7 +339,7 @@ void Win32_NewFrame()
 }
 
 // Map VK_xxx to ImGuiKey_xxx.
-static ImGuiKey Win32_VirtualKeyToImGuiKey(WPARAM WParam)
+ImGuiKey Win32_VirtualKeyToImGuiKey(WPARAM WParam)
 {
     switch (WParam)
     {
@@ -437,7 +451,7 @@ static ImGuiKey Win32_VirtualKeyToImGuiKey(WPARAM WParam)
     }
 }
 
-static ImGuiMouseSource Win32_GetMouseSourceFromMessageExtraInfo()
+ImGuiMouseSource Win32_GetMouseSourceFromMessageExtraInfo()
 {
     LPARAM ExtraInfo = GetMessageExtraInfo();
 
@@ -836,7 +850,7 @@ void Win32_EnableAlphaCompositing(void *Window)
 // This is an _advanced_ and _optional_ feature, allowing the backend to create and handle multiple viewports simultaneously.
 // If you are new to dear imgui or creating a new binding for dear imgui, it is recommended that you completely ignore this section first..
 //--------------------------------------------------------------------------------------------------------
-static void Win32_GetWin32StyleFromViewportFlags(ImGuiViewportFlags Flags, DWORD *OutputStyle, DWORD *OutputStyleExtended)
+void Win32_GetWin32StyleFromViewportFlags(ImGuiViewportFlags Flags, DWORD *OutputStyle, DWORD *OutputStyleExtended)
 {
     if (Flags & ImGuiViewportFlags_NoDecoration)
     {
@@ -862,7 +876,7 @@ static void Win32_GetWin32StyleFromViewportFlags(ImGuiViewportFlags Flags, DWORD
     }
 }
 
-static HWND Win32_GetHwndFromViewportID(ImGuiID ViewPortId)
+HWND Win32_GetHwndFromViewportID(ImGuiID ViewPortId)
 {
     if (ViewPortId != 0)
     {
@@ -875,7 +889,7 @@ static HWND Win32_GetHwndFromViewportID(ImGuiID ViewPortId)
     return NULL;
 }
 
-static void Win32_CreateWindow(ImGuiViewport *ViewPort)
+void Win32_CreateWindow(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ImGui::MemAlloc(sizeof(win32_viewport_data));
     *ViewPortData = {};
@@ -914,7 +928,7 @@ static void Win32_CreateWindow(ImGuiViewport *ViewPort)
     ViewPort->PlatformHandleRaw = ViewPortData->Window;
 }
 
-static void Win32_DestroyWindow(ImGuiViewport *ViewPort)
+void Win32_DestroyWindow(ImGuiViewport *ViewPort)
 {
     win32_backend_state *BackendState = Win32_GetBackendState();
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
@@ -939,7 +953,7 @@ static void Win32_DestroyWindow(ImGuiViewport *ViewPort)
     ViewPort->PlatformHandle = NULL;
 }
 
-static void Win32_ShowWindow(ImGuiViewport *ViewPort)
+void Win32_ShowWindow(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -954,7 +968,7 @@ static void Win32_ShowWindow(ImGuiViewport *ViewPort)
     }
 }
 
-static void Win32_UpdateWindow(ImGuiViewport *ViewPort)
+void Win32_UpdateWindow(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1048,7 +1062,7 @@ static void Win32_UpdateWindow(ImGuiViewport *ViewPort)
     }
 }
 
-static ImVec2 Win32_GetWindowPos(ImGuiViewport *ViewPort)
+ImVec2 Win32_GetWindowPos(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1060,7 +1074,7 @@ static ImVec2 Win32_GetWindowPos(ImGuiViewport *ViewPort)
     return Result;
 }
 
-static void Win32_SetWindowPos(ImGuiViewport *ViewPort, ImVec2 Position)
+void Win32_SetWindowPos(ImGuiViewport *ViewPort, ImVec2 Position)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1077,7 +1091,7 @@ static void Win32_SetWindowPos(ImGuiViewport *ViewPort, ImVec2 Position)
     SetWindowPos(ViewPortData->Window, NULL, Rectangle.left, Rectangle.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 
-static ImVec2 Win32_GetWindowSize(ImGuiViewport *ViewPort)
+ImVec2 Win32_GetWindowSize(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1088,7 +1102,7 @@ static ImVec2 Win32_GetWindowSize(ImGuiViewport *ViewPort)
     return Result;
 }
 
-static void Win32_SetWindowSize(ImGuiViewport *ViewPort, ImVec2 size)
+void Win32_SetWindowSize(ImGuiViewport *ViewPort, ImVec2 size)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1103,7 +1117,7 @@ static void Win32_SetWindowSize(ImGuiViewport *ViewPort, ImVec2 size)
     );
 }
 
-static void Win32_SetWindowFocus(ImGuiViewport *ViewPort)
+void Win32_SetWindowFocus(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1113,7 +1127,7 @@ static void Win32_SetWindowFocus(ImGuiViewport *ViewPort)
     SetFocus(ViewPortData->Window);
 }
 
-static b32 Win32_GetWindowFocus(ImGuiViewport *ViewPort)
+b32 Win32_GetWindowFocus(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1128,7 +1142,7 @@ static b32 Win32_GetWindowFocus(ImGuiViewport *ViewPort)
     }
 }
 
-static b32 Win32_GetWindowMinimized(ImGuiViewport *ViewPort)
+b32 Win32_GetWindowMinimized(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1143,7 +1157,7 @@ static b32 Win32_GetWindowMinimized(ImGuiViewport *ViewPort)
     }
 }
 
-static void Win32_SetWindowTitle(ImGuiViewport *ViewPort, const char *title)
+void Win32_SetWindowTitle(ImGuiViewport *ViewPort, const char *title)
 {
     // SetWindowTextA() doesn't properly handle UTF-8 so we explicitely convert our string.
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
@@ -1158,7 +1172,7 @@ static void Win32_SetWindowTitle(ImGuiViewport *ViewPort, const char *title)
     SetWindowTextW(ViewPortData->Window, TitleWideChar.Data);
 }
 
-static void Win32_SetWindowAlpha(ImGuiViewport *ViewPort, f32 alpha)
+void Win32_SetWindowAlpha(ImGuiViewport *ViewPort, f32 alpha)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1177,7 +1191,7 @@ static void Win32_SetWindowAlpha(ImGuiViewport *ViewPort, f32 alpha)
     }
 }
 
-static f32 Win32_GetWindowDpiScale(ImGuiViewport *ViewPort)
+f32 Win32_GetWindowDpiScale(ImGuiViewport *ViewPort)
 {
     win32_viewport_data *ViewPortData = (win32_viewport_data *)ViewPort->PlatformUserData;
     Assert(ViewPortData->Window != 0);
@@ -1186,7 +1200,7 @@ static f32 Win32_GetWindowDpiScale(ImGuiViewport *ViewPort)
 }
 
 // FIXME-DPI: Testing DPI related ideas
-static void Win32_OnChangedViewport(ImGuiViewport *ViewPort)
+void Win32_OnChangedViewport(ImGuiViewport *ViewPort)
 {
     (void)ViewPort;
 
@@ -1200,7 +1214,7 @@ static void Win32_OnChangedViewport(ImGuiViewport *ViewPort)
     // Style = default_style;
 }
 
-static LRESULT CALLBACK Win32_WindowProcedureHandler(HWND Window, u32 Message, WPARAM WParam, LPARAM LParam)
+LRESULT CALLBACK Win32_WindowProcedureHandler(HWND Window, u32 Message, WPARAM WParam, LPARAM LParam)
 {
     if (Win32_CustomCallbackHandler(Window, Message, WParam, LParam))
     {
@@ -1253,7 +1267,7 @@ static LRESULT CALLBACK Win32_WindowProcedureHandler(HWND Window, u32 Message, W
     return DefWindowProc(Window, Message, WParam, LParam);
 }
 
-static b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType)
+b32 Win32_Initialize(void *Window, win32_renderer_backend RendererType)
 {
     ImGuiIO *ImGuiIo = &ImGui::GetIO();
     Assert(ImGuiIo->BackendPlatformUserData == NULL && "Already initialized a platform backend!");

@@ -1,21 +1,6 @@
 bits 32
 
-extern ISREntry
-
-%macro ISRWithoutErrorCode 1
-global ISR%1
-ISR%1:
-    push 0 ; dummy error code
-    push %1
-    jmp ISRsCommon
-%endmacro
-
-%macro ISRWithErrorCode 1
-global ISR%1
-ISR%1:
-    push %1
-    jmp ISRsCommon
-%endmacro
+%include "sources\i686-elf\kernel\isr.i"
 
 ISRsCommon:
     pusha ; push all general purpose registers

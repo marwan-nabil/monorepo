@@ -1,6 +1,15 @@
-static HGLRC GlobalOpenGLRenderingContext;
+#include <windows.h>
+#include <stdint.h>
+#include <GL\GL.h>
 
-static b32 OpenGl2_CreateDevice(HWND Window, HDC *ResultDeviceContext)
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\imgui\imgui.h"
+#include "opengl2_backend.h"
+
+HGLRC GlobalOpenGLRenderingContext;
+
+b32 OpenGl2_CreateDevice(HWND Window, HDC *ResultDeviceContext)
 {
     HDC DeviceContext = GetDC(Window);
 
@@ -31,7 +40,7 @@ static b32 OpenGl2_CreateDevice(HWND Window, HDC *ResultDeviceContext)
     return TRUE;
 }
 
-static void OpenGl2_CleanupDeviceWGL(HWND Window, HDC DeviceContext)
+void OpenGl2_CleanupDeviceWGL(HWND Window, HDC DeviceContext)
 {
     wglMakeCurrent(NULL, NULL);
     ReleaseDC(Window, DeviceContext);
@@ -39,7 +48,7 @@ static void OpenGl2_CleanupDeviceWGL(HWND Window, HDC DeviceContext)
 
 // Backend data stored in ImGuiIoInterface.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
-static opengl2_backend_data *OpenGl2_GetBackendData()
+opengl2_backend_data *OpenGl2_GetBackendData()
 {
     if (ImGui::GetCurrentContext())
     {
@@ -51,7 +60,7 @@ static opengl2_backend_data *OpenGl2_GetBackendData()
     }
 }
 
-static b32 OpenGl2_CreateFontsTexture()
+b32 OpenGl2_CreateFontsTexture()
 {
     // Build texture atlas
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
@@ -81,7 +90,7 @@ static b32 OpenGl2_CreateFontsTexture()
     return TRUE;
 }
 
-static void OpenGl2_DestroyFontsTexture()
+void OpenGl2_DestroyFontsTexture()
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
@@ -93,7 +102,7 @@ static void OpenGl2_DestroyFontsTexture()
     }
 }
 
-static b32 OpenGl2_Initialize()
+b32 OpenGl2_Initialize()
 {
     ImGuiIO *ImGuiIoInterface = &ImGui::GetIO();
     Assert(ImGuiIoInterface->BackendRendererUserData == NULL && "Already initialized a renderer backend!");
@@ -107,7 +116,7 @@ static b32 OpenGl2_Initialize()
     return TRUE;
 }
 
-static void OpenGl2_Shutdown()
+void OpenGl2_Shutdown()
 {
     opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
     Assert(BackendData != NULL && "No renderer backend to shutdown, or already shutdown?");
@@ -122,7 +131,7 @@ static void OpenGl2_Shutdown()
     ImGui::MemFree(BackendData);
 }
 
-static void OpenGl2_NewFrame()
+void OpenGl2_NewFrame()
 {
     opengl2_backend_data *BackendData = OpenGl2_GetBackendData();
     Assert(BackendData != NULL && "Did you call OpenGl2_Initialize()?");
@@ -133,7 +142,7 @@ static void OpenGl2_NewFrame()
     }
 }
 
-static void OpenGl2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth, i32 FrameBufferHeight)
+void OpenGl2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth, i32 FrameBufferHeight)
 {
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, vertex/texcoord/color pointers, polygon fill.
     glEnable(GL_BLEND);
@@ -180,7 +189,7 @@ static void OpenGl2_SetupRenderState(ImDrawData *DrawData, i32 FrameBufferWidth,
 // OpenGL2 Render function.
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly.
 // This is in order to be able to run within an OpenGL engine that doesn't do so.
-static void OpenGl2_RenderDrawData(ImDrawData *DrawData)
+void OpenGl2_RenderDrawData(ImDrawData *DrawData)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     i32 FrameBufferWidth = (i32)(DrawData->DisplaySize.x * DrawData->FramebufferScale.x);

@@ -71,3 +71,16 @@ void RemoveLastSegmentFromPath(char *Path)
         }
     }
 }
+
+char *GetPointerToLastSegmentFromPath(char *Path)
+{
+    u32 PathLength = StringLength(Path);
+    for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
+    {
+        if (Path[CharIndex] == '\\')
+        {
+            return &Path[CharIndex + 1];
+        }
+    }
+    return NULL;
+}
