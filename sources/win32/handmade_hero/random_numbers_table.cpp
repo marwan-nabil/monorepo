@@ -1,4 +1,9 @@
-static u32 RandomNumbersTable[512] =
+#include <stdint.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+
+u32 RandomNumbersTable[512] =
 {
     0x2db599a4,	0x26564055,	0x192d0324,	0x35615cf4,
     0x13c4fc57,	0x12d89fe1,	0x312793f2,	0x3823caff,

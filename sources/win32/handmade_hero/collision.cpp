@@ -1,4 +1,35 @@
-inline entity_collision_mesh_group *
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
+#include <string.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\bit_operations.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\math\rectangle3.h"
+
+#include "game_interface.h"
+#include "memory.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "random_numbers_table.h"
+
+#include "entity.h"
+#include "collision.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
+
+entity_collision_mesh_group *
 MakeSimpleCollisionMeshTemplate(game_state *GameState, v3 CollisionMeshDiameter)
 {
     entity_collision_mesh_group *Result = PushStruct(&GameState->WorldArena, entity_collision_mesh_group);
@@ -15,7 +46,7 @@ MakeSimpleCollisionMeshTemplate(game_state *GameState, v3 CollisionMeshDiameter)
     return Result;
 }
 
-inline entity_collision_mesh_group *
+entity_collision_mesh_group *
 MakeNullCollisionMeshTemplate(game_state *GameState)
 {
     entity_collision_mesh_group *Result = PushStruct(&GameState->WorldArena, entity_collision_mesh_group);
@@ -26,7 +57,7 @@ MakeNullCollisionMeshTemplate(game_state *GameState)
     return Result;
 }
 
-static void
+void
 AddEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex, b32 CanCollide)
 {
     entity_collision_rule *ResultRule = 0;
@@ -79,12 +110,12 @@ AddEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 S
     }
 }
 
-static b32
-RemoveEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex)
+b32 RemoveEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex)
 {
+    return FALSE;
 }
 
-static void
+void
 ClearAllEntityCollisionRules(game_state *GameState, u32 StorageIndex)
 {
     for (u32 HashValue = 0; HashValue < ArrayCount(GameState->CollisionRulesTable); HashValue++)
@@ -113,7 +144,7 @@ ClearAllEntityCollisionRules(game_state *GameState, u32 StorageIndex)
     }
 }
 
-static b32
+b32
 CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
 {
     b32 Result = FALSE;
@@ -153,8 +184,7 @@ CanEntitiesCollide(game_state *GameState, entity *A, entity *B)
     return Result;
 }
 
-static b32
-ProcessEntityCollision(game_state *GameState, entity *MovingEntity, entity *StaticEntity)
+b32 ProcessEntityCollision(game_state *GameState, entity *MovingEntity, entity *StaticEntity)
 {
     b32 MovingEntityShouldStopOnCollision = FALSE;
 

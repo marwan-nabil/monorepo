@@ -19,12 +19,9 @@
 #include "sources\win32\shared\base_types.h"
 #include "sources\win32\shared\basic_defines.h"
 #include "sources\win32\shared\console\console.h"
-#include "compilation_tests.h"
-
-#include "sources\win32\shared\console\console.cpp"
-#include "sources\win32\shared\strings\strings.h"
-#include "sources\win32\shared\system\processes.cpp"
 #include "sources\win32\shared\timing\timing.h"
+#include "sources\win32\shared\system\processes.h"
+#include "compilation_tests.h"
 
 console_context GlobalConsoleContext;
 

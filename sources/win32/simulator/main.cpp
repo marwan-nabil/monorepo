@@ -12,18 +12,14 @@
 #include "sources\win32\shared\math\vector4.h"
 #include "sources\win32\shared\math\rectangle2.h"
 #include "sources\win32\shared\rasterizer\rasterizer.h"
+#include "sources\win32\shared\windows\windows.h"
+#include "sources\win32\shared\timing\timing.h"
 
 #include "electrical.h"
 #include "logic_gates.h"
-#include "simulation.h"
 #include "internal_types.h"
-
-#include "sources\win32\shared\rasterizer\rasterizer.cpp"
-#include "sources\win32\shared\windows\windows.cpp"
-#include "sources\win32\shared\timing\timing.h"
-#include "logic_gates.cpp"
-#include "simulation.cpp"
-#include "rendering.cpp"
+#include "simulation.h"
+#include "rendering.h"
 
 inline void ProcessButton(button_state *Button, b32 IsDown)
 {

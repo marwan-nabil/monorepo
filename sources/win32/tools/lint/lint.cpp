@@ -16,16 +16,13 @@
 
 #include "sources\win32\shared\base_types.h"
 #include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\floats.h"
 #include "sources\win32\shared\math\scalar_conversions.h"
 #include "sources\win32\shared\console\console.h"
 #include "sources\win32\shared\file_system\files.h"
 #include "sources\win32\shared\strings\strings.h"
 #include "sources\win32\shared\strings\path_handling.h"
 #include "lint.h"
-
-#include "sources\win32\shared\console\console.cpp"
-#include "sources\win32\shared\file_system\files.cpp"
-#include "sources\win32\shared\strings\path_handling.cpp"
 
 char RootDirectoryPath[1024];
 

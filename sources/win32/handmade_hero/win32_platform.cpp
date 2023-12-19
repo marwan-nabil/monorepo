@@ -14,11 +14,9 @@
 #include "sources\win32\shared\math\vector2.h"
 #include "sources\win32\shared\math\vector3.h"
 #include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\strings\strings.h"
 #include "game_interface.h"
 #include "win32_platform.h"
-
-#include "sources\win32\shared\strings\strings.h"
-#include "game_interface.cpp"
 
 static win32_platform_state Win32PlatformState = {};
 static xinput_get_state *XInputGetState_ = XInputGetStateStub;

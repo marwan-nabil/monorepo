@@ -1,5 +1,35 @@
-static void
-DrawRectangle
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
+#include <string.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\bit_operations.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\math\rectangle3.h"
+
+#include "game_interface.h"
+#include "memory.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "random_numbers_table.h"
+
+#include "entity.h"
+#include "collision.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
+
+void DrawRectangle
 (
     game_pixel_buffer *PixelBuffer,
     v2 MinCorner, v2 MaxCorner,
@@ -67,8 +97,7 @@ DrawRectangle
     }
 }
 
-static void
-DrawBitmap
+void DrawBitmap
 (
     loaded_bitmap *SourceBitMap, game_pixel_buffer *DestinationBuffer,
     f32 DestinationX, f32 DestinationY, f32 AlphaFactor
@@ -145,8 +174,7 @@ DrawBitmap
     }
 }
 
-inline void
-PushRenderPeice
+void PushRenderPeice
 (
     game_state *GameState, render_peice_group *PeiceGroup,
     loaded_bitmap *Bitmap, v3 Offset, v2 BitmapAlignment,
@@ -164,8 +192,7 @@ PushRenderPeice
     NewRenderPiece->Color = Color;
 }
 
-inline void
-PushBitmapRenderPiece
+void PushBitmapRenderPiece
 (
     game_state *GameState, render_peice_group *PeiceGroup,
     loaded_bitmap *Bitmap, v3 Offset, v2 BitmapAlignment,
@@ -175,8 +202,7 @@ PushBitmapRenderPiece
     PushRenderPeice(GameState, PeiceGroup, Bitmap, Offset, BitmapAlignment, V4(0, 0, 0, Alpha), EntityJumpZCoefficient, V2(0, 0));
 }
 
-inline void
-PushRectangleRenderPiece
+void PushRectangleRenderPiece
 (
     game_state *GameState, render_peice_group *PeiceGroup, v3 Offset,
     v2 RectangleDimensions, v4 Color, f32 EntityJumpZCoefficient
@@ -185,8 +211,7 @@ PushRectangleRenderPiece
     PushRenderPeice(GameState, PeiceGroup, 0, Offset, V2(0, 0), Color, EntityJumpZCoefficient, RectangleDimensions);
 }
 
-inline void
-PushRectangleOutlineRenderPieces
+void PushRectangleOutlineRenderPieces
 (
     game_state *GameState, render_peice_group *PeiceGroup,
     v3 Offset, v2 RectangleDimensions, v4 Color, f32 EntityJumpZCoefficient
@@ -215,8 +240,7 @@ PushRectangleOutlineRenderPieces
     );
 }
 
-inline void
-DrawHitpoints(game_state *GameState, render_peice_group *EntityPeiceGroup, entity *Entity)
+void DrawHitpoints(game_state *GameState, render_peice_group *EntityPeiceGroup, entity *Entity)
 {
     if (Entity->HitPointsMax >= 1)
     {

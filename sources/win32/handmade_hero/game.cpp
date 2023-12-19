@@ -17,6 +17,7 @@
 // - fix fp math so this should be < & >.
 // - in world.cpp CanonicalizeIntervalIndexAndOffset() fix this shit (truncation party).
 // - in world.cpp GetWorldPositionFromTilePosition() fix buggy Z handling.
+// - determine inlinable functions and move them to headers
 #include <stdint.h>
 #include <math.h>
 #include <intrin.h>
@@ -38,23 +39,15 @@
 
 #include "game_interface.h"
 #include "memory.h"
-#include "collision.h"
 #include "bitmap.h"
 #include "renderer.h"
+#include "random_numbers_table.h"
+
 #include "entity.h"
+#include "collision.h"
 #include "world.h"
 #include "simulation.h"
 #include "game.h"
-
-#include "game_interface.cpp"
-#include "memory.cpp"
-#include "bitmap.cpp"
-#include "renderer.cpp"
-#include "random_numbers_table.cpp"
-#include "world.cpp"
-#include "entity.cpp"
-#include "collision.cpp"
-#include "simulation.cpp"
 
 extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 {

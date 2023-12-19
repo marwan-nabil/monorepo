@@ -39,3 +39,5 @@ struct hero_bitmap_group
     loaded_bitmap Cape;
     loaded_bitmap Torso;
 };
+
+loaded_bitmap LoadBitmap(platform_read_file *ReadEntireFile, thread_context *ThreadContext, char *FileName);

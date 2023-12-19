@@ -133,7 +133,6 @@ b32 BuildKernelImage(build_context *BuildContext)
         "\\sources\\i686-elf\\shared\\cpu\\idt.s",
         "\\sources\\i686-elf\\shared\\cpu\\io.s",
         "\\sources\\i686-elf\\shared\\cpu\\panic.s",
-        "\\sources\\i686-elf\\shared\\bios\\disk.s",
     };
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
@@ -162,18 +161,14 @@ b32 BuildKernelImage(build_context *BuildContext)
         "\\sources\\i686-elf\\kernel\\descriptor_tables.c",
         "\\sources\\i686-elf\\kernel\\tests.c",
         "\\sources\\i686-elf\\shared\\vga\\vga.c",
-        "\\sources\\i686-elf\\shared\\disk\\disk.c",
         "\\sources\\i686-elf\\shared\\strings\\strings.c",
         "\\sources\\i686-elf\\shared\\strings\\path_handling.c",
         "\\sources\\i686-elf\\shared\\strings\\print.c",
         "\\sources\\i686-elf\\shared\\cpu\\timing.c",
         "\\sources\\i686-elf\\shared\\cpu\\gdt.c",
         "\\sources\\i686-elf\\shared\\cpu\\idt.c",
-        "\\sources\\i686-elf\\shared\\fat12\\get.c",
-        "\\sources\\i686-elf\\shared\\fat12\\set.c",
         "\\sources\\i686-elf\\shared\\memory\\arena_allocator.c",
         "\\sources\\i686-elf\\shared\\memory\\memory.c",
-        "\\sources\\i686-elf\\shared\\file_io\\file_io.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
@@ -261,7 +256,6 @@ b32 BuildOsFloppyDiskImage(build_context *BuildContext)
         return FALSE;
     }
 
-#if 0
     fat12_disk *Fat12Disk = (fat12_disk *)VirtualAlloc
     (
         0, sizeof(fat12_disk), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE
@@ -308,6 +302,5 @@ b32 BuildOsFloppyDiskImage(build_context *BuildContext)
     );
 
     VirtualFree(Fat12Disk, 0, MEM_RELEASE);
-#endif
     return BuildSuccess;
 }

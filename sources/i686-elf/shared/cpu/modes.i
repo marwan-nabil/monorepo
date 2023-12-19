@@ -2,7 +2,6 @@
 ; switch to real mode code 
 ; from protected 32-bit code
 ; ----------------------
-[bits 32]
 %macro x86EnterRealMode 0
     [bits 32]
     jmp word 18h:.ProtectedMode16Bits
@@ -26,7 +25,6 @@
 ; from real mode code
 ; ----------------------
 %macro x86EnterProtectedMode 0
-    [bits 16]
     cli
     mov eax, cr0
     or al, 1
@@ -49,7 +47,6 @@
 ;    4: 16-bit name of register argument 3
 ; -----------------------------------------
 %macro ConvertLinearAddressToSegmentOffsetAddress 4
-    [bits 16]
     mov %3, %1
     shr %3, 4
     mov %2, %4

@@ -12,20 +12,18 @@
 b32 BuildCompilationTests(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\compilation_tests\\compilation_tests.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\system\\processes.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\console\\console.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /FC /O2 /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     SetCompilerIncludePath(BuildContext, "\\");
-
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref user32.lib");
-
     SetLinkerOutputBinary(BuildContext, "\\compilation_tests.exe");
-
     b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }
-
 
 b32 BuildDirectxDemo(build_context *BuildContext)
 {
@@ -74,14 +72,15 @@ b32 BuildDirectxDemo(build_context *BuildContext)
 b32 BuildFat12Tests(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\fat12_tests\\test.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\console\\console.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\strings\\path_handling.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\fat12\\*.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Od /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     SetCompilerIncludePath(BuildContext, "\\");
-
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref user32.lib");
-
     SetLinkerOutputBinary(BuildContext, "\\fat12_tests.exe");
 
     b32 BuildSuccess = CompileWithMSVC(BuildContext);
@@ -107,12 +106,19 @@ b32 BuildFetchData(build_context *BuildContext)
 
 b32 BuildHandmadeHero(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\game.cpp");
-
     char SharedCompilerFlags[1024] = {};
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/nologo /Zi /FC /Od /Oi /GR- /EHa- /Gm- /MTd ");
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 ");
     StringCchCatA(SharedCompilerFlags, ArrayCount(SharedCompilerFlags), "/DHANDMADE_WIN32=1 /DHANDMADE_SLOW=1 /DHANDMADE_INTERNAL=1 /DENABLE_ASSERTIONS ");
+
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\game.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\bitmap.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\renderer.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\random_numbers_table.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\world.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\entity.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\collision.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\handmade_hero\\simulation.cpp");
 
     AddCompilerFlags(BuildContext, SharedCompilerFlags);
     AddCompilerFlags(BuildContext, "/LD /Fmgame.map");
@@ -178,6 +184,9 @@ b32 BuildImguiDemo(build_context *BuildContext)
     }
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\imgui\\imgui*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\windows\\dpi.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\system\\version.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\win32_backend.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Zi /MD /utf-8");
     AddCompilerFlags(BuildContext, "/DUNICODE /D_UNICODE /DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
@@ -189,12 +198,14 @@ b32 BuildImguiDemo(build_context *BuildContext)
     if (strcmp(BuildContext->EnvironmentInfo.argv[2], "opengl2") == 0)
     {
         AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\main_opengl2.cpp");
+        AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\opengl2_backend.cpp");
         AddLinkerFlags(BuildContext, "opengl32.lib");
         SetLinkerOutputBinary(BuildContext, "\\imgui_demo_opengl2.exe");
     }
     else if (strcmp(BuildContext->EnvironmentInfo.argv[2], "dx11") == 0)
     {
         AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\main_dx11.cpp");
+        AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\dx11_backend.cpp");
         AddLinkerFlags(BuildContext, "d3d11.lib d3dcompiler.lib");
         SetLinkerOutputBinary(BuildContext, "\\imgui_demo_dx11.exe");
     }
@@ -214,12 +225,13 @@ b32 BuildImguiDemo(build_context *BuildContext)
 b32 BuildLint(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\file_system\\files.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\strings\\path_handling.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     SetCompilerIncludePath(BuildContext, "\\");
-
     if
     (
         (BuildContext->EnvironmentInfo.argc >= 3) &&
@@ -232,9 +244,7 @@ b32 BuildLint(build_context *BuildContext)
     {
         AddCompilerFlags(BuildContext, "/DJOB_PER_FILE");
     }
-
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref Shlwapi.lib");
-
     SetLinkerOutputBinary(BuildContext, "\\lint.exe");
 
     b32 BuildSuccess = CompileWithMSVC(BuildContext);
@@ -251,12 +261,13 @@ b32 BuildRayTracer(build_context *BuildContext)
     }
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\ray_tracer\\main.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\ray_tracer\\brdf.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\file_system\\files.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /O2 /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     SetCompilerIncludePath(BuildContext, "\\");
-
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref user32.lib gdi32.lib");
 
     if (strcmp(BuildContext->EnvironmentInfo.argv[2], "1_lane") == 0)
@@ -289,17 +300,16 @@ b32 BuildRayTracer(build_context *BuildContext)
 
 b32 BuildSimulator(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\simulator\\main.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\simulator\\*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\windows\\windows.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\rasterizer\\rasterizer.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     SetCompilerIncludePath(BuildContext, "\\");
-
     AddLinkerFlags(BuildContext, "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib");
-
     SetLinkerOutputBinary(BuildContext, "\\simulator.exe");
-
     b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

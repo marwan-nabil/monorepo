@@ -3,8 +3,6 @@
 #include <dwmapi.h>
 #include <stdint.h>
 #include <d3d11.h>
-// #include <d3dcompiler.h>
-// #include <tchar.h>
 #include <stdio.h>
 #include <shellscalingapi.h>
 

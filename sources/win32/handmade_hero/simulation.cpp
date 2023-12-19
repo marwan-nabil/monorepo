@@ -1,5 +1,35 @@
-static entity_table_entry *
-GetEntityHashtableEntry(simulation_region *SimulationRegion, u32 StorageIndex)
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
+#include <string.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\bit_operations.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\math\rectangle3.h"
+
+#include "game_interface.h"
+#include "memory.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "random_numbers_table.h"
+
+#include "entity.h"
+#include "collision.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
+
+entity_table_entry *GetEntityHashtableEntry(simulation_region *SimulationRegion, u32 StorageIndex)
 {
     Assert(StorageIndex);
 
@@ -25,8 +55,7 @@ GetEntityHashtableEntry(simulation_region *SimulationRegion, u32 StorageIndex)
     return Result;
 }
 
-inline v3
-GetSimulationRegionRelativePosition(simulation_region *SimulationRegion, storage_entity *StorageEntity)
+v3 GetSimulationRegionRelativePosition(simulation_region *SimulationRegion, storage_entity *StorageEntity)
 {
     v3 Result;
     if (!IsEntityFlagSet(&StorageEntity->Entity, EF_NON_SPATIAL))
@@ -40,16 +69,14 @@ GetSimulationRegionRelativePosition(simulation_region *SimulationRegion, storage
     return Result;
 }
 
-inline b32
-DoesEntityCollisionMeshOverlapRectangle(v3 EntityPosition, entity_collision_mesh CollisionMesh, rectangle3 TestingRectangle)
+b32 DoesEntityCollisionMeshOverlapRectangle(v3 EntityPosition, entity_collision_mesh CollisionMesh, rectangle3 TestingRectangle)
 {
     rectangle3 ExpandedTestingRectangle = ExpandRectangle(TestingRectangle, CollisionMesh.Diameter);
     b32 Result = IsInRectangle(ExpandedTestingRectangle, EntityPosition + CollisionMesh.Offset);
     return Result;
 }
 
-static entity *
-RawAddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion, u32 StorageIndex, storage_entity *SourceStorageEntity)
+entity *RawAddEntityToSimulation(game_state *GameState, simulation_region *SimulationRegion, u32 StorageIndex, storage_entity *SourceStorageEntity)
 {
     Assert(StorageIndex);
 
@@ -86,8 +113,7 @@ RawAddEntityToSimulation(game_state *GameState, simulation_region *SimulationReg
     return Result;
 }
 
-static entity *
-AddEntityToSimulation
+entity *AddEntityToSimulation
 (
     game_state *GameState, simulation_region *SimulationRegion,
     u32 StorageIndex, storage_entity *SourceStorageEntity,
@@ -116,8 +142,7 @@ AddEntityToSimulation
     return Result;
 }
 
-inline void
-LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, entity_reference *EntityReference)
+void LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, entity_reference *EntityReference)
 {
     if (EntityReference->StorageIndex)
     {
@@ -144,8 +169,7 @@ LoadEntityReference(game_state *GameState, simulation_region *SimulationRegion, 
     }
 }
 
-static simulation_region *
-BeginSimulation
+simulation_region *BeginSimulation
 (
     game_state *GameState, world *World, memory_arena *SimulationArena,
     entity_world_position RegionOrigin, rectangle3 UpdateBounds, f32 TimeDelta
@@ -223,8 +247,7 @@ BeginSimulation
     return SimulationRegion;
 }
 
-static void
-EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
+void EndSimulation(simulation_region *SimulationRegion, game_state *GameState)
 {
     entity *Entity = SimulationRegion->Entities;
     for

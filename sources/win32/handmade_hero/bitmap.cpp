@@ -1,5 +1,35 @@
-static loaded_bitmap
-LoadBitmap(platform_read_file *ReadEntireFile, thread_context *ThreadContext, char *FileName)
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
+#include <string.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\bit_operations.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\math\rectangle3.h"
+
+#include "game_interface.h"
+#include "memory.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "random_numbers_table.h"
+
+#include "entity.h"
+#include "collision.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
+
+loaded_bitmap LoadBitmap(platform_read_file *ReadEntireFile, thread_context *ThreadContext, char *FileName)
 {
     loaded_bitmap Result = {};
 

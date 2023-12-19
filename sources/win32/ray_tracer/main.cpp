@@ -64,9 +64,6 @@
 #include "brdf.h"
 #include "ray_tracer.h"
 
-#include "sources\win32\shared\file_system\files.cpp"
-#include "brdf.cpp"
-
 inline void
 WriteBitmapImage(u32 *Pixels, u32 WidthInPixels, u32 HeightInPixels, char *FileName)
 {

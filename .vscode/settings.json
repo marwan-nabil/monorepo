@@ -40,13 +40,4 @@
         // os
         "packed=",
     ],
-    "files.associations": {
-        "*.s": "nasm",
-        "*.i": "nasm",
-        "base_types.h": "c",
-        "arena_allocator.h": "c",
-        "fat12.h": "c",
-        "disk.h": "c",
-        "basic_defines.h": "c"
-    },
 }

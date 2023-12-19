@@ -42,3 +42,6 @@ struct simulation_state
         };
     };
 };
+
+void InitializeSimulationState(simulation_state *SimulationState);
+void UpdateSimulation(f32 TimeDelta, user_input *UserInput, simulation_state *SimulationState);

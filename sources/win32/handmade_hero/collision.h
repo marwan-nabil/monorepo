@@ -24,5 +24,12 @@ struct entity_collision_rule
 struct game_state;
 struct entity;
 
-static b32 CanEntitiesCollide(game_state *GameState, entity *A, entity *B);
-static b32 ProcessEntityCollision(game_state *GameState, entity *MovingEntity, entity *StaticEntity);
+b32 CanEntitiesCollide(game_state *GameState, entity *A, entity *B);
+b32 ProcessEntityCollision(game_state *GameState, entity *MovingEntity, entity *StaticEntity);
+entity_collision_mesh_group *MakeNullCollisionMeshTemplate(game_state *GameState);
+entity_collision_mesh_group *MakeSimpleCollisionMeshTemplate(game_state *GameState, v3 CollisionMeshDiameter);
+void AddEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex, b32 CanCollide);
+b32 RemoveEntityCollisionRule(game_state *GameState, u32 FirstEntityStorageIndex, u32 SecondEntityStorageIndex);
+void ClearAllEntityCollisionRules(game_state *GameState, u32 StorageIndex);
+b32 CanEntitiesCollide(game_state *GameState, entity *A, entity *B);
+b32 ProcessEntityCollision(game_state *GameState, entity *MovingEntity, entity *StaticEntity);

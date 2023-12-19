@@ -1,3 +1,23 @@
+#include <Windows.h>
+#include <stdint.h>
+#include <math.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\rasterizer\rasterizer.h"
+
+#include "electrical.h"
+#include "logic_gates.h"
+#include "internal_types.h"
+#include "simulation.h"
+
 inline void
 RenderKeypad(rendering_buffer *Buffer, simulation_state *SimulationState)
 {

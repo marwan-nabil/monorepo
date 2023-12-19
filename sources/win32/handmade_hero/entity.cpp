@@ -1,37 +1,62 @@
-inline b32
-IsEntityFlagSet(entity *Entity, u32 Flag)
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
+#include <string.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\bit_operations.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\math\rectangle3.h"
+
+#include "game_interface.h"
+#include "memory.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "random_numbers_table.h"
+
+#include "entity.h"
+#include "collision.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
+
+b32 IsEntityFlagSet(entity *Entity, u32 Flag)
 {
     b32 Result = ((Entity->Flags & Flag) != 0);
     return Result;
 }
 
-inline b32
-AreAnyEntityFlagsSet(entity *Entity, u32 Flags)
+b32 AreAnyEntityFlagsSet(entity *Entity, u32 Flags)
 {
     b32 Result = ((Entity->Flags & Flags) != 0);
     return Result;
 }
 
-inline void
-SetEntityFlags(entity *Entity, u32 Flags)
+void SetEntityFlags(entity *Entity, u32 Flags)
 {
     Entity->Flags |= Flags;
 }
 
-inline void
-ClearEntityFlags(entity *Entity, u32 Flags)
+void ClearEntityFlags(entity *Entity, u32 Flags)
 {
     Entity->Flags &= ~Flags;
 }
 
-inline void
-ClearAllEntityFlags(entity *Entity)
+void ClearAllEntityFlags(entity *Entity)
 {
     Entity->Flags = 0;
 }
 
-inline void
-StoreEntityReference(entity_reference *EntityReference)
+void StoreEntityReference(entity_reference *EntityReference)
 {
     if (EntityReference->Entity)
     {
@@ -39,8 +64,7 @@ StoreEntityReference(entity_reference *EntityReference)
     }
 }
 
-inline void
-SortEntityPointersByEntityTypes(entity **A, entity **B)
+void SortEntityPointersByEntityTypes(entity **A, entity **B)
 {
     if ((*A)->Type > (*B)->Type)
     {
@@ -50,8 +74,7 @@ SortEntityPointersByEntityTypes(entity **A, entity **B)
     }
 }
 
-static b32
-CanEntitiesOverlap(game_state *GameState, entity *MovingEntity, entity *TestEntity)
+b32 CanEntitiesOverlap(game_state *GameState, entity *MovingEntity, entity *TestEntity)
 {
     b32 Result = FALSE;
     if
@@ -65,8 +88,7 @@ CanEntitiesOverlap(game_state *GameState, entity *MovingEntity, entity *TestEnti
     return Result;
 }
 
-static void
-InitializeEntityHitPoints(storage_entity *StorageEntity, u32 HitpointsCount)
+void InitializeEntityHitPoints(storage_entity *StorageEntity, u32 HitpointsCount)
 {
     Assert(HitpointsCount < ArrayCount(StorageEntity->Entity.HitPoints));
 
@@ -79,8 +101,7 @@ InitializeEntityHitPoints(storage_entity *StorageEntity, u32 HitpointsCount)
     }
 }
 
-inline entity_movement_parameters
-DefaultEntityMovementParameters()
+entity_movement_parameters DefaultEntityMovementParameters()
 {
     entity_movement_parameters Result;
     Result.NormalizeAcceleration = FALSE;
@@ -89,30 +110,26 @@ DefaultEntityMovementParameters()
     return Result;
 }
 
-inline void
-MakeEntityNonSpatial(entity *Entity)
+void MakeEntityNonSpatial(entity *Entity)
 {
     SetEntityFlags(Entity, EF_NON_SPATIAL);
     Entity->Position = INVALID_ENTITY_POSITION;
 }
 
-inline void
-MakeEntitySpatial(entity *Entity, v3 InitialPosition, v3 InitialVelocity)
+void MakeEntitySpatial(entity *Entity, v3 InitialPosition, v3 InitialVelocity)
 {
     ClearEntityFlags(Entity, EF_NON_SPATIAL);
     Entity->Position = InitialPosition;
     Entity->Velocity = InitialVelocity;
 }
 
-inline v3
-GetEntityGroundPoint(entity *Entity)
+v3 GetEntityGroundPoint(entity *Entity)
 {
     v3 GroundPoint = Entity->Position;
     return GroundPoint;
 }
 
-inline f32
-GetStairsEntityGroundLevel(entity *StairsEntity, v3 MeasurementPoint)
+f32 GetStairsEntityGroundLevel(entity *StairsEntity, v3 MeasurementPoint)
 {
     Assert(StairsEntity->Type == ET_STAIRS);
     rectangle2 StairsWalkableRegion = RectCenterDiameter(StairsEntity->Position.XY, StairsEntity->WalkableDiameter);
@@ -121,8 +138,7 @@ GetStairsEntityGroundLevel(entity *StairsEntity, v3 MeasurementPoint)
     return GroundLevel;
 }
 
-static void
-HandleEntityOverlapWithStairs(game_state *GameState, entity *MovingEntity, entity *TestEntity, f32 TimeDelta, f32 *CurrentGroundLevel)
+void HandleEntityOverlapWithStairs(game_state *GameState, entity *MovingEntity, entity *TestEntity, f32 TimeDelta, f32 *CurrentGroundLevel)
 {
     if (TestEntity->Type == ET_STAIRS)
     {
@@ -130,8 +146,7 @@ HandleEntityOverlapWithStairs(game_state *GameState, entity *MovingEntity, entit
     }
 }
 
-static b32
-SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
+b32 SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
 {
     b32 WillEntitiesCollide = TRUE;
     if (TestEntity->Type == ET_STAIRS)
@@ -153,8 +168,7 @@ SpeculativeCollision(entity *MovingEntity, entity *TestEntity)
     return WillEntitiesCollide;
 }
 
-static void
-RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u32 StorageIndex, entity_world_position *OldPosition, entity_world_position *NewPosition)
+void RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u32 StorageIndex, entity_world_position *OldPosition, entity_world_position *NewPosition)
 {
     Assert(!OldPosition || IsWorldPositionValid(*OldPosition));
     Assert(!NewPosition || IsWorldPositionValid(*NewPosition));
@@ -242,8 +256,7 @@ RawChangeStorageEntityLocationInWorld(world *World, memory_arena *MemoryArena, u
     }
 }
 
-static void
-ChangeStorageEntityLocationInWorld
+void ChangeStorageEntityLocationInWorld
 (
     world *World, memory_arena *MemoryArena, u32 StorageIndex,
     storage_entity *StorageEntity, entity_world_position *NewWorldPosition
@@ -279,8 +292,7 @@ ChangeStorageEntityLocationInWorld
     }
 }
 
-inline storage_entity *
-GetStorageEntity(game_state *GameState, u32 StorageIndex)
+storage_entity *GetStorageEntity(game_state *GameState, u32 StorageIndex)
 {
     storage_entity *Result = 0;
 
@@ -292,8 +304,7 @@ GetStorageEntity(game_state *GameState, u32 StorageIndex)
     return Result;
 }
 
-static add_storage_entity_result
-AddStorageEntity(game_state *GameState, entity_type Type, entity_world_position WorldPosition)
+add_storage_entity_result AddStorageEntity(game_state *GameState, entity_type Type, entity_world_position WorldPosition)
 {
     Assert(GameState->World->StorageEntityCount < ArrayCount(GameState->World->StorageEntities));
 
@@ -312,8 +323,7 @@ AddStorageEntity(game_state *GameState, entity_type Type, entity_world_position 
     return Result;
 }
 
-static add_storage_entity_result
-AddGoundBasedStorageEntity
+add_storage_entity_result AddGoundBasedStorageEntity
 (
     game_state *GameState, entity_type Type, entity_world_position GroundPoint,
     entity_collision_mesh_group *EntityCollisionMeshGroup
@@ -324,8 +334,7 @@ AddGoundBasedStorageEntity
     return Result;
 }
 
-static add_storage_entity_result
-AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
+add_storage_entity_result AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     entity_world_position RoomPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
@@ -337,8 +346,7 @@ AddStandardRoom(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return RoomStorageEntityResult;
 }
 
-static add_storage_entity_result
-AddSword(game_state *GameState)
+add_storage_entity_result AddSword(game_state *GameState)
 {
     add_storage_entity_result SwordStorageEntityResult = AddStorageEntity(GameState, ET_SWORD, InvalidWorldPosition());
 
@@ -349,8 +357,7 @@ AddSword(game_state *GameState)
     return SwordStorageEntityResult;
 }
 
-static add_storage_entity_result
-AddPlayer(game_state *GameState)
+add_storage_entity_result AddPlayer(game_state *GameState)
 {
     add_storage_entity_result PlayerStorageEntityResult =
         AddGoundBasedStorageEntity(GameState, ET_HERO, GameState->CameraPosition, GameState->PlayerCollisionMeshGroupTemplate);
@@ -369,8 +376,7 @@ AddPlayer(game_state *GameState)
     return PlayerStorageEntityResult;
 }
 
-static add_storage_entity_result
-AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
+add_storage_entity_result AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     entity_world_position MonsterPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
@@ -383,8 +389,7 @@ AddMonster(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return MonsterStorageEntityResult;
 }
 
-static add_storage_entity_result
-AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
+add_storage_entity_result AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
 {
     entity_world_position FamiliarPosition = GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
 
@@ -396,8 +401,7 @@ AddFamiliar(game_state *GameState, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ)
     return FamiliarStorageEntityResult;
 }
 
-static add_storage_entity_result
-AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
+add_storage_entity_result AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     entity_world_position WallGroundPosition =
         GetWorldPositionFromTilePosition(GameState->World, AbsTileX, AbsTileY, AbsTileZ, V3(0, 0, 0));
@@ -410,8 +414,7 @@ AddWall(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return WallStorageEntityResult;
 }
 
-static add_storage_entity_result
-AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
+add_storage_entity_result AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
 {
     entity_world_position StairsGroundPosition = GetWorldPositionFromTilePosition
     (
@@ -438,8 +441,7 @@ AddStairs(game_state *GameState, u32 AbsTileX, u32 AbsTileY, u32 AbsTileZ)
     return StairStorageEntityResult;
 }
 
-static b32
-TestWall
+b32 TestWall
 (
     f32 SquareCenterRelativeWallX,
     f32 SquareCenterToMovingEntityOriginalPositionX, f32 SquareCenterToMovingEntityOriginalPositionY,
@@ -471,8 +473,7 @@ TestWall
     return DidMovingEntityHitWall;
 }
 
-static void
-MoveEntity
+void MoveEntity
 (
     game_state *GameState, simulation_region *SimulationRegion, entity *MovingEntity,
     v3 Acceleration, f32 TimeDelta, entity_movement_parameters *MoveSpec

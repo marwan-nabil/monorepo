@@ -1,5 +1,35 @@
-inline b32
-IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
+#include <stdint.h>
+#include <math.h>
+#include <intrin.h>
+#include <string.h>
+
+#include "sources\win32\shared\base_types.h"
+#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\shared\math\constants.h"
+#include "sources\win32\shared\math\integers.h"
+#include "sources\win32\shared\math\bit_operations.h"
+#include "sources\win32\shared\math\floats.h"
+#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\shared\math\transcendentals.h"
+#include "sources\win32\shared\math\vector2.h"
+#include "sources\win32\shared\math\vector3.h"
+#include "sources\win32\shared\math\vector4.h"
+#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\shared\math\rectangle3.h"
+
+#include "game_interface.h"
+#include "memory.h"
+#include "bitmap.h"
+#include "renderer.h"
+#include "random_numbers_table.h"
+
+#include "entity.h"
+#include "collision.h"
+#include "world.h"
+#include "simulation.h"
+#include "game.h"
+
+b32 IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
 {
     f32 ToleranceEpsilon = 0.01f;
     f32 HalfIntervalLength = 0.5f * IntervalLength + ToleranceEpsilon;
@@ -11,8 +41,7 @@ IsOffsetWithinInterval(f32 IntervalLength, f32 OffsetFromIntervalCenter)
     return Result;
 }
 
-static b32
-IsChunkCenterOffsetCanonical(world *World, v3 OffsetFromChunkCenter)
+b32 IsChunkCenterOffsetCanonical(world *World, v3 OffsetFromChunkCenter)
 {
     b32 Result =
     (
@@ -23,23 +52,20 @@ IsChunkCenterOffsetCanonical(world *World, v3 OffsetFromChunkCenter)
     return Result;
 }
 
-inline entity_world_position
-InvalidWorldPosition()
+entity_world_position InvalidWorldPosition()
 {
     entity_world_position Result = {};
     Result.ChunkX = CHUNK_POSITION_UNINITIALIZED_VALUE;
     return Result;
 }
 
-inline b32
-IsWorldPositionValid(entity_world_position WorldPosition)
+b32 IsWorldPositionValid(entity_world_position WorldPosition)
 {
     b32 Result = (WorldPosition.ChunkX != CHUNK_POSITION_UNINITIALIZED_VALUE);
     return Result;
 }
 
-inline b32
-AreInTheSameChunk(world *World, entity_world_position *A, entity_world_position *B)
+b32 AreInTheSameChunk(world *World, entity_world_position *A, entity_world_position *B)
 {
     Assert(IsChunkCenterOffsetCanonical(World, A->OffsetFromChunkCenter));
     Assert(IsChunkCenterOffsetCanonical(World, B->OffsetFromChunkCenter));
@@ -54,8 +80,7 @@ AreInTheSameChunk(world *World, entity_world_position *A, entity_world_position 
     return Result;
 }
 
-inline chunk *
-GetChunk(world *World, memory_arena *MemoryArena, i32 ChunkX, i32 ChunkY, i32 ChunkZ)
+chunk *GetChunk(world *World, memory_arena *MemoryArena, i32 ChunkX, i32 ChunkY, i32 ChunkZ)
 {
     Assert(ChunkX > -MAX_CHUNK_DISTANCE_FROM_CENTER);
     Assert(ChunkY > -MAX_CHUNK_DISTANCE_FROM_CENTER);
@@ -128,8 +153,7 @@ GetChunk(world *World, memory_arena *MemoryArena, i32 ChunkX, i32 ChunkY, i32 Ch
     return Result;
 }
 
-inline void
-CanonicalizeIntervalIndexAndOffset(f32 IntervalLength, i32 *IntervalIndex, f32 *OffsetFromIntervalCenter)
+void CanonicalizeIntervalIndexAndOffset(f32 IntervalLength, i32 *IntervalIndex, f32 *OffsetFromIntervalCenter)
 {
     i32 IntervalIndexOffset = RoundF32ToI32(*OffsetFromIntervalCenter / IntervalLength);
 
@@ -139,8 +163,7 @@ CanonicalizeIntervalIndexAndOffset(f32 IntervalLength, i32 *IntervalIndex, f32 *
     Assert(IsOffsetWithinInterval(IntervalLength, *OffsetFromIntervalCenter));
 }
 
-inline entity_world_position
-MapIntoWorldPosition(world *World, entity_world_position BasePosition, v3 OffsetFromBase)
+entity_world_position MapIntoWorldPosition(world *World, entity_world_position BasePosition, v3 OffsetFromBase)
 {
     entity_world_position Result = BasePosition;
     Result.OffsetFromChunkCenter += OffsetFromBase;
@@ -150,8 +173,7 @@ MapIntoWorldPosition(world *World, entity_world_position BasePosition, v3 Offset
     return Result;
 }
 
-inline v3
-SubtractPositions(world *World, entity_world_position *A, entity_world_position *B)
+v3 SubtractPositions(world *World, entity_world_position *A, entity_world_position *B)
 {
     v3 Result = V3
     (
@@ -165,8 +187,7 @@ SubtractPositions(world *World, entity_world_position *A, entity_world_position 
     return Result;
 }
 
-inline void
-InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
+void InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
 {
     World->TileSideInMeters = TileSideInMeters;
     World->TileDepthInMeters = TileDepthInMeters;
@@ -183,8 +204,7 @@ InitializeWorld(world *World, f32 TileSideInMeters, f32 TileDepthInMeters)
     }
 }
 
-static entity_world_position
-GetWorldPositionFromTilePosition(world *World, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ, v3 OffsetFromTileCenter)
+entity_world_position GetWorldPositionFromTilePosition(world *World, i32 AbsTileX, i32 AbsTileY, i32 AbsTileZ, v3 OffsetFromTileCenter)
 {
     entity_world_position BasePosition = {};
 
