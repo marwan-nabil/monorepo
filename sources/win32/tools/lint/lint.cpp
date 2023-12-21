@@ -14,14 +14,14 @@
 #include <time.h>
 #include <shlwapi.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\math\floats.h"
-#include "sources\win32\shared\math\scalar_conversions.h"
-#include "sources\win32\shared\console\console.h"
-#include "sources\win32\shared\file_system\files.h"
-#include "sources\win32\shared\strings\strings.h"
-#include "sources\win32\shared\strings\path_handling.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\math\floats.h"
+#include "sources\win32\math\scalar_conversions.h"
+#include "sources\win32\console\console.h"
+#include "sources\win32\file_system\files.h"
+#include "sources\win32\strings\strings.h"
+#include "sources\win32\strings\path_handling.h"
 #include "lint.h"
 
 char RootDirectoryPath[1024];

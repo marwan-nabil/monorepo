@@ -16,11 +16,11 @@
 #include <strsafe.h>
 #include <io.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\console\console.h"
-#include "sources\win32\shared\timing\timing.h"
-#include "sources\win32\shared\system\processes.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\console\console.h"
+#include "sources\win32\system\timing.h"
+#include "sources\win32\system\processes.h"
 #include "compilation_tests.h"
 
 console_context GlobalConsoleContext;

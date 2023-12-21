@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\math\scalar_conversions.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\math\scalar_conversions.h"
 #include "files.h"
 
 void FreeFileMemory(read_file_result File)

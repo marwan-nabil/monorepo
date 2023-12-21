@@ -2,14 +2,14 @@
 #include <stdint.h>
 #include <strsafe.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\console\console.h"
-#include "sources\win32\shared\strings\strings.h"
-#include "sources\win32\shared\strings\path_handling.h"
-#include "sources\win32\shared\fat12\fat12.h"
-#include "sources\win32\shared\fat12\fat12_interface.h"
-#include "sources\win32\shared\file_system\files.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\console\console.h"
+#include "sources\win32\strings\strings.h"
+#include "sources\win32\strings\path_handling.h"
+#include "sources\win32\fat12\fat12.h"
+#include "sources\win32\fat12\fat12_interface.h"
+#include "sources\win32\file_system\files.h"
 #include "build.h"
 #include "build_helpers.h"
 #include "compiler_helpers.h"

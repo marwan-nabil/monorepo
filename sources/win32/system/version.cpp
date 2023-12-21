@@ -1,8 +1,8 @@
 #include <Windows.h>
 #include <stdint.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
 #include "version.h"
 
 b32 IsWindowsVersionGreaterOrEqual

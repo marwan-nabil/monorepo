@@ -3,8 +3,8 @@
 #include <math.h>
 #include <strsafe.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
 #include "strings.h"
 #include "path_handling.h"
 

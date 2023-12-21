@@ -13,11 +13,11 @@ pushd ..\tools\build
         /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS^
         /I..\..^
         ..\..\sources\win32\tools\build\*.cpp^
-        ..\..\sources\win32\shared\console\console.cpp^
-        ..\..\sources\win32\shared\file_system\*.cpp^
-        ..\..\sources\win32\shared\strings\path_handling.cpp^
-        ..\..\sources\win32\shared\system\processes.cpp^
-        ..\..\sources\win32\shared\fat12\*.cpp^
+        ..\..\sources\win32\console\console.cpp^
+        ..\..\sources\win32\file_system\*.cpp^
+        ..\..\sources\win32\strings\path_handling.cpp^
+        ..\..\sources\win32\system\processes.cpp^
+        ..\..\sources\win32\fat12\*.cpp^
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 

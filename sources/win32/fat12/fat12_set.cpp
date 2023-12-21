@@ -2,10 +2,10 @@
 #include <stdint.h>
 #include <strsafe.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\strings\strings.h"
-#include "sources\win32\shared\strings\path_handling.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\strings\strings.h"
+#include "sources\win32\strings\path_handling.h"
 #include "fat12.h"
 #include "fat12_get.h"
 #include "fat12_set.h"

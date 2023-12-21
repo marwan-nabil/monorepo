@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <strsafe.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\console\console.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\console\console.h"
 #include "build.h"
 #include "build_helpers.h"
 #include "compiler_helpers.h"
@@ -12,8 +12,8 @@
 b32 BuildCompilationTests(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\compilation_tests\\compilation_tests.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\system\\processes.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\console\\console.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\system\\processes.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\console\\console.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /FC /O2 /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127");
@@ -72,9 +72,9 @@ b32 BuildDirectxDemo(build_context *BuildContext)
 b32 BuildFat12Tests(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\fat12_tests\\test.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\console\\console.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\strings\\path_handling.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\fat12\\*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\console\\console.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\strings\\path_handling.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\fat12\\*.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Od /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127");
@@ -184,8 +184,8 @@ b32 BuildImguiDemo(build_context *BuildContext)
     }
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\imgui\\imgui*.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\windows\\dpi.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\system\\version.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\windows\\dpi.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\system\\version.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\win32_backend.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Zi /MD /utf-8");
@@ -225,8 +225,8 @@ b32 BuildImguiDemo(build_context *BuildContext)
 b32 BuildLint(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\file_system\\files.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\strings\\path_handling.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\file_system\\files.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\strings\\path_handling.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
@@ -262,7 +262,7 @@ b32 BuildRayTracer(build_context *BuildContext)
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\ray_tracer\\main.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\ray_tracer\\brdf.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\file_system\\files.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\file_system\\files.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /O2 /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
@@ -301,8 +301,8 @@ b32 BuildRayTracer(build_context *BuildContext)
 b32 BuildSimulator(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\simulator\\*.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\windows\\windows.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shared\\rasterizer\\rasterizer.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\windows\\windows.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\rasterizer\\rasterizer.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");

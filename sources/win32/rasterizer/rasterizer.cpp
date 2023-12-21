@@ -2,15 +2,15 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "sources\win32\shared\base_types.h"
-#include "sources\win32\shared\basic_defines.h"
-#include "sources\win32\shared\math\floats.h"
-#include "sources\win32\shared\math\integers.h"
-#include "sources\win32\shared\math\scalar_conversions.h"
-#include "sources\win32\shared\math\vector2.h"
-#include "sources\win32\shared\math\vector3.h"
-#include "sources\win32\shared\math\vector4.h"
-#include "sources\win32\shared\math\rectangle2.h"
+#include "sources\win32\base_types.h"
+#include "sources\win32\basic_defines.h"
+#include "sources\win32\math\floats.h"
+#include "sources\win32\math\integers.h"
+#include "sources\win32\math\scalar_conversions.h"
+#include "sources\win32\math\vector2.h"
+#include "sources\win32\math\vector3.h"
+#include "sources\win32\math\vector4.h"
+#include "sources\win32\math\rectangle2.h"
 #include "rasterizer.h"
 
 #if 0
