@@ -37,5 +37,4 @@ typedef enum
 } gdt_flags_field_offsets;
 
 gdt_entry CreateGDTEntry(u32 Base, u32 Limit, u8 AccessField, u8 FlagsField);
-
 void __attribute__((cdecl)) LoadGDT(gdt_descriptor *GDTDescriptor, u16 CodeSegmentOffset, u16 DataSegmentOffset);

@@ -1,19 +1,15 @@
 #include <stdarg.h>
-#include "sources\i686-elf\shared\base_types.h"
-#include "sources\i686-elf\shared\basic_defines.h"
-#include "sources\i686-elf\shared\vga\vga.h"
-#include "sources\i686-elf\shared\bios\disk.h"
-#include "sources\i686-elf\shared\disk\disk.h"
-#include "sources\i686-elf\shared\cpu\io.h"
-#include "sources\i686-elf\shared\math\integers.h"
-#include "sources\i686-elf\shared\strings\print.h"
-#include "sources\i686-elf\shared\cpu\timing.h"
-#include "sources\i686-elf\shared\fat12\fat12.h"
-#include "sources\i686-elf\shared\memory\arena_allocator.h"
-#include "sources\i686-elf\shared\strings\path_handling.h"
-#include "sources\i686-elf\shared\memory\arena_allocator.h"
-#include "sources\i686-elf\shared\file_io\file_io.h"
+#include "sources\i686-elf\base_types.h"
+#include "sources\i686-elf\basic_defines.h"
+#include "sources\i686-elf\vga\vga.h"
+#include "sources\i686-elf\disk\disk.h"
+#include "sources\i686-elf\strings\print.h"
+#include "sources\i686-elf\cpu\timing.h"
+#include "sources\i686-elf\fat12\fat12.h"
+#include "sources\i686-elf\memory\arena_allocator.h"
+#include "sources\i686-elf\file_io\file_io.h"
 #include "sources\i686-elf\bootloader\memory_layout.h"
+#include "sources\i686-elf\bootloader\tests.h"
 
 u8 FreeStore[KiloBytes(64)];
 print_context GlobalPrintContext;
@@ -61,14 +57,14 @@ void LoadKernel(u32 BootDriveNumber, void *FreeMemoryArea, print_context *PrintC
 
 void __attribute__((cdecl)) cstart(u32 BootDriveNumber)
 {
-    // TestVGA(&GlobalPrintContext);
-    // TestIO(&GlobalPrintContext);
-    // StringTests(&GlobalPrintContext);
-    // DiskDriverTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
-    // AllocatorTests(FreeStore, &GlobalPrintContext);
-    // PathHandlingTests(FreeStore, &GlobalPrintContext);
-    // Fat12Tests(BootDriveNumber, FreeStore, &GlobalPrintContext);
-    // FileIoTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
+    TestVGA(&GlobalPrintContext);
+    TestIO(&GlobalPrintContext);
+    StringTests(&GlobalPrintContext);
+    DiskDriverTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
+    AllocatorTests(FreeStore, &GlobalPrintContext);
+    PathHandlingTests(FreeStore, &GlobalPrintContext);
+    Fat12Tests(BootDriveNumber, FreeStore, &GlobalPrintContext);
+    FileIoTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
     LoadKernel(BootDriveNumber, &FreeStore, &GlobalPrintContext);
 
     while (1) {};

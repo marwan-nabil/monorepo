@@ -1,2 +1,0 @@
-global BIOSPrintCharacter
-global BIOSPrintString

@@ -1,2 +1,0 @@
-extern WriteByteToOutputPort
-extern ReadByteFromOutputPort

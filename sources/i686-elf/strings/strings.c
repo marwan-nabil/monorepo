@@ -1,10 +1,7 @@
-#include "sources/i686-elf/shared/base_types.h"
-#include "sources/i686-elf/shared/basic_defines.h"
-#include "sources/i686-elf/shared/math/integers.h"
-#include "sources/i686-elf/shared/memory/memory.h"
-#include "sources/i686-elf/shared/strings/print.h"
-#include "sources/i686-elf/shared/memory/arena_allocator.h"
-#include "sources/i686-elf/shared/strings/path_handling.h"
+#include "sources/i686-elf/base_types.h"
+#include "sources/i686-elf/basic_defines.h"
+#include "sources/i686-elf/math/integers.h"
+#include "sources/i686-elf/memory/memory.h"
 
 b8 IsCharacterLowerCase(char Character)
 {

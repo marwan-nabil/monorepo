@@ -1,8 +1,6 @@
-#include "sources/i686-elf/shared/base_types.h"
-#include "sources/i686-elf/shared/basic_defines.h"
-#include "sources/i686-elf/shared/memory/memory.h"
-#include "sources/i686-elf/shared/strings/print.h"
-#include "sources/i686-elf/shared/vga/vga.h"
+#include "sources/i686-elf/base_types.h"
+#include "sources/i686-elf/basic_defines.h"
+#include "sources/i686-elf/vga/vga.h"
 
 void PrintCharacterColored(char Character, u8 Color, u8 X, u8 Y)
 {

@@ -16,11 +16,11 @@
 
 b32 BuildBootSectorImage(build_context *BuildContext)
 {
-    PushSubTarget(BuildContext, "boot_sector");
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\boot_sector\\entry.s");
+    PushSubTarget(BuildContext, "bootsector");
+    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\bootsector\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin -lboot_sector.lst");
     SetCompilerIncludePath(BuildContext, "\\");
-    SetCompilerOutputObject(BuildContext, "\\boot_sector.img");
+    SetCompilerOutputObject(BuildContext, "\\bootsector.img");
     b32 BuildSuccess = AssembleWithNasm(BuildContext);
     PopSubTarget(BuildContext);
     return BuildSuccess;
@@ -34,8 +34,8 @@ b32 BuildBootloaderImage(build_context *BuildContext)
     char *AssemblyFiles[] =
     {
         "\\sources\\i686-elf\\bootloader\\entry.s",
-        "\\sources\\i686-elf\\shared\\cpu\\io.s",
-        "\\sources\\i686-elf\\shared\\bios\\disk.s"
+        "\\sources\\i686-elf\\cpu\\io.s",
+        "\\sources\\i686-elf\\bios\\disk.s"
     };
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
@@ -61,17 +61,17 @@ b32 BuildBootloaderImage(build_context *BuildContext)
     {
         "\\sources\\i686-elf\\bootloader\\main.c",
         "\\sources\\i686-elf\\bootloader\\tests.c",
-        "\\sources\\i686-elf\\shared\\vga\\vga.c",
-        "\\sources\\i686-elf\\shared\\disk\\disk.c",
-        "\\sources\\i686-elf\\shared\\strings\\strings.c",
-        "\\sources\\i686-elf\\shared\\strings\\path_handling.c",
-        "\\sources\\i686-elf\\shared\\strings\\print.c",
-        "\\sources\\i686-elf\\shared\\cpu\\timing.c",
-        "\\sources\\i686-elf\\shared\\fat12\\get.c",
-        "\\sources\\i686-elf\\shared\\fat12\\set.c",
-        "\\sources\\i686-elf\\shared\\memory\\arena_allocator.c",
-        "\\sources\\i686-elf\\shared\\memory\\memory.c",
-        "\\sources\\i686-elf\\shared\\file_io\\file_io.c",
+        "\\sources\\i686-elf\\vga\\vga.c",
+        "\\sources\\i686-elf\\disk\\disk.c",
+        "\\sources\\i686-elf\\strings\\strings.c",
+        "\\sources\\i686-elf\\strings\\path_handling.c",
+        "\\sources\\i686-elf\\strings\\print.c",
+        "\\sources\\i686-elf\\cpu\\timing.c",
+        "\\sources\\i686-elf\\fat12\\get.c",
+        "\\sources\\i686-elf\\fat12\\set.c",
+        "\\sources\\i686-elf\\memory\\arena_allocator.c",
+        "\\sources\\i686-elf\\memory\\memory.c",
+        "\\sources\\i686-elf\\file_io\\file_io.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
@@ -129,10 +129,10 @@ b32 BuildKernelImage(build_context *BuildContext)
     char *AssemblyFiles[] =
     {
         "\\sources\\i686-elf\\kernel\\isr.s",
-        "\\sources\\i686-elf\\shared\\cpu\\gdt.s",
-        "\\sources\\i686-elf\\shared\\cpu\\idt.s",
-        "\\sources\\i686-elf\\shared\\cpu\\io.s",
-        "\\sources\\i686-elf\\shared\\cpu\\panic.s",
+        "\\sources\\i686-elf\\cpu\\gdt.s",
+        "\\sources\\i686-elf\\cpu\\idt.s",
+        "\\sources\\i686-elf\\cpu\\io.s",
+        "\\sources\\i686-elf\\cpu\\panic.s",
     };
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
@@ -160,15 +160,15 @@ b32 BuildKernelImage(build_context *BuildContext)
         "\\sources\\i686-elf\\kernel\\isr.c",
         "\\sources\\i686-elf\\kernel\\descriptor_tables.c",
         "\\sources\\i686-elf\\kernel\\tests.c",
-        "\\sources\\i686-elf\\shared\\vga\\vga.c",
-        "\\sources\\i686-elf\\shared\\strings\\strings.c",
-        "\\sources\\i686-elf\\shared\\strings\\path_handling.c",
-        "\\sources\\i686-elf\\shared\\strings\\print.c",
-        "\\sources\\i686-elf\\shared\\cpu\\timing.c",
-        "\\sources\\i686-elf\\shared\\cpu\\gdt.c",
-        "\\sources\\i686-elf\\shared\\cpu\\idt.c",
-        "\\sources\\i686-elf\\shared\\memory\\arena_allocator.c",
-        "\\sources\\i686-elf\\shared\\memory\\memory.c",
+        "\\sources\\i686-elf\\vga\\vga.c",
+        "\\sources\\i686-elf\\strings\\strings.c",
+        "\\sources\\i686-elf\\strings\\path_handling.c",
+        "\\sources\\i686-elf\\strings\\print.c",
+        "\\sources\\i686-elf\\cpu\\timing.c",
+        "\\sources\\i686-elf\\cpu\\gdt.c",
+        "\\sources\\i686-elf\\cpu\\idt.c",
+        "\\sources\\i686-elf\\memory\\arena_allocator.c",
+        "\\sources\\i686-elf\\memory\\memory.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
@@ -265,7 +265,7 @@ b32 BuildOsFloppyDiskImage(build_context *BuildContext)
     char ImagePath[1024];
     ZeroMemory(ImagePath, ArrayCount(ImagePath));
     StringCchCat(ImagePath, ArrayCount(ImagePath), BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
-    StringCchCat(ImagePath, ArrayCount(ImagePath), "\\boot_sector\\boot_sector.img");
+    StringCchCat(ImagePath, ArrayCount(ImagePath), "\\bootsector\\bootsector.img");
 
     read_file_result BootSector = ReadFileIntoMemory(ImagePath);
     memcpy(&Fat12Disk->BootSector, BootSector.FileMemory, FAT12_SECTOR_SIZE);
