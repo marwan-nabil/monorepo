@@ -9,6 +9,8 @@ set path=%cd%\tools\i686-elf\bin;%path%
 set path=%cd%\tools\nasm;%path%
 set path=%cd%\tools\qemu;%path%
 set path=%cd%\tools\bochs;%path%
+set path=%cd%\tools\iverilog\bin;%path%
+set path=%cd%\tools\iverilog\gtkwave\bin;%path%
 
 @REM add local scripts and tools to shell path
 set path=%cd%\tools\build;%path%

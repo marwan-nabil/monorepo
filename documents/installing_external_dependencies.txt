@@ -10,6 +10,9 @@ for the os project:
     - bochs: https://sourceforge.net/projects/bochs/
     - gcc cross compiler
 
+for hdl projects:
+    - icarus verilog: https://bleyer.org/icarus/
+
 for building the gcc cross compiler:
     - cygwin
     - gcc-13.2.0 source code
