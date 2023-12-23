@@ -9,23 +9,9 @@
 #include "sources\win32\console\console.h"
 #include "sources\win32\file_system\folders.h"
 #include "sources\win32\strings\path_handling.h"
-#include "build.h"
-#include "i686-elf_targets.h"
-#include "win32_targets.h"
 
-static build_target_config BuildTargetConfigurations[] =
-{
-    {"lint", &BuildLint, "[job_per_directory]", NULL, NULL},
-    {"fetch_data", &BuildFetchData, NULL, NULL, NULL},
-    {"compilation_tests", &BuildCompilationTests, NULL, NULL, NULL},
-    {"fat12_tests", &BuildFat12Tests, NULL, NULL, NULL},
-    {"simulator", &BuildSimulator, NULL, NULL, NULL},
-    {"directx_demo", &BuildDirectxDemo, "[debug, release]", NULL, NULL},
-    {"handmade_hero", &BuildHandmadeHero, NULL, NULL, NULL},
-    {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
-    {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
-    {"os", &BuildOsFloppyDiskImage, NULL, NULL, NULL},
-};
+#include "build.h"
+#include "target_configuration.h"
 
 static console_context GlobalConsoleContext;
 

@@ -1,15 +1,14 @@
 #include <Windows.h>
 #include <stdint.h>
 #include <strsafe.h>
-
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
 #include "sources\win32\console\console.h"
 #include "sources\win32\system\processes.h"
 #include "sources\win32\strings\strings.h"
-#include "build.h"
-#include "build_helpers.h"
 
+#include "..\build.h"
+#include "build_helpers.h"
 
 b32 CompileWithGCC(build_context *BuildContext)
 {
@@ -170,6 +169,38 @@ b32 AssembleWithNasm(build_context *BuildContext)
         ConsolePrintColored
         (
             "ERROR: Assembly failed.\n",
+            BuildContext->EnvironmentInfo.ConsoleContext,
+            FOREGROUND_RED
+        );
+    }
+
+    ClearBuildContext(BuildContext);
+    return Result;
+}
+
+b32 CompileWithIVerilog(build_context *BuildContext)
+{
+    char CompilerCommand[1024];
+    *CompilerCommand = {};
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "iverilog.exe ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "-I ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -o ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+
+    b32 Result = CreateProcessAndWait
+    (
+        CompilerCommand,
+        BuildContext->EnvironmentInfo.ConsoleContext
+    );
+    if (!Result)
+    {
+        ConsolePrintColored
+        (
+            "ERROR: compilation failed.\n",
             BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );

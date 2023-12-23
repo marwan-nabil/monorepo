@@ -5,8 +5,8 @@
     "files.exclude":
     {
         // "outputs/": true,
-        // "tools/": true,
-        // "assets/": true,
+        "tools/": true,
+        "assets/": true,
 
         // "sources/win32": true,
         // "sources/win32/imgui": true,

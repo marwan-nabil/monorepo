@@ -41,15 +41,4 @@ struct build_context
     linking_info LinkingInfo;
 };
 
-typedef b32 (build_function_type)(build_context *);
-
-struct build_target_config
-{
-    const char *TargetName;
-    build_function_type *BuildFunction;
-    const char *FirstArgument;
-    const char *SecondArgument;
-    const char *ThirdArgument;
-};
-
 void DisplayHelp();
