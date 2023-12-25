@@ -12,32 +12,30 @@
 #include "sources\win32\strings\strings.h"
 #include "sources\win32\system\processes.cpp"
 
-console_context GlobalConsoleContext;
-
 void CompilationTest(char *TestCommand)
 {
     printf("\n");
-    ConsoleSwitchColor(&GlobalConsoleContext, BACKGROUND_BLUE);
+    ConsoleSwitchColor(BACKGROUND_BLUE);
     printf("> %s", TestCommand);
-    ConsoleResetColor(&GlobalConsoleContext);
+    ConsoleResetColor();
     printf("\n");
     fflush(stdout);
 
-    b32 Result = CreateProcessAndWait(TestCommand, &GlobalConsoleContext);
+    b32 Result = CreateProcessAndWait(TestCommand);
     if (Result)
     {
-        ConsolePrintColored("INFO: test succeeded.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
+        ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
     }
     else
     {
-        ConsolePrintColored("ERROR: test failed.\n", &GlobalConsoleContext, FOREGROUND_RED);
+        ConsolePrintColored("ERROR: test failed.\n", FOREGROUND_RED);
         exit(1);
     }
 }
 
 i32 main(i32 argc, char **argv)
 {
-    InitializeConsole(&GlobalConsoleContext);
+    InitializeConsole();
 
     CompilationTest("build simulator");
     CompilationTest("build imgui_demo opengl2");
@@ -60,7 +58,6 @@ i32 main(i32 argc, char **argv)
         "\n==========================\n"
         "INFO: all tests succeeded.\n"
         "==========================\n",
-        &GlobalConsoleContext,
         FOREGROUND_GREEN
     );
 }

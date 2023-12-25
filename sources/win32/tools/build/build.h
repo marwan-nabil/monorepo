@@ -12,7 +12,6 @@ struct environment_info
 {
     i32 argc;
     char **argv;
-    console_context *ConsoleContext;
     char RootDirectoryPath[1024];
     char OutputDirectoryPath[1024];
     char TargetOutputDirectoryPath[1024];

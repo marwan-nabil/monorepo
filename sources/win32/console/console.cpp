@@ -6,28 +6,30 @@
 #include "sources\win32\basic_defines.h"
 #include "console.h"
 
-void InitializeConsole(console_context *ConsoleContext)
+static console_context ConsoleContext;
+
+void InitializeConsole()
 {
-    ConsoleContext->ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    ConsoleContext.ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
-    GetConsoleScreenBufferInfo(ConsoleContext->ConsoleHandle, &ConsoleInfo);
-    ConsoleContext->OriginalConsoleAttributes = ConsoleInfo.wAttributes;
+    GetConsoleScreenBufferInfo(ConsoleContext.ConsoleHandle, &ConsoleInfo);
+    ConsoleContext.OriginalConsoleAttributes = ConsoleInfo.wAttributes;
 }
 
-void ConsoleSwitchColor(console_context *ConsoleContext, WORD Color)
+void ConsoleSwitchColor(WORD Color)
 {
-    SetConsoleTextAttribute(ConsoleContext->ConsoleHandle, Color);
+    SetConsoleTextAttribute(ConsoleContext.ConsoleHandle, Color);
 }
 
-void ConsoleResetColor(console_context *ConsoleContext)
+void ConsoleResetColor()
 {
-    SetConsoleTextAttribute(ConsoleContext->ConsoleHandle, ConsoleContext->OriginalConsoleAttributes);
+    SetConsoleTextAttribute(ConsoleContext.ConsoleHandle, ConsoleContext.OriginalConsoleAttributes);
 }
 
-void ConsolePrintColored(const char *String, console_context *ConsoleContext, WORD Color)
+void ConsolePrintColored(const char *String, WORD Color)
 {
-    ConsoleSwitchColor(ConsoleContext, Color);
+    ConsoleSwitchColor(Color);
     printf(String);
     fflush(stdout);
-    ConsoleResetColor(ConsoleContext);
+    ConsoleResetColor();
 }

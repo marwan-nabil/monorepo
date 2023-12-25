@@ -19,8 +19,6 @@ struct ram_file
     u32 Size;
 };
 
-console_context GlobalConsoleContext;
-
 ram_file CreateDummyFile(char *FullFilePath, u32 Size, u32 FillPattern)
 {
     ram_file Result = {};
@@ -46,7 +44,7 @@ i32 main(i32 argc, char **argv)
     Assert(sizeof(data_area) == (2847 * FAT12_SECTOR_SIZE));
     Assert(sizeof(fat12_disk) == (2880 * FAT12_SECTOR_SIZE));
 
-    InitializeConsole(&GlobalConsoleContext);
+    InitializeConsole();
 
     fat12_disk *Disk = (fat12_disk *)malloc(sizeof(fat12_disk));
     ZeroMemory(Disk, sizeof(fat12_disk));
@@ -77,7 +75,7 @@ i32 main(i32 argc, char **argv)
     free(File1.Memory);
     free(File2.Memory);
 
-    ConsolePrintColored("\nFinished.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
+    ConsolePrintColored("\nFinished.\n", FOREGROUND_GREEN);
 
     return 0;
 }

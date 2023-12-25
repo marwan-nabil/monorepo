@@ -13,8 +13,6 @@
 #include "build.h"
 #include "target_configuration.h"
 
-static console_context GlobalConsoleContext;
-
 void DisplayHelp()
 {
     printf("INFO: Available build targets:\n");
@@ -62,13 +60,12 @@ int main(int argc, char **argv)
 
     BuildContext.EnvironmentInfo.argc = argc;
     BuildContext.EnvironmentInfo.argv = argv;
-    BuildContext.EnvironmentInfo.ConsoleContext = &GlobalConsoleContext;
 
-    InitializeConsole(&GlobalConsoleContext);
+    InitializeConsole();
 
     if (argc < 2)
     {
-        ConsolePrintColored("ERROR: No build target.\n", &GlobalConsoleContext, FOREGROUND_RED);
+        ConsolePrintColored("ERROR: No build target.\n", FOREGROUND_RED);
         DisplayHelp();
         return 1;
     }
@@ -137,9 +134,9 @@ int main(int argc, char **argv)
         }
         else
         {
-            ConsoleSwitchColor(&GlobalConsoleContext, FOREGROUND_RED);
+            ConsoleSwitchColor(FOREGROUND_RED);
             printf("ERROR: invalid build target \"%s\".\n", argv[1]);
-            ConsoleResetColor(&GlobalConsoleContext);
+            ConsoleResetColor();
             DisplayHelp();
             BuildSuccess = FALSE;
         }
@@ -147,12 +144,12 @@ int main(int argc, char **argv)
 
     if (BuildSuccess)
     {
-        ConsolePrintColored("INFO: Build Succeeded.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
+        ConsolePrintColored("INFO: Build Succeeded.\n", FOREGROUND_GREEN);
         return 0;
     }
     else
     {
-        ConsolePrintColored("ERROR: Build Failed.\n", &GlobalConsoleContext, FOREGROUND_RED);
+        ConsolePrintColored("ERROR: Build Failed.\n", FOREGROUND_RED);
         return 1;
     }
 }

@@ -7,7 +7,7 @@
 #include "sources\win32\basic_defines.h"
 #include "sources\win32\console\console.h"
 
-b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput, console_context *ConsoleContext)
+b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput)
 {
     PROCESS_INFORMATION ProcessInfo = {};
 
@@ -46,14 +46,14 @@ b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput, console_contex
             NULL
         );
 
-        ConsoleSwitchColor(ConsoleContext, FOREGROUND_RED);
+        ConsoleSwitchColor(FOREGROUND_RED);
         printf
         (
             "ERROR: failed to create a sub-process, system error code: %lu == %s",
             LastError, (const char *)ErrorMessageFromSystem
         );
         fflush(stdout);
-        ConsoleResetColor(ConsoleContext);
+        ConsoleResetColor();
 
         LocalFree(ErrorMessageFromSystem);
         return FALSE;
@@ -77,7 +77,7 @@ b32 CreateProcessAndWait(char *CommandLine, HANDLE ProcessOutput, console_contex
     return TRUE;
 }
 
-b32 CreateProcessAndWait(char *CommandLine, console_context *ConsoleContext)
+b32 CreateProcessAndWait(char *CommandLine)
 {
-    return CreateProcessAndWait(CommandLine, (HANDLE)_get_osfhandle(_fileno(stdout)), ConsoleContext);
+    return CreateProcessAndWait(CommandLine, (HANDLE)_get_osfhandle(_fileno(stdout)));
 }

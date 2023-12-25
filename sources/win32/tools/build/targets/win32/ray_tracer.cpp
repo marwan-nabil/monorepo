@@ -13,7 +13,7 @@ b32 BuildRayTracer(build_context *BuildContext)
 {
     if (BuildContext->EnvironmentInfo.argc < 3)
     {
-        ConsolePrintColored("ERROR: invalid number of arguments for build ray_tracer ...\n", BuildContext->EnvironmentInfo.ConsoleContext, FOREGROUND_RED);
+        ConsolePrintColored("ERROR: invalid number of arguments for build ray_tracer ...\n", FOREGROUND_RED);
         DisplayHelp();
         return FALSE;
     }
@@ -45,9 +45,9 @@ b32 BuildRayTracer(build_context *BuildContext)
     }
     else
     {
-        ConsoleSwitchColor(BuildContext->EnvironmentInfo.ConsoleContext, FOREGROUND_RED);
+        ConsoleSwitchColor(FOREGROUND_RED);
         printf("ERROR: invalid argument \"%s\" for build ray_tracer ...\n", BuildContext->EnvironmentInfo.argv[3]);
-        ConsoleResetColor(BuildContext->EnvironmentInfo.ConsoleContext);
+        ConsoleResetColor();
         DisplayHelp();
         return FALSE;
     }

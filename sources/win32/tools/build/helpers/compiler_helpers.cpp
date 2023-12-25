@@ -27,17 +27,12 @@ b32 CompileWithGCC(build_context *BuildContext)
     }
     FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
-    b32 Result = CreateProcessAndWait
-    (
-        CompilerCommand,
-        BuildContext->EnvironmentInfo.ConsoleContext
-    );
+    b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
     {
         ConsolePrintColored
         (
             "ERROR: compilation failed.\n",
-            BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );
     }
@@ -61,17 +56,12 @@ b32 LinkWithGCC(build_context *BuildContext)
     FlattenFileNameList(BuildContext->LinkingInfo.LinkerInputs, LinkerCommand, ArrayCount(LinkerCommand));
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " -lgcc");
 
-    b32 Result = CreateProcessAndWait
-    (
-        LinkerCommand,
-        BuildContext->EnvironmentInfo.ConsoleContext
-    );
+    b32 Result = CreateProcessAndWait(LinkerCommand);
     if (!Result)
     {
         ConsolePrintColored
         (
             "ERROR: linking failed.\n",
-            BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );
     }
@@ -92,13 +82,12 @@ b32 CompileShader(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
     FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
-    b32 Result = CreateProcessAndWait(CompilerCommand, BuildContext->EnvironmentInfo.ConsoleContext);
+    b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
     {
         ConsolePrintColored
         (
             "ERROR: shader compilation failed.\n",
-            BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );
     }
@@ -126,17 +115,12 @@ b32 CompileWithMSVC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /link ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->LinkingInfo.LinkerFlags);
 
-    b32 Result = CreateProcessAndWait
-    (
-        CompilerCommand,
-        BuildContext->EnvironmentInfo.ConsoleContext
-    );
+    b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
     {
         ConsolePrintColored
         (
             "ERROR: compilation failed.\n",
-            BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );
     }
@@ -159,17 +143,12 @@ b32 AssembleWithNasm(build_context *BuildContext)
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");
 
-    b32 Result = CreateProcessAndWait
-    (
-        AssemblerCommand,
-        BuildContext->EnvironmentInfo.ConsoleContext
-    );
+    b32 Result = CreateProcessAndWait(AssemblerCommand);
     if (!Result)
     {
         ConsolePrintColored
         (
             "ERROR: Assembly failed.\n",
-            BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );
     }
@@ -191,17 +170,12 @@ b32 CompileWithIVerilog(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
     FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
-    b32 Result = CreateProcessAndWait
-    (
-        CompilerCommand,
-        BuildContext->EnvironmentInfo.ConsoleContext
-    );
+    b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
     {
         ConsolePrintColored
         (
             "ERROR: compilation failed.\n",
-            BuildContext->EnvironmentInfo.ConsoleContext,
             FOREGROUND_RED
         );
     }

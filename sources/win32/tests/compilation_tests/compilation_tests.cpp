@@ -23,8 +23,6 @@
 #include "sources\win32\system\processes.h"
 #include "compilation_tests.h"
 
-console_context GlobalConsoleContext;
-
 test_job_configuration TestJobConfiguration[] =
 {
     NULL, "build simulator",
@@ -40,6 +38,7 @@ test_job_configuration TestJobConfiguration[] =
     NULL, "build fetch_data",
     NULL, "build fat12_tests",
     NULL, "build os",
+    NULL, "build verilog_demo",
 };
 
 void ProcessJob(test_job *Job)
@@ -59,7 +58,7 @@ void ProcessJob(test_job *Job)
         WaitForSingleObject(MutexHandle, INFINITE);
     }
 
-    Job->TestResult = CreateProcessAndWait(Job->TestCommand, PipeInput, &GlobalConsoleContext);
+    Job->TestResult = CreateProcessAndWait(Job->TestCommand, PipeInput);
     CloseHandle(PipeInput);
 
     if (Job->MutexName)
@@ -135,7 +134,7 @@ i32 main(i32 argc, char **argv)
 
     b32 AllTestsSucceeded = TRUE;
 
-    InitializeConsole(&GlobalConsoleContext);
+    InitializeConsole();
 
     for (u32 JobIndex = 0; JobIndex < JobQueue.JobCount; JobIndex++)
     {
@@ -143,10 +142,10 @@ i32 main(i32 argc, char **argv)
 
         printf("\n");
         fflush(stdout);
-        ConsoleSwitchColor(&GlobalConsoleContext, BACKGROUND_BLUE);
+        ConsoleSwitchColor(BACKGROUND_BLUE);
         printf("> %s", Job->TestCommand);
         fflush(stdout);
-        ConsoleResetColor(&GlobalConsoleContext);
+        ConsoleResetColor();
         printf("\n");
         fflush(stdout);
 
@@ -154,11 +153,11 @@ i32 main(i32 argc, char **argv)
 
         if (Job->TestResult)
         {
-            ConsolePrintColored("INFO: test succeeded.\n", &GlobalConsoleContext, FOREGROUND_GREEN);
+            ConsolePrintColored("INFO: test succeeded.\n", FOREGROUND_GREEN);
         }
         else
         {
-            ConsolePrintColored("ERROR: test failed.\n", &GlobalConsoleContext, FOREGROUND_RED);
+            ConsolePrintColored("ERROR: test failed.\n", FOREGROUND_RED);
             AllTestsSucceeded = FALSE;
         }
     }
@@ -170,7 +169,6 @@ i32 main(i32 argc, char **argv)
             "\n==========================\n"
             "INFO: all tests succeeded.\n"
             "==========================\n",
-            &GlobalConsoleContext,
             FOREGROUND_GREEN
         );
     }
