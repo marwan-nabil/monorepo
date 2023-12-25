@@ -18,7 +18,6 @@
 #include "sources\win32\basic_defines.h"
 #include "sources\win32\math\floats.h"
 #include "sources\win32\math\scalar_conversions.h"
-#include "sources\win32\console\console.h"
 #include "sources\win32\file_system\files.h"
 #include "sources\win32\strings\strings.h"
 #include "sources\win32\strings\path_handling.h"

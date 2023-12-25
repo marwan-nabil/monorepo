@@ -18,7 +18,7 @@
 
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
-#include "sources\win32\console\console.h"
+#include "sources\win32\shell\console.h"
 #include "sources\win32\system\timing.h"
 #include "sources\win32\system\processes.h"
 #include "compilation_tests.h"

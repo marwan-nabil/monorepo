@@ -3,7 +3,7 @@
 #include <strsafe.h>
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
-#include "sources\win32\console\console.h"
+#include "sources\win32\shell\console.h"
 
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"
@@ -23,7 +23,7 @@ b32 BuildImguiDemo(build_context *BuildContext)
     }
 
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\imgui\\imgui*.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\windows\\dpi.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shell\\dpi.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\system\\version.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\win32_backend.cpp");
 

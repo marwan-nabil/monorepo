@@ -1,12 +1,12 @@
 #include "sources/i686-elf/base_types.h"
 #include "sources/i686-elf/basic_defines.h"
-#include "sources/i686-elf/disk/disk.h"
+#include "sources/i686-elf/storage/disk/disk.h"
 #include "sources/i686-elf/strings/print.h"
 #include "sources/i686-elf/strings/strings.h"
 #include "sources/i686-elf/memory/memory.h"
 #include "sources/i686-elf/memory/arena_allocator.h"
 #include "sources/i686-elf/strings/path_handling.h"
-#include "sources/i686-elf/fat12/fat12.h"
+#include "sources/i686-elf/storage\fat12/fat12.h"
 
 b8 IsFatEntryEndOfFile(u16 FatEntry)
 {

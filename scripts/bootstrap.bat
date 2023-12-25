@@ -17,11 +17,11 @@ pushd ..\tools\build
         ..\..\sources\win32\tools\build\targets\win32\*.cpp^
         ..\..\sources\win32\tools\build\targets\i686-elf\*.cpp^
         ..\..\sources\win32\tools\build\helpers\*.cpp^
-        ..\..\sources\win32\console\console.cpp^
+        ..\..\sources\win32\shell\console.cpp^
         ..\..\sources\win32\file_system\*.cpp^
         ..\..\sources\win32\strings\path_handling.cpp^
         ..\..\sources\win32\system\processes.cpp^
-        ..\..\sources\win32\fat12\*.cpp^
+        ..\..\sources\win32\file_system\fat12\*.cpp^
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 

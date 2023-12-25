@@ -3,7 +3,6 @@
 #include <strsafe.h>
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
-#include "sources\win32\console\console.h"
 #include "sources\win32\strings\path_handling.h"
 
 #include "..\..\build.h"
@@ -46,16 +45,16 @@ b32 BuildBootloaderImage(build_context *BuildContext)
         "\\sources\\i686-elf\\bootloader\\main.c",
         "\\sources\\i686-elf\\bootloader\\tests.c",
         "\\sources\\i686-elf\\vga\\vga.c",
-        "\\sources\\i686-elf\\disk\\disk.c",
+        "\\sources\\i686-elf\\storage\\disk\\disk.c",
         "\\sources\\i686-elf\\strings\\strings.c",
         "\\sources\\i686-elf\\strings\\path_handling.c",
         "\\sources\\i686-elf\\strings\\print.c",
         "\\sources\\i686-elf\\cpu\\timing.c",
-        "\\sources\\i686-elf\\fat12\\get.c",
-        "\\sources\\i686-elf\\fat12\\set.c",
+        "\\sources\\i686-elf\\storage\\fat12\\get.c",
+        "\\sources\\i686-elf\\storage\\fat12\\set.c",
         "\\sources\\i686-elf\\memory\\arena_allocator.c",
         "\\sources\\i686-elf\\memory\\memory.c",
-        "\\sources\\i686-elf\\file_io\\file_io.c",
+        "\\sources\\i686-elf\\storage\\file_io\\file_io.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)

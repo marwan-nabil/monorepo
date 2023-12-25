@@ -12,7 +12,7 @@
 #include "sources\win32\math\vector4.h"
 #include "sources\win32\math\rectangle2.h"
 #include "sources\win32\rasterizer\rasterizer.h"
-#include "sources\win32\windows\windows.h"
+#include "sources\win32\shell\windows.h"
 #include "sources\win32\system\timing.h"
 
 #include "electrical.h"

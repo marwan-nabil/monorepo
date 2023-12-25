@@ -1,6 +1,3 @@
-%include "sources\i686-elf\bootloader\linker.i"
-%include "sources\i686-elf\bootloader\main.i"
-
 %define KEYBOARD_CONTROLLER_DATA_PORT 0x60
 %define KEYBOARD_CONTROLLER_COMMAND_PORT 0x64
 
@@ -8,6 +5,10 @@
 %define KEYBOARD_CONTROLLER_COMMAND_ENABLE_KEYBOARD 0xAE
 %define KEYBOARD_CONTROLLER_COMMAND_READ 0xD0
 %define KEYBOARD_CONTROLLER_COMMAND_WRITE 0xD1
+
+extern cstart
+extern __bss_start
+extern __bss_end
 
 ; ---------------------
 ; real mode entry point

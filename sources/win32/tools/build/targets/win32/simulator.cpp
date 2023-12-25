@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
-#include "sources\win32\console\console.h"
 
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"
@@ -11,7 +10,7 @@
 b32 BuildSimulator(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\simulator\\*.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\windows\\windows.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shell\\windows.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\rasterizer\\rasterizer.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except-");

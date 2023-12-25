@@ -7,10 +7,10 @@
 
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
-#include "sources\win32\console\console.h"
+#include "sources\win32\shell\console.h"
 #include "sources\win32\strings\path_handling.h"
-#include "sources\win32\fat12\fat12.h"
-#include "sources\win32\fat12\fat12_interface.h"
+#include "sources\win32\file_system\fat12\fat12.h"
+#include "sources\win32\file_system\fat12\fat12_interface.h"
 
 struct ram_file
 {

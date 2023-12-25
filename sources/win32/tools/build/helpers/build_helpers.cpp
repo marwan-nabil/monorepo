@@ -3,7 +3,6 @@
 #include <strsafe.h>
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
-#include "sources\win32\console\console.h"
 #include "sources\win32\strings\path_handling.h"
 
 #include "..\build.h"
