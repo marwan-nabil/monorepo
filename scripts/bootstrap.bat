@@ -20,6 +20,7 @@ pushd ..\tools\build
         ..\..\sources\win32\shell\console.cpp^
         ..\..\sources\win32\file_system\*.cpp^
         ..\..\sources\win32\strings\path_handling.cpp^
+        ..\..\sources\win32\strings\string_list.cpp^
         ..\..\sources\win32\system\processes.cpp^
         ..\..\sources\win32\file_system\fat12\*.cpp^
         /Fe:build.exe^

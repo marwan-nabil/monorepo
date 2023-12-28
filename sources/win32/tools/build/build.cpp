@@ -9,6 +9,7 @@
 #include "sources\win32\shell\console.h"
 #include "sources\win32\file_system\folders.h"
 #include "sources\win32\strings\path_handling.h"
+#include "sources\win32\strings\string_list.h"
 
 #include "build.h"
 #include "target_configuration.h"

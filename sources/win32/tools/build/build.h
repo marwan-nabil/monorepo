@@ -1,13 +1,5 @@
 #pragma once
 
-#define MAX_FILENAME 1024
-
-struct file_name_node
-{
-    char FileName[MAX_FILENAME];
-    file_name_node *NextFileName;
-};
-
 struct environment_info
 {
     i32 argc;
@@ -21,7 +13,7 @@ struct compilation_info
 {
     char CompilerFlags[1024];
     char CompilerIncludePath[1024];
-    file_name_node *Sources;
+    string_node *Sources;
     char OutputObjectPath[1024];
 };
 
@@ -29,7 +21,7 @@ struct linking_info
 {
     char LinkerFlags[1024];
     char LinkerScriptPath[1024];
-    file_name_node *LinkerInputs;
+    string_node *LinkerInputs;
     char OutputBinaryPath[1024];
 };
 

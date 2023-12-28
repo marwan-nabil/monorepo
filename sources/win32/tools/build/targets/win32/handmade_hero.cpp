@@ -3,6 +3,7 @@
 #include <strsafe.h>
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
+#include "sources\win32\strings\string_list.h"
 
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"

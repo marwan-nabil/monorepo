@@ -4,6 +4,7 @@
 #include "sources\win32\base_types.h"
 #include "sources\win32\basic_defines.h"
 #include "sources\win32\strings\path_handling.h"
+#include "sources\win32\strings\string_list.h"
 
 #include "..\build.h"
 
@@ -41,21 +42,17 @@ void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath
 
 void AddCompilerSourceFile(build_context *BuildContext, const char *SourceFile)
 {
-    file_name_node *NewNode = (file_name_node *)malloc(sizeof(file_name_node));
-    ZeroMemory(NewNode->FileName, MAX_FILENAME);
-    NewNode->NextFileName = BuildContext->CompilationInfo.Sources;
-    BuildContext->CompilationInfo.Sources = NewNode;
-
+    string_node *NewNode = PushStringNode(&BuildContext->CompilationInfo.Sources);
     StringCchCatA
     (
-        NewNode->FileName,
-        ArrayCount(NewNode->FileName),
+        NewNode->String,
+        ArrayCount(NewNode->String),
         BuildContext->EnvironmentInfo.RootDirectoryPath
     );
     StringCchCatA
     (
-        NewNode->FileName,
-        ArrayCount(NewNode->FileName),
+        NewNode->String,
+        ArrayCount(NewNode->String),
         SourceFile
     );
 }
@@ -110,21 +107,17 @@ void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFi
 
 void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
 {
-    file_name_node *NewNode = (file_name_node *)malloc(sizeof(file_name_node));
-    ZeroMemory(NewNode->FileName, MAX_FILENAME);
-    NewNode->NextFileName = BuildContext->LinkingInfo.LinkerInputs;
-    BuildContext->LinkingInfo.LinkerInputs = NewNode;
-
+    string_node *NewNode = PushStringNode(&BuildContext->LinkingInfo.LinkerInputs);
     StringCchCatA
     (
-        NewNode->FileName,
-        ArrayCount(NewNode->FileName),
+        NewNode->String,
+        ArrayCount(NewNode->String),
         BuildContext->EnvironmentInfo.TargetOutputDirectoryPath
     );
     StringCchCatA
     (
-        NewNode->FileName,
-        ArrayCount(NewNode->FileName),
+        NewNode->String,
+        ArrayCount(NewNode->String),
         LinkerInputFile
     );
 }
@@ -170,33 +163,10 @@ void PopSubTarget(build_context *BuildContext)
     SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 
-void FreeFileNameList(file_name_node *RootNode)
-{
-    file_name_node *CurrentNode = RootNode;
-    file_name_node *ChildNode;
-
-    while (CurrentNode)
-    {
-        ChildNode = CurrentNode->NextFileName;
-        free(CurrentNode);
-        CurrentNode = ChildNode;
-    }
-}
-
-void FlattenFileNameList(file_name_node *FileNameList, char *Output, u32 OutputSize)
-{
-    while (FileNameList)
-    {
-        StringCchCatA(Output, OutputSize, FileNameList->FileName);
-        StringCchCatA(Output, OutputSize, " ");
-        FileNameList = FileNameList->NextFileName;
-    }
-}
-
 void ClearBuildContext(build_context *BuildContext)
 {
-    FreeFileNameList(BuildContext->CompilationInfo.Sources);
-    FreeFileNameList(BuildContext->LinkingInfo.LinkerInputs);
+    FreeStringList(BuildContext->CompilationInfo.Sources);
+    FreeStringList(BuildContext->LinkingInfo.LinkerInputs);
     BuildContext->CompilationInfo = {};
     BuildContext->LinkingInfo = {};
 }

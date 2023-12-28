@@ -5,6 +5,7 @@
 #include "sources\win32\basic_defines.h"
 #include "sources\win32\strings\strings.h"
 #include "sources\win32\strings\path_handling.h"
+#include "sources\win32\strings\string_list.h"
 #include "sources\win32\file_system\fat12\fat12.h"
 #include "sources\win32\file_system\fat12\fat12_interface.h"
 #include "sources\win32\file_system\files.h"

@@ -6,6 +6,7 @@
 #include "sources\win32\shell\console.h"
 #include "sources\win32\system\processes.h"
 #include "sources\win32\strings\strings.h"
+#include "sources\win32\strings\string_list.h"
 
 #include "..\build.h"
 #include "build_helpers.h"
@@ -25,7 +26,7 @@ b32 CompileWithGCC(build_context *BuildContext)
         StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
         StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
     }
-    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+    FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
@@ -53,7 +54,7 @@ b32 LinkWithGCC(build_context *BuildContext)
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " -o ");
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), BuildContext->LinkingInfo.OutputBinaryPath);
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " ");
-    FlattenFileNameList(BuildContext->LinkingInfo.LinkerInputs, LinkerCommand, ArrayCount(LinkerCommand));
+    FlattenStringList(BuildContext->LinkingInfo.LinkerInputs, LinkerCommand, ArrayCount(LinkerCommand));
     StringCchCatA(LinkerCommand, ArrayCount(LinkerCommand), " -lgcc");
 
     b32 Result = CreateProcessAndWait(LinkerCommand);
@@ -80,7 +81,7 @@ b32 CompileShader(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo \"");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
-    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+    FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
@@ -105,7 +106,7 @@ b32 CompileWithMSVC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /I");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
-    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+    FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
     if (StringLength(BuildContext->LinkingInfo.OutputBinaryPath) != 0)
     {
         StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fe:\"");
@@ -138,7 +139,7 @@ b32 AssembleWithNasm(build_context *BuildContext)
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "-i ");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " ");
-    FlattenFileNameList(BuildContext->CompilationInfo.Sources, AssemblerCommand, ArrayCount(AssemblerCommand));
+    FlattenStringList(BuildContext->CompilationInfo.Sources, AssemblerCommand, ArrayCount(AssemblerCommand));
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), " -o \"");
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(AssemblerCommand, ArrayCount(AssemblerCommand), "\" ");
@@ -168,7 +169,7 @@ b32 CompileWithIVerilog(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " -o ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
-    FlattenFileNameList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+    FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
