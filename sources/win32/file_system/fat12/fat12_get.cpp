@@ -43,13 +43,15 @@ u16 GetFatEntry(fat12_disk *Disk, u32 ClusterNumber)
 
     if ((ClusterNumber % 2) == 0)
     {
-        Result = (u16)Disk->Fat1.Bytes[StartingByteIndex];
-        Result |= ((u16)Disk->Fat1.Bytes[StartingByteIndex + 1] & 0x000F) << 8;
+        Result = (*(u16 *)&Disk->Fat1.Bytes[StartingByteIndex]) & 0x0FFF;
+        // Result = (u16)Disk->Fat1.Bytes[StartingByteIndex];
+        // Result |= ((u16)Disk->Fat1.Bytes[StartingByteIndex + 1] & 0x000F) << 8;
     }
     else
     {
-        Result = (u16)(Disk->Fat1.Bytes[StartingByteIndex] & 0xF0) >> 4;
-        Result |= ((u16)Disk->Fat1.Bytes[StartingByteIndex + 1]) << 4;
+        Result = (*(u16 *)&Disk->Fat1.Bytes[StartingByteIndex]) >> 4;
+        // Result = (u16)(Disk->Fat1.Bytes[StartingByteIndex] & 0xF0) >> 4;
+        // Result |= ((u16)Disk->Fat1.Bytes[StartingByteIndex + 1]) << 4;
     }
 
     return Result;

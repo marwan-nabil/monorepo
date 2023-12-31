@@ -34,10 +34,12 @@ Entry:
 
     ; enable protected mode
     mov eax, cr0
-    or al, 1
+    or al, 1 ; set PE flag in CR0
     mov cr0, eax
 
-    ; jump into 32-bit code
+    ; far jump into 32-bit code
+    ; necessary to select the proper segment
+    ; (32-bit flat segment) in the GDT
     jmp dword 0x08:ProtectedModeEntryPoint
 
 ; --------------------------
@@ -75,32 +77,32 @@ ProtectedModeEntryPoint:
 [bits 16]
 section .text
 EnableA20Line:
-    call WaitUntilKeyboardControllerCanBeWritten
+    call WaitForKeyboardController
     mov al, KEYBOARD_CONTROLLER_COMMAND_DISABLE_KEYBOARD
     out KEYBOARD_CONTROLLER_COMMAND_PORT, al
 
-    call WaitUntilKeyboardControllerCanBeWritten
+    call WaitForKeyboardController
     mov al, KEYBOARD_CONTROLLER_COMMAND_READ
     out KEYBOARD_CONTROLLER_COMMAND_PORT, al
 
-    call WaitUntilKeyboardControllerCanBeRead
+    call WaitForKeyboardController2
     in al, KEYBOARD_CONTROLLER_DATA_PORT
     push eax
 
-    call WaitUntilKeyboardControllerCanBeWritten
+    call WaitForKeyboardController
     mov al, KEYBOARD_CONTROLLER_COMMAND_WRITE
     out KEYBOARD_CONTROLLER_COMMAND_PORT, al
 
-    call WaitUntilKeyboardControllerCanBeWritten
+    call WaitForKeyboardController
     pop eax
     or al, 2 ; set the A20 line bit
     out KEYBOARD_CONTROLLER_DATA_PORT, al
 
-    call WaitUntilKeyboardControllerCanBeWritten
+    call WaitForKeyboardController
     mov al, KEYBOARD_CONTROLLER_COMMAND_ENABLE_KEYBOARD
     out KEYBOARD_CONTROLLER_COMMAND_PORT, al
 
-    call WaitUntilKeyboardControllerCanBeWritten
+    call WaitForKeyboardController
     ret
 
 ; ----------------------------
@@ -109,10 +111,10 @@ EnableA20Line:
 ; ----------------------------
 [bits 16]
 section .text
-WaitUntilKeyboardControllerCanBeWritten:
+WaitForKeyboardController:
     in al, KEYBOARD_CONTROLLER_COMMAND_PORT
     test al, 2
-    jnz WaitUntilKeyboardControllerCanBeWritten
+    jnz WaitForKeyboardController
     ret
 
 ; ----------------------------
@@ -121,10 +123,10 @@ WaitUntilKeyboardControllerCanBeWritten:
 ; ----------------------------
 [bits 16]
 section .text
-WaitUntilKeyboardControllerCanBeRead:
+WaitForKeyboardController2:
     in al, KEYBOARD_CONTROLLER_COMMAND_PORT
     test al, 1
-    jz WaitUntilKeyboardControllerCanBeRead
+    jz WaitForKeyboardController2
     ret
 
 ; ----------------------------

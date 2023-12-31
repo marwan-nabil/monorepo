@@ -54,6 +54,7 @@ u16 GetFatEntryFromClusterNumber(fat12_ram_disk *Disk, u32 ClusterNumber)
 
     if ((ClusterNumber % 2) == 0)
     {
+        // Result = (*(u16 *)&Disk->Fat.Bytes[StartingByteIndex]) & 0x0FFF;
         Result = (u16)Disk->Fat.Bytes[StartingByteIndex];
         Result |= ((u16)Disk->Fat.Bytes[StartingByteIndex + 1] & 0x000F) << 8;
     }

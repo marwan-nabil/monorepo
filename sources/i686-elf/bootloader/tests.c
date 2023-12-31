@@ -20,7 +20,7 @@ void TestVGA(print_context *PrintContext)
     SetCursorPosition(PrintContext, 0, 10);
 
     PrintString(PrintContext, "\r\n============ VGA driver tests ============== \r\n");
-    for (u32 Y = 0; Y < VGA_SCREEN_HEIGHT - 4; Y++)
+    for (u32 Y = 0; Y < VGA_SCREEN_HEIGHT; Y++)
     {
         for (u32 X = 0; X < VGA_SCREEN_WIDTH; X++)
         {

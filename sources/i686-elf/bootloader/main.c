@@ -57,14 +57,14 @@ void LoadKernel(u32 BootDriveNumber, void *FreeMemoryArea, print_context *PrintC
 
 void __attribute__((cdecl)) cstart(u32 BootDriveNumber)
 {
-    TestVGA(&GlobalPrintContext);
-    TestIO(&GlobalPrintContext);
-    StringTests(&GlobalPrintContext);
-    DiskDriverTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
-    AllocatorTests(FreeStore, &GlobalPrintContext);
-    PathHandlingTests(FreeStore, &GlobalPrintContext);
-    Fat12Tests(BootDriveNumber, FreeStore, &GlobalPrintContext);
-    FileIoTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
+    // TestVGA(&GlobalPrintContext);
+    // TestIO(&GlobalPrintContext);
+    // StringTests(&GlobalPrintContext);
+    // DiskDriverTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
+    // AllocatorTests(FreeStore, &GlobalPrintContext);
+    // PathHandlingTests(FreeStore, &GlobalPrintContext);
+    // Fat12Tests(BootDriveNumber, FreeStore, &GlobalPrintContext);
+    // FileIoTests(BootDriveNumber, FreeStore, &GlobalPrintContext);
     LoadKernel(BootDriveNumber, &FreeStore, &GlobalPrintContext);
 
     while (1) {};

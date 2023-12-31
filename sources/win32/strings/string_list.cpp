@@ -8,6 +8,8 @@
 
 string_node *PushStringNode(string_node **List)
 {
+    // TODO: this implmentation sucks, change it to something that
+    // just takes a string and a next node pointer
     string_node *NewNode = (string_node *)malloc(sizeof(string_node));
     ZeroMemory(NewNode->String, MAX_STRING_LENGTH);
     if (List)

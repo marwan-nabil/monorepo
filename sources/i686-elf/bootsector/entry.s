@@ -206,6 +206,9 @@ Start:
     mov cl, 1 ; sectors to read
     mov dl, [DriveNumber]
     call ReadFromDisk
+    ; TODO: handle reading hazard, if bootloader is
+    ;       too big, it could overwrite the bootsector
+    ;       at 0x7C00, bootsector would crash
 
     add bx, [BytesPerSector]
 
@@ -245,7 +248,7 @@ Start:
 
 .NextCluster:
     ; ax == next logical cluster in the file
-    cmp ax, 0x0FF8
+    cmp ax, 0x0FF8 ; FAT12 EOF pattern
     jae .ReadingFinished
     mov [BootloaderLogicalCluster], ax
     jmp .LoadBootloaderLoop
@@ -296,7 +299,7 @@ BootloaderNotFoundErrorHandler:
 ; --------------------
 ; prints a string
 ; in:
-;       si -> address of string
+;       si -> offset of string
 ; --------------------
 PrintString:
     ; save touched register
@@ -464,9 +467,6 @@ DiskLoadingMessage:
 BootloaderFileName:
     db 'bootld  bin'
 
-BootloaderLogicalCluster:
-    dw 0
-
 ; ---------------------------------------
 ; pad with 0 until you reach address 0x7DFE
 ; ---------------------------------------
@@ -480,5 +480,7 @@ dw 0xAA55
 ; -----------------------------------------------
 ; 0x7E00, from here on, nothing is loaded into the floppy disk
 ; -----------------------------------------------
+BootloaderLogicalCluster:
+    dw 0
 RootDirectoryBuffer:
 FAT1Buffer:
