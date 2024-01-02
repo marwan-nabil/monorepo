@@ -25,20 +25,21 @@
 
 test_job_configuration TestJobConfiguration[] =
 {
-    NULL, "build simulator",
-    "imgui_demo", "build imgui_demo opengl2",
-    "imgui_demo", "build imgui_demo dx11",
-    "ray_tracer", "build ray_tracer 1_lane",
-    "ray_tracer", "build ray_tracer 4_lanes",
-    "ray_tracer", "build ray_tracer 8_lanes",
-    NULL, "build handmade_hero",
-    "directx_demo", "build directx_demo debug",
-    "directx_demo", "build directx_demo release",
-    NULL, "build lint",
-    NULL, "build fetch_data",
-    NULL, "build fat12_tests",
-    NULL, "build os",
-    NULL, "build verilog_demo",
+    {NULL, "build simulator"},
+    {"imgui_demo", "build imgui_demo opengl2"},
+    {"imgui_demo", "build imgui_demo dx11"},
+    {"ray_tracer", "build ray_tracer 1_lane"},
+    {"ray_tracer", "build ray_tracer 4_lanes"},
+    {"ray_tracer", "build ray_tracer 8_lanes"},
+    {NULL, "build handmade_hero"},
+    {"directx_demo", "build directx_demo debug"},
+    {"directx_demo", "build directx_demo release"},
+    {NULL, "build lint"},
+    {NULL, "build fetch_data"},
+    {NULL, "build fat12_tests"},
+    {NULL, "build os"},
+    {NULL, "build verilog_demo"},
+    {NULL, "build uart_app"},
 };
 
 void ProcessJob(test_job *Job)

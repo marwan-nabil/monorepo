@@ -22,4 +22,5 @@ build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},
     {"os", &BuildOsFloppyDiskImage, NULL, NULL, NULL},
     {"verilog_demo", &BuildVerilogDemo, NULL, NULL, NULL},
+    {"uart_app", &BuildUARTApp, NULL, NULL, NULL},
 };
