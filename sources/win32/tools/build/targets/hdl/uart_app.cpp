@@ -11,7 +11,7 @@
 
 b32 BuildUARTApp(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\hdl\\uart_app\\uart\\baud_generator_test.v");
+    AddCompilerSourceFile(BuildContext, "\\sources\\hdl\\uart_app\\uart\\uart_test.v");
     SetCompilerIncludePath(BuildContext, "\\sources\\hdl\\uart_app\\uart");
     SetCompilerOutputObject(BuildContext, "\\uart_app.vvp");
     b32 BuildSuccess = CompileWithIVerilog(BuildContext);
