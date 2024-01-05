@@ -1,6 +1,6 @@
-#include "sources/i686-elf/base_types.h"
-#include "sources/i686-elf/basic_defines.h"
-#include "sources/i686-elf/cpu/idt.h"
+#include "sources\i686-elf\base_types.h"
+#include "sources\i686-elf\basic_defines.h"
+#include "sources\i686-elf\cpu\idt.h"
 
 idt_entry CreateIDTEntry
 (

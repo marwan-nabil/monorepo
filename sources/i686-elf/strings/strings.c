@@ -1,7 +1,7 @@
-#include "sources/i686-elf/base_types.h"
-#include "sources/i686-elf/basic_defines.h"
-#include "sources/i686-elf/math/integers.h"
-#include "sources/i686-elf/memory/memory.h"
+#include "sources\i686-elf\base_types.h"
+#include "sources\i686-elf\basic_defines.h"
+#include "sources\i686-elf\math\integers.h"
+#include "sources\i686-elf\memory\memory.h"
 
 b8 IsCharacterLowerCase(char Character)
 {

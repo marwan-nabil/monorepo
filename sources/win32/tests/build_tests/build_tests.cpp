@@ -21,7 +21,7 @@
 #include "sources\win32\shell\console.h"
 #include "sources\win32\system\timing.h"
 #include "sources\win32\system\processes.h"
-#include "compilation_tests.h"
+#include "build_tests.h"
 
 test_job_configuration TestJobConfiguration[] =
 {

@@ -1,8 +1,8 @@
 @echo off
 
-if "%1"=="compilation" (
-    build compilation_tests
-    compilation_tests\compilation_tests.exe
+if "%1"=="build" (
+    build build_tests
+    build_tests\build_tests.exe
 )
 
 if "%1"=="fat12" (

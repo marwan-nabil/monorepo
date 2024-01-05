@@ -49,7 +49,7 @@ i32 main(i32 argc, char **argv)
     CompilationTest("build lint");
     CompilationTest("build fetch_data");
     CompilationTest("build fat12_tests");
-    CompilationTest("build compilation_tests_multi_threaded");
+    CompilationTest("build build_tests_multi_threaded");
     CompilationTest("build os");
     CompilationTest("build x86_kernel_tests");
 

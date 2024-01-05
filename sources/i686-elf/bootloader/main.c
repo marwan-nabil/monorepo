@@ -1,15 +1,15 @@
 #include <stdarg.h>
-#include "sources/i686-elf/base_types.h"
-#include "sources/i686-elf/basic_defines.h"
-#include "sources/i686-elf/vga/vga.h"
-#include "sources/i686-elf/storage/disk/disk.h"
-#include "sources/i686-elf/strings/print.h"
-#include "sources/i686-elf/cpu/timing.h"
-#include "sources/i686-elf/storage/fat12/fat12.h"
-#include "sources/i686-elf/memory/arena_allocator.h"
-#include "sources/i686-elf/storage/file_io/file_io.h"
-#include "sources/i686-elf/bootloader/memory_layout.h"
-#include "sources/i686-elf/bootloader/tests.h"
+#include "sources\i686-elf\base_types.h"
+#include "sources\i686-elf\basic_defines.h"
+#include "sources\i686-elf\vga\vga.h"
+#include "sources\i686-elf\storage\disk\disk.h"
+#include "sources\i686-elf\strings\print.h"
+#include "sources\i686-elf\cpu\timing.h"
+#include "sources\i686-elf\storage\fat12\fat12.h"
+#include "sources\i686-elf\memory\arena_allocator.h"
+#include "sources\i686-elf\storage\file_io\file_io.h"
+#include "sources\i686-elf\bootloader\memory_layout.h"
+#include "sources\i686-elf\bootloader\tests.h"
 
 u8 FreeStore[KiloBytes(64)];
 print_context GlobalPrintContext;

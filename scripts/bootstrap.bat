@@ -13,6 +13,7 @@ pushd ..\tools\build
         /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS^
         /I..\..^
         ..\..\sources\win32\tools\build\*.cpp^
+        ..\..\sources\win32\tools\build\targets\*.cpp^
         ..\..\sources\win32\tools\build\targets\hdl\*.cpp^
         ..\..\sources\win32\tools\build\targets\win32\*.cpp^
         ..\..\sources\win32\tools\build\targets\i686-elf\*.cpp^

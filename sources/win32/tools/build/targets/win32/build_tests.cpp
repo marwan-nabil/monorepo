@@ -8,9 +8,9 @@
 #include "..\..\helpers\build_helpers.h"
 #include "..\..\helpers\compiler_helpers.h"
 
-b32 BuildCompilationTests(build_context *BuildContext)
+b32 BuildBuildTests(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\compilation_tests\\compilation_tests.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\build_tests\\build_tests.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\system\\processes.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shell\\console.cpp");
 
@@ -19,7 +19,7 @@ b32 BuildCompilationTests(build_context *BuildContext)
     AddCompilerFlags(BuildContext, "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS");
     SetCompilerIncludePath(BuildContext, "\\");
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref user32.lib");
-    SetLinkerOutputBinary(BuildContext, "\\compilation_tests.exe");
+    SetLinkerOutputBinary(BuildContext, "\\build_tests.exe");
     b32 BuildSuccess = CompileWithMSVC(BuildContext);
     return BuildSuccess;
 }

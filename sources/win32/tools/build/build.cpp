@@ -12,7 +12,7 @@
 #include "sources\win32\strings\string_list.h"
 
 #include "build.h"
-#include "target_configuration.h"
+#include "targets\target_configuration.h"
 
 void DisplayHelp()
 {
