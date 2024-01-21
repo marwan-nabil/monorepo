@@ -1,0 +1,6 @@
+------------------------
+used tools documentation
+------------------------
+- NASM: netwide assembler
+- IcarusVerilog: verilog compiler and simulation runner
+- GTKWave: verilog simulation visualizer

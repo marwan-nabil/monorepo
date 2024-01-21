@@ -167,7 +167,6 @@ BIOSGetDiskDriveParameters:
 
     x86EnterRealMode
 
-    [bits 16]
     ; save registers
     push es
     push bx
@@ -219,8 +218,6 @@ BIOSGetDiskDriveParameters:
 
     push eax
     x86EnterProtectedMode
-
-    [bits 32]
     pop eax
 
     mov esp, ebp
