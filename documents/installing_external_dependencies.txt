@@ -19,13 +19,14 @@ for building the gcc cross compiler:
     - binutils-2.41 source code
 
 -------------------------------------------
-how to install nasm, bochs and qemu
+how to install nasm, bochs, qemu and iverilog
 -------------------------------------------
 - downlaod all of them
 - install them in the folders:
     - tools/nasm
     - tools/bochs
     - tools/qemu
+    - tools/iverilog
 
 -----------------------------------------------
 how to setup a windows-based gcc cross compiler
@@ -51,8 +52,8 @@ how to setup a windows-based gcc cross compiler
 - switch to gcc-build folder then configure gcc:
     - ../gcc-13.2.0/configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c,c++ --without-headers
 - build gcc:
-    - make all-gcc -sj12 [currently here]
-    - make all-target-libgcc -sj12
+    - make all-gcc -sj12
+    - make all-target-libgcc -sj12 [stopped here]
     - if building gcc fails with the latest version,
       switch to an older version or 13.2.0 (guaranteed to work under cygwin)
 - install gcc:

@@ -16,7 +16,7 @@ if "%1"=="uart_app" (
 
 if "%1"=="os" (
     pushd os
-        @REM bochsdbg.exe -q -f ..\..\configs\bochs.txt
+        @REM bochsdbg.exe -q -f ..\..\configuration\bochs.txt
         qemu-system-x86_64 -drive format=raw,file=floppy.img
     popd
 )

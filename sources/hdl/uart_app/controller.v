@@ -14,8 +14,7 @@ module controller (reading,shut_down,alarm,clk,reset);
       else if(reading >240 ) state <= 2'b10;
       else state <= 2'b00;
     end
-  
-  
+
   always @(state)
     begin
       case(state)

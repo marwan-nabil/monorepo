@@ -6,10 +6,10 @@
     {
         // "outputs/": true,
         "tools/": true,
-        "assets/": true,
+        "binary_data/": true,
 
-        // "sources/win32": true,
-        // "sources/win32/imgui": true,
+        "sources/hdl": true,
+        "sources/win32": true,
         // "sources/i686-elf": true,
     },
 
