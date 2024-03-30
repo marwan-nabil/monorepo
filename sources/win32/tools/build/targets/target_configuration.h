@@ -1,6 +1,6 @@
 #pragma once
 
-#define CONFIGURED_TARGETS_COUNT 12
+#define CONFIGURED_TARGETS_COUNT 13
 
 typedef b32 (build_function_type)(build_context *);
 

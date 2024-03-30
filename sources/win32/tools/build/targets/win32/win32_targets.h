@@ -9,3 +9,4 @@ b32 BuildImguiDemo(build_context *BuildContext);
 b32 BuildLint(build_context *BuildContext);
 b32 BuildRayTracer(build_context *BuildContext);
 b32 BuildSimulator(build_context *BuildContext);
+b32 BuildRefTerm(build_context *BuildContext);

@@ -23,4 +23,5 @@ build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
     {"os", &BuildOsFloppyDiskImage, NULL, NULL, NULL},
     {"verilog_demo", &BuildVerilogDemo, NULL, NULL, NULL},
     {"uart_app", &BuildUARTApp, NULL, NULL, NULL},
+    {"refterm", &BuildRefTerm, NULL, NULL, NULL},
 };

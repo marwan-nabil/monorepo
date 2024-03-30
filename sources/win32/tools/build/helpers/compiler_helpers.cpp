@@ -71,7 +71,6 @@ b32 LinkWithGCC(build_context *BuildContext)
     return Result;
 }
 
-
 b32 CompileShader(build_context *BuildContext)
 {
     char CompilerCommand[1024];
@@ -81,6 +80,29 @@ b32 CompileShader(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo \"");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "\" ");
+    FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+
+    b32 Result = CreateProcessAndWait(CompilerCommand);
+    if (!Result)
+    {
+        ConsolePrintColored
+        (
+            "ERROR: shader compilation failed.\n",
+            FOREGROUND_RED
+        );
+    }
+
+    ClearBuildContext(BuildContext);
+    return Result;
+}
+
+b32 CompileShader2(build_context *BuildContext)
+{
+    char CompilerCommand[1024];
+    *CompilerCommand = {};
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "fxc.exe ");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
     FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
