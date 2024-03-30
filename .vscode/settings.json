@@ -8,8 +8,8 @@
         "tools/": true,
         "binary_data/": true,
 
-        "sources/hdl": true,
-        "sources/win32": true,
+        // "sources/hdl": true,
+        // "sources/win32": true,
         // "sources/i686-elf": true,
     },
 
