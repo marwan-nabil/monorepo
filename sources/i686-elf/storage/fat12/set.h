@@ -3,7 +3,6 @@
 void InitializeFat12RamDisk
 (
     disk_parameters *DiskParameters,
-    memory_arena *MemoryArena,
     fat12_ram_disk *RamDisk
 );
 

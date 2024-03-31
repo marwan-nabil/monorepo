@@ -1,17 +1,10 @@
 -------------
 dependencies:
 -------------
-for all projects:
-    - MSVC: https://visualstudio.microsoft.com/
-
-for the os project:
-    - nasm: https://nasm.us/
-    - qemu: https://www.qemu.org/
-    - bochs: https://sourceforge.net/projects/bochs/
-    - gcc cross compiler
-
-for hdl projects:
-    - icarus verilog + GTKWave: https://bleyer.org/icarus/
+- nasm: https://nasm.us/
+- qemu: https://www.qemu.org/
+- bochs: https://sourceforge.net/projects/bochs/
+- gcc cross compiler
 
 for building the gcc cross compiler:
     - cygwin
@@ -19,14 +12,13 @@ for building the gcc cross compiler:
     - binutils-2.41 source code
 
 -------------------------------------------
-how to install nasm, bochs, qemu and iverilog
+how to install nasm, bochs, qemu
 -------------------------------------------
 - downlaod all of them
 - install them in the folders:
     - tools/nasm
     - tools/bochs
     - tools/qemu
-    - tools/iverilog
 
 -----------------------------------------------
 how to setup a windows-based gcc cross compiler

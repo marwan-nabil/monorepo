@@ -19,8 +19,8 @@ b32 BuildRayTracer(build_context *BuildContext)
         return FALSE;
     }
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\ray_tracer\\main.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\ray_tracer\\brdf.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\apps\\ray_tracer\\main.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\apps\\ray_tracer\\brdf.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\file_system\\files.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /O2 /GR- /EHa- /MTd /fp:fast /fp:except-");

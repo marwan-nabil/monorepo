@@ -27,8 +27,7 @@ void FileIoInitialize
         TransientMemoryAddress
     );
 
-    InitializeFat12RamDisk(&Context->DiskParameters, &Context->TransientMemoryArena, &Context->Fat12RamDisk);
-    FreeMemoryArena(&Context->TransientMemoryArena);
+    InitializeFat12RamDisk(&Context->DiskParameters, &Context->Fat12RamDisk);
 
     Context->OpenFilesCount = 0;
     for (u16 Index = 0; Index < FILE_IO_MAX_OPEN_FILES; Index++)

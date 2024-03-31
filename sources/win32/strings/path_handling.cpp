@@ -59,15 +59,23 @@ CreateFilePathSegmentList(char *FileFullPath)
     return LastFilePathNode;
 }
 
-void RemoveLastSegmentFromPath(char *Path)
+void RemoveLastSegmentFromPath(char *Path, b8 KeepSlash)
 {
     u32 PathLength = StringLength(Path);
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
     {
         if (Path[CharIndex] == '\\')
         {
-            ZeroMemory(&Path[CharIndex], StringLength(&Path[CharIndex]));
-            return;
+            if (KeepSlash)
+            {
+                ZeroMemory(&Path[CharIndex + 1], StringLength(&Path[CharIndex]));
+                return;
+            }
+            else
+            {
+                ZeroMemory(&Path[CharIndex], StringLength(&Path[CharIndex]));
+                return;
+            }
         }
     }
 }

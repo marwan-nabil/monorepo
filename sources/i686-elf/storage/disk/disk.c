@@ -32,7 +32,7 @@ void TranslateLbaToChs
 {
     *Cylinder = (LogicalBlockAddress / DiskParameters->Sectors) / DiskParameters->Heads;
     *Head = (LogicalBlockAddress / DiskParameters->Sectors) % DiskParameters->Heads;
-    *Sector = (LogicalBlockAddress % DiskParameters->Sectors) + 1;
+    *Sector = (LogicalBlockAddress % DiskParameters->Sectors) + 1; // sector indices start from 1
 }
 
 void ReadDiskSectors

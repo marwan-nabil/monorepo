@@ -196,7 +196,7 @@ static glyph_hash ComputeGlyphHash(size_t Count, char unsigned *At, char unsigne
         At += 16;
 
         HashValue = _mm_xor_si128(HashValue, In);
-        HashValue = _mm_aesdec_si128(HashValue, _mm_setzero_si128());
+        HashValue = _mm_aesdec_si128(HashValue, _mm_setzero_si128()); // NOTE: illegal instruction on my shitty laptop
         HashValue = _mm_aesdec_si128(HashValue, _mm_setzero_si128());
         HashValue = _mm_aesdec_si128(HashValue, _mm_setzero_si128());
         HashValue = _mm_aesdec_si128(HashValue, _mm_setzero_si128());

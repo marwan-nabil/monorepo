@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         ArrayCount(BuildContext.EnvironmentInfo.RootDirectoryPath),
         BuildContext.EnvironmentInfo.OutputDirectoryPath
     );
-    RemoveLastSegmentFromPath(BuildContext.EnvironmentInfo.RootDirectoryPath);
+    RemoveLastSegmentFromPath(BuildContext.EnvironmentInfo.RootDirectoryPath, FALSE);
 
     BuildContext.EnvironmentInfo.argc = argc;
     BuildContext.EnvironmentInfo.argv = argv;

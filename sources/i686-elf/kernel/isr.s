@@ -1,6 +1,6 @@
 bits 32
 
-%include "sources\i686-elf\kernel\isr.i"
+%include "i686-elf\kernel\isr.i"
 
 ISRsCommon:
     pusha ; push all general purpose registers

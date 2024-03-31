@@ -12,14 +12,10 @@
 void InitializeFat12RamDisk
 (
     disk_parameters *DiskParameters,
-    memory_arena *MemoryArena,
     fat12_ram_disk *RamDisk
 )
 {
-    boot_sector *RamBootSector = PushStruct(MemoryArena, boot_sector);
-    ReadDiskSectors(DiskParameters, 0, 1, RamBootSector);
-    MemoryCopy(&RamDisk->BootSectorHeader, RamBootSector, sizeof(boot_sector_header));
-
+    ReadDiskSectors(DiskParameters, 0, 1, &RamDisk->BootSectorHeader);
     ReadDiskSectors(DiskParameters, 1, FAT12_SECTORS_IN_FAT, &RamDisk->Fat);
     ReadDiskSectors
     (

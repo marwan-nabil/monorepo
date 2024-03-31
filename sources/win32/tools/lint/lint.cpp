@@ -350,7 +350,7 @@ int main(int argc, char **argv)
 
     *RootDirectoryPath = {};
     StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
-    RemoveLastSegmentFromPath(RootDirectoryPath);
+    RemoveLastSegmentFromPath(RootDirectoryPath, FALSE);
 
     directory_node *FoundDirectoriesList = 0;
     file_node *FoundFilesList = 0;

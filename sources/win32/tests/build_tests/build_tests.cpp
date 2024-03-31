@@ -40,6 +40,7 @@ test_job_configuration TestJobConfiguration[] =
     {NULL, "build os"},
     {NULL, "build verilog_demo"},
     {NULL, "build uart_app"},
+    {NULL, "build refterm"},
 };
 
 void ProcessJob(test_job *Job)

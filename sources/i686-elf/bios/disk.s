@@ -1,9 +1,8 @@
-%include "sources\i686-elf\cpu\modes.i"
+%include "i686-elf\cpu\modes.i"
 
 ; ---------------------------------------
 ; resets the floppy disk
-; in:
-;       word [sp + 2] == driver number
+; b8 __attribute__((cdecl)) BIOSDiskReset(u8 DriveNumber);
 ; ---------------------------------------
 section .text
 global BIOSDiskReset 

@@ -148,6 +148,7 @@ b32 CompileWithMSVC(build_context *BuildContext)
         );
     }
 
+    // TODO: remove ClearBuildContext() from here
     ClearBuildContext(BuildContext);
     return Result;
 }

@@ -10,7 +10,7 @@
 
 b32 BuildSimulator(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\simulator\\*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\apps\\simulator\\*.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shell\\windows.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\rasterizer\\rasterizer.cpp");
 

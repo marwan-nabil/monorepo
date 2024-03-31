@@ -159,7 +159,7 @@ void PushSubTarget(build_context *BuildContext, const char *SubTargetRelativePat
 
 void PopSubTarget(build_context *BuildContext)
 {
-    RemoveLastSegmentFromPath(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    RemoveLastSegmentFromPath(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath, FALSE);
     SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 

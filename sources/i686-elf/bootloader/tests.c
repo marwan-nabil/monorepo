@@ -235,7 +235,7 @@ void Fat12Tests(u16 BootDriveNumber, void *FreeMemoryArea, print_context *PrintC
     );
 
     fat12_ram_disk *RamDisk = PushStruct(&LocalMemoryArena, fat12_ram_disk);
-    InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
+    InitializeFat12RamDisk(&DiskParameters, RamDisk);
 
     Fat12ListDirectory
     (
@@ -295,7 +295,7 @@ void Fat12Tests(u16 BootDriveNumber, void *FreeMemoryArea, print_context *PrintC
 
     PrintFormatted(PrintContext, "\r\n");
     PrintFormatted(PrintContext, "reload the disk to see if file system modifications are persistent.\r\n");
-    InitializeFat12RamDisk(&DiskParameters, &LocalMemoryArena, RamDisk);
+    InitializeFat12RamDisk(&DiskParameters, RamDisk);
 
     Fat12ListDirectory
     (
