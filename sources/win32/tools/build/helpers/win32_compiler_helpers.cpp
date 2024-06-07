@@ -65,7 +65,7 @@ b32 CompileWithMSVC(build_context *BuildContext)
     char CompilerCommand[KiloBytes(1)];
     *CompilerCommand = {};
 
-    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "cl.exe /c");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "cl.exe /c ");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerFlags);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /I");
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
@@ -105,8 +105,6 @@ b32 LinkWithMSVC(build_context *BuildContext)
         );
     }
 
-    // TODO: remove ClearBuildContext() from here
-    ClearBuildContext(BuildContext);
     return Result;
 }
 

@@ -28,5 +28,5 @@ pushd ..\tools\build
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 
-    del *.obj
+    @REM del *.obj
 popd

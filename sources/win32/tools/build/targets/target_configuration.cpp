@@ -11,7 +11,7 @@
 
 build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
 {
-    {"lint", &BuildLint, "[job_per_directory]", NULL, NULL},
+    {"lint", &BuildLintOptimized, "[job_per_directory]", NULL, NULL},
     {"fetch_data", &BuildFetchData, NULL, NULL, NULL},
     {"build_tests", &BuildBuildTests, NULL, NULL, NULL},
     {"fat12_tests", &BuildFat12Tests, NULL, NULL, NULL},
