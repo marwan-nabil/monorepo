@@ -6,13 +6,13 @@
 
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"
-#include "..\..\helpers\compiler_helpers.h"
+#include "..\..\helpers\win32_compiler_helpers.h"
 
-b32 BuildLint(build_context *BuildContext)
+b32 BuildLintOptimized(build_context *BuildContext)
 {
-    AddCompilerSourceFileIfRecompilationNeeded(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
-    AddCompilerSourceFileIfRecompilationNeeded(BuildContext, "\\sources\\win32\\libraries\\file_system\\files.cpp");
-    AddCompilerSourceFileIfRecompilationNeeded(BuildContext, "\\sources\\win32\\libraries\\strings\\path_handling.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\file_system\\files.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\strings\\path_handling.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
@@ -36,7 +36,7 @@ b32 BuildLint(build_context *BuildContext)
     return BuildSuccess;
 }
 
-b32 BuildLintOld(build_context *BuildContext)
+b32 BuildLint(build_context *BuildContext)
 {
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\file_system\\files.cpp");
