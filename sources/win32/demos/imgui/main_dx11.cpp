@@ -10,7 +10,7 @@
 #include "sources\win32\libraries\basic_defines.h"
 #include "sources\win32\libraries\system\version.h"
 #include "sources\win32\libraries\shell\dpi.h"
-#include "sources\win32\imgui\imgui.h"
+#include "sources\win32\libraries\imgui\imgui.h"
 #include "win32_backend.h"
 #include "dx11_backend.h"
 

@@ -5,7 +5,7 @@
 
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
-#include "sources\win32\imgui\imgui.h"
+#include "sources\win32\libraries\imgui\imgui.h"
 #include "dx11_backend.h"
 
 // Backend data stored in ImGuiIoInterface.BackendRendererUserData to allow support for multiple Dear ImGui contexts

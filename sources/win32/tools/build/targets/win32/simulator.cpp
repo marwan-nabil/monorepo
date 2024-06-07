@@ -10,9 +10,9 @@
 
 b32 BuildSimulator(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\apps\\simulator\\*.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shell\\windows.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\rasterizer\\rasterizer.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\applications\\simulator\\*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\shell\\windows.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\rasterizer\\rasterizer.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Z7 /FC /Oi /Od /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");

@@ -6,10 +6,12 @@ dependencies:
 - bochs: https://sourceforge.net/projects/bochs/
 - gcc cross compiler
 
-for building the gcc cross compiler:
-    - cygwin
-    - gcc-13.2.0 source code
-    - binutils-2.41 source code
+-------------------------------------------------
+dependencies for building the gcc cross compiler:
+-------------------------------------------------
+- cygwin
+- gcc-13.2.0 source code
+- binutils-2.41 source code
 
 -------------------------------------------
 how to install nasm, bochs, qemu
@@ -21,7 +23,7 @@ how to install nasm, bochs, qemu
     - tools/qemu
 
 -----------------------------------------------
-how to setup a windows-based gcc cross compiler
+how to build a windows-based gcc cross compiler
 -----------------------------------------------
 - download and install cygwin in tools/cygwin
 - install those cygwin packages:

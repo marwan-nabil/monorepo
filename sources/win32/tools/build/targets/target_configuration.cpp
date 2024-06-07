@@ -16,7 +16,7 @@ build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
     {"build_tests", &BuildBuildTests, NULL, NULL, NULL},
     {"fat12_tests", &BuildFat12Tests, NULL, NULL, NULL},
     {"simulator", &BuildSimulator, NULL, NULL, NULL},
-    {"directx_demo", &BuildDirectxDemo, "[debug, release]", NULL, NULL},
+    {"directx_demo", &BuildDirectxDemo, NULL, NULL, NULL},
     {"handmade_hero", &BuildHandmadeHero, NULL, NULL, NULL},
     {"imgui_demo", &BuildImguiDemo, "[opengl2, dx11]", NULL, NULL},
     {"ray_tracer", &BuildRayTracer, "[1_lane, 4_lanes, 8_lanes]", NULL, NULL},

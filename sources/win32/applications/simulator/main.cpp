@@ -11,7 +11,7 @@
 #include "sources\win32\libraries\math\vector3.h"
 #include "sources\win32\libraries\math\vector4.h"
 #include "sources\win32\libraries\math\rectangle2.h"
-#include "sources\win32\rasterizer\rasterizer.h"
+#include "sources\win32\libraries\rasterizer\rasterizer.h"
 #include "sources\win32\libraries\shell\windows.h"
 #include "sources\win32\libraries\system\timing.h"
 

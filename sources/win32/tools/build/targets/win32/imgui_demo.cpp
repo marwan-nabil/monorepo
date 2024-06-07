@@ -23,9 +23,9 @@ b32 BuildImguiDemo(build_context *BuildContext)
         return FALSE;
     }
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\imgui\\imgui*.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\shell\\dpi.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\system\\version.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\imgui\\imgui*.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\shell\\dpi.cpp");
+    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\system\\version.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\imgui\\win32_backend.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /Zi /MD /utf-8");

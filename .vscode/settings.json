@@ -7,9 +7,9 @@
         "outputs/": true,
         "tools/": true,
         // "binary_data/": true,
-        // "i686-elf/": true,
-        // "hdl/": true,
-        // "win32/": true,
+        // "sources/i686-elf/": true,
+        // "sources/hdl/": true,
+        // "sources/win32/": true,
     },
 
     "C_Cpp.default.defines":
