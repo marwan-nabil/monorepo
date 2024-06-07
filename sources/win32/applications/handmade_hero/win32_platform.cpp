@@ -1167,12 +1167,7 @@ WinMain
                 while (Win32PlatformState.IsRunning)
                 {
                     FILETIME LastWriteTimeForDLL = Win32GetFileLastWriteTime(GameCodeDLLPath);
-                    if
-                    (
-                        CompareFileTime(&LastWriteTimeForDLL, &GameCode.LastWriteTimeForLoadedDLL)
-                        !=
-                        0
-                    )
+                    if (CompareFileTime(&LastWriteTimeForDLL, &GameCode.LastWriteTimeForLoadedDLL) != 0)
                     {
                         WIN32_FILE_ATTRIBUTE_DATA IgnoredParameter = {};
                         if

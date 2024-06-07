@@ -21,6 +21,6 @@ b32 BuildFetchData(build_context *BuildContext)
 
     SetLinkerOutputBinary(BuildContext, "\\fetch_data.exe");
 
-    b32 BuildSuccess = CompileWithMSVC(BuildContext);
+    b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     return BuildSuccess;
 }

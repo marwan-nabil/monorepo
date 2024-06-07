@@ -90,7 +90,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     AddLinkerFlags(BuildContext, SharedLinkerFlags);
     AddLinkerFlags(BuildContext, "/subsystem:windows");
     SetLinkerOutputBinary(BuildContext, "\\refterm_debug_msvc.exe");
-    BuildSuccess = CompileWithMSVC(BuildContext);
+    BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
@@ -104,7 +104,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     AddLinkerFlags(BuildContext, SharedLinkerFlags);
     AddLinkerFlags(BuildContext, "/subsystem:windows");
     SetLinkerOutputBinary(BuildContext, "\\refterm_release_msvc.exe");
-    BuildSuccess = CompileWithMSVC(BuildContext);
+    BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
@@ -117,7 +117,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     AddLinkerFlags(BuildContext, SharedLinkerFlags);
     AddLinkerFlags(BuildContext, "/subsystem:console");
     SetLinkerOutputBinary(BuildContext, "\\splat.exe");
-    BuildSuccess = CompileWithMSVC(BuildContext);
+    BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;
@@ -130,7 +130,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     AddLinkerFlags(BuildContext, SharedLinkerFlags);
     AddLinkerFlags(BuildContext, "/subsystem:console");
     SetLinkerOutputBinary(BuildContext, "\\splat2.exe");
-    BuildSuccess = CompileWithMSVC(BuildContext);
+    BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;

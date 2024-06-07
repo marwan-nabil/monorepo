@@ -119,7 +119,33 @@ b32 CompileShader2(build_context *BuildContext)
     return Result;
 }
 
+// NOTE: a work in progress
 b32 CompileWithMSVC(build_context *BuildContext)
+{
+    char CompilerCommand[KiloBytes(1)];
+    *CompilerCommand = {};
+
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), "cl.exe /c");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerFlags);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /I");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
+    FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+
+    b32 Result = CreateProcessAndWait(CompilerCommand);
+    if (!Result)
+    {
+        ConsolePrintColored
+        (
+            "ERROR: compilation failed.\n",
+            FOREGROUND_RED
+        );
+    }
+
+    return Result;
+}
+
+b32 CompileAndLinkWithMSVC(build_context *BuildContext)
 {
     char CompilerCommand[KiloBytes(2)];
     *CompilerCommand = {};

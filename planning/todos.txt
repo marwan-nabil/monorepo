@@ -1,7 +1,10 @@
 =====================
         bugs
 =====================
-- build system bug, refterm folder is not deleted by > build clean.
+=> build system bugs:
+     - refterm folder is not deleted by "build clean".
+     - called fromt the build system "clean_all" command context, the EmptyDirectory()
+     function doesn't have a console output when it succeeds/fails in deleting files.
 
 ==================================
      build system improvement

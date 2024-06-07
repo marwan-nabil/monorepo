@@ -22,6 +22,6 @@ b32 BuildFat12Tests(build_context *BuildContext)
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref user32.lib");
     SetLinkerOutputBinary(BuildContext, "\\fat12_tests.exe");
 
-    b32 BuildSuccess = CompileWithMSVC(BuildContext);
+    b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     return BuildSuccess;
 }

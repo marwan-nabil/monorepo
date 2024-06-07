@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdint.h>
 #include <math.h>
+#include <fileapi.h>
 
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
@@ -116,6 +117,19 @@ b32 WriteBinaryFileOverAnother(char *DestinationBinaryFilePath, char *SourceBina
 
     FreeFileMemory(SourceBinary);
     FreeFileMemory(DestinationBinary);
+
+    return Result;
+}
+
+FILETIME GetFileLastWriteTime(char *FileName)
+{
+    FILETIME Result = {};
+
+    WIN32_FILE_ATTRIBUTE_DATA FileAttributes;
+    if (GetFileAttributesEx(FileName, GetFileExInfoStandard, &FileAttributes))
+    {
+        Result = FileAttributes.ftLastWriteTime;
+    }
 
     return Result;
 }

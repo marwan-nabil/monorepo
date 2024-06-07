@@ -11,3 +11,4 @@ read_file_result ReadFileIntoMemory(char *FilePath);
 b32 WriteFileFromMemory(char *FilePath, void *DataToWrite, u32 DataSize);
 b32 CreateEmptyFile(char *FilePath, u32 Size, u32 FillPattern);
 b32 WriteBinaryFileOverAnother(char *DestinationBinaryFilePath, char *SourceBinaryFilePath, u32 WriteOffset);
+FILETIME GetFileLastWriteTime(char *FileName);

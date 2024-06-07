@@ -22,7 +22,7 @@ b32 BuildDirectxDemo(build_context *BuildContext)
 
     SetLinkerOutputBinary(BuildContext, "\\directx_demo.exe");
 
-    b32 BuildSuccess = CompileWithMSVC(BuildContext);
+    b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     if (!BuildSuccess)
     {
         return FALSE;

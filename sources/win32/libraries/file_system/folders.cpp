@@ -105,17 +105,16 @@ b32 DoesDirectoryExist(const char *DirectoryPath)
 
 void DeleteDirectoryCompletely(const char *DirectoryPath)
 {
-    SHFILEOPSTRUCT ShellOperation =
-    {
-        NULL,
-        FO_DELETE,
-        DirectoryPath,
-        "",
-        FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
-        FALSE,
-        0,
-        ""
-    };
+    SHFILEOPSTRUCT ShellOperation;
+    ShellOperation.hwnd = NULL;
+    ShellOperation.wFunc = FO_DELETE;
+    ShellOperation.pFrom = DirectoryPath;
+    ShellOperation.pTo = "";
+    ShellOperation.fFlags = FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
+    ShellOperation.fAnyOperationsAborted = FALSE;
+    ShellOperation.hNameMappings = 0;
+    ShellOperation.lpszProgressTitle = "";
+
     SHFileOperation(&ShellOperation);
 }
 
@@ -131,33 +130,27 @@ void EmptyDirectory(const char *DirectoryPath)
     {
         do
         {
-            if
-            (
-                (FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ==
-                FILE_ATTRIBUTE_DIRECTORY
-            )
+            if (FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
             {
                 if
                 (
-                    (strcmp(FindOperationData.cFileName, ".") == 0) ||
-                    (strcmp(FindOperationData.cFileName, "..") == 0)
+                    (strcmp(FindOperationData.cFileName, ".") != 0) &&
+                    (strcmp(FindOperationData.cFileName, "..") != 0)
                 )
                 {
-                    continue;
+                    char SubDirectoryPath[1024] = {};
+                    StringCchCatA(SubDirectoryPath, 1024, DirectoryPath);
+                    StringCchCatA(SubDirectoryPath, 1024, "\\");
+                    StringCchCatA(SubDirectoryPath, 1024, FindOperationData.cFileName);
+                    DeleteDirectoryCompletely(SubDirectoryPath);
                 }
-
-                char SubDirectoryPath[1024] = {};
-                StringCchCatA(SubDirectoryPath, 1024, DirectoryPath);
-                StringCchCatA(SubDirectoryPath, 1024, "\\");
-                StringCchCatA(SubDirectoryPath, 1024, FindOperationData.cFileName);
-                DeleteDirectoryCompletely(SubDirectoryPath);
             }
             else
             {
-                char FoundFilePath[512] = {};
-                StringCchCatA(FoundFilePath, MAX_PATH, DirectoryPath);
-                StringCchCatA(FoundFilePath, MAX_PATH, "\\");
-                StringCchCatA(FoundFilePath, 512, FindOperationData.cFileName);
+                char FoundFilePath[1024] = {};
+                StringCchCatA(FoundFilePath, 1024, DirectoryPath);
+                StringCchCatA(FoundFilePath, 1024, "\\");
+                StringCchCatA(FoundFilePath, 1024, FindOperationData.cFileName);
 
                 b32 DeleteResult = DeleteFile(FoundFilePath);
                 if (DeleteResult == 0)

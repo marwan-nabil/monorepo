@@ -28,8 +28,8 @@ void ConsoleResetColor()
 
 void ConsolePrintColored(const char *String, WORD Color)
 {
-    ConsoleSwitchColor(Color);
+    SetConsoleTextAttribute(ConsoleContext.ConsoleHandle, Color);
     printf(String);
     fflush(stdout);
-    ConsoleResetColor();
+    SetConsoleTextAttribute(ConsoleContext.ConsoleHandle, ConsoleContext.OriginalConsoleAttributes);
 }

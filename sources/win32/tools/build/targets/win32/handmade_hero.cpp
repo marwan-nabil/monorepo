@@ -52,7 +52,7 @@ b32 BuildHandmadeHero(build_context *BuildContext)
     StringCchCatA(LockFilePath, ArrayCount(LockFilePath), "compilation.lock");
 
     CreateFileA(LockFilePath, 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-    b32 BuildSuccess = CompileWithMSVC(BuildContext);
+    b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     DeleteFileA(LockFilePath);
     if (!BuildSuccess)
     {
@@ -70,6 +70,6 @@ b32 BuildHandmadeHero(build_context *BuildContext)
 
     SetLinkerOutputBinary(BuildContext, "\\win32_platform.exe");
 
-    BuildSuccess = CompileWithMSVC(BuildContext);
+    BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     return BuildSuccess;
 }

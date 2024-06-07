@@ -20,6 +20,6 @@ b32 BuildBuildTests(build_context *BuildContext)
     SetCompilerIncludePath(BuildContext, "\\");
     AddLinkerFlags(BuildContext, "/subsystem:console /incremental:no /opt:ref user32.lib");
     SetLinkerOutputBinary(BuildContext, "\\build_tests.exe");
-    b32 BuildSuccess = CompileWithMSVC(BuildContext);
+    b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
     return BuildSuccess;
 }
