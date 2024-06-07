@@ -8,9 +8,9 @@
 #include <directxcolors.h>
 #include <dxgi.h>
 
-#include "sources\win32\base_types.h"
-#include "sources\win32\basic_defines.h"
-#include "sources\win32\math\floats.h"
+#include "sources\win32\libraries\base_types.h"
+#include "sources\win32\libraries\basic_defines.h"
+#include "sources\win32\libraries\math\floats.h"
 #include "directx_demo.h"
 
 application_data GlobalApplicationData;

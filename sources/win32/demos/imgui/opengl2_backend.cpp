@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <GL\GL.h>
 
-#include "sources\win32\base_types.h"
-#include "sources\win32\basic_defines.h"
+#include "sources\win32\libraries\base_types.h"
+#include "sources\win32\libraries\basic_defines.h"
 #include "sources\win32\imgui\imgui.h"
 #include "opengl2_backend.h"
 

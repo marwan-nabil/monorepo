@@ -5,10 +5,10 @@
 #include <shellscalingapi.h>
 #include <dwmapi.h>
 
-#include "sources\win32\base_types.h"
-#include "sources\win32\basic_defines.h"
-#include "sources\win32\shell\dpi.h"
-#include "sources\win32\system\version.h"
+#include "sources\win32\libraries\base_types.h"
+#include "sources\win32\libraries\basic_defines.h"
+#include "sources\win32\libraries\shell\dpi.h"
+#include "sources\win32\libraries\system\version.h"
 #include "sources\win32\imgui\imgui.h"
 #include "win32_backend.h"
 

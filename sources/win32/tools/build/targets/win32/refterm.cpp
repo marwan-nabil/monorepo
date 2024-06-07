@@ -1,11 +1,11 @@
 #include <Windows.h>
 #include <stdint.h>
 #include <strsafe.h>
-#include "sources\win32\base_types.h"
-#include "sources\win32\basic_defines.h"
-#include "sources\win32\strings\string_list.h"
-#include "sources\win32\strings\strings.h"
-#include "sources\win32\strings\path_handling.h"
+#include "sources\win32\libraries\base_types.h"
+#include "sources\win32\libraries\basic_defines.h"
+#include "sources\win32\libraries\strings\string_list.h"
+#include "sources\win32\libraries\strings\strings.h"
+#include "sources\win32\libraries\strings\path_handling.h"
 
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"

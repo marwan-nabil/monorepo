@@ -1,1 +1,12 @@
-=> build system bug, refterm folder is not deleted by > build clean.
+=====================
+        bugs
+=====================
+- build system bug, refterm folder is not deleted by > build clean.
+
+==================================
+     build system improvement
+==================================
+- build tool
+    - add a way to get and compare last modified time of the files
+    - skip rebuilding of object files if their inputs (source files and their headers) haven't changed
+    - add function to analyze source code files and determine all of their dependencies
