@@ -15,7 +15,21 @@ static void BuildDependencyGraph()
     CreateArtifact("\\sources\\win32\\libraries\\basic_defines.h");
     CreateArtifact("\\outputs\\lint\\lint.obj");
 
-    AddArtifactDependencyLink(Artifact, DependencyArtifact);
+    AddArtifactDependency
+    (
+        GetArtifact("\\sources\\win32\\tools\\lint\\lint.cpp"),
+        GetArtifact("\\sources\\win32\\libraries\\base_types.h")
+    );
+    AddArtifactDependency
+    (
+        GetArtifact("\\sources\\win32\\tools\\lint\\lint.cpp"),
+        GetArtifact("\\sources\\win32\\libraries\\basic_defines.h")
+    );
+    AddArtifactDependency
+    (
+        GetArtifact("\\outputs\\lint\\lint.obj"),
+        GetArtifact("\\sources\\win32\\tools\\lint\\lint.cpp")
+    );
 }
 
 b32 BuildLintOptimized(build_context *BuildContext)
