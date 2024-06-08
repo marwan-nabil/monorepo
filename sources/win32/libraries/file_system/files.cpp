@@ -120,16 +120,3 @@ b32 WriteBinaryFileOverAnother(char *DestinationBinaryFilePath, char *SourceBina
 
     return Result;
 }
-
-FILETIME GetFileLastWriteTime(char *FileName)
-{
-    FILETIME Result = {};
-
-    WIN32_FILE_ATTRIBUTE_DATA FileAttributes;
-    if (GetFileAttributesEx(FileName, GetFileExInfoStandard, &FileAttributes))
-    {
-        Result = FileAttributes.ftLastWriteTime;
-    }
-
-    return Result;
-}

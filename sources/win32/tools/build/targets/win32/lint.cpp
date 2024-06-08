@@ -7,29 +7,30 @@
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"
 #include "..\..\helpers\win32_compiler_helpers.h"
+#include "..\..\helpers\artifact_handling.h"
+
 
 static void BuildDependencyGraph()
 {
-    CreateArtifact("\\sources\\win32\\tools\\lint\\lint.cpp");
-    CreateArtifact("\\sources\\win32\\libraries\\base_types.h");
-    CreateArtifact("\\sources\\win32\\libraries\\basic_defines.h");
-    CreateArtifact("\\outputs\\lint\\lint.obj");
+    artifact_list_node *ArtifactsList = NULL;
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\base_types.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\basic_defines.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\math\\floats.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\math\\scalar_conversions.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\file_system\\files.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\strings\\strings.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\strings\\path_handling.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\libraries\\math\\floats.h");
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\tools\\lint\\lint.h");
 
-    AddArtifactDependency
-    (
-        GetArtifact("\\sources\\win32\\tools\\lint\\lint.cpp"),
-        GetArtifact("\\sources\\win32\\libraries\\base_types.h")
-    );
-    AddArtifactDependency
-    (
-        GetArtifact("\\sources\\win32\\tools\\lint\\lint.cpp"),
-        GetArtifact("\\sources\\win32\\libraries\\basic_defines.h")
-    );
-    AddArtifactDependency
-    (
-        GetArtifact("\\outputs\\lint\\lint.obj"),
-        GetArtifact("\\sources\\win32\\tools\\lint\\lint.cpp")
-    );
+    artifact_table_entry *ArtifactEntry = AddArtifact("\\sources\\win32\\tools\\lint\\lint.cpp");
+    ArtifactEntry->Dependencies = ArtifactsList;
+
+    ArtifactsList = NULL;
+    PushArtifactList(&ArtifactsList, "\\sources\\win32\\tools\\lint\\lint.cpp");
+    
+    ArtifactEntry = AddArtifact("\\outputs\\lint\\lint.obj");
+    ArtifactEntry->Dependencies = ArtifactsList;
 }
 
 b32 BuildLintOptimized(build_context *BuildContext)

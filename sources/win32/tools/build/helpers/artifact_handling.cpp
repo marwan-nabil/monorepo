@@ -10,7 +10,7 @@
 artifact_table_entry *ArtifactTable[256];
 artifact_table_entry *ArtifactTableEntriesFreeList;
 
-u32 GetHashOfFileName(char *FilePath, u32 HashValueLimit)
+static u32 GetHashOfFileName(char *FilePath, u32 HashValueLimit)
 {
     u32 HashValue = 0;
     char *FileName = GetPointerToLastSegmentFromPath(FilePath);
@@ -23,38 +23,76 @@ u32 GetHashOfFileName(char *FilePath, u32 HashValueLimit)
     return HashValue;
 }
 
-void AddArtifact(char *FilePath)
+artifact_table_entry *AddArtifact(char *FilePath)
 {
-    artifact_table_entry *ResultEntry = 0;
+    artifact_table_entry *ArtifactEntry = NULL;
     u32 HashValue = GetHashOfFileName(FilePath, ArrayCount(ArtifactTable));
-
     for
     (
         artifact_table_entry *CurrentEntry = ArtifactTable[HashValue];
         CurrentEntry;
-        CurrentEntry = CurrentEntry->NextEntry;
+        CurrentEntry = CurrentEntry->NextEntry
     )
     {
         if (strcmp(FilePath, CurrentEntry->FilePath) == 0)
         {
-            return;
+            ArtifactEntry = CurrentEntry;
         }
     }
 
-    if (ArtifactTableEntriesFreeList)
+    if (!ArtifactEntry)
     {
-        ResultEntry = ArtifactTableEntriesFreeList;
-        ArtifactTableEntriesFreeList = ArtifactTableEntriesFreeList->NextEntry;
-    }
-    else
-    {
-        ResultEntry = (artifact_table_entry *)malloc(sizeof(artifact_table_entry));
+        if (ArtifactTableEntriesFreeList)
+        {
+            ArtifactEntry = ArtifactTableEntriesFreeList;
+            ArtifactTableEntriesFreeList = ArtifactTableEntriesFreeList->NextEntry;
+        }
+        else
+        {
+            ArtifactEntry = (artifact_table_entry *)malloc(sizeof(artifact_table_entry));
+        }
+
+        ArtifactEntry->NextEntry = ArtifactTable[HashValue];
+        ArtifactTable[HashValue] = ArtifactEntry;
+
+        memcpy(ArtifactEntry->FilePath, FilePath, ArrayCount(ArtifactEntry->FilePath));
+        ArtifactEntry->Dependencies = NULL;
+
+        WIN32_FILE_ATTRIBUTE_DATA FileAttributes;
+        if (GetFileAttributesEx(FilePath, GetFileExInfoStandard, &FileAttributes))
+        {
+            ArtifactEntry->FileExists = TRUE;
+            ArtifactEntry->FileLastWriteTime = FileAttributes.ftLastWriteTime;
+        }
+        else
+        {
+            ArtifactEntry->FileExists = FALSE;
+            ArtifactEntry->FileLastWriteTime.dwLowDateTime = 0;
+            ArtifactEntry->FileLastWriteTime.dwHighDateTime = 0;
+        }
     }
 
-    ResultEntry->NextEntry = ArtifactTable[HashValue];
-    ArtifactTable[HashValue] = ResultEntry;
+    return ArtifactEntry;
+}
 
-    memset(ResultEntry->FilePath, FilePath, ArrayCount(ResultEntry->FilePath));
-    ResultEntry->FileExists = ;
-    ResultEntry->FileLastWriteTime = ;
+void PushArtifactList(artifact_list_node **List, char *FilePath)
+{
+    artifact_table_entry *Artifact = AddArtifact(FilePath);
+    artifact_list_node *NewNode = (artifact_list_node *)malloc(sizeof(artifact_list_node));
+    NewNode->Artifact = Artifact;
+    NewNode->NextNode = *List;
+    *List = NewNode;
+}
+
+void FreeArtifactList(artifact_list_node *RootNode)
+{
+    artifact_list_node *CurrentNode = RootNode;
+    artifact_list_node *ChildNode;
+
+    while (CurrentNode)
+    {
+        ChildNode = CurrentNode->NextNode;
+        free(CurrentNode);
+        CurrentNode = ChildNode;
+    }
 }
