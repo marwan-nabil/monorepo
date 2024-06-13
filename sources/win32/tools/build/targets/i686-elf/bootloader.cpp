@@ -78,7 +78,7 @@ b32 BuildBootloaderImage(build_context *BuildContext)
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=bootloader.map");
-    SetLinkerScriptPath(BuildContext, "\\sources\\i686-elf\\bootloader\\linker.lds");
+    SetLinkerScriptPath(BuildContext, "\\configuration\\i686-elf\\linker\\bootloader.lds");
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
     {

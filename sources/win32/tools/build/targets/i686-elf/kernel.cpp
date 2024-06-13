@@ -80,7 +80,7 @@ b32 BuildKernelImage(build_context *BuildContext)
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
-    SetLinkerScriptPath(BuildContext, "\\sources\\i686-elf\\kernel\\linker.lds");
+    SetLinkerScriptPath(BuildContext, "\\configuration\\i686-elf\\linker\\kernel.lds");
     
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
     {
