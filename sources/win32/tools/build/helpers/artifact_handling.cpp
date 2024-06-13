@@ -19,7 +19,7 @@ static u32 GetHashOfFileName(char *FilePath, u32 HashValueLimit)
         HashValue += (u32)*FileName;
         FileName++;
     }
-    HashValue &= HashValueLimit;
+    HashValue = HashValue % HashValueLimit;
     return HashValue;
 }
 
@@ -95,4 +95,18 @@ void FreeArtifactList(artifact_list_node *RootNode)
         free(CurrentNode);
         CurrentNode = ChildNode;
     }
+}
+
+artifact_list_node *MakeArtifactList(string_node *ArtifactPathsList, char *RootDirectoryPath)
+{
+    artifact_list_node *Result = NULL;
+
+    // char AbsoluteFilePath[ArrayCount(Result->)];
+
+    // for ()
+    // {
+    //     PushArtifactList(&Result, AbsoluteFilePath);
+    // }
+
+    return Result;
 }

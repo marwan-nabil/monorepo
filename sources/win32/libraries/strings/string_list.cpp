@@ -6,17 +6,13 @@
 
 #include "string_list.h"
 
-string_node *PushStringNode(string_node **List)
+string_node *PushStringNode(string_node **List, char *String)
 {
-    // TODO: this implmentation sucks, change it to something that
-    // just takes a string and a next node pointer
     string_node *NewNode = (string_node *)malloc(sizeof(string_node));
     ZeroMemory(NewNode->String, MAX_STRING_LENGTH);
-    if (List)
-    {
-        NewNode->NextString = *List;
-        *List = NewNode;
-    }
+    StringCchCat(NewNode->String, ArrayCount(NewNode->String), String);
+    NewNode->NextString = *List;
+    *List = NewNode;
     return NewNode;
 }
 

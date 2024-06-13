@@ -8,6 +8,6 @@ struct string_node
     string_node *NextString;
 };
 
-string_node *PushStringNode(string_node **List);
+string_node *PushStringNode(string_node **List, char *String);
 void FreeStringList(string_node *RootNode);
 void FlattenStringList(string_node *ListNode, char *Output, u32 OutputSize);

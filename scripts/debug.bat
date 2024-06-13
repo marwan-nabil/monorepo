@@ -1,7 +1,7 @@
 @echo off
 
 if "%1"=="build" (
-    devenv ..\tools\build\build.exe
+    devenv build\build.exe
 )
 
 if "%1"=="refterm" (

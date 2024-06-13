@@ -42,11 +42,9 @@ void SetCompilerIncludePath(build_context *BuildContext, const char *IncludePath
 
 void AddCompilerSourceFile(build_context *BuildContext, const char *SourceFile)
 {
-    string_node *NewNode = PushStringNode(&BuildContext->CompilationInfo.Sources);
-    StringCchCatA
+    string_node *NewNode = PushStringNode
     (
-        NewNode->String,
-        ArrayCount(NewNode->String),
+        &BuildContext->CompilationInfo.Sources,
         BuildContext->EnvironmentInfo.RootDirectoryPath
     );
     StringCchCatA
@@ -107,11 +105,9 @@ void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFi
 
 void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
 {
-    string_node *NewNode = PushStringNode(&BuildContext->LinkingInfo.LinkerInputs);
-    StringCchCatA
+    string_node *NewNode = PushStringNode
     (
-        NewNode->String,
-        ArrayCount(NewNode->String),
+        &BuildContext->LinkingInfo.LinkerInputs,
         BuildContext->EnvironmentInfo.TargetOutputDirectoryPath
     );
     StringCchCatA

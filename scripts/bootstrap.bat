@@ -2,12 +2,12 @@
 
 set root_path=%cd%\..
 set cc_flags=/O2
-
 if "%1"=="debug" (
     set cc_flags=/Od /Z7
 )
 
-pushd ..\tools\build
+if not exist build; mkdir build
+pushd build
     cl^
         /nologo %cc_flags% /Oi /FC /GR- /EHa-^
         /W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018^
@@ -28,5 +28,8 @@ pushd ..\tools\build
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 
-    @REM del *.obj
+    copy build.exe %root_path%\tools\build
+    if "%1"=="debug" (
+        copy build.pdb %root_path%\tools\build
+    )
 popd

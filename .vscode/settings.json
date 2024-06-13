@@ -6,7 +6,7 @@
 
     "files.exclude":
     {
-        "outputs/": true,
+        // "outputs/": true,
         "tools/": true,
         // "binary_data/": true,
         // "sources/i686-elf/": true,
