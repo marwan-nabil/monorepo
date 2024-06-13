@@ -7,36 +7,10 @@
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"
 #include "..\..\helpers\win32_compiler_helpers.h"
-#include "..\..\helpers\artifact_handling.h"
-
-static void BuildDependencyGraph()
-{
-    string_node *DependenciesList = NULL;
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\base_types.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\math\\floats.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\math\\scalar_conversions.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\file_system\\files.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\strings\\strings.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\strings\\path_handling.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\libraries\\math\\floats.h");
-    PushStringNode(&DependenciesList, "\\sources\\win32\\tools\\lint\\lint.h");
-
-    artifact_list_node *ArtifactsList = NULL;
-
-    artifact_table_entry *ArtifactEntry = AddArtifact("C:\\monorepo\\sources\\win32\\tools\\lint\\lint.cpp");
-    ArtifactEntry->Dependencies = ArtifactsList;
-
-    ArtifactsList = NULL;
-    PushArtifactList(&ArtifactsList, "C:\\monorepo\\sources\\win32\\tools\\lint\\lint.cpp");
-
-    ArtifactEntry = AddArtifact("C:\\monorepo\\outputs\\lint\\lint.obj");
-    ArtifactEntry->Dependencies = ArtifactsList;
-}
+#include "..\..\artifact_handling\artifact_handling.h"
 
 b32 BuildLintOptimized(build_context *BuildContext)
 {
-    BuildDependencyGraph();
-
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\file_system\\files.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\strings\\path_handling.cpp");

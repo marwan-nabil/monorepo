@@ -1,0 +1,14 @@
+[
+    {
+        "name": "job_per_file",
+        "type": "build_time_condition",
+        "command_line_argument_index": 2,
+        "command_line_argument_value": "job_per_file"
+    },
+    {
+        "name": "job_per_directory",
+        "type": "build_time_condition",
+        "command_line_argument_index": 2,
+        "command_line_argument_value": "job_per_directory"
+    }
+]

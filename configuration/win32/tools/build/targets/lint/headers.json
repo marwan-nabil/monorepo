@@ -1,0 +1,42 @@
+[
+    {
+        "name": "base_types.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\base_types.h"
+    },
+    {
+        "name": "basic_defines.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\basic_defines.h"
+    },
+    {
+        "name": "floats.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\math\\floats.h"
+    },
+    {
+        "name": "scalar_conversions.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\math\\scalar_conversions.h"
+    },
+    {
+        "name": "files.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\file_system\\files.h"
+    },
+    {
+        "name": "strings.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\strings\\strings.h"
+    },
+    {
+        "name": "path_handling.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\libraries\\strings\\path_handling.h"
+    },
+    {
+        "name": "lint.h",
+        "type": "cpp_header_file",
+        "artifact_path": "\\sources\\win32\\tools\\lint\\lint.h"
+    }
+]

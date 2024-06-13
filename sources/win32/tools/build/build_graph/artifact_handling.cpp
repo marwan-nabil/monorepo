@@ -96,17 +96,3 @@ void FreeArtifactList(artifact_list_node *RootNode)
         CurrentNode = ChildNode;
     }
 }
-
-// artifact_list_node *MakeArtifactList(string_node *ArtifactPathsList, char *RootDirectoryPath)
-// {
-//     artifact_list_node *Result = NULL;
-
-//     // char AbsoluteFilePath[ArrayCount(Result->)];
-
-//     // for ()
-//     // {
-//     //     PushArtifactList(&Result, AbsoluteFilePath);
-//     // }
-
-//     return Result;
-// }

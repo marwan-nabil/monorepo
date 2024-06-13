@@ -1,0 +1,51 @@
+[
+    {
+        "name": "static_compiler_flags",
+        "type": "string_list",
+        "strings": [
+            "/nologo /Z7 /FC /Oi /GR- /EHa- /fp:fast /fp:except-",
+            "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018",
+            "/DENABLE_ASSERTIONS /D_CRT_SECURE_NO_WARNINGS"
+        ]
+    },
+    {
+        "name": "compiler_flag_variant_0",
+        "type": "string",
+        "value": "/DJOB_PER_DIRECTORY"
+    },
+    {
+        "name": "compiler_flag_variant_1",
+        "type": "string",
+        "value": "/DJOB_PER_FILE"
+    },
+    {
+        "name": "build_time_compiler_flags",
+        "type": "conditional_string",
+        "conditional_string_values": [
+            {
+                "condition_name": ":job_per_file",
+                "value": "/DJOB_PER_FILE"
+            },
+            {
+                "condition_name": ":job_per_directory",
+                "value": "/DJOB_PER_DIRECTORY"
+            }
+        ]
+    },
+    {
+        "name": "lint_compiler_flags",
+        "type": "string_reference_list",
+        "string_references": [
+            ":static_compiler_flags",
+            ":build_time_compiler_flags"
+        ]
+    },
+    {
+        "name": "lint_linker_flags",
+        "type": "string_list",
+        "strings": [
+            "/NOLOGO /DEBUG /subsystem:console /incremental:no /opt:ref /NODEFAULTLIB:LIBCMT",
+            "Shlwapi.lib libcmtd.lib"
+        ]
+    }
+]
