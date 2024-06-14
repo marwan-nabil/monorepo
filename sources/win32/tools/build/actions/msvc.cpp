@@ -9,8 +9,8 @@
 #include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "..\build.h"
-#include "build_helpers.h"
+#include "build_context.h"
+#include "msvc.h"
 
 b32 CompileShader(build_context *BuildContext)
 {

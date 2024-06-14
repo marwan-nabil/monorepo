@@ -23,6 +23,12 @@ struct build_object
     void *Contents;
 };
 
+struct build_object_table_entry
+{
+    build_object BuildObject;
+    build_object_table_entry *NextEntry;
+};
+
 struct build_time_condition
 {
     u32 CommandLineArgumentIndex;
@@ -36,26 +42,26 @@ struct string
 
 struct string_list
 {
-    u32 Count;
     char **Strings;
+    u32 StringsCount;
 };
 
 struct string_reference_list
 {
-    u32 Count;
     char **StringReferences;
+    u32 StringReferencesCount;
 };
 
 struct conditional_string_value
 {
-    char *ConditionName;
+    char *Condition;
     char *Value;
 };
 
 struct conditional_string
 {
-    u32 Count;
     conditional_string_value **ConditionalStringValues;
+    u32 ConditionalStringValuesCount;
 };
 
 struct cpp_header_file
@@ -85,3 +91,6 @@ struct win32_executable_file
     char **ObjectDependencies;
     u32 ObjectDependenciesCount;
 };
+
+build_object *GetBuildObject(char *Name);
+build_object *AddBuildObject(char *Name, build_object_type Type);

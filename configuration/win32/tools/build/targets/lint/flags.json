@@ -23,11 +23,11 @@
         "type": "conditional_string",
         "conditional_string_values": [
             {
-                "condition_name": ":job_per_file",
+                "condition": ":job_per_file",
                 "value": "/DJOB_PER_FILE"
             },
             {
-                "condition_name": ":job_per_directory",
+                "condition": ":job_per_directory",
                 "value": "/DJOB_PER_DIRECTORY"
             }
         ]

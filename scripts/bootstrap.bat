@@ -18,14 +18,15 @@ pushd build
         %root_path%\sources\win32\tools\build\targets\hdl\*.cpp^
         %root_path%\sources\win32\tools\build\targets\win32\*.cpp^
         %root_path%\sources\win32\tools\build\targets\i686-elf\*.cpp^
-        %root_path%\sources\win32\tools\build\helpers\*.cpp^
-        %root_path%\sources\win32\tools\build\build_graph\*.cpp^
+        %root_path%\sources\win32\tools\build\actions\*.cpp^
+        %root_path%\sources\win32\tools\build\graph\*.cpp^
         %root_path%\sources\win32\libraries\shell\console.cpp^
         %root_path%\sources\win32\libraries\file_system\*.cpp^
         %root_path%\sources\win32\libraries\strings\path_handling.cpp^
         %root_path%\sources\win32\libraries\strings\string_list.cpp^
         %root_path%\sources\win32\libraries\system\processes.cpp^
         %root_path%\sources\win32\libraries\file_system\fat12\*.cpp^
+        %root_path%\sources\win32\libraries\cJSON\*.c^
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 

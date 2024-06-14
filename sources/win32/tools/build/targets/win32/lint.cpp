@@ -1,16 +1,32 @@
 #include <Windows.h>
 #include <stdint.h>
+#include <strsafe.h>
+
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
 #include "sources\win32\libraries\strings\string_list.h"
+#include "sources\win32\libraries\file_system\files.h"
+#include "sources\win32\libraries\cJSON\cJSON.h"
 
 #include "..\..\build.h"
 #include "..\..\helpers\build_helpers.h"
 #include "..\..\helpers\win32_compiler_helpers.h"
-#include "..\..\artifact_handling\artifact_handling.h"
+
+void MakeBuildGraph(build_context *BuildContext)
+{
+    char FilePath[1024] = {};
+    StringCchCatA(FilePath, ArrayCount(FilePath), BuildContext->EnvironmentInfo.RootDirectoryPath);
+    StringCchCatA(FilePath, ArrayCount(FilePath), "\\configuration\\win32\\tools\\build\\targets\\lint\\headers.json");
+
+    read_file_result File = ReadFileIntoMemory(FilePath);
+    cJSON *Json = cJSON_ParseWithLength((char *)File.FileMemory, File.Size);
+    FreeFileMemory(File);
+}
 
 b32 BuildLintOptimized(build_context *BuildContext)
 {
+    MakeBuildGraph(BuildContext);
+
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tools\\lint\\lint.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\file_system\\files.cpp");
     AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\strings\\path_handling.cpp");

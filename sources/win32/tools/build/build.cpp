@@ -13,6 +13,7 @@
 
 #include "build.h"
 #include "targets\target_configuration.h"
+#include "actions\build_context.h"
 
 void DisplayHelp()
 {
