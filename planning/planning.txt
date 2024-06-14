@@ -1,0 +1,29 @@
+=====================
+        bugs
+=====================
+- build system bugs
+     - refterm folder is not deleted by "build clean".
+     - called fromt the build system "clean_all" command context, the EmptyDirectory()
+     function doesn't have a console output when it succeeds/fails in deleting files.
+
+==================================
+     build system improvement
+==================================
+- build tool
+     - add a way to get and compare last modified time of the files
+     - skip rebuilding of object files if their inputs (source files and their headers) haven't changed
+     - add function to analyze source code files and determine all of their dependencies
+     - add a command to try to compile a single source file to make development faster
+
+- create a tool to determine unnecessary header file dependencies in sources
+     - the command will parse source code files and find the #included headers
+     - the command will try to determine if the headers are needed or not
+     - the tool will try to compile the source file without the header file
+     - if the build succeeds, the header file is then unnecessary and can be removed
+     - the tool will create a report of the unnecessary header #includes
+
+=========================================
+     x86 operating system development
+=========================================
+- overall code review for the i686-elf platform source code
+- allow access for BIOS functions both through real & protected 32-bit mode

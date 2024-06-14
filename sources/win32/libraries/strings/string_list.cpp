@@ -6,14 +6,13 @@
 
 #include "string_list.h"
 
-string_node *PushStringNode(string_node **List, char *String)
+void PushStringNode(string_node **List, char *String)
 {
     string_node *NewNode = (string_node *)malloc(sizeof(string_node));
     ZeroMemory(NewNode->String, MAX_STRING_LENGTH);
     StringCchCat(NewNode->String, ArrayCount(NewNode->String), String);
     NewNode->NextString = *List;
     *List = NewNode;
-    return NewNode;
 }
 
 void FreeStringList(string_node *RootNode)

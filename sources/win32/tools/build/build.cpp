@@ -6,10 +6,10 @@
 
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
+#include "sources\win32\libraries\strings\string_list.h"
 #include "sources\win32\libraries\shell\console.h"
 #include "sources\win32\libraries\file_system\folders.h"
 #include "sources\win32\libraries\strings\path_handling.h"
-#include "sources\win32\libraries\strings\string_list.h"
 
 #include "actions\build_context.h"
 #include "targets\target_configuration.h"

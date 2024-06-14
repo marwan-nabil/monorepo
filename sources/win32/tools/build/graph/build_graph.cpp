@@ -1,10 +1,13 @@
 #include <Windows.h>
 #include <stdint.h>
+#include <strsafe.h>
 
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
 #include "sources\win32\libraries\strings\path_handling.h"
 #include "sources\win32\libraries\shell\console.h"
+#include "sources\win32\libraries\file_system\files.h"
+#include "sources\win32\libraries\cJSON\cJSON.h"
 
 #include "build_graph.h"
 
@@ -45,6 +48,11 @@ build_object *GetBuildObject(char *Name)
 
 build_object *AddBuildObject(char *Name, build_object_type Type)
 {
+    if (Type == BOT_INVALID)
+    {
+        return NULL;
+    }
+
     build_object_table_entry *Entry = NULL;
     u32 HashValue = GetHashOfBuildObjectName(Name, ArrayCount(BuildObjectTable));
     for
@@ -75,10 +83,11 @@ build_object *AddBuildObject(char *Name, build_object_type Type)
         Entry = (build_object_table_entry *)malloc(sizeof(build_object_table_entry));
     }
 
+    ZeroMemory(Entry, sizeof(build_object_table_entry));
     Entry->NextEntry = BuildObjectTable[HashValue];
     BuildObjectTable[HashValue] = Entry;
 
-    memcpy(Entry->BuildObject.Name, Name, ArrayCount(Entry->BuildObject.Name));
+    StringCchCatA(Entry->BuildObject.Name, ArrayCount(Entry->BuildObject.Name), Name);
     Entry->BuildObject.Type = Type;
 
     return &Entry->BuildObject;

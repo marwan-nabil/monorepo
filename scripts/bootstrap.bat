@@ -7,6 +7,7 @@ if "%1"=="debug" (
 )
 
 if not exist build; mkdir build
+if exist %root_path%\tools\build\build.exe; del /Q %root_path%\tools\build\build.exe
 pushd build
     cl^
         /nologo %cc_flags% /Oi /FC /GR- /EHa-^
@@ -30,8 +31,10 @@ pushd build
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 
-    copy build.exe %root_path%\tools\build
-    if "%1"=="debug" (
-        copy build.pdb %root_path%\tools\build
+    if %errorlevel%==0 (
+        copy build.exe %root_path%\tools\build
+        if "%1"=="debug" (
+            copy build.pdb %root_path%\tools\build
+        )
     )
 popd

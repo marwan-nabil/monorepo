@@ -1,0 +1,40 @@
+[
+    {
+        "name": "lint.exe",
+        "type": "win32_executable_file",
+        "artifact_path": "\\outputs\\lint\\lint.exe",
+        "object_dependencies": [
+            ":lint.obj",
+            ":files.obj",
+            ":path_handling.obj"
+        ],
+        "linker_flags": ":lint_linker_flags"
+    },
+    {
+        "name": "lint.obj",
+        "type": "msvc_object_file",
+        "artifact_path": "\\outputs\\lint\\lint.obj",
+        "source_dependencies": [
+            ":lint.cpp"
+        ],
+        "compiler_flags": ":lint_compiler_flags"
+    },
+    {
+        "name": "files.obj",
+        "type": "msvc_object_file",
+        "artifact_path": "\\outputs\\lint\\files.obj",
+        "source_dependencies": [
+            ":files.cpp"
+        ],
+        "compiler_flags": ":lint_compiler_flags"
+    },
+    {
+        "name": "path_handling.obj",
+        "type": "msvc_object_file",
+        "artifact_path": "\\outputs\\lint\\path_handling.obj",
+        "source_dependencies": [
+            ":path_handling.cpp"
+        ],
+        "compiler_flags": ":lint_compiler_flags"
+    }
+]

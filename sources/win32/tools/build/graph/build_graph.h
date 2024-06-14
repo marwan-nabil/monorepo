@@ -5,15 +5,16 @@
 
 enum build_object_type
 {
+    BOT_INVALID,
     BOT_STRING,
     BOT_STRING_LIST,
-    BOT_REFERENCE_LIST,
-    BOT_BUILD_TIME_STRING,
+    BOT_STRING_REFERENCE_LIST,
+    BOT_CONDITIONAL_STRING,
+    BOT_BUILD_TIME_CONDITION,
     BOT_CPP_HEADER_FILE,
     BOT_CPP_SOURCE_FILE,
     BOT_WIN32_EXECUTABLE_FILE,
     BOT_MSVC_OBJECT_FILE,
-    BOT_BUILD_TIME_CONDITION,
 };
 
 struct build_object
@@ -94,3 +95,4 @@ struct win32_executable_file
 
 build_object *GetBuildObject(char *Name);
 build_object *AddBuildObject(char *Name, build_object_type Type);
+void ParseFileIntoBuildObjects(char *FilePath);
