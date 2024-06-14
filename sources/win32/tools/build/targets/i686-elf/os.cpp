@@ -10,9 +10,7 @@
 #include "sources\win32\libraries\file_system\fat12\fat12_interface.h"
 #include "sources\win32\libraries\file_system\files.h"
 
-#include "..\..\build.h"
-#include "..\..\helpers\build_helpers.h"
-#include "..\..\helpers\compiler_helpers.h"
+#include "..\..\actions\build_context.h"
 #include "i686-elf_targets.h"
 
 static void AddTestFilesToDiskImage(build_context *BuildContext, fat12_disk *Fat12Disk)

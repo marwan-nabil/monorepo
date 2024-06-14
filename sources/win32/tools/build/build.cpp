@@ -11,9 +11,9 @@
 #include "sources\win32\libraries\strings\path_handling.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "build.h"
-#include "targets\target_configuration.h"
 #include "actions\build_context.h"
+#include "targets\target_configuration.h"
+#include "build.h"
 
 void DisplayHelp()
 {

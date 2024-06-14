@@ -7,9 +7,8 @@
 #include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\strings\path_handling.h"
 
-#include "..\..\build.h"
-#include "..\..\helpers\build_helpers.h"
-#include "..\..\helpers\win32_compiler_helpers.h"
+#include "..\..\actions\build_context.h"
+#include "..\..\actions\msvc.h"
 
 static b32 BuildShaders(build_context *BuildContext)
 {

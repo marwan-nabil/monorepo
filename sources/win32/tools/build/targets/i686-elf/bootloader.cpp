@@ -6,9 +6,9 @@
 #include "sources\win32\libraries\strings\path_handling.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "..\..\build.h"
-#include "..\..\helpers\build_helpers.h"
-#include "..\..\helpers\compiler_helpers.h"
+#include "..\..\actions\build_context.h"
+#include "..\..\actions\nasm.h"
+#include "..\..\actions\gcc.h"
 
 b32 BuildBootloaderImage(build_context *BuildContext)
 {

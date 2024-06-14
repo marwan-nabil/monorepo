@@ -8,9 +8,8 @@
 #include "sources\win32\libraries\file_system\files.h"
 #include "sources\win32\libraries\cJSON\cJSON.h"
 
-#include "..\..\build.h"
-#include "..\..\helpers\build_helpers.h"
-#include "..\..\helpers\win32_compiler_helpers.h"
+#include "..\..\actions\build_context.h"
+#include "..\..\actions\msvc.h"
 
 void MakeBuildGraph(build_context *BuildContext)
 {

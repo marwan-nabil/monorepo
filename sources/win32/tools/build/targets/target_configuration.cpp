@@ -3,11 +3,12 @@
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "..\build.h"
-#include "..\targets\i686-elf\i686-elf_targets.h"
-#include "..\targets\win32\win32_targets.h"
-#include "..\targets\hdl\hdl_targets.h"
+#include "..\actions\build_context.h"
+#include "i686-elf\i686-elf_targets.h"
+#include "win32\win32_targets.h"
+#include "hdl\hdl_targets.h"
 #include "target_configuration.h"
+#include "..\build.h"
 
 build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
 {

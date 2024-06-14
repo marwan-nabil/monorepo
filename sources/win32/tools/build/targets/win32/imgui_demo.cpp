@@ -6,9 +6,9 @@
 #include "sources\win32\libraries\shell\console.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
+#include "..\..\actions\build_context.h"
+#include "..\..\actions\msvc.h"
 #include "..\..\build.h"
-#include "..\..\helpers\build_helpers.h"
-#include "..\..\helpers\win32_compiler_helpers.h"
 
 b32 BuildImguiDemo(build_context *BuildContext)
 {
