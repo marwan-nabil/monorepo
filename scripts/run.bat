@@ -1,27 +1,29 @@
 @echo off
 
+set root_path=%cd%
+
 if "%1"=="verilog_demo" (
-    pushd verilog_demo
+    pushd outputs\verilog_demo
         vvp testbench.vvp
-        gtkwave -f demo.vcd
+        start gtkwave -f demo.vcd
     popd
 )
 
 if "%1"=="uart_app" (
-    pushd uart_app
+    pushd outputs\uart_app
         vvp uart_app.vvp
-        gtkwave -f uart_app.vcd
+        start gtkwave -f uart_app.vcd
     popd
 )
 
 if "%1"=="os" (
-    pushd os
-        qemu-system-x86_64 -drive format=raw,file=floppy.img
+    pushd outputs\os
+        start qemu-system-x86_64 -drive format=raw,file=floppy.img
     popd
 )
 
 if "%1"=="os_debug" (
-    pushd os
-        bochsdbg.exe -q -f ..\..\configuration\i686-elf\bochs.txt
+    pushd outputs\os
+        start bochsdbg -q -f %root_path%\configuration\i686-elf\bochs.txt
     popd
 )

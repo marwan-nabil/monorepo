@@ -23,6 +23,7 @@
 #include "sources\win32\libraries\strings\path_handling.h"
 #include "lint.h"
 
+// TODO: remove this global path, all functions should use absolute paths
 char RootDirectoryPath[1024];
 
 b32 ProcessDirectory(char *DirectoryRelativePath, directory_node **FoundDirectoriesList, file_node **FoundFilesList)
@@ -345,12 +346,7 @@ WorkerThreadEntry(void *Parameter)
 
 int main(int argc, char **argv)
 {
-    char OutputDirectoryPath[1024] = {};
-    _getcwd(OutputDirectoryPath, sizeof(OutputDirectoryPath));
-
-    *RootDirectoryPath = {};
-    StringCchCatA(RootDirectoryPath, ArrayCount(RootDirectoryPath), OutputDirectoryPath);
-    RemoveLastSegmentFromPath(RootDirectoryPath, FALSE);
+    _getcwd(RootDirectoryPath, sizeof(RootDirectoryPath));
 
     directory_node *FoundDirectoriesList = 0;
     file_node *FoundFilesList = 0;

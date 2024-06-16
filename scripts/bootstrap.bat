@@ -1,14 +1,17 @@
 @echo off
 
-set root_path=%cd%\..
+set root_path=%cd%
+
 set cc_flags=/O2
 if "%1"=="debug" (
     set cc_flags=/Od /Z7
 )
 
-if not exist build; mkdir build
-if exist %root_path%\tools\build\build.exe; del /Q %root_path%\tools\build\build.exe
-pushd build
+if not exist tools\build; mkdir tools\build
+if exist tools\build\build.exe; del /Q tools\build\build.exe
+if exist tools\build\build.pdb; del /Q tools\build\build.pdb
+
+pushd tools\build
     cl^
         /nologo %cc_flags% /Oi /FC /GR- /EHa-^
         /W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018^
@@ -31,10 +34,5 @@ pushd build
         /Fe:build.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 
-    if %errorlevel%==0 (
-        copy build.exe %root_path%\tools\build
-        if "%1"=="debug" (
-            copy build.pdb %root_path%\tools\build
-        )
-    )
+    del /Q *.obj
 popd

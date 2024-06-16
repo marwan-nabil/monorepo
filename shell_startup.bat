@@ -17,9 +17,7 @@ set path=%cd%\tools\build;%path%
 set path=%cd%\tools\lint;%path%
 set path=%cd%\scripts;%path%
 
-@REM setup MSVC environment
+@REM setup MSVC & windows SDK environment
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 if not exist outputs; mkdir outputs
-if not exist tools\build; mkdir tools\build
-cd outputs

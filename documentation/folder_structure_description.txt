@@ -3,6 +3,7 @@ binary_data/
 
 configuration/
     text-based configuration data, parsable by tools or applications at runtime.
+    organized into separate folders for each target platform.
 
 documentation/
     documents, guides, specifications and descriptions

@@ -18,10 +18,10 @@ b32 BuildKernelImage(build_context *BuildContext)
     char *AssemblyFiles[] =
     {
         "\\sources\\i686-elf\\kernel\\isr.s",
-        "\\sources\\i686-elf\\cpu\\gdt.s",
-        "\\sources\\i686-elf\\cpu\\idt.s",
-        "\\sources\\i686-elf\\cpu\\io.s",
-        "\\sources\\i686-elf\\cpu\\panic.s",
+        "\\sources\\i686-elf\\libraries\\cpu\\gdt.s",
+        "\\sources\\i686-elf\\libraries\\cpu\\idt.s",
+        "\\sources\\i686-elf\\libraries\\cpu\\io.s",
+        "\\sources\\i686-elf\\libraries\\cpu\\panic.s",
     };
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
@@ -49,15 +49,15 @@ b32 BuildKernelImage(build_context *BuildContext)
         "\\sources\\i686-elf\\kernel\\isr.c",
         "\\sources\\i686-elf\\kernel\\descriptor_tables.c",
         "\\sources\\i686-elf\\kernel\\tests.c",
-        "\\sources\\i686-elf\\vga\\vga.c",
-        "\\sources\\i686-elf\\strings\\strings.c",
-        "\\sources\\i686-elf\\strings\\path_handling.c",
-        "\\sources\\i686-elf\\strings\\print.c",
-        "\\sources\\i686-elf\\cpu\\timing.c",
-        "\\sources\\i686-elf\\cpu\\gdt.c",
-        "\\sources\\i686-elf\\cpu\\idt.c",
-        "\\sources\\i686-elf\\memory\\arena_allocator.c",
-        "\\sources\\i686-elf\\memory\\memory.c",
+        "\\sources\\i686-elf\\libraries\\vga\\vga.c",
+        "\\sources\\i686-elf\\libraries\\strings\\strings.c",
+        "\\sources\\i686-elf\\libraries\\strings\\path_handling.c",
+        "\\sources\\i686-elf\\libraries\\strings\\print.c",
+        "\\sources\\i686-elf\\libraries\\cpu\\timing.c",
+        "\\sources\\i686-elf\\libraries\\cpu\\gdt.c",
+        "\\sources\\i686-elf\\libraries\\cpu\\idt.c",
+        "\\sources\\i686-elf\\libraries\\memory\\arena_allocator.c",
+        "\\sources\\i686-elf\\libraries\\memory\\memory.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)

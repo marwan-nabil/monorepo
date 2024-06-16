@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "build", "..\..\..\..\outputs\build\build.exe", "{A70E6B59-4113-4FE3-8C1E-0299301882AE}"
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "build", "..\..\..\..\tools\build\build.exe", "{A70E6B59-4113-4FE3-8C1E-0299301882AE}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\monorepo\outputs\build\build.exe
+		Executable = C:\monorepo\tools\build\build.exe
 		RemoteMachine = DESKTOP-4SH2POT
-		StartingDirectory = C:\monorepo\outputs\
-		Arguments = lint
+		StartingDirectory = C:\monorepo\
+		Arguments = clean
 		Environment = Default
 		LaunchingEngine = 00000000-0000-0000-0000-000000000000
 		UseLegacyDebugEngines = No

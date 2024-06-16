@@ -389,10 +389,10 @@ main(i32 argc, char **argv)
     MaterialsArray[0].EmmissionColor = V3(0.3, 0.4, 0.5);
 
     MaterialsArray[1].ReflectionColor = V3(0.5, 0.5, 0.5);
-    LoadReflectionDataForMaterial("..\\data\\ray_tracer\\cayman.astm", &MaterialsArray[1]);
+    LoadReflectionDataForMaterial("binary_data\\ray_tracer\\cayman.astm", &MaterialsArray[1]);
 
     MaterialsArray[2].ReflectionColor = V3(0.7, 0.5, 0.3);
-    LoadReflectionDataForMaterial("..\\data\\ray_tracer\\garnet_red.astm", &MaterialsArray[2]);
+    LoadReflectionDataForMaterial("binary_data\\ray_tracer\\garnet_red.astm", &MaterialsArray[2]);
 
     MaterialsArray[3].EmmissionColor = V3(4, 0, 0);
 

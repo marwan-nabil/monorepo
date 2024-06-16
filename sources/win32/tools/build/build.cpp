@@ -48,17 +48,22 @@ int main(int argc, char **argv)
 
     _getcwd
     (
-        BuildContext.EnvironmentInfo.OutputDirectoryPath,
-        sizeof(BuildContext.EnvironmentInfo.OutputDirectoryPath)
+        BuildContext.EnvironmentInfo.RootDirectoryPath,
+        sizeof(BuildContext.EnvironmentInfo.RootDirectoryPath)
     );
 
     StringCchCatA
     (
-        BuildContext.EnvironmentInfo.RootDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.RootDirectoryPath),
-        BuildContext.EnvironmentInfo.OutputDirectoryPath
+        BuildContext.EnvironmentInfo.OutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
+        BuildContext.EnvironmentInfo.RootDirectoryPath
     );
-    RemoveLastSegmentFromPath(BuildContext.EnvironmentInfo.RootDirectoryPath, FALSE);
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.OutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
+        "\\outputs"
+    );
 
     BuildContext.EnvironmentInfo.argc = argc;
     BuildContext.EnvironmentInfo.argv = argv;
@@ -76,9 +81,13 @@ int main(int argc, char **argv)
     {
         for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
         {
-            if (DoesDirectoryExist(BuildTargetConfigurations[TargetIndex].TargetName))
+            char DirectoryName[1024] = {};
+            StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildContext.EnvironmentInfo.OutputDirectoryPath);
+            StringCchCat(DirectoryName, ArrayCount(DirectoryName), "\\");
+            StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildTargetConfigurations[TargetIndex].TargetName);
+            if (DoesDirectoryExist(DirectoryName))
             {
-                DeleteDirectoryCompletely(BuildTargetConfigurations[TargetIndex].TargetName);
+                DeleteDirectoryCompletely(DirectoryName);
             }
         }
         BuildSuccess = TRUE;
@@ -131,7 +140,7 @@ int main(int argc, char **argv)
             if (Result)
             {
                 BuildSuccess = FoundTargetConfig->BuildFunction(&BuildContext);
-                SetCurrentDirectory(BuildContext.EnvironmentInfo.OutputDirectoryPath);
+                SetCurrentDirectory(BuildContext.EnvironmentInfo.RootDirectoryPath);
             }
         }
         else

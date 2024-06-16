@@ -1,4 +1,4 @@
-%include "sources\i686-elf\cpu\modes.i"
+%include "sources\i686-elf\libraries\cpu\modes.i"
 
 ; --------------------
 ; writes a character using a BIOS function

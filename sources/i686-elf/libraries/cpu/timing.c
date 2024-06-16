@@ -1,5 +1,5 @@
-#include "sources\i686-elf\base_types.h"
-#include "sources\i686-elf\basic_defines.h"
+#include "sources\i686-elf\libraries\base_types.h"
+#include "sources\i686-elf\libraries\basic_defines.h"
 
 void SpinlockWait(u32 SleepLoops)
 {
