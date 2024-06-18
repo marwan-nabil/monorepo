@@ -117,8 +117,17 @@ b32 LoadMsvcObjectFileBuildObject(build_object *BuildObject, cJSON *JsonObject)
     return TRUE;
 }
 
-void ParseFileIntoBuildObjects(char *FilePath)
+void ParseFileIntoBuildObjects(char *FilePath, char *BuildConfigurationDirectoryPath)
 {
+    char PackagePathOfFile[BUILD_PACKAGE_PATH_LENGTH] = {};
+    file_path_segment_node *FilePathSegmentList = CreateFilePathSegmentList(FilePath);
+    file_path_segment_node *BuildConfigurationDirectorySegmentList = CreateFilePathSegmentList(BuildConfigurationDirectoryPath);
+    file_path_segment_node *RealPackagePathList = SkipSubPath(FilePathSegmentList, BuildConfigurationDirectorySegmentList);
+    FreeFilePathSegmentList(BuildConfigurationDirectorySegmentList);
+    FlattenPathSegmentList(RealPackagePathList, PackagePathOfFile, BUILD_PACKAGE_PATH_LENGTH, '/');
+    FreeFilePathSegmentList(RealPackagePathList);
+    RemoveLastSegmentFromPath(PackagePathOfFile, FALSE, '/');
+
     read_file_result File = ReadFileIntoMemory(FilePath);
     cJSON *FileRoot = cJSON_ParseWithLength((char *)File.FileMemory, File.Size);
     if (!FileRoot || !cJSON_IsArray(FileRoot))
@@ -146,7 +155,7 @@ void ParseFileIntoBuildObjects(char *FilePath)
 
         build_object_type ObjectType = GetBuildObjectTypeFromString(TypeElement->valuestring);
         cJSON *NameElement = cJSON_GetObjectItem(CurrentJsonObject, "name");
-        build_object *BuildObject = AddBuildObject(NameElement->valuestring, ObjectType);
+        build_object *BuildObject = AddBuildObject(NameElement->valuestring, ObjectType, PackagePathOfFile);
 
         b32 Succeeded = FALSE;
         switch (ObjectType)
@@ -167,6 +176,10 @@ void ParseFileIntoBuildObjects(char *FilePath)
             } break;
 
             case BOT_WIN32_EXECUTABLE_FILE:
+            {
+                // Succeeded = LoadWin32ExecutableFileBuildObject(BuildObject, CurrentJsonObject);
+            } break;
+
             case BOT_STRING_LIST:
             case BOT_STRING:
             case BOT_CONDITIONAL_STRING:

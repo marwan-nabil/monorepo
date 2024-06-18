@@ -58,8 +58,8 @@ static b32 BuildShaders(build_context *BuildContext)
         // StringCchCat(DestinationFileName, 1024, "\\");
         StringCchCat(DestinationFileName, 1024, FilesToMove[FileIndex]);
         MoveFile(SourceFileName, DestinationFileName);
-        RemoveLastSegmentFromPath(SourceFileName, TRUE);
-        RemoveLastSegmentFromPath(DestinationFileName, TRUE);
+        RemoveLastSegmentFromPath(SourceFileName, TRUE, '\\');
+        RemoveLastSegmentFromPath(DestinationFileName, TRUE, '\\');
     }
 
     return BuildSuccess;

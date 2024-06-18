@@ -8,7 +8,9 @@
             ":files.obj",
             ":path_handling.obj"
         ],
-        "linker_flags": ":lint_linker_flags"
+        "linker_flags": [
+            ":lint_linker_flags"
+        ]
     },
     {
         "name": "lint.obj",

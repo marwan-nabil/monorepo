@@ -18,20 +18,20 @@ directory_entry *Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePa
         return NULL;
     }
 
-    file_path_node *FirstNode = CreateFilePathSegmentList(FullFilePath);
+    file_path_segment_node *FirstNode = CreateFilePathSegmentList(FullFilePath);
     if (!FirstNode)
     {
         return NULL;
     }
 
-    file_path_node *CurrentNode = FirstNode;
+    file_path_segment_node *CurrentNode = FirstNode;
 
     char LocalFileName[8] = {};
     char LocalFileExtension[3] = {};
 
     GetFileNameAndExtensionFromString
     (
-        CurrentNode->FileName, LocalFileName, 8, LocalFileExtension, 3
+        CurrentNode->SegmentName, LocalFileName, 8, LocalFileExtension, 3
     );
 
     directory_entry *CurrentEntry = GetDirectoryEntryOfFileInRootDirectory
@@ -55,7 +55,7 @@ directory_entry *Fat12GetDirectoryEntryOfFile(fat12_disk *Disk, char *FullFilePa
 
         GetFileNameAndExtensionFromString
         (
-            CurrentNode->FileName, LocalFileName, 8, LocalFileExtension, 3
+            CurrentNode->SegmentName, LocalFileName, 8, LocalFileExtension, 3
         );
 
         CurrentEntry = GetDirectoryEntryOfFileInDirectory
@@ -86,13 +86,13 @@ directory_entry *Fat12AddFile(fat12_disk *Disk, char *FullFilePath, void *Memory
         return NULL;
     }
 
-    file_path_node *CurrentPathNode = CreateFilePathSegmentList(FullFilePath);
+    file_path_segment_node *CurrentPathNode = CreateFilePathSegmentList(FullFilePath);
 
     char LocalFileName[8] = {};
     char LocalFileExtension[3] = {};
     GetFileNameAndExtensionFromString
     (
-        CurrentPathNode->FileName, LocalFileName, 8, LocalFileExtension, 3
+        CurrentPathNode->SegmentName, LocalFileName, 8, LocalFileExtension, 3
     );
 
     if (!CurrentPathNode->ChildNode)
@@ -130,7 +130,7 @@ directory_entry *Fat12AddFile(fat12_disk *Disk, char *FullFilePath, void *Memory
 
         GetFileNameAndExtensionFromString
         (
-            CurrentPathNode->FileName, LocalFileName, 8, LocalFileExtension, 3
+            CurrentPathNode->SegmentName, LocalFileName, 8, LocalFileExtension, 3
         );
 
         if (!CurrentPathNode->ChildNode)
@@ -176,7 +176,7 @@ directory_entry *Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
         return NULL;
     }
 
-    file_path_node *CurrentPathNode = CreateFilePathSegmentList(DirectoryPath);
+    file_path_segment_node *CurrentPathNode = CreateFilePathSegmentList(DirectoryPath);
 
     if (!CurrentPathNode->ChildNode)
     {
@@ -185,7 +185,7 @@ directory_entry *Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
         (
             LocalDirectoryName,
             ArrayCount(LocalDirectoryName),
-            CurrentPathNode->FileName
+            CurrentPathNode->SegmentName
         );
 
         directory_entry *DirectoryDirectoryEntry = GetDirectoryEntryOfDirectoryInRootDirectory
@@ -210,7 +210,7 @@ directory_entry *Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
     }
 
     directory_entry *CurrentDirectoryEntry =
-        GetDirectoryEntryOfDirectoryInRootDirectory(Disk, CurrentPathNode->FileName);
+        GetDirectoryEntryOfDirectoryInRootDirectory(Disk, CurrentPathNode->SegmentName);
     CurrentPathNode = CurrentPathNode->ChildNode;
 
     while (CurrentPathNode)
@@ -222,7 +222,7 @@ directory_entry *Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
             (
                 LocalDirectoryName,
                 ArrayCount(LocalDirectoryName),
-                CurrentPathNode->FileName
+                CurrentPathNode->SegmentName
             );
 
             directory_entry *DirectoryDirectoryEntry =
@@ -250,7 +250,7 @@ directory_entry *Fat12AddDirectory(fat12_disk *Disk, char *DirectoryPath)
         {
             CurrentDirectoryEntry = GetDirectoryEntryOfDirectoryInDirectory
             (
-                Disk, CurrentDirectoryEntry, CurrentPathNode->FileName
+                Disk, CurrentDirectoryEntry, CurrentPathNode->SegmentName
             );
             CurrentPathNode = CurrentPathNode->ChildNode;
         }

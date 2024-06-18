@@ -9,10 +9,10 @@
 #include "path_handling.h"
 
 void
-FreeFilePathSegmentList(file_path_node *RootNode)
+FreeFilePathSegmentList(file_path_segment_node *RootNode)
 {
-    file_path_node *CurrentNode = RootNode;
-    file_path_node *ChildNode;
+    file_path_segment_node *CurrentNode = RootNode;
+    file_path_segment_node *ChildNode;
 
     while (CurrentNode)
     {
@@ -22,17 +22,18 @@ FreeFilePathSegmentList(file_path_node *RootNode)
     }
 }
 
-file_path_node *
+file_path_segment_node *
 CreateFilePathSegmentList(char *FileFullPath)
 {
-    char LocalPathBuffer[MAX_PATH] = {};
+    char LocalPathBuffer[1024] = {};
     StringCchCat(LocalPathBuffer, ArrayCount(LocalPathBuffer), FileFullPath);
 
     u32 PathLength = StringLength(LocalPathBuffer);
 
-    file_path_node *CurrentFilePathNode = (file_path_node *)malloc(sizeof(file_path_node));
+    file_path_segment_node *CurrentFilePathNode =
+        (file_path_segment_node *)malloc(sizeof(file_path_segment_node));
     *CurrentFilePathNode = {};
-    file_path_node *LastFilePathNode = 0;
+    file_path_segment_node *LastFilePathNode = 0;
 
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
     {
@@ -44,11 +45,11 @@ CreateFilePathSegmentList(char *FileFullPath)
 
             if (!CurrentFilePathNode)
             {
-                CurrentFilePathNode = (file_path_node *)malloc(sizeof(file_path_node));
+                CurrentFilePathNode = (file_path_segment_node *)malloc(sizeof(file_path_segment_node));
                 *CurrentFilePathNode = {};
             }
 
-            memcpy(CurrentFilePathNode->FileName, PathSegment, ArrayCount(CurrentFilePathNode->FileName));
+            memcpy(CurrentFilePathNode->SegmentName, PathSegment, ArrayCount(CurrentFilePathNode->SegmentName));
             CurrentFilePathNode->ChildNode = LastFilePathNode;
 
             LastFilePathNode = CurrentFilePathNode;
@@ -59,12 +60,12 @@ CreateFilePathSegmentList(char *FileFullPath)
     return LastFilePathNode;
 }
 
-void RemoveLastSegmentFromPath(char *Path, b8 KeepSlash)
+void RemoveLastSegmentFromPath(char *Path, b8 KeepSlash, char Separator)
 {
     u32 PathLength = StringLength(Path);
     for (i32 CharIndex = PathLength - 1; CharIndex >= 0; CharIndex--)
     {
-        if (Path[CharIndex] == '\\')
+        if (Path[CharIndex] == Separator)
         {
             if (KeepSlash)
             {
@@ -91,4 +92,47 @@ char *GetPointerToLastSegmentFromPath(char *Path)
         }
     }
     return NULL;
+}
+
+file_path_segment_node *SkipSubPath
+(
+    file_path_segment_node *Path,
+    file_path_segment_node *SubPathToSkip
+)
+{
+    file_path_segment_node *CurrentPathNode = Path;
+    file_path_segment_node *CurrentSubPathNode = SubPathToSkip;
+    while (CurrentPathNode && CurrentSubPathNode)
+    {
+        if (strcmp(CurrentPathNode->SegmentName, CurrentSubPathNode->SegmentName) == 0)
+        {
+            CurrentPathNode = CurrentPathNode->ChildNode;
+            CurrentSubPathNode = CurrentSubPathNode->ChildNode;
+        }
+        else
+        {
+            CurrentPathNode = Path;
+            break;
+        }
+    }
+
+    if (!CurrentPathNode)
+    {
+        CurrentPathNode = Path;
+    }
+
+    return CurrentPathNode;
+}
+
+void FlattenPathSegmentList(file_path_segment_node *PathList, char *TargetStringBuffer, u32 TargetBufferLength, char Separator)
+{
+    char SeparatorString[2] = {};
+    SeparatorString[0] = Separator;
+    file_path_segment_node *CurrentSegmentNode = PathList;
+    while (CurrentSegmentNode)
+    {
+        StringCchCatA(TargetStringBuffer, TargetBufferLength, SeparatorString);
+        StringCchCatA(TargetStringBuffer, TargetBufferLength, CurrentSegmentNode->SegmentName);
+        CurrentSegmentNode = CurrentSegmentNode->ChildNode;
+    }
 }

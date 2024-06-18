@@ -78,7 +78,7 @@ build_object *GetBuildObject(char *Name)
     return Result;
 }
 
-build_object *AddBuildObject(char *Name, build_object_type Type)
+build_object *AddBuildObject(char *Name, build_object_type Type, char *PackagePath)
 {
     if (Type == BOT_INVALID)
     {
@@ -120,6 +120,7 @@ build_object *AddBuildObject(char *Name, build_object_type Type)
     BuildObjectTable[HashValue] = Entry;
 
     StringCchCatA(Entry->BuildObject.Name, ArrayCount(Entry->BuildObject.Name), Name);
+    StringCchCatA(Entry->BuildObject.PackagePath, ArrayCount(Entry->BuildObject.PackagePath), PackagePath);
     Entry->BuildObject.Type = Type;
 
     return &Entry->BuildObject;

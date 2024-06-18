@@ -1,6 +1,7 @@
 #pragma once
 
 #define BUILD_OBJECT_NAME_LENGTH 64
+#define BUILD_PACKAGE_PATH_LENGTH 256
 #define BUILD_OBJECT_NAME_REFERENCE_LENGTH 1024
 #define ARTIFACT_MAX_FILE_PATH 1024
 
@@ -20,6 +21,7 @@ enum build_object_type
 struct build_object
 {
     char Name[BUILD_OBJECT_NAME_LENGTH];
+    char PackagePath[BUILD_PACKAGE_PATH_LENGTH];
     build_object_type Type;
     void *Contents;
 };
@@ -90,6 +92,5 @@ struct win32_executable_file
 };
 
 build_object *GetBuildObject(char *Name);
-build_object *AddBuildObject(char *Name, build_object_type Type);
-void ParseFileIntoBuildObjects(char *FilePath);
+build_object *AddBuildObject(char *Name, build_object_type Type, char *PackagePath);
 build_object_type GetBuildObjectTypeFromString(char *TypeString);

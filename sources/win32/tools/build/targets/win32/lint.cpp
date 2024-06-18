@@ -21,7 +21,7 @@ b32 BuildLintOptimized(build_context *BuildContext)
     string_node *CurrentNode = FilePathsList;
     while (CurrentNode)
     {
-        ParseFileIntoBuildObjects(CurrentNode->String);
+        ParseFileIntoBuildObjects(CurrentNode->String, BuildContext->EnvironmentInfo.BuildConfigurationDirectoryPath);
         CurrentNode = CurrentNode->NextString;
     }
     FreeStringList(FilePathsList);
