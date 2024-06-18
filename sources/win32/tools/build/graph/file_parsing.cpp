@@ -9,7 +9,7 @@
 #include "sources\win32\libraries\file_system\files.h"
 #include "sources\win32\libraries\cJSON\cJSON.h"
 
-#include "build_graph.h"
+#include "build_object.h"
 #include "file_parsing.h"
 
 static void ReportParseFailure(char *FilePath)
@@ -18,44 +18,6 @@ static void ReportParseFailure(char *FilePath)
     printf("ERROR: failed to parse input build description file.\n");
     printf("ERROR:      Error location: %s\n", FilePath);
     ConsoleResetColor();
-}
-
-static build_object_type GetBuildObjectTypeFromString(char *TypeString)
-{
-    build_object_type Result = BOT_INVALID;
-    if (strcmp(TypeString, "cpp_header_file") == 0)
-    {
-        Result = BOT_CPP_HEADER_FILE;
-    }
-    else if (strcmp(TypeString, "cpp_source_file") == 0)
-    {
-        Result = BOT_CPP_SOURCE_FILE;
-    }
-    else if (strcmp(TypeString, "win32_executable_file") == 0)
-    {
-        Result = BOT_WIN32_EXECUTABLE_FILE;
-    }
-    else if (strcmp(TypeString, "msvc_object_file") == 0)
-    {
-        Result = BOT_MSVC_OBJECT_FILE;
-    }
-    else if (strcmp(TypeString, "string_list") == 0)
-    {
-        Result = BOT_STRING_LIST;
-    }
-    else if (strcmp(TypeString, "conditional_string") == 0)
-    {
-        Result = BOT_CONDITIONAL_STRING;
-    }
-    else if (strcmp(TypeString, "string_reference_list") == 0)
-    {
-        Result = BOT_STRING_REFERENCE_LIST;
-    }
-    else if (strcmp(TypeString, "build_time_condition") == 0)
-    {
-        Result = BOT_BUILD_TIME_CONDITION;
-    }
-    return Result;
 }
 
 void ParseFileIntoBuildObjects(char *FilePath)
@@ -85,17 +47,59 @@ void ParseFileIntoBuildObjects(char *FilePath)
             return;
         }
 
-        build_object_type ElementType = GetBuildObjectTypeFromString(TypeElement->valuestring);
+        build_object_type ObjectType = GetBuildObjectTypeFromString(TypeElement->valuestring);
         cJSON *NameElement = cJSON_GetObjectItem(CurrentObject, "name");
-        build_object *BuildObject = AddBuildObject(NameElement->valuestring, ElementType);
+        build_object *BuildObject = AddBuildObject(NameElement->valuestring, ObjectType);
 
-        // switch (ElementType)
-        // {
-        //     case BOT_CPP_HEADER_FILE:
-        //     {
+        switch (ObjectType)
+        {
+            case BOT_CPP_HEADER_FILE:
+            {
+                BuildObject->Contents = malloc(sizeof(cpp_header_file));
+                cpp_header_file *Contents = (cpp_header_file *)BuildObject->Contents;
+                ZeroMemory(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath));
+                cJSON *ArtifactPathItem = cJSON_GetObjectItem(CurrentObject, "artifact_path");
+                if (!ArtifactPathItem)
+                {
+                    ReportParseFailure(FilePath);
+                    return;
+                }
+                StringCchCatA(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath), ArtifactPathItem->valuestring);
+            } break;
 
-        //     } break;
-        // }
+            case BOT_CPP_SOURCE_FILE:
+            {
+                BuildObject->Contents = malloc(sizeof(cpp_source_file));
+                cpp_source_file *Contents = (cpp_source_file *)BuildObject->Contents;
+                ZeroMemory(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath));
+                cJSON *ArtifactPathItem = cJSON_GetObjectItem(CurrentObject, "artifact_path");
+                if (!ArtifactPathItem)
+                {
+                    ReportParseFailure(FilePath);
+                    return;
+                }
+                StringCchCatA(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath), ArtifactPathItem->valuestring);
+
+                // Contents->HeaderDependenciesCount
+                cJSON *HeaderDependenciesElement = cJSON_GetObjectItem(CurrentObject, "header_dependencies");
+                if (!HeaderDependenciesElement || !cJSON_IsArray(HeaderDependenciesElement))
+                {
+                    ReportParseFailure(FilePath);
+                    return;
+                }
+                Contents->HeaderDependenciesCount = cJSON_GetArraySize(HeaderDependenciesElement);
+
+                // Contents->HeaderDependencies
+                Contents->HeaderDependencies = (char **)malloc(Contents->HeaderDependenciesCount * sizeof(char *));
+                for (u32 HeaderIndex = 0; HeaderIndex < Contents->HeaderDependenciesCount; HeaderIndex++)
+                {
+                    Contents->HeaderDependencies[HeaderIndex] = (char *)malloc(BUILD_OBJECT_NAME_REFERENCE_LENGTH);
+                    ZeroMemory(Contents->HeaderDependencies[HeaderIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH);
+                    cJSON *HeaderDependency = cJSON_GetArrayItem(HeaderDependenciesElement, HeaderIndex);
+                    StringCchCatA(Contents->HeaderDependencies[HeaderIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH, HeaderDependency->valuestring);
+                }
+            } break;
+        }
     }
 
     FreeFileMemory(File);

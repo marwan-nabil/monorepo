@@ -65,6 +65,19 @@ int main(int argc, char **argv)
         "\\outputs"
     );
 
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath),
+        BuildContext.EnvironmentInfo.RootDirectoryPath
+    );
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath),
+        "\\configuration\\win32\\build"
+    );
+
     BuildContext.EnvironmentInfo.argc = argc;
     BuildContext.EnvironmentInfo.argv = argv;
 

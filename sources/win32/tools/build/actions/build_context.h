@@ -7,6 +7,7 @@ struct environment_info
     char RootDirectoryPath[1024];
     char OutputDirectoryPath[1024];
     char TargetOutputDirectoryPath[1024];
+    char BuildConfigurationDirectoryPath[1024];
 };
 
 struct compilation_info
