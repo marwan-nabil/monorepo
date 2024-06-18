@@ -9,7 +9,6 @@ enum build_object_type
     BOT_INVALID,
     BOT_STRING,
     BOT_STRING_LIST,
-    BOT_STRING_REFERENCE_LIST,
     BOT_CONDITIONAL_STRING,
     BOT_BUILD_TIME_CONDITION,
     BOT_CPP_HEADER_FILE,
@@ -48,12 +47,6 @@ struct string_list
     u32 StringsCount;
 };
 
-struct string_reference_list
-{
-    char **StringReferences;
-    u32 StringReferencesCount;
-};
-
 struct conditional_string_value
 {
     char *Condition;
@@ -81,17 +74,19 @@ struct cpp_source_file
 struct msvc_object_file
 {
     char ArtifactPath[ARTIFACT_MAX_FILE_PATH];
-    char *CompilerFlags;
     char **SourceDependencies;
+    char **CompilerFlags;
     u32 SourceDependenciesCount;
+    u32 CompilerFlagsCount;
 };
 
 struct win32_executable_file
 {
     char ArtifactPath[ARTIFACT_MAX_FILE_PATH];
-    char *LinkerFlags;
+    char **LinkerFlags;
     char **ObjectDependencies;
     u32 ObjectDependenciesCount;
+    u32 LinkerFlagsCount;
 };
 
 build_object *GetBuildObject(char *Name);

@@ -1,6 +1,6 @@
 #pragma once
 
-#define PATH_HANDLING_MAX_FILENAME 512
+#define PATH_HANDLING_MAX_FILENAME 1024
 
 struct file_path_node
 {

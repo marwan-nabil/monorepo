@@ -1,8 +1,8 @@
 @echo off
 
 if "%1"=="build" (
-    if exist configuration\win32\tools\build\build.sln (
-        start configuration\win32\tools\build\build.sln
+    if exist configuration\win32\build\build.sln (
+        start configuration\win32\build\build.sln
     ) else (
         devenv tools\build\build.exe
     )

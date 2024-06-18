@@ -51,10 +51,6 @@ build_object_type GetBuildObjectTypeFromString(char *TypeString)
     {
         Result = BOT_CONDITIONAL_STRING;
     }
-    else if (strcmp(TypeString, "string_reference_list") == 0)
-    {
-        Result = BOT_STRING_REFERENCE_LIST;
-    }
     else if (strcmp(TypeString, "build_time_condition") == 0)
     {
         Result = BOT_BUILD_TIME_CONDITION;
@@ -102,7 +98,7 @@ build_object *AddBuildObject(char *Name, build_object_type Type)
         {
             ConsolePrintColored
             (
-                "ERROR: build graph issue, cannot re-add an already existent build object.\n", 
+                "ERROR: build graph issue, cannot re-add an already existent build object.\n",
                 FOREGROUND_RED
             );
             return NULL;

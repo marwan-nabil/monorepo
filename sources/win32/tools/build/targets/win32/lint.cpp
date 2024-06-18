@@ -8,7 +8,7 @@
 #include "sources\win32\libraries\file_system\files.h"
 #include "sources\win32\libraries\file_system\folders.h"
 
-#include "..\..\graph\file_parsing.h"
+#include "..\..\graph\loading.h"
 #include "..\..\actions\build_context.h"
 #include "..\..\actions\msvc.h"
 

@@ -23,14 +23,6 @@
         ]
     },
     {
-        "name": "lint_compiler_flags",
-        "type": "string_reference_list",
-        "string_references": [
-            ":static_compiler_flags",
-            ":build_time_compiler_flags"
-        ]
-    },
-    {
         "name": "lint_linker_flags",
         "type": "string_list",
         "strings": [

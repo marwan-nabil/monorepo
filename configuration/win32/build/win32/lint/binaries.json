@@ -17,7 +17,10 @@
         "source_dependencies": [
             ":lint.cpp"
         ],
-        "compiler_flags": ":lint_compiler_flags"
+        "compiler_flags": [
+            ":static_compiler_flags",
+            ":build_time_compiler_flags"
+        ]
     },
     {
         "name": "files.obj",
@@ -26,7 +29,10 @@
         "source_dependencies": [
             ":files.cpp"
         ],
-        "compiler_flags": ":lint_compiler_flags"
+        "compiler_flags": [
+            ":static_compiler_flags",
+            ":build_time_compiler_flags"
+        ]
     },
     {
         "name": "path_handling.obj",
@@ -35,6 +41,9 @@
         "source_dependencies": [
             ":path_handling.cpp"
         ],
-        "compiler_flags": ":lint_compiler_flags"
+        "compiler_flags": [
+            ":static_compiler_flags",
+            ":build_time_compiler_flags"
+        ]
     }
 ]
