@@ -5,7 +5,7 @@
 
 typedef struct _file_path_node
 {
-    char FileName[PATH_HANDLING_SEGMENT_NAME_LENGTH];
+    char FileName[PATH_HANDLING_SEGMENT_STRING_LENGTH];
     struct _file_path_node *ChildNode;
 } file_path_node;
 
