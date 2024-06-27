@@ -2,15 +2,6 @@
 
 set root_path=%cd%
 
-if "%1"=="help" (
-    @REM @echo Bootstraps (i.e. rebuilds) the build system itself.
-    @REM @echo OPTIONS:"
-    @REM @echo      <no argument> - rebuilds the build system tool with full compiler optimizations
-    @REM @echo      debug - rebuilds the build system tool with debug symbols available and optimizations disabled
-    @REM @echo      help - dispalys this help message"
-    goto :end
-)
-
 set cc_flags=/O2
 if "%1"=="debug" (
     set cc_flags=/Od /Z7
@@ -45,5 +36,3 @@ pushd tools\build
 
     del /Q *.obj *.lib *.exp
 popd
-
-:end

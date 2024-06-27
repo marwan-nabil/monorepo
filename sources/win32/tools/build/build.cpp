@@ -87,82 +87,84 @@ int main(int argc, char **argv)
     {
         ConsolePrintColored("ERROR: No build target.\n", FOREGROUND_RED);
         DisplayHelp();
-        return 1;
-    }
-
-    if (strcmp(argv[1], "clean") == 0)
-    {
-        for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
-        {
-            char DirectoryName[1024] = {};
-            StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildContext.EnvironmentInfo.OutputDirectoryPath);
-            StringCchCat(DirectoryName, ArrayCount(DirectoryName), "\\");
-            StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildTargetConfigurations[TargetIndex].TargetName);
-            if (DoesDirectoryExist(DirectoryName))
-            {
-                DeleteDirectoryCompletely(DirectoryName);
-            }
-        }
-        BuildSuccess = TRUE;
-    }
-    else if (strcmp(argv[1], "clean_all") == 0)
-    {
-        EmptyDirectory(BuildContext.EnvironmentInfo.OutputDirectoryPath);
-        BuildSuccess = TRUE;
-    }
-    else if (strcmp(argv[1], "help") == 0)
-    {
-        DisplayHelp();
-        BuildSuccess = TRUE;
+        BuildSuccess = FALSE;
     }
     else
     {
-        build_target_config *FoundTargetConfig = NULL;
-        for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
+        if (strcmp(argv[1], "clean") == 0)
         {
-            if (strcmp(argv[1], BuildTargetConfigurations[TargetIndex].TargetName) == 0)
+            for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
             {
-                FoundTargetConfig = &BuildTargetConfigurations[TargetIndex];
-                break;
+                char DirectoryName[1024] = {};
+                StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildContext.EnvironmentInfo.OutputDirectoryPath);
+                StringCchCat(DirectoryName, ArrayCount(DirectoryName), "\\");
+                StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildTargetConfigurations[TargetIndex].TargetName);
+                if (DoesDirectoryExist(DirectoryName))
+                {
+                    DeleteDirectoryCompletely(DirectoryName);
+                }
             }
+            BuildSuccess = TRUE;
         }
-
-        if (FoundTargetConfig)
+        else if (strcmp(argv[1], "clean_all") == 0)
         {
-            StringCchCatA
-            (
-                BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
-                ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-                BuildContext.EnvironmentInfo.OutputDirectoryPath
-            );
-            StringCchCatA
-            (
-                BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
-                ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-                "\\"
-            );
-            StringCchCatA
-            (
-                BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
-                ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-                FoundTargetConfig->TargetName
-            );
-
-            CreateDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath, NULL);
-            b32 Result = SetCurrentDirectory(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
-            if (Result)
-            {
-                BuildSuccess = FoundTargetConfig->BuildFunction(&BuildContext);
-                SetCurrentDirectory(BuildContext.EnvironmentInfo.RootDirectoryPath);
-            }
+            EmptyDirectory(BuildContext.EnvironmentInfo.OutputDirectoryPath);
+            BuildSuccess = TRUE;
+        }
+        else if (strcmp(argv[1], "help") == 0)
+        {
+            DisplayHelp();
+            BuildSuccess = TRUE;
         }
         else
         {
-            ConsoleSwitchColor(FOREGROUND_RED);
-            printf("ERROR: invalid build target \"%s\".\n", argv[1]);
-            ConsoleResetColor();
-            DisplayHelp();
-            BuildSuccess = FALSE;
+            build_target_config *FoundTargetConfig = NULL;
+            for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
+            {
+                if (strcmp(argv[1], BuildTargetConfigurations[TargetIndex].TargetName) == 0)
+                {
+                    FoundTargetConfig = &BuildTargetConfigurations[TargetIndex];
+                    break;
+                }
+            }
+
+            if (FoundTargetConfig)
+            {
+                StringCchCatA
+                (
+                    BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+                    ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+                    BuildContext.EnvironmentInfo.OutputDirectoryPath
+                );
+                StringCchCatA
+                (
+                    BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+                    ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+                    "\\"
+                );
+                StringCchCatA
+                (
+                    BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+                    ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+                    FoundTargetConfig->TargetName
+                );
+
+                CreateDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath, NULL);
+                b32 Result = SetCurrentDirectory(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
+                if (Result)
+                {
+                    BuildSuccess = FoundTargetConfig->BuildFunction(&BuildContext);
+                    SetCurrentDirectory(BuildContext.EnvironmentInfo.RootDirectoryPath);
+                }
+            }
+            else
+            {
+                ConsoleSwitchColor(FOREGROUND_RED);
+                printf("ERROR: invalid build target \"%s\".\n", argv[1]);
+                ConsoleResetColor();
+                DisplayHelp();
+                BuildSuccess = FALSE;
+            }
         }
     }
 

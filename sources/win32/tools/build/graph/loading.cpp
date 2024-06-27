@@ -9,7 +9,7 @@
 #include "sources\win32\libraries\file_system\files.h"
 #include "sources\win32\libraries\cJSON\cJSON.h"
 
-#include "build_object.h"
+#include "target.h"
 #include "loading.h"
 
 static void ReportParseFailure(char *FilePath)
@@ -20,111 +20,162 @@ static void ReportParseFailure(char *FilePath)
     ConsoleResetColor();
 }
 
-b32 LoadCppHeaderBuildObject(build_object *BuildObject, cJSON *JsonObject)
+b32 LoadCppHeaderTarget(target *Target, cJSON *JsonObject)
 {
-    cpp_header_file *Contents = (cpp_header_file *)malloc(sizeof(cpp_header_file));
-    BuildObject->Contents = Contents;
-    ZeroMemory(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath));
+    cpp_header_file *Details = (cpp_header_file *)malloc(sizeof(cpp_header_file));
+    Target->Details = Details;
+    ZeroMemory(Details->ArtifactPath, ArrayCount(Details->ArtifactPath));
     cJSON *ArtifactPathItem = cJSON_GetObjectItem(JsonObject, "artifact_path");
     if (!ArtifactPathItem)
     {
         return FALSE;
     }
-    StringCchCatA(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath), ArtifactPathItem->valuestring);
+    StringCchCatA(Details->ArtifactPath, ArrayCount(Details->ArtifactPath), ArtifactPathItem->valuestring);
     return TRUE;
 }
 
-b32 LoadCppSourceBuildObject(build_object *BuildObject, cJSON *JsonObject)
+b32 LoadCppSourceTarget(target *Target, cJSON *JsonObject)
 {
-    cpp_source_file *Contents = (cpp_source_file *)malloc(sizeof(cpp_source_file));
-    BuildObject->Contents = Contents;
-    ZeroMemory(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath));
+    cpp_source_file *Details = (cpp_source_file *)malloc(sizeof(cpp_source_file));
+    Target->Details = Details;
+    ZeroMemory(Details->ArtifactPath, ArrayCount(Details->ArtifactPath));
     cJSON *ArtifactPathItem = cJSON_GetObjectItem(JsonObject, "artifact_path");
     if (!ArtifactPathItem)
     {
         return FALSE;
     }
-    StringCchCatA(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath), ArtifactPathItem->valuestring);
+    StringCchCatA(Details->ArtifactPath, ArrayCount(Details->ArtifactPath), ArtifactPathItem->valuestring);
 
-    // Contents->HeaderDependenciesCount
+    // Details->HeaderDependenciesCount
     cJSON *HeaderDependenciesElement = cJSON_GetObjectItem(JsonObject, "header_dependencies");
     if (!HeaderDependenciesElement || !cJSON_IsArray(HeaderDependenciesElement))
     {
         return FALSE;
     }
-    Contents->HeaderDependenciesCount = cJSON_GetArraySize(HeaderDependenciesElement);
+    Details->HeaderDependenciesCount = cJSON_GetArraySize(HeaderDependenciesElement);
 
-    // Contents->HeaderDependencies
-    Contents->HeaderDependencies = (char **)malloc(Contents->HeaderDependenciesCount * sizeof(char *));
-    for (u32 HeaderIndex = 0; HeaderIndex < Contents->HeaderDependenciesCount; HeaderIndex++)
+    // Details->HeaderDependencies
+    Details->HeaderDependencies = (char **)malloc(Details->HeaderDependenciesCount * sizeof(char *));
+    for (u32 HeaderIndex = 0; HeaderIndex < Details->HeaderDependenciesCount; HeaderIndex++)
     {
-        Contents->HeaderDependencies[HeaderIndex] = (char *)malloc(BUILD_OBJECT_NAME_REFERENCE_LENGTH);
-        ZeroMemory(Contents->HeaderDependencies[HeaderIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH);
+        Details->HeaderDependencies[HeaderIndex] = (char *)malloc(TARGET_FULL_PATH_BUFFER_SIZE);
+        ZeroMemory(Details->HeaderDependencies[HeaderIndex], TARGET_FULL_PATH_BUFFER_SIZE);
         cJSON *HeaderDependency = cJSON_GetArrayItem(HeaderDependenciesElement, HeaderIndex);
-        StringCchCatA(Contents->HeaderDependencies[HeaderIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH, HeaderDependency->valuestring);
+        StringCchCatA(Details->HeaderDependencies[HeaderIndex], TARGET_FULL_PATH_BUFFER_SIZE, HeaderDependency->valuestring);
     }
     return TRUE;
 }
 
-b32 LoadMsvcObjectFileBuildObject(build_object *BuildObject, cJSON *JsonObject)
+b32 LoadMsvcObjectFileTarget(target *Target, cJSON *JsonObject)
 {
-    msvc_object_file *Contents = (msvc_object_file *)malloc(sizeof(msvc_object_file));
-    BuildObject->Contents = Contents;
-    ZeroMemory(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath));
+    msvc_object_file *Details = (msvc_object_file *)malloc(sizeof(msvc_object_file));
+    Target->Details = Details;
+    ZeroMemory(Details->ArtifactPath, ArrayCount(Details->ArtifactPath));
     cJSON *ArtifactPathItem = cJSON_GetObjectItem(JsonObject, "artifact_path");
     if (!ArtifactPathItem)
     {
         return FALSE;
     }
-    StringCchCatA(Contents->ArtifactPath, ArrayCount(Contents->ArtifactPath), ArtifactPathItem->valuestring);
+    StringCchCatA(Details->ArtifactPath, ArrayCount(Details->ArtifactPath), ArtifactPathItem->valuestring);
 
-    // Contents->SourceDependenciesCount
+    // Details->SourceDependenciesCount
     cJSON *SourceDependenciesElement = cJSON_GetObjectItem(JsonObject, "source_dependencies");
     if (!SourceDependenciesElement || !cJSON_IsArray(SourceDependenciesElement))
     {
         return FALSE;
     }
-    Contents->SourceDependenciesCount = cJSON_GetArraySize(SourceDependenciesElement);
+    Details->SourceDependenciesCount = cJSON_GetArraySize(SourceDependenciesElement);
 
-    // Contents->SourceDependencies
-    Contents->SourceDependencies = (char **)malloc(Contents->SourceDependenciesCount * sizeof(char *));
-    for (u32 SourceIndex = 0; SourceIndex < Contents->SourceDependenciesCount; SourceIndex++)
+    // Details->SourceDependencies
+    Details->SourceDependencies = (char **)malloc(Details->SourceDependenciesCount * sizeof(char *));
+    for (u32 SourceIndex = 0; SourceIndex < Details->SourceDependenciesCount; SourceIndex++)
     {
-        Contents->SourceDependencies[SourceIndex] = (char *)malloc(BUILD_OBJECT_NAME_REFERENCE_LENGTH);
-        ZeroMemory(Contents->SourceDependencies[SourceIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH);
+        Details->SourceDependencies[SourceIndex] = (char *)malloc(TARGET_FULL_PATH_BUFFER_SIZE);
+        ZeroMemory(Details->SourceDependencies[SourceIndex], TARGET_FULL_PATH_BUFFER_SIZE);
         cJSON *HeaderDependency = cJSON_GetArrayItem(SourceDependenciesElement, SourceIndex);
-        StringCchCatA(Contents->SourceDependencies[SourceIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH, HeaderDependency->valuestring);
+        StringCchCatA(Details->SourceDependencies[SourceIndex], TARGET_FULL_PATH_BUFFER_SIZE, HeaderDependency->valuestring);
     }
 
-    // Contents->CompilerFlagsCount
+    // Details->CompilerFlagsCount
     cJSON *CompilerFlagsElement = cJSON_GetObjectItem(JsonObject, "compiler_flags");
     if (!CompilerFlagsElement || !cJSON_IsArray(CompilerFlagsElement))
     {
         return FALSE;
     }
-    Contents->CompilerFlagsCount = cJSON_GetArraySize(CompilerFlagsElement);
+    Details->CompilerFlagsCount = cJSON_GetArraySize(CompilerFlagsElement);
 
-    // Contents->CompilerFlags
-    Contents->CompilerFlags = (char **)malloc(Contents->CompilerFlagsCount * sizeof(char *));
-    for (u32 FlagIndex = 0; FlagIndex < Contents->CompilerFlagsCount; FlagIndex++)
+    // Details->CompilerFlags
+    Details->CompilerFlags = (char **)malloc(Details->CompilerFlagsCount * sizeof(char *));
+    for (u32 FlagIndex = 0; FlagIndex < Details->CompilerFlagsCount; FlagIndex++)
     {
-        Contents->CompilerFlags[FlagIndex] = (char *)malloc(BUILD_OBJECT_NAME_REFERENCE_LENGTH);
-        ZeroMemory(Contents->CompilerFlags[FlagIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH);
+        Details->CompilerFlags[FlagIndex] = (char *)malloc(TARGET_FULL_PATH_BUFFER_SIZE);
+        ZeroMemory(Details->CompilerFlags[FlagIndex], TARGET_FULL_PATH_BUFFER_SIZE);
         cJSON *CompilerFlag = cJSON_GetArrayItem(CompilerFlagsElement, FlagIndex);
-        StringCchCatA(Contents->CompilerFlags[FlagIndex], BUILD_OBJECT_NAME_REFERENCE_LENGTH, CompilerFlag->valuestring);
+        StringCchCatA(Details->CompilerFlags[FlagIndex], TARGET_FULL_PATH_BUFFER_SIZE, CompilerFlag->valuestring);
     }
 
     return TRUE;
 }
 
-void ParseFileIntoBuildObjects(char *FilePath, char *BuildConfigurationDirectoryPath)
+b32 LoadWin32ExecutableFileTarget(target *Target, cJSON *JsonObject)
 {
-    char PackagePathOfFile[BUILD_PACKAGE_PATH_LENGTH] = {};
+    win32_executable_file *Details = (win32_executable_file *)malloc(sizeof(win32_executable_file));
+    Target->Details = Details;
+    ZeroMemory(Details->ArtifactPath, ArrayCount(Details->ArtifactPath));
+    cJSON *ArtifactPathItem = cJSON_GetObjectItem(JsonObject, "artifact_path");
+    if (!ArtifactPathItem)
+    {
+        return FALSE;
+    }
+    StringCchCatA(Details->ArtifactPath, ArrayCount(Details->ArtifactPath), ArtifactPathItem->valuestring);
+
+    // Details->ObjectDependenciesCount
+    cJSON *ObjectDependenciesElement = cJSON_GetObjectItem(JsonObject, "object_dependencies");
+    if (!ObjectDependenciesElement || !cJSON_IsArray(ObjectDependenciesElement))
+    {
+        return FALSE;
+    }
+    Details->ObjectDependenciesCount = cJSON_GetArraySize(ObjectDependenciesElement);
+
+    // Details->ObjectDependencies
+    Details->ObjectDependencies = (char **)malloc(Details->ObjectDependenciesCount * sizeof(char *));
+    for (u32 ObjectIndex = 0; ObjectIndex < Details->ObjectDependenciesCount; ObjectIndex++)
+    {
+        Details->ObjectDependencies[ObjectIndex] = (char *)malloc(TARGET_FULL_PATH_BUFFER_SIZE);
+        ZeroMemory(Details->ObjectDependencies[ObjectIndex], TARGET_FULL_PATH_BUFFER_SIZE);
+        cJSON *ObjectDependency = cJSON_GetArrayItem(ObjectDependenciesElement, ObjectIndex);
+        StringCchCatA(Details->ObjectDependencies[ObjectIndex], TARGET_FULL_PATH_BUFFER_SIZE, ObjectDependency->valuestring);
+    }
+
+    // Details->LinkerFlagsCount
+    cJSON *LinkerFlagsElement = cJSON_GetObjectItem(JsonObject, "linker_flags");
+    if (!LinkerFlagsElement || !cJSON_IsArray(LinkerFlagsElement))
+    {
+        return FALSE;
+    }
+    Details->LinkerFlagsCount = cJSON_GetArraySize(LinkerFlagsElement);
+
+    // Details->LinkerFlags
+    Details->LinkerFlags = (char **)malloc(Details->LinkerFlagsCount * sizeof(char *));
+    for (u32 FlagIndex = 0; FlagIndex < Details->LinkerFlagsCount; FlagIndex++)
+    {
+        Details->LinkerFlags[FlagIndex] = (char *)malloc(TARGET_FULL_PATH_BUFFER_SIZE);
+        ZeroMemory(Details->LinkerFlags[FlagIndex], TARGET_FULL_PATH_BUFFER_SIZE);
+        cJSON *LinkerFlag = cJSON_GetArrayItem(LinkerFlagsElement, FlagIndex);
+        StringCchCatA(Details->LinkerFlags[FlagIndex], TARGET_FULL_PATH_BUFFER_SIZE, LinkerFlag->valuestring);
+    }
+
+    return TRUE;
+}
+
+void LoadFileIntoTargetGraph(char *FilePath, char *BuildConfigurationDirectoryPath)
+{
+    char PackagePathOfFile[PACKAGE_PATH_BUFFER_SIZE] = {};
     file_path_segment_node *FilePathSegmentList = CreateFilePathSegmentList(FilePath);
     file_path_segment_node *BuildConfigurationDirectorySegmentList = CreateFilePathSegmentList(BuildConfigurationDirectoryPath);
     file_path_segment_node *RealPackagePathList = SkipSubPath(FilePathSegmentList, BuildConfigurationDirectorySegmentList);
     FreeFilePathSegmentList(BuildConfigurationDirectorySegmentList);
-    FlattenPathSegmentList(RealPackagePathList, PackagePathOfFile, BUILD_PACKAGE_PATH_LENGTH, '/');
+    FlattenPathSegmentList(RealPackagePathList, PackagePathOfFile, PACKAGE_PATH_BUFFER_SIZE, '/');
     FreeFilePathSegmentList(RealPackagePathList);
     RemoveLastSegmentFromPath(PackagePathOfFile, FALSE, '/');
 
@@ -153,37 +204,54 @@ void ParseFileIntoBuildObjects(char *FilePath, char *BuildConfigurationDirectory
             return;
         }
 
-        build_object_type ObjectType = GetBuildObjectTypeFromString(TypeElement->valuestring);
+        target_type TargetType = GetTargetTypeFromString(TypeElement->valuestring);
         cJSON *NameElement = cJSON_GetObjectItem(CurrentJsonObject, "name");
-        build_object *BuildObject = AddBuildObject(NameElement->valuestring, ObjectType, PackagePathOfFile);
+        target *Target = AddTarget(NameElement->valuestring, PackagePathOfFile, TargetType);
 
         b32 Succeeded = FALSE;
-        switch (ObjectType)
+        switch (TargetType)
         {
-            case BOT_CPP_HEADER_FILE:
+            case TT_CPP_HEADER_FILE:
             {
-                Succeeded = LoadCppHeaderBuildObject(BuildObject, CurrentJsonObject);
+                Succeeded = LoadCppHeaderTarget(Target, CurrentJsonObject);
             } break;
 
-            case BOT_CPP_SOURCE_FILE:
+            case TT_CPP_SOURCE_FILE:
             {
-                Succeeded = LoadCppSourceBuildObject(BuildObject, CurrentJsonObject);
+                Succeeded = LoadCppSourceTarget(Target, CurrentJsonObject);
             } break;
 
-            case BOT_MSVC_OBJECT_FILE:
+            case TT_MSVC_OBJECT_FILE:
             {
-                Succeeded = LoadMsvcObjectFileBuildObject(BuildObject, CurrentJsonObject);
+                Succeeded = LoadMsvcObjectFileTarget(Target, CurrentJsonObject);
             } break;
 
-            case BOT_WIN32_EXECUTABLE_FILE:
+            case TT_WIN32_EXECUTABLE_FILE:
             {
-                // Succeeded = LoadWin32ExecutableFileBuildObject(BuildObject, CurrentJsonObject);
+                Succeeded = LoadWin32ExecutableFileTarget(Target, CurrentJsonObject);
             } break;
 
-            case BOT_STRING_LIST:
-            case BOT_STRING:
-            case BOT_CONDITIONAL_STRING:
-            case BOT_BUILD_TIME_CONDITION:
+            case TT_STRING_LIST:
+            {
+                // Succeeded = LoadStringListTarget(Target, CurrentJsonObject);
+            } break;
+
+            case TT_STRING:
+            {
+                // Succeeded = LoadXXXTarget(Target, CurrentJsonObject);
+            } break;
+
+            case TT_CONDITIONAL_STRING:
+            {
+                // Succeeded = LoadXXXTarget(Target, CurrentJsonObject);
+            } break;
+
+            case TT_BUILD_TIME_CONDITION:
+            {
+                // Succeeded = LoadXXXTarget(Target, CurrentJsonObject);
+            } break;
+
+            default:
             {
             } break;
         }

@@ -1,3 +1,3 @@
 #pragma once
 
-void ParseFileIntoBuildObjects(char *FilePath, char *BuildConfigurationDirectoryPath);
+void LoadFileIntoTargetGraph(char *FilePath, char *BuildConfigurationDirectoryPath);
