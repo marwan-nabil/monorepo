@@ -5,6 +5,7 @@
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
 #include "sources\win32\libraries\strings\path_handling.h"
+#include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\shell\console.h"
 #include "sources\win32\libraries\file_system\files.h"
 #include "sources\win32\libraries\cJSON\cJSON.h"
@@ -20,7 +21,7 @@ static void ReportParseFailure(char *FilePath)
     ConsoleResetColor();
 }
 
-b32 LoadCppHeaderTarget(target *Target, cJSON *JsonObject)
+static b32 LoadCppHeaderTarget(target *Target, cJSON *JsonObject)
 {
     cpp_header_file *Details = (cpp_header_file *)malloc(sizeof(cpp_header_file));
     Target->Details = Details;
@@ -34,7 +35,7 @@ b32 LoadCppHeaderTarget(target *Target, cJSON *JsonObject)
     return TRUE;
 }
 
-b32 LoadCppSourceTarget(target *Target, cJSON *JsonObject)
+static b32 LoadCppSourceTarget(target *Target, cJSON *JsonObject)
 {
     cpp_source_file *Details = (cpp_source_file *)malloc(sizeof(cpp_source_file));
     Target->Details = Details;
@@ -66,7 +67,7 @@ b32 LoadCppSourceTarget(target *Target, cJSON *JsonObject)
     return TRUE;
 }
 
-b32 LoadMsvcObjectFileTarget(target *Target, cJSON *JsonObject)
+static b32 LoadMsvcObjectFileTarget(target *Target, cJSON *JsonObject)
 {
     msvc_object_file *Details = (msvc_object_file *)malloc(sizeof(msvc_object_file));
     Target->Details = Details;
@@ -117,7 +118,7 @@ b32 LoadMsvcObjectFileTarget(target *Target, cJSON *JsonObject)
     return TRUE;
 }
 
-b32 LoadWin32ExecutableFileTarget(target *Target, cJSON *JsonObject)
+static b32 LoadWin32ExecutableFileTarget(target *Target, cJSON *JsonObject)
 {
     win32_executable_file *Details = (win32_executable_file *)malloc(sizeof(win32_executable_file));
     Target->Details = Details;
@@ -165,6 +166,100 @@ b32 LoadWin32ExecutableFileTarget(target *Target, cJSON *JsonObject)
         StringCchCatA(Details->LinkerFlags[FlagIndex], TARGET_FULL_PATH_BUFFER_SIZE, LinkerFlag->valuestring);
     }
 
+    return TRUE;
+}
+
+static b32 LoadStringListTarget(target *Target, cJSON *JsonObject)
+{
+    string_list *Details = (string_list *)malloc(sizeof(string_list));
+    Target->Details = Details;
+
+    // Details->StringsCount
+    cJSON *StringsElement = cJSON_GetObjectItem(JsonObject, "strings");
+    if (!StringsElement || !cJSON_IsArray(StringsElement))
+    {
+        return FALSE;
+    }
+    Details->StringsCount = cJSON_GetArraySize(StringsElement);
+
+    // Details->Strings
+    for (u32 StringIndex = 0; StringIndex < Details->StringsCount; StringIndex++)
+    {
+        cJSON *String = cJSON_GetArrayItem(StringsElement, StringIndex);
+        u32 AllocationSize = StringLength(String->valuestring);
+        Details->Strings[StringIndex] = (char *)malloc(AllocationSize);
+        StringCchCatA(Details->Strings[StringIndex], AllocationSize, String->valuestring);
+    }
+
+    return TRUE;
+}
+
+static b32 LoadStringTarget(target *Target, cJSON *JsonObject)
+{
+    string *Details = (string *)malloc(sizeof(string));
+    Target->Details = Details;
+
+    // Details->Value
+    cJSON *ValueElement = cJSON_GetObjectItem(JsonObject, "value");
+    u32 AllocationSize = StringLength(ValueElement->valuestring);
+    Details->Value = (char *)malloc(AllocationSize);
+    StringCchCatA(Details->Value, AllocationSize, ValueElement->valuestring);
+    return TRUE;
+}
+
+static b32 LoadConditionalStringTarget(target *Target, cJSON *JsonObject)
+{
+    conditional_string *Details = (conditional_string *)malloc(sizeof(conditional_string));
+    Target->Details = Details;
+
+    // Details->ConditionalStringValuesCount
+    cJSON *ConditionalStringValuesElement = cJSON_GetObjectItem(JsonObject, "conditional_string_values");
+    if (!ConditionalStringValuesElement || !cJSON_IsArray(ConditionalStringValuesElement))
+    {
+        return FALSE;
+    }
+    Details->ConditionalStringValuesCount = cJSON_GetArraySize(ConditionalStringValuesElement);
+    
+    // Details->ConditionalStringValues
+    for
+    (
+        u32 ConditionalStringValueIndex = 0;
+        ConditionalStringValueIndex < Details->ConditionalStringValuesCount;
+        ConditionalStringValueIndex++
+    )
+    {
+        Details->ConditionalStringValues[ConditionalStringValueIndex] =
+            (conditional_string_value *)malloc(sizeof(conditional_string_value));
+        cJSON *CSVObject = cJSON_GetArrayItem(ConditionalStringValuesElement, ConditionalStringValueIndex);
+
+        cJSON *ConditionObject = cJSON_GetObjectItem(CSVObject, "condition");
+        u32 AllocationSize = StringLength(ConditionObject->valuestring);
+        Details->ConditionalStringValues[ConditionalStringValueIndex]->Condition =
+            (char *)malloc(AllocationSize);
+        StringCchCatA
+        (
+            Details->ConditionalStringValues[ConditionalStringValueIndex]->Condition,
+            AllocationSize,
+            ConditionObject->valuestring
+        );
+        
+        cJSON *ValueObject = cJSON_GetObjectItem(CSVObject, "value");
+        AllocationSize = StringLength(ValueObject->valuestring);
+        Details->ConditionalStringValues[ConditionalStringValueIndex]->Value =
+            (char *)malloc(AllocationSize);
+        StringCchCatA
+        (
+            Details->ConditionalStringValues[ConditionalStringValueIndex]->Value,
+            AllocationSize,
+            ValueObject->valuestring
+        );
+    }
+
+    return TRUE;
+}
+
+static b32 LoadBuildTimeConditionTarget(target *Target, cJSON *JsonObject)
+{
     return TRUE;
 }
 
@@ -233,22 +328,22 @@ void LoadFileIntoTargetGraph(char *FilePath, char *BuildConfigurationDirectoryPa
 
             case TT_STRING_LIST:
             {
-                // Succeeded = LoadStringListTarget(Target, CurrentJsonObject);
+                Succeeded = LoadStringListTarget(Target, CurrentJsonObject);
             } break;
 
             case TT_STRING:
             {
-                // Succeeded = LoadXXXTarget(Target, CurrentJsonObject);
+                Succeeded = LoadStringTarget(Target, CurrentJsonObject);
             } break;
 
             case TT_CONDITIONAL_STRING:
             {
-                // Succeeded = LoadXXXTarget(Target, CurrentJsonObject);
+                Succeeded = LoadConditionalStringTarget(Target, CurrentJsonObject);
             } break;
 
             case TT_BUILD_TIME_CONDITION:
             {
-                // Succeeded = LoadXXXTarget(Target, CurrentJsonObject);
+                Succeeded = LoadBuildTimeConditionTarget(Target, CurrentJsonObject);
             } break;
 
             default:

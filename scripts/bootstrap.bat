@@ -23,7 +23,6 @@ pushd tools\build
         %root_path%\sources\win32\tools\build\targets\win32\*.cpp^
         %root_path%\sources\win32\tools\build\targets\i686-elf\*.cpp^
         %root_path%\sources\win32\tools\build\actions\*.cpp^
-        %root_path%\sources\win32\tools\build\graph\*.cpp^
         %root_path%\sources\win32\libraries\shell\console.cpp^
         %root_path%\sources\win32\libraries\file_system\*.cpp^
         %root_path%\sources\win32\libraries\strings\path_handling.cpp^

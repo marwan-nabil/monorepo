@@ -8,25 +8,24 @@
 #include "sources\win32\libraries\file_system\files.h"
 #include "sources\win32\libraries\file_system\folders.h"
 
-#include "..\..\graph\loading.h"
 #include "..\..\actions\build_context.h"
 #include "..\..\actions\msvc.h"
 
-b32 BuildLintOptimized(build_context *BuildContext)
-{
-    char FolderPath[1024] = {};
-    StringCchCatA(FolderPath, ArrayCount(FolderPath), BuildContext->EnvironmentInfo.BuildConfigurationDirectoryPath);
-    StringCchCatA(FolderPath, ArrayCount(FolderPath), "\\win32\\lint");
-    string_node *FilePathsList = GetListOfFilesInFolder(FolderPath);
-    string_node *CurrentNode = FilePathsList;
-    while (CurrentNode)
-    {
-        LoadFileIntoTargetGraph(CurrentNode->String, BuildContext->EnvironmentInfo.BuildConfigurationDirectoryPath);
-        CurrentNode = CurrentNode->NextString;
-    }
-    FreeStringList(FilePathsList);
-    return TRUE;
-}
+// b32 BuildLintOptimized(build_context *BuildContext)
+// {
+//     char FolderPath[1024] = {};
+//     StringCchCatA(FolderPath, ArrayCount(FolderPath), BuildContext->EnvironmentInfo.BuildConfigurationDirectoryPath);
+//     StringCchCatA(FolderPath, ArrayCount(FolderPath), "\\win32\\lint");
+//     string_node *FilePathsList = GetListOfFilesInFolder(FolderPath);
+//     string_node *CurrentNode = FilePathsList;
+//     while (CurrentNode)
+//     {
+//         LoadFileIntoTargetGraph(CurrentNode->String, BuildContext->EnvironmentInfo.BuildConfigurationDirectoryPath);
+//         CurrentNode = CurrentNode->NextString;
+//     }
+//     FreeStringList(FilePathsList);
+//     return TRUE;
+// }
 
 b32 BuildLint(build_context *BuildContext)
 {
