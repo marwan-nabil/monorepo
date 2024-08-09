@@ -1,4 +1,0 @@
--------------
-dependencies:
--------------
-- MSVC: https://visualstudio.microsoft.com/

@@ -1,5 +1,0 @@
--------------
-dependencies:
--------------
-- icarus verilog + GTKWave: https://bleyer.org/icarus/
-- to be installed in tools/iverilog

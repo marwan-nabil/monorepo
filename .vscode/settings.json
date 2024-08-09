@@ -6,12 +6,13 @@
 
     "files.exclude":
     {
-        // "outputs/": true,
+        "build_output/": true,
         "tools/": true,
         // "binary_data/": true,
-        // "sources/i686-elf/": true,
-        // "sources/hdl/": true,
-        // "sources/win32/": true,
+        // "i686-elf/": true,
+        // "hdl/": true,
+        // "win32/": true,
+        "win32/libraries/imgui": true,
     },
 
     "C_Cpp.default.defines":
