@@ -21,6 +21,6 @@ void FlattenPathSegmentList
 (
     file_path_segment_node *PathList,
     char *TargetStringBuffer,
-    u32 TargetBufferLength, 
+    u32 TargetBufferLength,
     char Separator
 );

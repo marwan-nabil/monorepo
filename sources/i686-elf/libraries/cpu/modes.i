@@ -1,5 +1,5 @@
 ; ----------------------
-; switch to real mode code 
+; switch to real mode code
 ; from protected 32-bit code
 ; ----------------------
 %macro x86EnterRealMode 0
@@ -21,7 +21,7 @@
 %endmacro
 
 ; ----------------------
-; switch to protected 32-bit code 
+; switch to protected 32-bit code
 ; from real mode code
 ; ----------------------
 %macro x86EnterProtectedMode 0

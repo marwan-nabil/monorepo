@@ -7,7 +7,7 @@
 #include "sources\i686-elf\kernel\main.h"
 
 isr_handler_function GlobalISRHandlers[256];
-char *GlobalExceptionMessages[] = 
+char *GlobalExceptionMessages[] =
 {
     "Divide by zero exeption",
     "Debug",

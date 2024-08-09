@@ -62,20 +62,20 @@ static glyph_dim GetGlyphDim(glyph_generator *GlyphGen, glyph_table *Table, size
     }
 
     Result.TileCount = SafeRatio1((uint16_t)(Size.cx + GlyphGen->FontWidth/2), GlyphGen->FontWidth);
-    
+
     Result.XScale = 1.0f;
     if((uint32_t)Size.cx > GlyphGen->FontWidth)
     {
         Result.XScale = SafeRatio1((float)(Result.TileCount*GlyphGen->FontWidth),
                                    (float)(Size.cx));
     }
-    
+
     Result.YScale = 1.0f;
     if((uint32_t)Size.cy > GlyphGen->FontHeight)
     {
         Result.YScale = SafeRatio1((float)GlyphGen->FontHeight, (float)Size.cy);
     }
-        
+
     return Result;
 }
 

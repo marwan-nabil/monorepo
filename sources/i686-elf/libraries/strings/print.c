@@ -28,7 +28,7 @@ void PrintCharacter(print_context *Context, char Character)
             Context->X = 0;
             Context->Y++;
         } break;
-    
+
         case '\t':
         {
             for (u8 Index = 0; Index < 4 - (Context->X % 4); Index++)

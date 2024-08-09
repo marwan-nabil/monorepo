@@ -9,8 +9,8 @@
 #include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "build_context.h"
-#include "msvc.h"
+#include "sources\win32\tools\build\actions\build_context.h"
+#include "sources\win32\tools\build\actions\msvc.h"
 
 b32 CompileShader(build_context *BuildContext)
 {
@@ -33,7 +33,6 @@ b32 CompileShader(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext);
     return Result;
 }
 
@@ -56,7 +55,6 @@ b32 CompileShader2(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext);
     return Result;
 }
 
@@ -71,6 +69,8 @@ b32 CompileWithMSVC(build_context *BuildContext)
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.CompilerIncludePath);
     StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " ");
     FlattenStringList(BuildContext->CompilationInfo.Sources, CompilerCommand, ArrayCount(CompilerCommand));
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), " /Fo");
+    StringCchCatA(CompilerCommand, ArrayCount(CompilerCommand), BuildContext->CompilationInfo.OutputObjectPath);
 
     b32 Result = CreateProcessAndWait(CompilerCommand);
     if (!Result)
@@ -137,7 +137,5 @@ b32 CompileAndLinkWithMSVC(build_context *BuildContext)
         );
     }
 
-    // TODO: remove ClearBuildContext() from here
-    ClearBuildContext(BuildContext);
     return Result;
 }

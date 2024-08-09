@@ -6,14 +6,15 @@
 
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
+#include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\strings\string_list.h"
 #include "sources\win32\libraries\shell\console.h"
 #include "sources\win32\libraries\file_system\folders.h"
 #include "sources\win32\libraries\strings\path_handling.h"
-
-#include "actions\build_context.h"
-#include "targets\target_configuration.h"
-#include "build.h"
+#include "sources\win32\tools\build\actions\build_context.h"
+#include "sources\win32\tools\build\actions\msvc.h"
+#include "sources\win32\tools\build\targets.h"
+#include "sources\win32\tools\build\build.h"
 
 void DisplayHelp()
 {
@@ -54,28 +55,15 @@ int main(int argc, char **argv)
 
     StringCchCatA
     (
-        BuildContext.EnvironmentInfo.OutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
+        BuildContext.EnvironmentInfo.OutputsDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.OutputsDirectoryPath),
         BuildContext.EnvironmentInfo.RootDirectoryPath
     );
     StringCchCatA
     (
-        BuildContext.EnvironmentInfo.OutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
+        BuildContext.EnvironmentInfo.OutputsDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.OutputsDirectoryPath),
         "\\outputs"
-    );
-
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath),
-        BuildContext.EnvironmentInfo.RootDirectoryPath
-    );
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath),
-        "\\configuration\\win32\\build"
     );
 
     BuildContext.EnvironmentInfo.argc = argc;
@@ -96,9 +84,9 @@ int main(int argc, char **argv)
             for (u32 TargetIndex = 0; TargetIndex < ArrayCount(BuildTargetConfigurations); TargetIndex++)
             {
                 char DirectoryName[1024] = {};
-                StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildContext.EnvironmentInfo.OutputDirectoryPath);
-                StringCchCat(DirectoryName, ArrayCount(DirectoryName), "\\");
-                StringCchCat(DirectoryName, ArrayCount(DirectoryName), BuildTargetConfigurations[TargetIndex].TargetName);
+                StringCchCatA(DirectoryName, ArrayCount(DirectoryName), BuildContext.EnvironmentInfo.OutputsDirectoryPath);
+                StringCchCatA(DirectoryName, ArrayCount(DirectoryName), "\\");
+                StringCchCatA(DirectoryName, ArrayCount(DirectoryName), BuildTargetConfigurations[TargetIndex].TargetName);
                 if (DoesDirectoryExist(DirectoryName))
                 {
                     DeleteDirectoryCompletely(DirectoryName);
@@ -108,7 +96,7 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[1], "clean_all") == 0)
         {
-            EmptyDirectory(BuildContext.EnvironmentInfo.OutputDirectoryPath);
+            EmptyDirectory(BuildContext.EnvironmentInfo.OutputsDirectoryPath);
             BuildSuccess = TRUE;
         }
         else if (strcmp(argv[1], "help") == 0)
@@ -134,7 +122,7 @@ int main(int argc, char **argv)
                 (
                     BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
                     ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-                    BuildContext.EnvironmentInfo.OutputDirectoryPath
+                    BuildContext.EnvironmentInfo.OutputsDirectoryPath
                 );
                 StringCchCatA
                 (
@@ -150,11 +138,11 @@ int main(int argc, char **argv)
                 );
 
                 CreateDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath, NULL);
-                b32 Result = SetCurrentDirectory(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
+                b32 Result = SetCurrentDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
                 if (Result)
                 {
                     BuildSuccess = FoundTargetConfig->BuildFunction(&BuildContext);
-                    SetCurrentDirectory(BuildContext.EnvironmentInfo.RootDirectoryPath);
+                    SetCurrentDirectoryA(BuildContext.EnvironmentInfo.RootDirectoryPath);
                 }
             }
             else

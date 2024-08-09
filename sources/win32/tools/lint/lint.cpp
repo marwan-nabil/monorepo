@@ -351,7 +351,7 @@ int main(int argc, char **argv)
     directory_node *FoundDirectoriesList = 0;
     file_node *FoundFilesList = 0;
 
-    ProcessDirectory("\\sources", &FoundDirectoriesList, &FoundFilesList);
+    ProcessDirectory("", &FoundDirectoriesList, &FoundFilesList);
 
     u32 DirectoryCount = 0;
     directory_node *DirectoryListIterator = FoundDirectoriesList;

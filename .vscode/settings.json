@@ -1,44 +1,36 @@
 {
-    "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "C_Cpp.errorSquiggles": "disabled",
-    "C_Cpp.vcpkg.enabled": false,
-    "C_Cpp.autoAddFileAssociations": false,
-
-    "files.exclude":
-    {
-        // "outputs/": true,
-        "tools/": true,
+    "files.exclude": {
         // "binary_data/": true,
-        // "sources/i686-elf/": true,
+        // "outputs/": true,
+        // "scripts/": true,
         // "sources/hdl/": true,
+        // "sources/i686-elf/": true,
         // "sources/win32/": true,
+        "sources/win32/libraries/imgui": true,
+        "tools/": true,
     },
-
-    "C_Cpp.default.defines":
-    [
+    "C_Cpp.default.defines": [
         // shared
         "ENABLE_ASSERTIONS=",
         "_CRT_SECURE_NO_WARNINGS=",
-
         // build
         "_CRT_RAND_S=",
-
+        "BOOTSTRAPPER=",
         // ray_tracer
         "SIMD_NUMBEROF_LANES=8",
-
         // imgui_demo
         "UNICODE=",
         "_UNICODE=",
-
         // handmade_hero
         "HANDMADE_WIN32=1",
         "HANDMADE_SLOW=1",
         "HANDMADE_INTERNAL=1",
-
         // lint
         "JOB_PER_FILE=",
-        
         // os
         "packed=",
+    ],
+    "C_Cpp.default.includePath": [
+        "."
     ],
 }

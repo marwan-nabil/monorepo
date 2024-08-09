@@ -59,7 +59,7 @@ static LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPA
         {
             PostQuitMessage(0);
         } break;
-        
+
         case WM_CHAR:
         case WM_SIZE:
         {

@@ -5,9 +5,9 @@ struct environment_info
     i32 argc;
     char **argv;
     char RootDirectoryPath[1024];
-    char OutputDirectoryPath[1024];
+    char SourcesDirectoryPath[1024];
+    char OutputsDirectoryPath[1024];
     char TargetOutputDirectoryPath[1024];
-    char BuildConfigurationDirectoryPath[1024];
 };
 
 struct compilation_info
@@ -39,8 +39,8 @@ void AddCompilerSourceFile(build_context *BuildContext, const char *SourceFile);
 void SetCompilerOutputObject(build_context *BuildContext, const char *ObjectFile);
 void AddLinkerFlags(build_context *BuildContext, const char *Flags);
 void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFile);
-void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile);
-void SetLinkerOutputBinary(build_context *BuildContext, const char *OutputBinaryPath);
+void AddLinkerInputFile(build_context *BuildContext, char *LinkerInputFile);
+void SetLinkerOutputBinary(build_context *BuildContext, char *OutputBinaryPath);
 void PushSubTarget(build_context *BuildContext, const char *SubTargetRelativePath);
 void PopSubTarget(build_context *BuildContext);
 void ClearBuildContext(build_context *BuildContext);

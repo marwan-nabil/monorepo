@@ -15,7 +15,7 @@ int main(int ArgCount, char **Args)
         SetConsoleOutputCP(65001);
     }
 #endif
-    
+
     size_t TotalTransfer = 0;
     size_t BufferSize = 64*1024*1024;
     char *Buffer = (char *)malloc(BufferSize);
@@ -36,11 +36,11 @@ int main(int ArgCount, char **Args)
                     fwrite(Buffer, 1, ByteCount, stdout);
                 }
                 clock_t End = clock();
-                
+
                 double Elapsed = (double)(End - Start) / (double)CLOCKS_PER_SEC;
-                fprintf(stdout, "\n\nTotal sink time: %.03fs (%fgb/s)\n", 
+                fprintf(stdout, "\n\nTotal sink time: %.03fs (%fgb/s)\n",
                         Elapsed, TotalTransfer / (1024.0*1024.0*1024.0*Elapsed));
-                
+
                 fclose(File);
             }
             else
@@ -48,9 +48,9 @@ int main(int ArgCount, char **Args)
                 fprintf(stderr, "Unable to open \"%s\".\n", FileName);
             }
         }
-     
+
         free(Buffer);
     }
-    
+
     return 0;
 }

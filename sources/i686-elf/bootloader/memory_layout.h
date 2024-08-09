@@ -5,7 +5,7 @@
 // 0x00000500 - 0x00010500: bootloader area [65,536 bytes]
 //      0x00000500 - ... : code and data
 //      ... - 0x0000FFF0: stack
-// 0x00020000 - 0x00030000: 
+// 0x00020000 - 0x00030000:
 // 0x00030000 - 0x00080000: free memory
 // 0x00080000 - 0x0009FFFF: Extended BIOS data area [131,072 bytes]
 // 0x000A0000 - 0x000C7FFF: VGA Ram [163,840 bytes]

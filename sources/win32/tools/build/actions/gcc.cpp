@@ -8,8 +8,8 @@
 #include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "build_context.h"
-#include "gcc.h"
+#include "sources\win32\tools\build\actions\build_context.h"
+#include "sources\win32\tools\build\actions\gcc.h"
 
 b32 CompileWithGCC(build_context *BuildContext)
 {
@@ -38,7 +38,6 @@ b32 CompileWithGCC(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext);
     return Result;
 }
 
@@ -67,6 +66,5 @@ b32 LinkWithGCC(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext);
     return Result;
 }

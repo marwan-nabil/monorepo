@@ -140,7 +140,7 @@ static void SetD3D11MaxCellCount(d3d11_renderer *Renderer, uint32_t Count)
 
             ID3D11Device_CreateShaderResourceView(Renderer->Device, (ID3D11Resource *)Renderer->CellBuffer, &CellViewDesc, &Renderer->CellView);
         }
-        
+
         Renderer->MaxCellCount = Count;
     }
 }
@@ -398,7 +398,7 @@ static void RendererDraw(example_terminal *Terminal, uint32_t Width, uint32_t He
     {
         SetD3D11MaxCellCount(Renderer, CellCount);
     }
-        
+
     if(Renderer->RenderView || Renderer->RenderTarget)
     {
         D3D11_MAPPED_SUBRESOURCE Mapped;
@@ -412,7 +412,7 @@ static void RendererDraw(example_terminal *Terminal, uint32_t Width, uint32_t He
                 .TopLeftMargin = {8, 8},
                 .BlinkModulate = BlinkModulate,
                 .MarginColor = 0x000c0c0c,
-                
+
                 .StrikeMin = GlyphGen->FontHeight/2 - GlyphGen->FontHeight/10,
                 .StrikeMax = GlyphGen->FontHeight/2 + GlyphGen->FontHeight/10,
                 .UnderlineMin = GlyphGen->FontHeight - GlyphGen->FontHeight/5,

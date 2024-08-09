@@ -6,8 +6,8 @@
 #include "sources\win32\libraries\strings\path_handling.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "build_context.h"
-#include "..\build.h"
+#include "sources\win32\tools\build\actions\build_context.h"
+#include "sources\win32\tools\build\build.h"
 
 void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 {
@@ -104,7 +104,7 @@ void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFi
     );
 }
 
-void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
+void AddLinkerInputFile(build_context *BuildContext, char *LinkerInputFile)
 {
     PushStringNode
     (
@@ -119,7 +119,7 @@ void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile
     );
 }
 
-void SetLinkerOutputBinary(build_context *BuildContext, const char *OutputBinaryPath)
+void SetLinkerOutputBinary(build_context *BuildContext, char *OutputBinaryPath)
 {
     StringCchCatA
     (
@@ -151,13 +151,13 @@ void PushSubTarget(build_context *BuildContext, const char *SubTargetRelativePat
     );
 
     CreateDirectoryA(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath, NULL);
-    SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    SetCurrentDirectoryA(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 
 void PopSubTarget(build_context *BuildContext)
 {
     RemoveLastSegmentFromPath(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath, FALSE, '\\');
-    SetCurrentDirectory(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
+    SetCurrentDirectoryA(BuildContext->EnvironmentInfo.TargetOutputDirectoryPath);
 }
 
 void ClearBuildContext(build_context *BuildContext)

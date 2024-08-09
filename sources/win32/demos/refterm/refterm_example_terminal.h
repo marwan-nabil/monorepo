@@ -120,4 +120,3 @@ typedef struct
 #define MaxDirectCodepoint 126
     gpu_glyph_index ReservedTileTable[MaxDirectCodepoint - MinDirectCodepoint + 1];
 } example_terminal;
-

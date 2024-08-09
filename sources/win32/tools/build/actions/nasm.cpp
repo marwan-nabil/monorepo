@@ -8,8 +8,8 @@
 #include "sources\win32\libraries\strings\strings.h"
 #include "sources\win32\libraries\strings\string_list.h"
 
-#include "build_context.h"
-#include "nasm.h"
+#include "sources\win32\tools\build\actions\build_context.h"
+#include "sources\win32\tools\build\actions\nasm.h"
 
 b32 AssembleWithNasm(build_context *BuildContext)
 {
@@ -35,6 +35,5 @@ b32 AssembleWithNasm(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext);
     return Result;
 }

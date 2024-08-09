@@ -5,7 +5,7 @@
 ; b8 __attribute__((cdecl)) BIOSDiskReset(u8 DriveNumber);
 ; ---------------------------------------
 section .text
-global BIOSDiskReset 
+global BIOSDiskReset
 BIOSDiskReset:
     [bits 32]
     push ebp

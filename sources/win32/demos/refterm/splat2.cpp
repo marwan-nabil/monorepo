@@ -90,12 +90,12 @@ int main(int ArgCount, char **Args)
                 }
             }
         }
-        
+
         if(VTEnabled)
         {
             fprintf(stdout, "\x1b[0m");
         }
-        
+
         double GBs = 0;
         if(Elapsed)
         {

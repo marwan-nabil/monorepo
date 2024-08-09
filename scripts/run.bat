@@ -1,6 +1,14 @@
 @echo off
 
-set root_path=%cd%
+if not %cd% == %root_path% (
+    echo ERROR: calling a script from outside the repository root path.
+    exit /b 1
+)
+
+if "%1"=="" (
+    echo ERROR: no argument provided to run.bat
+    exit /b 1
+)
 
 if "%1"=="verilog_demo" (
     pushd outputs\verilog_demo
@@ -24,6 +32,6 @@ if "%1"=="os" (
 
 if "%1"=="os_debug" (
     pushd outputs\os
-        start bochsdbg -q -f %root_path%\configuration\i686-elf\bochs.txt
+        start bochsdbg -q -f %root_path%\configuration\bochs\bochs.txt
     popd
 )

@@ -1,37 +1,43 @@
 @echo off
 
-set root_path=%cd%
-
-set cc_flags=/O2
-if "%1"=="debug" (
-    set cc_flags=/Od /Z7
+if not %cd% == %root_path% (
+    echo ERROR: calling a script from outside the repository root path.
+    exit /b 1
 )
 
-if not exist tools\build; mkdir tools\build
-if exist tools\build\build.exe; del /Q tools\build\build.exe
-if exist tools\build\build.pdb; del /Q tools\build\build.pdb
+if "%1"=="debug" (
+    set optimization_flags=/Od /Z7
+) else (
+    set optimization_flags=/O2
+)
 
-pushd tools\build
-    cl^
-        /nologo %cc_flags% /Oi /FC /GR- /EHa-^
-        /W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018^
-        /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS^
-        /I%root_path%^
-        %root_path%\sources\win32\tools\build\*.cpp^
-        %root_path%\sources\win32\tools\build\targets\*.cpp^
-        %root_path%\sources\win32\tools\build\targets\hdl\*.cpp^
-        %root_path%\sources\win32\tools\build\targets\win32\*.cpp^
-        %root_path%\sources\win32\tools\build\targets\i686-elf\*.cpp^
-        %root_path%\sources\win32\tools\build\actions\*.cpp^
+set cc_flags=/nologo %optimization_flags% /Oi /FC /GR- /EHa-
+set cc_flags=%cc_flags% /W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018
+set cc_flags=%cc_flags% /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS
+set cc_flags=%cc_flags% /I%root_path%
+
+set link_flags=/link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
+
+if not exist outputs\bootstrapper; mkdir outputs\bootstrapper
+pushd outputs\bootstrapper
+    cl %cc_flags%^
+        %root_path%\sources\win32\tools\bootstrapper\bootstrapper.cpp^
+        %root_path%\sources\win32\tools\build\actions\build_context.cpp^
+        %root_path%\sources\win32\tools\build\actions\msvc.cpp^
+        %root_path%\sources\win32\libraries\file_system\folders.cpp^
         %root_path%\sources\win32\libraries\shell\console.cpp^
-        %root_path%\sources\win32\libraries\file_system\*.cpp^
         %root_path%\sources\win32\libraries\strings\path_handling.cpp^
         %root_path%\sources\win32\libraries\strings\string_list.cpp^
         %root_path%\sources\win32\libraries\system\processes.cpp^
-        %root_path%\sources\win32\libraries\file_system\fat12\*.cpp^
-        %root_path%\sources\win32\libraries\cJSON\*.c^
-        /Fe:build.exe^
-        /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
-
-    del /Q *.obj *.lib *.exp
+        /Fe:bootstrapper.exe^
+        %link_flags%
 popd
+
+outputs\bootstrapper\bootstrapper.exe %1
+
+if exist outputs\build\build.exe (
+    if not exist tools\build; mkdir tools\build
+    copy outputs\build\build.exe tools\build\build.exe
+) else (
+    echo ERROR: build.exe was not built!
+)

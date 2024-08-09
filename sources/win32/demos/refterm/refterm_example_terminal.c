@@ -1243,7 +1243,7 @@ static DWORD WINAPI TerminalThread(LPVOID Param)
     AppendOutput(Terminal, "\n");
     AppendOutput(Terminal, OpeningMessage);
     AppendOutput(Terminal, "\n");
-    
+
     int BlinkMS = 500; // TODO(casey): Use this in blink determination
     int MinTermSize = 512;
     uint32_t Width = MinTermSize;
