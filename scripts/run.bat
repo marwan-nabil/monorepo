@@ -1,5 +1,10 @@
 @echo off
 
+if not %cd% == %root_path% (
+    echo ERROR: calling a script from outside the repository root path.
+    exit /b 1
+)
+
 if "%1"=="verilog_demo" (
     pushd build_output\verilog_demo
         vvp testbench.vvp

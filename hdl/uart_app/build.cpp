@@ -10,8 +10,8 @@
 
 b32 BuildUARTApp(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\hdl\\uart_app\\uart\\uart_test.v");
-    SetCompilerIncludePath(BuildContext, "\\sources\\hdl\\uart_app\\uart");
+    AddCompilerSourceFile(BuildContext, "\\hdl\\uart_app\\uart\\uart_test.v");
+    SetCompilerIncludePath(BuildContext, "\\hdl\\uart_app\\uart");
     SetCompilerOutputObject(BuildContext, "\\uart_app.vvp");
     b32 BuildSuccess = CompileWithIVerilog(BuildContext);
     return BuildSuccess;

@@ -8,8 +8,8 @@
 #include "win32\libraries\strings\strings.h"
 #include "win32\libraries\strings\string_list.h"
 
-#include "build_context.h"
-#include "iverilog.h"
+#include "win32\tools\build\actions\build_context.h"
+#include "win32\tools\build\actions\iverilog.h"
 
 b32 CompileWithIVerilog(build_context *BuildContext)
 {
@@ -34,6 +34,6 @@ b32 CompileWithIVerilog(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext);
+    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }

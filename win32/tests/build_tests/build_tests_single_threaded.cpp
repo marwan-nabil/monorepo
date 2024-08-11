@@ -7,10 +7,8 @@
 #include "win32\libraries\base_types.h"
 #include "win32\libraries\basic_defines.h"
 #include "win32\libraries\shell\console.h"
-
-#include "win32\libraries\shell\console.cpp"
 #include "win32\libraries\strings\strings.h"
-#include "win32\libraries\system\processes.cpp"
+#include "win32\libraries\system\processes.h"
 
 void CompilationTest(char *TestCommand)
 {

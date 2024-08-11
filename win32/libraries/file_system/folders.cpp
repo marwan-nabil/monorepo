@@ -212,3 +212,31 @@ string_node *GetListOfFilesInFolder(char *DirectoryPath)
     FindClose(FindHandle);
     return Result;
 }
+
+string_node *GetListOfFilesWithExtensionInFolder(char *DirectoryPath, char *Extension)
+{
+    string_node *Result = NULL;
+    char FilesWildcard[MAX_STRING_LENGTH] = {};
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, DirectoryPath);
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, "\\*.");
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, Extension);
+
+    WIN32_FIND_DATAA FindOperationData;
+    HANDLE FindHandle = FindFirstFileA(FilesWildcard, &FindOperationData);
+    if (FindHandle != INVALID_HANDLE_VALUE)
+    {
+        do
+        {
+            if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+            {
+                char FoundFilePath[MAX_STRING_LENGTH] = {};
+                StringCchCatA(FoundFilePath, MAX_STRING_LENGTH, DirectoryPath);
+                StringCchCatA(FoundFilePath, MAX_STRING_LENGTH, "\\");
+                StringCchCatA(FoundFilePath, MAX_STRING_LENGTH, FindOperationData.cFileName);
+                PushStringNode(&Result, FoundFilePath);
+            }
+        } while (FindNextFileA(FindHandle, &FindOperationData) != 0);
+    }
+    FindClose(FindHandle);
+    return Result;
+}

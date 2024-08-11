@@ -21,10 +21,11 @@
 #include "win32\libraries\shell\console.h"
 #include "win32\libraries\system\timing.h"
 #include "win32\libraries\system\processes.h"
-#include "build_tests.h"
+#include "win32\tests\build_tests\build_tests.h"
 
 test_job_configuration TestJobConfiguration[] =
 {
+    {NULL, "build build"},
     {NULL, "build simulator"},
     {"imgui_demo", "build imgui_demo opengl2"},
     {"imgui_demo", "build imgui_demo dx11"},

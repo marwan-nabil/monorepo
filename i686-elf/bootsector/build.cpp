@@ -10,7 +10,7 @@
 b32 BuildBootSectorImage(build_context *BuildContext)
 {
     PushSubTarget(BuildContext, "bootsector");
-    AddCompilerSourceFile(BuildContext, "\\sources\\i686-elf\\bootsector\\entry.s");
+    AddCompilerSourceFile(BuildContext, "\\i686-elf\\bootsector\\entry.s");
     AddCompilerFlags(BuildContext, "-f bin -lboot_sector.lst");
     SetCompilerIncludePath(BuildContext, "\\");
     SetCompilerOutputObject(BuildContext, "\\bootsector.img");

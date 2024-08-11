@@ -1,5 +1,10 @@
 @echo off
 
+if not %cd% == %root_path% (
+    echo ERROR: calling a script from outside the repository root path.
+    exit /b 1
+)
+
 if "%1"=="build" (
     build build_tests
     build_output\build_tests\build_tests.exe

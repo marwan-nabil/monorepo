@@ -6,14 +6,15 @@
 
 #include "win32\libraries\base_types.h"
 #include "win32\libraries\basic_defines.h"
+#include "win32\libraries\strings\strings.h"
 #include "win32\libraries\strings\string_list.h"
 #include "win32\libraries\shell\console.h"
 #include "win32\libraries\file_system\folders.h"
 #include "win32\libraries\strings\path_handling.h"
-
-#include "actions\build_context.h"
-#include "targets\target_configuration.h"
-#include "build.h"
+#include "win32\tools\build\actions\build_context.h"
+#include "win32\tools\build\actions\msvc.h"
+#include "win32\tools\build\targets.h"
+#include "win32\tools\build\build.h"
 
 void DisplayHelp()
 {
@@ -63,19 +64,6 @@ int main(int argc, char **argv)
         BuildContext.EnvironmentInfo.OutputDirectoryPath,
         ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
         "\\build_output"
-    );
-
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath),
-        BuildContext.EnvironmentInfo.RootDirectoryPath
-    );
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.BuildConfigurationDirectoryPath),
-        "\\configuration\\win32\\build"
     );
 
     BuildContext.EnvironmentInfo.argc = argc;

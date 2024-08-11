@@ -9,9 +9,9 @@
 
 b32 BuildBuildTests(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\tests\\win32\\build\\build_tests.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\system\\processes.cpp");
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\libraries\\shell\\console.cpp");
+    AddCompilerSourceFile(BuildContext, "\\win32\\tests\\build_tests\\build_tests.cpp");
+    AddCompilerSourceFile(BuildContext, "\\win32\\libraries\\system\\processes.cpp");
+    AddCompilerSourceFile(BuildContext, "\\win32\\libraries\\shell\\console.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /FC /O2 /Oi /GR- /EHa- /MTd /fp:fast /fp:except-");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 /wd4127");

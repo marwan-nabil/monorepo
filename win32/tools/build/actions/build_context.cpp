@@ -6,8 +6,8 @@
 #include "win32\libraries\strings\path_handling.h"
 #include "win32\libraries\strings\string_list.h"
 
-#include "build_context.h"
-#include "win32\tools\build.h"
+#include "win32\tools\build\actions\build_context.h"
+#include "win32\tools\build\build.h"
 
 void AddCompilerFlags(build_context *BuildContext, const char *Flags)
 {
@@ -104,7 +104,7 @@ void SetLinkerScriptPath(build_context *BuildContext, const char *LinkerScriptFi
     );
 }
 
-void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile)
+void AddLinkerInputFile(build_context *BuildContext, char *LinkerInputFile)
 {
     PushStringNode
     (
@@ -119,7 +119,7 @@ void AddLinkerInputFile(build_context *BuildContext, const char *LinkerInputFile
     );
 }
 
-void SetLinkerOutputBinary(build_context *BuildContext, const char *OutputBinaryPath)
+void SetLinkerOutputBinary(build_context *BuildContext, char *OutputBinaryPath)
 {
     StringCchCatA
     (

@@ -10,8 +10,8 @@
 
 b32 BuildVerilogDemo(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\hdl\\verilog_demo\\testbench.v");
-    SetCompilerIncludePath(BuildContext, "\\sources\\hdl\\verilog_demo");
+    AddCompilerSourceFile(BuildContext, "\\hdl\\verilog_demo\\testbench.v");
+    SetCompilerIncludePath(BuildContext, "\\hdl\\verilog_demo");
     SetCompilerOutputObject(BuildContext, "\\testbench.vvp");
     b32 BuildSuccess = CompileWithIVerilog(BuildContext);
     return BuildSuccess;

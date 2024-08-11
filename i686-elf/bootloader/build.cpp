@@ -17,9 +17,9 @@ b32 BuildBootloaderImage(build_context *BuildContext)
 
     char *AssemblyFiles[] =
     {
-        "\\sources\\i686-elf\\bootloader\\entry.s",
-        "\\sources\\i686-elf\\libraries\\cpu\\io.s",
-        "\\sources\\i686-elf\\libraries\\bios\\disk.s"
+        "\\i686-elf\\bootloader\\entry.s",
+        "\\i686-elf\\libraries\\cpu\\io.s",
+        "\\i686-elf\\libraries\\bios\\disk.s"
     };
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
@@ -43,19 +43,19 @@ b32 BuildBootloaderImage(build_context *BuildContext)
 
     char *CFiles[] =
     {
-        "\\sources\\i686-elf\\bootloader\\main.c",
-        "\\sources\\i686-elf\\bootloader\\tests.c",
-        "\\sources\\i686-elf\\libraries\\vga\\vga.c",
-        "\\sources\\i686-elf\\libraries\\storage\\disk\\disk.c",
-        "\\sources\\i686-elf\\libraries\\strings\\strings.c",
-        "\\sources\\i686-elf\\libraries\\strings\\path_handling.c",
-        "\\sources\\i686-elf\\libraries\\strings\\print.c",
-        "\\sources\\i686-elf\\libraries\\cpu\\timing.c",
-        "\\sources\\i686-elf\\libraries\\storage\\fat12\\get.c",
-        "\\sources\\i686-elf\\libraries\\storage\\fat12\\set.c",
-        "\\sources\\i686-elf\\libraries\\memory\\arena_allocator.c",
-        "\\sources\\i686-elf\\libraries\\memory\\memory.c",
-        "\\sources\\i686-elf\\libraries\\storage\\file_io\\file_io.c",
+        "\\i686-elf\\bootloader\\main.c",
+        "\\i686-elf\\bootloader\\tests.c",
+        "\\i686-elf\\libraries\\vga\\vga.c",
+        "\\i686-elf\\libraries\\storage\\disk\\disk.c",
+        "\\i686-elf\\libraries\\strings\\strings.c",
+        "\\i686-elf\\libraries\\strings\\path_handling.c",
+        "\\i686-elf\\libraries\\strings\\print.c",
+        "\\i686-elf\\libraries\\cpu\\timing.c",
+        "\\i686-elf\\libraries\\storage\\fat12\\get.c",
+        "\\i686-elf\\libraries\\storage\\fat12\\set.c",
+        "\\i686-elf\\libraries\\memory\\arena_allocator.c",
+        "\\i686-elf\\libraries\\memory\\memory.c",
+        "\\i686-elf\\libraries\\storage\\file_io\\file_io.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
@@ -78,7 +78,7 @@ b32 BuildBootloaderImage(build_context *BuildContext)
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=bootloader.map");
-    SetLinkerScriptPath(BuildContext, "\\configuration\\i686-elf\\linker\\bootloader.lds");
+    SetLinkerScriptPath(BuildContext, "\\i686-elf\\bootloader\\bootloader.lds");
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
     {

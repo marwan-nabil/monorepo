@@ -9,7 +9,7 @@
 
 b32 BuildDirectxDemo(build_context *BuildContext)
 {
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\directx\\main.cpp");
+    AddCompilerSourceFile(BuildContext, "\\win32\\demos\\directx\\main.cpp");
 
     AddCompilerFlags(BuildContext, "/nologo /FC /Oi /O2 /GR- /EHa- /Zi /MD");
     AddCompilerFlags(BuildContext, "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018");
@@ -27,7 +27,7 @@ b32 BuildDirectxDemo(build_context *BuildContext)
         return FALSE;
     }
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\directx\\vertex_shader.hlsl");
+    AddCompilerSourceFile(BuildContext, "\\win32\\demos\\directx\\vertex_shader.hlsl");
     AddCompilerFlags
     (
         BuildContext,
@@ -40,7 +40,7 @@ b32 BuildDirectxDemo(build_context *BuildContext)
         return FALSE;
     }
 
-    AddCompilerSourceFile(BuildContext, "\\sources\\win32\\demos\\directx\\pixel_shader.hlsl");
+    AddCompilerSourceFile(BuildContext, "\\win32\\demos\\directx\\pixel_shader.hlsl");
     AddCompilerFlags
     (
         BuildContext,

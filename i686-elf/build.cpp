@@ -11,7 +11,7 @@
 #include "win32\libraries\file_system\files.h"
 
 #include "win32\tools\build\actions\build_context.h"
-#include "i686-elf_targets.h"
+#include "i686-elf\build.h"
 
 static void AddTestFilesToDiskImage(build_context *BuildContext, fat12_disk *Fat12Disk)
 {

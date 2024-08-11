@@ -1,14 +1,14 @@
 #include <Windows.h>
 #include <stdint.h>
+
 #include "win32\libraries\base_types.h"
 #include "win32\libraries\strings\string_list.h"
-
 #include "win32\tools\build\actions\build_context.h"
-#include "i686-elf\i686-elf_targets.h"
-#include "win32\win32_targets.h"
-#include "hdl\hdl_targets.h"
-#include "target_configuration.h"
+#include "win32\tools\build\targets.h"
 #include "win32\tools\build\build.h"
+#include "win32\build.h"
+#include "hdl\build.h"
+#include "i686-elf\build.h"
 
 build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
 {

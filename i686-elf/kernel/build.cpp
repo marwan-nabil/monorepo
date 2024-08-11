@@ -17,11 +17,11 @@ b32 BuildKernelImage(build_context *BuildContext)
 
     char *AssemblyFiles[] =
     {
-        "\\sources\\i686-elf\\kernel\\isr.s",
-        "\\sources\\i686-elf\\libraries\\cpu\\gdt.s",
-        "\\sources\\i686-elf\\libraries\\cpu\\idt.s",
-        "\\sources\\i686-elf\\libraries\\cpu\\io.s",
-        "\\sources\\i686-elf\\libraries\\cpu\\panic.s",
+        "\\i686-elf\\kernel\\isr.s",
+        "\\i686-elf\\libraries\\cpu\\gdt.s",
+        "\\i686-elf\\libraries\\cpu\\idt.s",
+        "\\i686-elf\\libraries\\cpu\\io.s",
+        "\\i686-elf\\libraries\\cpu\\panic.s",
     };
 
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
@@ -45,19 +45,19 @@ b32 BuildKernelImage(build_context *BuildContext)
 
     char *CFiles[] =
     {
-        "\\sources\\i686-elf\\kernel\\main.c",
-        "\\sources\\i686-elf\\kernel\\isr.c",
-        "\\sources\\i686-elf\\kernel\\descriptor_tables.c",
-        "\\sources\\i686-elf\\kernel\\tests.c",
-        "\\sources\\i686-elf\\libraries\\vga\\vga.c",
-        "\\sources\\i686-elf\\libraries\\strings\\strings.c",
-        "\\sources\\i686-elf\\libraries\\strings\\path_handling.c",
-        "\\sources\\i686-elf\\libraries\\strings\\print.c",
-        "\\sources\\i686-elf\\libraries\\cpu\\timing.c",
-        "\\sources\\i686-elf\\libraries\\cpu\\gdt.c",
-        "\\sources\\i686-elf\\libraries\\cpu\\idt.c",
-        "\\sources\\i686-elf\\libraries\\memory\\arena_allocator.c",
-        "\\sources\\i686-elf\\libraries\\memory\\memory.c",
+        "\\i686-elf\\kernel\\main.c",
+        "\\i686-elf\\kernel\\isr.c",
+        "\\i686-elf\\kernel\\descriptor_tables.c",
+        "\\i686-elf\\kernel\\tests.c",
+        "\\i686-elf\\libraries\\vga\\vga.c",
+        "\\i686-elf\\libraries\\strings\\strings.c",
+        "\\i686-elf\\libraries\\strings\\path_handling.c",
+        "\\i686-elf\\libraries\\strings\\print.c",
+        "\\i686-elf\\libraries\\cpu\\timing.c",
+        "\\i686-elf\\libraries\\cpu\\gdt.c",
+        "\\i686-elf\\libraries\\cpu\\idt.c",
+        "\\i686-elf\\libraries\\memory\\arena_allocator.c",
+        "\\i686-elf\\libraries\\memory\\memory.c",
     };
 
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
@@ -80,7 +80,7 @@ b32 BuildKernelImage(build_context *BuildContext)
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
-    SetLinkerScriptPath(BuildContext, "\\configuration\\i686-elf\\linker\\kernel.lds");
+    SetLinkerScriptPath(BuildContext, "\\i686-elf\\kernel\\kernel.lds");
     
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
     {
