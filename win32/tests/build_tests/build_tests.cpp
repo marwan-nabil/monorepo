@@ -25,7 +25,6 @@
 
 test_job_configuration TestJobConfiguration[] =
 {
-    {NULL, "build build"},
     {NULL, "build simulator"},
     {"imgui_demo", "build imgui_demo opengl2"},
     {"imgui_demo", "build imgui_demo dx11"},

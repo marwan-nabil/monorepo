@@ -10,8 +10,8 @@ if "%1"=="debug" (
     set cc_flags=/Od /Z7
 )
 
-if not exist tools\build; mkdir tools\build
-pushd tools\build
+if not exist build_output\bootstrapper; mkdir build_output\bootstrapper
+pushd build_output\bootstrapper
     cl^
         /nologo %cc_flags% /Oi /FC /GR- /EHa-^
         /W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018^
@@ -27,22 +27,15 @@ pushd tools\build
         %root_path%\win32\libraries\system\processes.cpp^
         /Fe:bootstrapper.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
-
-    del /Q *.obj *.lib *.exp
 popd
 
 if "%1"=="debug" (
-    call bootstrapper.exe debug
+    call build_output\bootstrapper\bootstrapper.exe debug
 ) else (
-    call bootstrapper.exe
+    call build_output\bootstrapper\bootstrapper.exe
 )
 
 if exist build_output\build\build.exe (
     if exist tools\build\build.exe; del /Q tools\build\build.exe
     copy build_output\build\build.exe tools\build
-)
-
-if exist build_output\build\build.pdb (
-    if exist tools\build\build.pdb; del /Q tools\build\build.pdb
-    copy build_output\build\build.pdb tools\build
 )

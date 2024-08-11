@@ -9,7 +9,7 @@ if "%1"=="build" (
     if exist win32\tools\build\build.sln (
         start win32\tools\build\build.sln
     ) else (
-        devenv tools\build\build.exe
+        devenv build_output\build\build.exe
     )
 )
 
@@ -17,7 +17,7 @@ if "%1"=="bootstrapper" (
     if exist win32\tools\build\bootstrapper.sln (
         start win32\tools\build\bootstrapper.sln
     ) else (
-        devenv tools\build\bootstrapper.exe
+        devenv build_output\bootstrapper\bootstrapper.exe
     )
 )
 
