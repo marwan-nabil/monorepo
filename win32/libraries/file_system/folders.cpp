@@ -186,7 +186,7 @@ void EmptyDirectory(const char *DirectoryPath)
     }
 }
 
-string_node *GetListOfFilesInFolder(char *DirectoryPath) 
+string_node *GetListOfFilesInFolder(char *DirectoryPath)
 {
     string_node *Result = NULL;
     char FilesWildcard[MAX_STRING_LENGTH] = {};

@@ -1,4 +1,4 @@
-/* NOTE(casey): 
+/* NOTE(casey):
 
    There is no reason for this file to exist at all, other than the fact that
    they didn't bother to make DirectWrite work with C.  So this file just

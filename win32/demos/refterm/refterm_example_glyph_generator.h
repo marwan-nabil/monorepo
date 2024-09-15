@@ -19,10 +19,10 @@ struct glyph_generator
     uint32_t FontWidth, FontHeight;
     uint32_t Pitch;
     uint32_t *Pixels;
-    
+
     uint32_t TransferWidth;
     uint32_t TransferHeight;
-    
+
     // NOTE(casey): For DWrite-based generation:
     struct IDWriteFactory *DWriteFactory;
     struct IDWriteFontFace *FontFace;

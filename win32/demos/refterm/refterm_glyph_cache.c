@@ -18,7 +18,7 @@ struct glyph_entry
     uint32_t FilledState;
     uint16_t DimX;
     uint16_t DimY;
-    
+
 #if DEBUG_VALIDATE_LRU
     size_t Ordering;
 #endif
@@ -242,7 +242,7 @@ static glyph_state FindGlyphEntryByHash(glyph_table *Table, glyph_hash RunHash)
         Assert(Result->NextWithSameHash == 0);
         Assert(Result->DimX == 0);
         Assert(Result->DimY == 0);
-        
+
         Result->NextWithSameHash = *Slot;
         Result->HashValue = RunHash;
         *Slot = EntryIndex;
@@ -278,12 +278,12 @@ static glyph_state FindGlyphEntryByHash(glyph_table *Table, glyph_hash RunHash)
 static void InitializeDirectGlyphTable(glyph_table_params Params, gpu_glyph_index *Table, int SkipZeroSlot)
 {
     Assert(Params.CacheTileCountInX >= 1);
-    
+
     if(SkipZeroSlot)
     {
         SkipZeroSlot = 1;
     }
-        
+
     uint32_t X = SkipZeroSlot;
     uint32_t Y = 0;
     for(uint32_t EntryIndex = 0;
@@ -364,7 +364,7 @@ static glyph_table *PlaceGlyphTableInMemory(glyph_table_params Params, void *Mem
             Entry->FilledState = 0;
             Entry->DimX = 0;
             Entry->DimY = 0;
-            
+
             ++X;
         }
 

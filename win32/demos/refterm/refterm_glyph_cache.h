@@ -1,19 +1,19 @@
-/* TODO(casey): 
+/* TODO(casey):
 
    This is not designed to be a particularly high-speed cache.
-   
-   It is merely a simple example of a basic LRU cache, which is all 
+
+   It is merely a simple example of a basic LRU cache, which is all
    that is necessary for something like a terminal.
-   
+
    Things that would probably want to be done for harder-core use:
-   
+
    1) Consider and test some alternate cache designs to see if there
       are any that remain simple to understand, but provide better
       performance.  For example, this is a two-level cache (first the
       chain is looked up, then the elements), which almost certainly
       has worse cache behavior than a design where the first lookup
       produced an actual element.
-      
+
    2) Battle-test all the functions with a lot of randomized and constructed
       data to ensure there are no lurking reference errors.  There are
       three chaining behaviors - the LRU chain, the hash chains, and the
@@ -36,24 +36,24 @@ typedef struct glyph_entry glyph_entry;
 /* NOTE(casey):
 
    The glyph table requires some simple settings.
-   
+
    HashCount = The size of the hash table.  This must be a power of two.
                Larger is faster, up to a point.  Values like 65536 may be
                appropriate for extensive codepoint usage, whereas much
                smaller values like 256 or 4096 would be fine for situations
                where very few Unicode combinations will be used.
-               
+
    EntryCount = The total number of entries to remember.  This must be
                 no larger than the number that fit into the actual cache
                 texture, otherwise the glyph table will report back
                 indexes into that texture that are "off the bottom".
-                
+
    ReservedTileCount = The total number of rects in the cache texture
                        to reserve for direct mapping.  These will not
                        be used when assigning slots to hashes, and
                        are assumed to be for the app's own short-circuit
                        usage.
-                       
+
    CacheTileCountInX = The number of rects to put horizontally in the
                        cache texture.  This should generally be the width of the
                        cache texture divided by the font width.
@@ -92,13 +92,13 @@ static void InitializeDirectGlyphTable(glyph_table_params Params, gpu_glyph_inde
    To allocate a new glyph cache, call GetGlyphTableFootprint to find out the total size,
    allocate that, then pass the memory block to PlaceGlyphTableInMemory.
    Everything else is done for you:
-   
+
    glyph_table *Table = PlaceGlyphTableInMemory(Params, malloc(GetGlyphTableFootprint(Params)));
    if(Table)
    {
        // ...
    }
-   
+
    You do not need to check your allocation - PlaceGlyphTableInMemory will pass 0 through.
    So it is sufficient to just check the PlaceGlyphTableInMemory return value.
 */
@@ -111,7 +111,7 @@ static glyph_table *PlaceGlyphTableInMemory(glyph_table_params Params, void *Mem
    you can retrieve the X/Y ordinal of the point int he texture with UnpackGlyphCachePoint,
    so you don't have to do the unpacking yourself.
 */
-struct gpu_glyph_index 
+struct gpu_glyph_index
 {
     uint32_t Value;
 };
@@ -127,7 +127,7 @@ static glyph_cache_point UnpackGlyphCachePoint(gpu_glyph_index P);
    and pass it to FindGlyphEntryByHash.  You'll get back a glyph_state that represents
    this glyph in the cache.
 */
-struct glyph_hash 
+struct glyph_hash
 {
     __m128i Value;
 };
@@ -156,7 +156,7 @@ static void UpdateGlyphCacheEntry(glyph_table *Table, uint32_t ID, uint32_t NewS
 
    The table keeps some simple internal stats.  The values are zeroed after every GetAndClearStats,
    so the count is the total number since the last time the stats were retrieved.
-   
+
    TODO(casey): This may be a mistake.  Perhaps the stats should just accumulate ad infinitum,
    and people can diff vs. their old stats to find out the change?
 */

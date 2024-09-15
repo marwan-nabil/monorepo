@@ -39,7 +39,7 @@ static b32 BuildShaders(build_context *BuildContext)
     }
     ClearBuildContext(BuildContext);
 
-    char *FilesToMove[3] = 
+    char *FilesToMove[3] =
     {
         "refterm_cs.h",
         "refterm_vs.h",
