@@ -14,5 +14,6 @@ b32 BuildVerilogDemo(build_context *BuildContext)
     SetCompilerIncludePath(BuildContext, "\\hdl\\verilog_demo");
     SetCompilerOutputObject(BuildContext, "\\testbench.vvp");
     b32 BuildSuccess = CompileWithIVerilog(BuildContext);
+    ClearBuildContext(BuildContext);
     return BuildSuccess;
 }

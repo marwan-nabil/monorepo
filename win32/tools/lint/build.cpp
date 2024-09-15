@@ -37,5 +37,6 @@ b32 BuildLint(build_context *BuildContext)
     SetLinkerOutputBinary(BuildContext, "\\lint.exe");
 
     b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
+    ClearBuildContext(BuildContext);
     return BuildSuccess;
 }

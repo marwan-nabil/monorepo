@@ -38,4 +38,7 @@ if "%1"=="debug" (
 if exist build_output\build\build.exe (
     if exist tools\build\build.exe; del /Q tools\build\build.exe
     copy build_output\build\build.exe tools\build
+) else (
+    echo ERROR: bootstrapping the build system failed.
+    exit /b 1
 )

@@ -22,5 +22,6 @@ b32 BuildFat12Tests(build_context *BuildContext)
     SetLinkerOutputBinary(BuildContext, "\\fat12_tests.exe");
 
     b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
+    ClearBuildContext(BuildContext);
     return BuildSuccess;
 }

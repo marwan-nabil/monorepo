@@ -77,6 +77,7 @@ b32 BuildKernelImage(build_context *BuildContext)
         {
             return FALSE;
         }
+        ClearBuildContext(BuildContext);
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=kernel.map");
@@ -101,7 +102,7 @@ b32 BuildKernelImage(build_context *BuildContext)
 
     SetLinkerOutputBinary(BuildContext, "\\kernel.img");
     BuildSuccess = LinkWithGCC(BuildContext);
-
+    ClearBuildContext(BuildContext);
     PopSubTarget(BuildContext);
     return BuildSuccess;
 }

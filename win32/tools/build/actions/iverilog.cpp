@@ -34,6 +34,5 @@ b32 CompileWithIVerilog(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }

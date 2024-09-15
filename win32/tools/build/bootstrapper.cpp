@@ -16,84 +16,14 @@
 #include "win32\tools\build\targets.h"
 #include "win32\tools\build\build.h"
 
-b32 BuildBuild(build_context *BuildContext);
-
-int main(int argc, char **argv)
-{
-    u32 BuildSuccess = FALSE;
-    build_context BuildContext = {};
-
-    _getcwd
-    (
-        BuildContext.EnvironmentInfo.RootDirectoryPath,
-        sizeof(BuildContext.EnvironmentInfo.RootDirectoryPath)
-    );
-
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.OutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
-        BuildContext.EnvironmentInfo.RootDirectoryPath
-    );
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.OutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
-        "\\build_output"
-    );
-
-    BuildContext.EnvironmentInfo.argc = argc;
-    BuildContext.EnvironmentInfo.argv = argv;
-
-    InitializeConsole();
-
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-        BuildContext.EnvironmentInfo.OutputDirectoryPath
-    );
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-        "\\"
-    );
-    StringCchCatA
-    (
-        BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
-        ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
-        "build"
-    );
-
-    CreateDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath, NULL);
-    b32 Result = SetCurrentDirectory(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
-    if (Result)
-    {
-        BuildSuccess = BuildBuild(&BuildContext);
-        SetCurrentDirectory(BuildContext.EnvironmentInfo.RootDirectoryPath);
-    }
-
-    if (BuildSuccess)
-    {
-        ConsolePrintColored("INFO: Build Succeeded.\n", FOREGROUND_GREEN);
-        return 0;
-    }
-    else
-    {
-        ConsolePrintColored("ERROR: Build Failed.\n", FOREGROUND_RED);
-        return 1;
-    }
-}
-
 b32 BuildBuild(build_context *BuildContext)
 {
     b32 BuildSuccess = FALSE;
 
     char *StaticCompilerFlags =
-    "/nologo /Oi /FC /GR- /EHa- "
-    "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 "
-    "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ";
+        "/nologo /Oi /FC /GR- /EHa- "
+        "/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018 "
+        "/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS ";
 
     char *DynamicCompilerFlags = NULL;
     if
@@ -204,4 +134,72 @@ b32 BuildBuild(build_context *BuildContext)
     SetLinkerOutputBinary(BuildContext, "\\build.exe");
     BuildSuccess = LinkWithMSVC(BuildContext);
     return BuildSuccess;
+}
+
+int main(int argc, char **argv)
+{
+    u32 BuildSuccess = FALSE;
+    build_context BuildContext = {};
+
+    _getcwd
+    (
+        BuildContext.EnvironmentInfo.RootDirectoryPath,
+        sizeof(BuildContext.EnvironmentInfo.RootDirectoryPath)
+    );
+
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.OutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
+        BuildContext.EnvironmentInfo.RootDirectoryPath
+    );
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.OutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.OutputDirectoryPath),
+        "\\build_output"
+    );
+
+    BuildContext.EnvironmentInfo.argc = argc;
+    BuildContext.EnvironmentInfo.argv = argv;
+
+    InitializeConsole();
+
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+        BuildContext.EnvironmentInfo.OutputDirectoryPath
+    );
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+        "\\"
+    );
+    StringCchCatA
+    (
+        BuildContext.EnvironmentInfo.TargetOutputDirectoryPath,
+        ArrayCount(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath),
+        "build"
+    );
+
+    CreateDirectoryA(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath, NULL);
+    b32 Result = SetCurrentDirectory(BuildContext.EnvironmentInfo.TargetOutputDirectoryPath);
+    if (Result)
+    {
+        BuildSuccess = BuildBuild(&BuildContext);
+        SetCurrentDirectory(BuildContext.EnvironmentInfo.RootDirectoryPath);
+    }
+
+    if (BuildSuccess)
+    {
+        ConsolePrintColored("INFO: Build Succeeded.\n", FOREGROUND_GREEN);
+        return 0;
+    }
+    else
+    {
+        ConsolePrintColored("ERROR: Build Failed.\n", FOREGROUND_RED);
+        return 1;
+    }
 }

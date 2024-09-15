@@ -54,5 +54,6 @@ b32 BuildRayTracer(build_context *BuildContext)
     }
 
     b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
+    ClearBuildContext(BuildContext);
     return BuildSuccess;
 }

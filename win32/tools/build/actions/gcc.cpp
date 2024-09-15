@@ -38,7 +38,6 @@ b32 CompileWithGCC(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }
 
@@ -67,6 +66,5 @@ b32 LinkWithGCC(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }

@@ -14,5 +14,6 @@ b32 BuildUARTApp(build_context *BuildContext)
     SetCompilerIncludePath(BuildContext, "\\hdl\\uart_app\\uart");
     SetCompilerOutputObject(BuildContext, "\\uart_app.vvp");
     b32 BuildSuccess = CompileWithIVerilog(BuildContext);
+    ClearBuildContext(BuildContext);
     return BuildSuccess;
 }

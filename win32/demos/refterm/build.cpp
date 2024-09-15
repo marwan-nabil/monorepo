@@ -19,6 +19,7 @@ static b32 BuildShaders(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\win32\\demos\\refterm\\refterm.hlsl");
     AddCompilerFlags(BuildContext, "/nologo /T ps_5_0 /E PixelMain /O3 /WX /Fh refterm_ps.h /Vn ReftermPSShaderBytes /Qstrip_reflect /Qstrip_debug /Qstrip_priv");
@@ -27,6 +28,7 @@ static b32 BuildShaders(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\win32\\demos\\refterm\\refterm.hlsl");
     AddCompilerFlags(BuildContext, "/nologo /T vs_5_0 /E VertexMain /O3 /WX /Fh refterm_vs.h /Vn ReftermVSShaderBytes /Qstrip_reflect /Qstrip_debug /Qstrip_priv");
@@ -35,6 +37,7 @@ static b32 BuildShaders(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     char *FilesToMove[3] = 
     {
@@ -94,6 +97,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, SharedSourceFiles[0]);
     AddCompilerSourceFile(BuildContext, SharedSourceFiles[1]);
@@ -108,6 +112,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\win32\\demos\\refterm\\splat.cpp");
     AddCompilerFlags(BuildContext, SharedCompilerFlags);
@@ -121,6 +126,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     AddCompilerSourceFile(BuildContext, "\\win32\\demos\\refterm\\splat2.cpp");
     AddCompilerFlags(BuildContext, SharedCompilerFlags);
@@ -134,6 +140,7 @@ b32 BuildRefTerm(build_context *BuildContext)
     {
         return FALSE;
     }
+    ClearBuildContext(BuildContext);
 
     return BuildSuccess;
 }

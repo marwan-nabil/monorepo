@@ -23,5 +23,6 @@ b32 BuildSimulator(build_context *BuildContext)
     AddLinkerFlags(BuildContext, "/subsystem:windows /incremental:no /opt:ref user32.lib gdi32.lib winmm.lib");
     SetLinkerOutputBinary(BuildContext, "\\simulator.exe");
     b32 BuildSuccess = CompileAndLinkWithMSVC(BuildContext);
+    ClearBuildContext(BuildContext);
     return BuildSuccess;
 }

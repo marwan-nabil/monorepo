@@ -33,7 +33,6 @@ b32 CompileShader(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }
 
@@ -56,7 +55,6 @@ b32 CompileShader2(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }
 
@@ -139,6 +137,5 @@ b32 CompileAndLinkWithMSVC(build_context *BuildContext)
         );
     }
 
-    ClearBuildContext(BuildContext); // TODO: remove from here
     return Result;
 }

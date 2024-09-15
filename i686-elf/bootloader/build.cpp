@@ -75,6 +75,7 @@ b32 BuildBootloaderImage(build_context *BuildContext)
         {
             return FALSE;
         }
+        ClearBuildContext(BuildContext);
     }
 
     AddLinkerFlags(BuildContext, "-nostdlib -Wl,-Map=bootloader.map");
@@ -99,7 +100,7 @@ b32 BuildBootloaderImage(build_context *BuildContext)
     
     SetLinkerOutputBinary(BuildContext, "\\bootloader.img");
     BuildSuccess = LinkWithGCC(BuildContext);
-
+    ClearBuildContext(BuildContext);
     PopSubTarget(BuildContext);
     return BuildSuccess;
 }
