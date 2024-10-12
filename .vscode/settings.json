@@ -1,7 +1,7 @@
 {
     "files.exclude": {
         // "binary_data/": true,
-        // "build_output/": true,
+        // "outputs/": true,
         // "hdl/": true,
         // "i686-elf/": true,
         // "scripts/": true,

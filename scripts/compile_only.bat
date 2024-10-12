@@ -9,12 +9,12 @@ set cc_flags_0=/nologo /Oi /FC /GR- /EHa- /O2
 set cc_flags_1=/W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018
 set cc_flags_2=/D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS
 
-if not exist build_output\compile_only_test; mkdir build_output\compile_only_test
-pushd build_output\compile_only_test
+if not exist outputs\compile_only_test; mkdir outputs\compile_only_test
+pushd outputs\compile_only_test
     cl /c^
         %cc_flags_0%^
         %cc_flags_1%^
         %cc_flags_2%^
         /I%root_path%^
-        %root_path%\win32\tools\lint\build.cpp^
+        %root_path%\platforms\win32\tools\lint\build.cpp^
 popd

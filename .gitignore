@@ -1,4 +1,4 @@
-build_output/**
+outputs/**
 tools/**
 binary_data/**
 *.suo

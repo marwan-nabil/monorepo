@@ -6,21 +6,21 @@ if not %cd% == %root_path% (
 )
 
 if "%1"=="build" (
-    if exist win32\tools\build\build.sln (
-        start win32\tools\build\build.sln
+    if exist platforms\win32\tools\build\build.sln (
+        start platforms\win32\tools\build\build.sln
     ) else (
-        devenv build_output\build\build.exe
+        devenv outputs\build\build.exe
     )
 )
 
 if "%1"=="bootstrapper" (
-    if exist win32\tools\build\bootstrapper.sln (
-        start win32\tools\build\bootstrapper.sln
+    if exist platforms\win32\tools\build\bootstrapper.sln (
+        start platforms\win32\tools\build\bootstrapper.sln
     ) else (
-        devenv build_output\bootstrapper\bootstrapper.exe
+        devenv outputs\bootstrapper\bootstrapper.exe
     )
 )
 
 if "%1"=="refterm" (
-    devenv build_output\refterm\refterm_debug_msvc.exe
+    devenv outputs\refterm\refterm_debug_msvc.exe
 )
