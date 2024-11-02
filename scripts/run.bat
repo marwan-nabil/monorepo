@@ -27,6 +27,6 @@ if "%1"=="os" (
 
 if "%1"=="os_debug" (
     pushd outputs\os
-        start bochsdbg -q -f %root_path%\platforms\i686-elf\bochs.txt
+        start bochsdbg -q -f %root_path%\sources\i686-elf\bochs.txt
     popd
 )

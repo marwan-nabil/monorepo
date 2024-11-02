@@ -6,16 +6,16 @@ if not %cd% == %root_path% (
 )
 
 if "%1"=="build" (
-    if exist platforms\win32\tools\build\build.sln (
-        start platforms\win32\tools\build\build.sln
+    if exist sources\win32\tools\build\build.sln (
+        start sources\win32\tools\build\build.sln
     ) else (
         devenv outputs\build\build.exe
     )
 )
 
 if "%1"=="bootstrapper" (
-    if exist platforms\win32\tools\build\bootstrapper.sln (
-        start platforms\win32\tools\build\bootstrapper.sln
+    if exist sources\win32\tools\build\bootstrapper.sln (
+        start sources\win32\tools\build\bootstrapper.sln
     ) else (
         devenv outputs\bootstrapper\bootstrapper.exe
     )

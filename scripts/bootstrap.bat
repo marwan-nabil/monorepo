@@ -17,14 +17,14 @@ pushd outputs\bootstrapper
         /W4 /WX /wd4201 /wd4100 /wd4189 /wd4505 /wd4456 /wd4996 /wd4018^
         /D_CRT_SECURE_NO_WARNINGS /D_CRT_RAND_S /DENABLE_ASSERTIONS^
         /I%root_path%^
-        %root_path%\platforms\win32\tools\build\actions\build_context.cpp^
-        %root_path%\platforms\win32\tools\build\actions\msvc.cpp^
-        %root_path%\platforms\win32\tools\build\bootstrapper.cpp^
-        %root_path%\platforms\win32\libraries\file_system\folders.cpp^
-        %root_path%\platforms\win32\libraries\shell\console.cpp^
-        %root_path%\platforms\win32\libraries\strings\path_handling.cpp^
-        %root_path%\platforms\win32\libraries\strings\string_list.cpp^
-        %root_path%\platforms\win32\libraries\system\processes.cpp^
+        %root_path%\sources\win32\tools\build\actions\build_context.cpp^
+        %root_path%\sources\win32\tools\build\actions\msvc.cpp^
+        %root_path%\sources\win32\tools\build\bootstrapper.cpp^
+        %root_path%\sources\win32\libraries\file_system\folders.cpp^
+        %root_path%\sources\win32\libraries\shell\console.cpp^
+        %root_path%\sources\win32\libraries\strings\path_handling.cpp^
+        %root_path%\sources\win32\libraries\strings\string_list.cpp^
+        %root_path%\sources\win32\libraries\system\processes.cpp^
         /Fe:bootstrapper.exe^
         /link /subsystem:console /incremental:no /opt:ref user32.lib shell32.lib
 popd

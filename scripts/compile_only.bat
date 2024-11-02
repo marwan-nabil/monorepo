@@ -16,5 +16,5 @@ pushd outputs\compile_only_test
         %cc_flags_1%^
         %cc_flags_2%^
         /I%root_path%^
-        %root_path%\platforms\win32\tools\lint\build.cpp^
+        %root_path%\sources\win32\tools\lint\build.cpp^
 popd
