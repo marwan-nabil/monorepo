@@ -13,6 +13,7 @@ set path=%cd%\tools\iverilog\bin;%path%
 set path=%cd%\tools\iverilog\gtkwave\bin;%path%
 
 @REM add local scripts and tools to shell path
+set path=%cd%\tools\bootstrapper;%path%
 set path=%cd%\tools\build;%path%
 set path=%cd%\tools\lint;%path%
 set path=%cd%\scripts;%path%

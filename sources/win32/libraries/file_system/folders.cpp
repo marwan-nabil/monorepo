@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <strsafe.h>
 #include <math.h>
+#include <shlwapi.h>
 
 #include "sources\win32\libraries\base_types.h"
 #include "sources\win32\libraries\basic_defines.h"
@@ -213,13 +214,13 @@ string_node *GetListOfFilesInFolder(char *DirectoryPath)
     return Result;
 }
 
-string_node *GetListOfFilesWithExtensionInFolder(char *DirectoryPath, char *Extension)
+string_node *GetListOfFilesWithNameInFolder(char *DirectoryPath, char *FileName)
 {
     string_node *Result = NULL;
     char FilesWildcard[MAX_STRING_LENGTH] = {};
     StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, DirectoryPath);
-    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, "\\*.");
-    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, Extension);
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, "\\");
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, FileName);
 
     WIN32_FIND_DATAA FindOperationData;
     HANDLE FindHandle = FindFirstFileA(FilesWildcard, &FindOperationData);
@@ -239,4 +240,50 @@ string_node *GetListOfFilesWithExtensionInFolder(char *DirectoryPath, char *Exte
     }
     FindClose(FindHandle);
     return Result;
+}
+
+void GetListOfFilesWithNameInFolderRecursive(char *DirectoryPath, char *FileName, string_node **List)
+{
+    char FilesWildcard[MAX_STRING_LENGTH] = {};
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, DirectoryPath);
+    StringCchCatA(FilesWildcard, MAX_STRING_LENGTH, "\\*");
+
+    WIN32_FIND_DATAA FindOperationData;
+    HANDLE FindHandle = FindFirstFileA(FilesWildcard, &FindOperationData);
+    if (FindHandle != INVALID_HANDLE_VALUE)
+    {
+        do
+        {
+            if ((FindOperationData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+            {
+                if
+                (
+                    (strcmp(FindOperationData.cFileName, ".") == 0) ||
+                    (strcmp(FindOperationData.cFileName, "..") == 0)
+                )
+                {
+                    continue;
+                }
+
+                char SubDirectoryPath[1024] = {};
+                StringCchCatA(SubDirectoryPath, 1024, DirectoryPath);
+                StringCchCatA(SubDirectoryPath, 1024, "\\");
+                StringCchCatA(SubDirectoryPath, 1024, FindOperationData.cFileName);
+                GetListOfFilesWithNameInFolderRecursive(SubDirectoryPath, FileName, List);
+            }
+            else if
+            (
+                (strcmp(FindOperationData.cFileName, FileName) == 0)
+            )
+            {
+                string_node *NewStringNode = (string_node *)malloc(sizeof(string_node));
+                *NewStringNode = {};
+                StringCchCatA(NewStringNode->String, ArrayCount(NewStringNode->String), DirectoryPath);
+                StringCchCatA(NewStringNode->String, ArrayCount(NewStringNode->String), "\\");
+                StringCchCatA(NewStringNode->String, ArrayCount(NewStringNode->String), FindOperationData.cFileName);
+                NewStringNode->NextString = *List;
+                *List = NewStringNode;
+            }
+        } while (FindNextFileA(FindHandle, &FindOperationData) != 0);
+    }
 }

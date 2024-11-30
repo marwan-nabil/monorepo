@@ -8,17 +8,17 @@ if not %cd% == %root_path% (
 if "%1"=="build" (
     if exist sources\win32\tools\build\build.sln (
         start sources\win32\tools\build\build.sln
-    ) else (
+    ) else if exist outputs\build\build.exe (
         devenv outputs\build\build.exe
+    ) else if exist tools\build\build.exe (
+        devenv tools\build\build.exe
+    ) else (
+        echo ERROR: build.exe doesn't exist.
     )
 )
 
 if "%1"=="bootstrapper" (
-    if exist sources\win32\tools\build\bootstrapper.sln (
-        start sources\win32\tools\build\bootstrapper.sln
-    ) else (
-        devenv outputs\bootstrapper\bootstrapper.exe
-    )
+    devenv outputs\bootstrapper\bootstrapper.exe
 )
 
 if "%1"=="refterm" (

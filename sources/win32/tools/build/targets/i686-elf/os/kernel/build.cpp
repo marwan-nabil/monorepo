@@ -29,9 +29,9 @@ b32 BuildKernelImage(build_context *BuildContext)
         AddCompilerSourceFile(BuildContext, AssemblyFiles[Index]);
 
         char ObjectFileName[MAX_PATH] = {};
-        StringCchCat(ObjectFileName, MAX_PATH, "\\");
-        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
-        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        StringCchCatA(ObjectFileName, MAX_PATH, "\\");
+        StringCchCatA(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
+        StringCchCatA(ObjectFileName, MAX_PATH, ".elf");
         SetCompilerOutputObject(BuildContext, ObjectFileName);
 
         AddCompilerFlags(BuildContext, "-f elf");
@@ -65,9 +65,9 @@ b32 BuildKernelImage(build_context *BuildContext)
         AddCompilerSourceFile(BuildContext, CFiles[Index]);
 
         char ObjectFileName[MAX_PATH] = {};
-        StringCchCat(ObjectFileName, MAX_PATH, "\\");
-        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
-        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        StringCchCatA(ObjectFileName, MAX_PATH, "\\");
+        StringCchCatA(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
+        StringCchCatA(ObjectFileName, MAX_PATH, ".elf");
         SetCompilerOutputObject(BuildContext, ObjectFileName);
 
         AddCompilerFlags(BuildContext, "-std=c99 -g -ffreestanding -nostdlib");
@@ -86,17 +86,17 @@ b32 BuildKernelImage(build_context *BuildContext)
     for (u32 Index = 0; Index < ArrayCount(AssemblyFiles); Index++)
     {
         char ObjectFileName[MAX_PATH] = {};
-        StringCchCat(ObjectFileName, MAX_PATH, "\\");
-        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
-        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        StringCchCatA(ObjectFileName, MAX_PATH, "\\");
+        StringCchCatA(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(AssemblyFiles[Index]));
+        StringCchCatA(ObjectFileName, MAX_PATH, ".elf");
         AddLinkerInputFile(BuildContext, ObjectFileName);
     }
     for (u32 Index = 0; Index < ArrayCount(CFiles); Index++)
     {
         char ObjectFileName[MAX_PATH] = {};
-        StringCchCat(ObjectFileName, MAX_PATH, "\\");
-        StringCchCat(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
-        StringCchCat(ObjectFileName, MAX_PATH, ".elf");
+        StringCchCatA(ObjectFileName, MAX_PATH, "\\");
+        StringCchCatA(ObjectFileName, MAX_PATH, GetPointerToLastSegmentFromPath(CFiles[Index]));
+        StringCchCatA(ObjectFileName, MAX_PATH, ".elf");
         AddLinkerInputFile(BuildContext, ObjectFileName);
     }
 

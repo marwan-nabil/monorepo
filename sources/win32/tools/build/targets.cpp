@@ -6,9 +6,19 @@
 #include "sources\win32\tools\build\actions\build_context.h"
 #include "sources\win32\tools\build\targets.h"
 #include "sources\win32\tools\build\build.h"
-#include "sources\win32\build.h"
-#include "sources\hdl\build.h"
-#include "sources\i686-elf\build.h"
+#include "sources\win32\tools\build\targets\hdl\uart_app\build.h"
+#include "sources\win32\tools\build\targets\hdl\verilog_demo\build.h"
+#include "sources\win32\tools\build\targets\i686-elf\os\build.h"
+#include "sources\win32\tools\build\targets\win32\lint\build.h"
+#include "sources\win32\tools\build\targets\win32\fetch_data\build.h"
+#include "sources\win32\tools\build\targets\win32\build_tests\build.h"
+#include "sources\win32\tools\build\targets\win32\fat12_tests\build.h"
+#include "sources\win32\tools\build\targets\win32\simulator\build.h"
+#include "sources\win32\tools\build\targets\win32\directx_demo\build.h"
+#include "sources\win32\tools\build\targets\win32\handmade_hero\build.h"
+#include "sources\win32\tools\build\targets\win32\imgui_demo\build.h"
+#include "sources\win32\tools\build\targets\win32\ray_tracer\build.h"
+#include "sources\win32\tools\build\targets\win32\refterm\build.h"
 
 build_target_config BuildTargetConfigurations[CONFIGURED_TARGETS_COUNT] =
 {

@@ -2,12 +2,12 @@
     "files.exclude": {
         // "binary_data/": true,
         // "outputs/": true,
-        // "hdl/": true,
-        // "i686-elf/": true,
         // "scripts/": true,
+        // "sources/hdl/": true,
+        // "sources/i686-elf/": true,
+        // "sources/win32/": true,
+        "sources/win32/libraries/imgui": true,
         "tools/": true,
-        // "win32/": true,
-        "win32/libraries/imgui": true,
     },
     "C_Cpp.default.defines": [
         // shared
