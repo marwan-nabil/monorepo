@@ -3,3 +3,4 @@ tools/**
 binary_data/**
 *.suo
 **/.vs
+*.pdf

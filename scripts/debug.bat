@@ -6,8 +6,8 @@ if not %cd% == %root_path% (
 )
 
 if "%1"=="build" (
-    if exist sources\win32\tools\build\build.sln (
-        start sources\win32\tools\build\build.sln
+    if exist configuration\visual_studio\build.sln (
+        start configuration\visual_studio\build.sln
     ) else if exist outputs\build\build.exe (
         devenv outputs\build\build.exe
     ) else if exist tools\build\build.exe (
